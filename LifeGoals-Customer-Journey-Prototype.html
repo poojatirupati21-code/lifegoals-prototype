@@ -436,35 +436,103 @@ const val = f => typeof f === 'function' ? f() : f;
 function dsc(id){ const k = S.ans[id]; return typeof k === 'number' ? DQ_BY(id).o[k].s : null; }
 
 /* ================= PROFILE / SCORING ================= */
+/* Money personality: Financial Planner review round 1 §1 (docs/fp-review-round1.md), pasted as tested */
+// Personality weights per option, in option order. 0.5 steps. Q6 (amount) and u9-u13 carry no personality weight.
+const PW = {
+  '2':  [{A:2}, {B:2}, {E:2}, {C:2}],                       // Sticking to a budget · Checking your balance · Trying something new · Relaxed about money
+  '4':  [{E:1}, {A:1}, {B:1}, {B:.5, C:.5}],                // Buy in quickly · Research it · Ask an expert · Stay away
+  '7':  [{A:.5}, {}, {}, {C:.5}],                           // Emergency savings · Other savings · Credit/loan · Not sure
+  '8':  [{B:.5, C:.5}, {A:.5, B:.5}, {A:.5, E:.5}, {E:1}],  // Calm · Mostly sunny · Sunshine and showers · Stormy
+  '9':  [{B:1}, {B:.5}, {A:.5, C:.5}, {E:1}],               // Sell · Wait until back, then sell · Stay calm · Buy more
+  '12': [{B:1}, {E:.5}, {A:1}, {C:1}],                      // Worried · Hopeful · Confident · Avoid thinking about it
+  u4:   [{A:.5, E:.5}, {A:.5, B:.5}, {B:1}, {C:1}]          // Research myself · Basics then expert · Expert first · Keep it simple
+};
+const P_ORDER = ['B', 'A', 'C', 'E'];
+function personalityScores(){
+  const t = {A:0, B:0, E:0, C:0}; let n = 0;
+  const add = w => Object.entries(w).forEach(([x, v]) => { t[x] += v; });
+  ['2', '4', '7', '8', '9', '12'].forEach(id => { const k = S.ans[id]; if (typeof k === 'number'){ n++; add(PW[id][k]); } });
+  if (typeof S.um.a.u4 === 'number') add(PW.u4[S.um.a.u4]);
+  return {t, n};
+}
 function personality(){
-  const t = {A:0, B:0, E:0, C:0};
-  ['2','4'].forEach(id => { const k = S.ans[id]; if (typeof k === 'number') Object.entries(DQ_BY(id).o[k].w).forEach(([x, n]) => t[x] += n); });
-  const first = typeof S.ans['2'] === 'number' ? Object.keys(DQ_BY('2').o[S.ans['2']].w)[0] : 'B';
-  const rank = Object.keys(t).sort((a, b) => (t[b] - t[a]) || (b === first) - (a === first));
-  return TYPES[t[rank[0]] ? rank[0] : 'B'];
+  const {t, n} = personalityScores();
+  if (n < 4) return null;                                   // never guess a type (CJ E10)
+  const top = Math.max(...Object.values(t)), tied = Object.keys(t).filter(x => t[x] === top);
+  const from = id => typeof S.ans[id] === 'number' ? Object.keys(PW[id][S.ans[id]]).filter(x => tied.includes(x)) : [];
+  const q4 = from('4');
+  const k = tied.length === 1 ? tied[0] : (from('2')[0] || (q4.length === 1 ? q4[0] : null) || P_ORDER.find(x => tied.includes(x)));
+  return TYPES[k];
 }
 function umS(u){ const q = UM.flatMap(s => s.qs).find(x => x.u === u), k = S.um.a[u]; return typeof k === 'number' && q.o[k].s != null ? q.o[k].s : null; }
+/* Horizon suggestion + risk profile: FP review round 1 §2 (R1–R10, R13), pasted as tested */
 function suggestU9(){
-  const a0 = S.about.age, g = S.goals.filter(x => x.kind !== 'retire' && x.age - a0 > 2 && !(x.saved > 0)).sort((a, b) => a.age - b.age)[0];
-  const y = g ? g.age - a0 : (S.retireAge - a0);
+  const a0 = S.about.age, yrs = g => g.age - a0;
+  const pot = S.goals.filter(g => g.kind === 'pot' && yrs(g) > 2).sort((a, b) => a.age - b.age)[0];
+  const g = pot || S.goals.filter(x => x.kind !== 'retire' && yrs(x) > 2 && !(x.saved > 0)).sort((a, b) => a.age - b.age)[0];
+  const y = g ? yrs(g) : (S.retireAge - a0 + 10);           // pension money is used over decades after retiring
   return y <= 2 ? 0 : y <= 5 ? 1 : y <= 10 ? 2 : 3;
 }
+const RISK_LBL = ['Cautious', 'Cautious–balanced', 'Balanced', 'Balanced–growth', 'Growth'];
+const COMFORT = ['Steady', 'Mostly steady', 'Balanced', 'Adventurous'];   // D10 tile: Q8 appetite only, deliberately not the 5 profile labels
+const MIS = {
+  K16:  'A safety net often comes first: an emergency fund and the right cover. It is a good place to start with an adviser.',
+  K14c: "You're open to ups and downs, but your cushion is thin. Many people build a safety net before taking more risk.",
+  K14l: "You're open to ups and downs, but a fall would hit everyday life right now. Many people build a safety net before taking more risk.",
+  K14t: "You're open to ups and downs, but you'll need this money within 5 years. Money needed soon has less time to recover from a fall.",
+  K13:  'You like the idea of growth, but falls may unsettle you. A calmer approach might feel more comfortable. Worth talking through with an adviser.',
+  K15:  "Your finances could handle more ups and downs than you'd choose. That's fine. It's worth seeing what playing very safe can cost as prices rise.",
+  K17:  "You're comfortable with ups and downs, you can afford them and you have time. A good basis for a growth conversation with an adviser.",
+  OK:   'How you feel about risk and what you can afford are broadly in line. A good starting point.'
+};
+const MIS_ADV = {   // adviser-only (xlsx column M). Never shown to the customer.
+  K13: 'Route to a calmer plan than they picked; flag for a call if markets fall.',
+  K14c: 'Build the safety net first; explain why risk waits, not that they are wrong.', K14l: 'Build the safety net first; explain why risk waits, not that they are wrong.', K14t: 'Short horizon: explain why risk waits.',
+  K15: 'Respect the preference; gently show what over-caution costs over time.',
+  K16: 'Protection and emergency fund first; investing conversation comes later.',
+  K17: 'Ready for a growth conversation; route to the investment expert.'
+};
 function riskRead(full){
-  const want = dsc('8') || 2, comp = dsc('9') || 2, q6 = dsc('6') || 2, q7 = dsc('7') || 2;
-  const parts = [q6, q7]; if (full) { const a = umS('u10'), b = umS('u12'); if (a) parts.push(a); if (b) parts.push(b); }
-  const can = parts.reduce((x, y) => x + y, 0) / parts.length;
-  const tk = typeof S.um.a.u9 === 'number' ? S.um.a.u9 : suggestU9(), time = tk + 1;
-  let score = Math.min(want, can); if (time === 1) score = Math.min(score, 1.5); if (time === 2) score = Math.min(score, 2.4);
-  const label = score <= 1.5 ? 'Cautious' : score <= 2.1 ? 'Cautious–balanced' : score <= 2.7 ? 'Balanced' : score <= 3.3 ? 'Balanced–growth' : 'Growth';
-  const capHi = full ? can >= 3.25 : (q7 === 4 && q6 >= 3), capLo = full ? can < 2.25 : (q7 <= 2 || q6 <= 1), thin = q7 <= 2;
-  let mis = null;
-  if (want >= 3 && comp >= 3 && capHi) mis = "You're willing, able and calm under pressure — ready for a growth conversation.";
-  else if (want <= 2 && comp <= 2 && capLo) mis = 'Safety first: an emergency fund and protection come before investing.';
-  else if (want >= 3 && capLo) mis = thin ? "You're keen on growth, but your cushion is thin — build the safety net first." : "You're keen on growth, but there's little room to take a loss right now — build the safety net first.";
-  else if (want >= 3 && comp <= 2) mis = 'You like the idea of growth, but drops may unsettle you. A calmer plan could suit you better.';
-  else if (want <= 2 && capHi) mis = "You could afford a little more risk, but you'd rather not. That's fine — it's worth seeing what playing safe costs over time.";
-  return {want, can, time, label, mis, comfort:['Careful','Cautious','Balanced–growth','Adventurous'][want - 1], cushion: thin ? 'Thin' : 'Strong'};
+  const q6 = dsc('6'), q7 = dsc('7'), q8 = dsc('8'), q9 = dsc('9');
+  const ix = u => typeof S.um.a[u] === 'number' ? S.um.a[u] : null;           // option index, not score
+  const u9 = ix('u9') != null ? ix('u9') : suggestU9(), u10 = ix('u10'), u11 = ix('u11'), u12 = ix('u12');
+  const r = {comfort: q8 ? COMFORT[q8 - 1] : null, cushion: q7 == null ? null : q7 === 4 ? 'Strong' : 'Thin',
+             want:null, can:null, time:null, level:null, label:null, limit:null, provisional:!full, mis:null, misKey:null, adv:null, keNote:false};
+  if (q8 == null || q9 == null) return r;                                   // no made-up profile
+  // 1. Willingness (attitude to risk): appetite (Q8), composure (Q9) pulls it down one or more steps (xlsx K13)
+  let T = q8 + (q9 === 4 && q8 >= 3 ? 1 : 0);
+  T = Math.min(T, q9 === 1 ? 2 : q9 === 2 ? 3 : 5);
+  // 2. Capacity for loss: weakest link wins
+  let C = 5; const cap = v => { C = Math.min(C, v); };
+  if (q7 === 2) cap(3); if (q7 === 1) cap(2);                               // other savings / credit or not sure
+  if (full){ if (u10 === 0) cap(2); if (u10 === 1 || u10 === 3) cap(3); if (u12 === 0) cap(2); if (u12 === 1) cap(4); }
+  if (S.src.cash && S.src.costsM){ const f = finNums(); if (f.costsM > 0 && f.cash < 3 * f.costsM) cap(3); }   // < 3 months' costs in cash
+  // 3. Time horizon cap
+  const H = [1, 2, 4, 5][u9];
+  // 4. Knowledge & experience cap (provisional read is held at Balanced until u10 + u11 are answered)
+  let KE = !full || u11 == null ? 3 : [3, 4, 5, 5][u11];
+  const ch = S.um.chips || [];                                              // ESMA: don't rely on self-assessment alone
+  if (full && u11 >= 2 && ch.length && ch.every(c => c === 'None' || c === 'Savings account')) KE = Math.min(KE, 4);
+  const L = Math.min(T, C, H, KE);
+  r.want = T; r.can = C; r.time = H; r.level = L; r.label = RISK_LBL[L - 1];
+  r.limit = L === T ? 'want' : L === C ? 'can' : L === H ? 'time' : 'experience';
+  r.keNote = full && L === KE && KE < Math.min(T, C, H);
+  // Mismatch (xlsx K13–K17), one line, safety first
+  const wantHi = q8 >= 3, wantLo = q8 <= 2, compHi = q9 >= 3, compLo = q9 <= 2, thin = q7 != null && q7 <= 2;
+  const shortT = full && H <= 2, lossLo = full && C <= 2;
+  const capLo = thin || lossLo || shortT, capHi = full ? (C >= 4 && H >= 4) : (q7 === 4 && q6 != null && q6 >= 3);
+  const k = wantLo && compLo && capLo ? 'K16'
+    : wantHi && capLo ? (thin ? 'K14c' : lossLo ? 'K14l' : 'K14t')
+    : wantHi && compLo ? 'K13'
+    : wantLo && capHi ? 'K15'
+    : full && wantHi && compHi && capHi && u11 != null && u11 >= 1 ? 'K17' : 'OK';
+  r.misKey = k; r.mis = MIS[k]; r.adv = MIS_ADV[k] || null;
+  return r;
 }
+const RISK_SETBY = {want:'how much risk you want to take', can:'how much you can afford to lose', time:'how long you can wait', experience:'your investing experience'};
+const KE_NOTE = 'Investing is new to you, so this stays at Balanced for now. An adviser can explain how investments rise and fall.';
+// Customer-facing risk label: "Not answered yet" when Q8/Q9 are missing; "First read" (never above Balanced) until Understand Me is done
+const riskLabelText = r => r.label == null ? 'Not answered yet' : r.label + (r.provisional ? ' (first read)' : '');
 const discCount = () => DQ.filter(q => typeof S.ans[q.id] === 'number').length;
 const discEnough = () => discCount() >= 5;
 function umCount(){ let n = 0; UM.forEach(s => s.qs.forEach(q => { if (q.d ? typeof S.ans[q.d] === 'number' : typeof S.um.a[q.u] === 'number') n++; })); return n; }
@@ -485,13 +553,32 @@ const retireGoal = () => S.goals.find(g => g.kind === 'retire');
 function setRetireAge(a){ S.retireAge = a; const r = retireGoal(); if (r) r.age = a; S.fin.retireAge = a; S.src.retireAge = S.src.retireAge || 'pre'; }
 
 /* ================= CASHFLOW ENGINE (adapted from LifeGoals 2.0 project(), with fixes) ================= */
-const AS = {infl:0.02, wage:0.025, cash:0.01, inv:0.045, pen:0.045, sp:15044, spAge:66, end:90, mortRate:0.038, debtRate:0.09};
-function netPay(g){ if (g <= 0) return 0; const it = Math.max(0, 0.2 * Math.min(g, 44000) + 0.4 * Math.max(0, g - 44000) - 4000); return g - it - 0.04 * g - (g > 18304 ? 0.042 * g : 0); }
+/* Irish 2026 tax + assumptions: FP review round 1 §3 (C1–C9), pasted as tested */
+const AS = {infl:0.025, wage:0.03, cash:0.007, inv:0.03, pen:0.04, penRet:0.028, sp:15564, spAge:66, end:90, mortRate:0.038, debtRate:0.09};
+// 2026 Irish rules, today's money. Bands/credits are assumed to rise with prices (call with income / infl, then multiply back).
+const TX = {band:44000, credits:4000, ageCredit:245, ageExempt:18000,
+  usc:[[12012, .005], [28700, .02], [70044, .03], [Infinity, .08]], uscExempt:13000, prsi:0.0435, prsiWk:352};
+function incomeTax(g, cr){ return Math.max(0, 0.2 * Math.min(g, TX.band) + 0.4 * Math.max(0, g - TX.band) - (cr == null ? TX.credits : cr)); }
+function usc(g, reduced){ if (g <= TX.uscExempt) return 0; const b = reduced ? [[12012, .005], [Infinity, .02]] : TX.usc; let t = 0, lo = 0;
+  for (const [hi, r] of b){ t += Math.max(0, Math.min(g, hi) - lo) * r; lo = hi; if (g <= hi) break; } return t; }
+function prsi(g){ const wk = g / 52; if (wk <= TX.prsiWk) return 0; const cr = wk <= 424 ? Math.max(0, 12 - (wk - 352.01) / 6) : 0; return Math.max(0, (wk * TX.prsi - cr) * 52); }
+const pc = x => +(x * 100).toFixed(2) + '%';
+// Assumption rows, all built from AS / TX so the copy never drifts from the engine (FP review C1–C10, W12)
+const assumeRows = () => [['Prices rise (inflation)', pc(AS.infl) + ' a year'], ['Pay rises', pc(AS.wage) + ' a year'], ['Cash savings grow', pc(AS.cash) + ' a year, after tax'], ['Investments grow', pc(AS.inv) + ' a year, after charges and tax'], ['Pensions grow', pc(AS.pen) + ' a year after charges (' + pc(AS.penRet) + ' once retired)'],
+  ['State Pension', eur(AS.sp) + ' a year from ' + AS.spAge + ' (' + (S.fin.sp || 'Not sure') + ')'], ['Retirement age', '' + S.retireAge], ['Tax', '2026 Irish income tax, USC and PRSI; bands assumed to rise with prices'], ['At retirement', '25% of your pension taken tax-free (up to €200,000)'], ['Spare money each year', 'Assumed saved: 60% cash, 40% invested'], ['Plan ends', 'Age ' + AS.end]];
+function netPay(g){ return g <= 0 ? 0 : g - incomeTax(g) - usc(g) - prsi(g); }
+// Retirement: no PRSI at 66+, State Pension is USC-exempt, age credit and age exemption from 65, reduced USC from 70 (income <= €60,000)
+function netRet(draw, sp, age){ const g = draw + sp; if (g <= 0) return 0;
+  const it = age >= 65 && g <= TX.ageExempt ? 0 : incomeTax(g, TX.credits + (age >= 65 ? TX.ageCredit : 0));
+  return g - it - usc(draw, age >= 70 && g <= 60000); }
+// Net cost to take-home of the employee's own pension contributions (relief at marginal income-tax rate, within age limits and the €115,000 cap)
+const relLim = a => a < 30 ? .15 : a < 40 ? .2 : a < 50 ? .25 : a < 55 ? .3 : a < 60 ? .35 : .4;
+function pensionCost(g, E, age){ const Er = Math.min(E, relLim(age) * Math.min(g, 115000)); return E - (incomeTax(g) - incomeTax(Math.max(0, g - Er))); }
 function finNums(){
   // Skipped figures count as €0 and show as ❓ Missing. Only "Estimate for me" adds a (labelled) typical figure. (spec §11)
   const f = S.fin, n = k => { const v = f[k]; return v != null && v !== '' && !isNaN(+v) ? +v : 0; };
   const mortOn = f.home === 'Own with mortgage';
-  return {age:S.about.age, R:S.retireAge, partner:!!S.about.partner, pAge:n('pAge') || S.about.age, income:f.work === 'Not working' ? 0 : n('income'), pIncome:S.about.partner ? n('pIncome') : 0,
+  return {age:S.about.age, R:S.retireAge, work:f.work, partner:!!S.about.partner, pAge:n('pAge') || S.about.age, income:f.work === 'Not working' ? 0 : n('income'), pIncome:S.about.partner ? n('pIncome') : 0,
     otherM:n('otherM'), costsM:n('costsM'), oneOffY:n('oneOffY'), cash:n('cash'), invest:n('invest'), rentM:n('rentM'),
     mortBal:mortOn ? n('mortBal') : 0, mortPayM:mortOn ? n('mortPayM') : 0, mortYears:mortOn ? n('mortYears') : 0, debt:n('debt'), debtPayM:n('debtPayM'),
     pension:n('pension'), pensionM:n('pensionM'), sp:f.sp === 'Expect full' ? 1 : f.sp === 'Partly' ? 0.6 : 0.8};
@@ -507,12 +594,22 @@ function project(wi){
   for (let t = 0; t <= N; t++){
     const a = a0 + t, infl = Math.pow(1 + AS.infl, t), wgw = Math.pow(1 + AS.wage, t), working = a < R;
     let inflow = 0;
-    if (working){ inflow += netPay(f.income * wgw) - 0.3 * f.pensionM * 12 * wgw;
+    // FP review round 1 §3 (C5–C9): tax in today's money (bands indexed), own-share pension relief, drawdown tax, 25% tax-free lump sum
+    if (working){
+      const gR = f.income * wgw / infl;                                   // gross in today's money
+      const E  = f.pensionM * 12 * (f.work === 'Self-employed' ? 1 : 0.5) * wgw / infl;   // own share of "paid in each month"
+      inflow += (netPay(gR) - pensionCost(gR, E, a)) * infl;
       let contrib = f.pensionM * 12 * wgw; if (wg && wg.kind === 'retire') contrib = Math.max(0, contrib + wm * 12);
       pen = pen * (1 + AS.pen) + contrib;
-    } else { const draw = pen / Math.max(1, AS.end - a + 1); pen = (pen - draw) * (1 + AS.pen * 0.7); inflow += draw * 0.9; }
-    if (a >= AS.spAge) inflow += AS.sp * f.sp * infl;
-    if (f.partner){ const pa = f.pAge + t; if (pa < 66) inflow += netPay(f.pIncome * wgw); else inflow += AS.sp * f.sp * infl; }
+      if (a >= AS.spAge) inflow += AS.sp * f.sp * infl;                   // working past 66 (rare): keep as today
+    } else {
+      if (a === R){ const ls = Math.min(pen * 0.25, 200000); pen -= ls; cash += ls; }   // tax-free lump sum (limit is not indexed)
+      const draw = pen / Math.max(1, AS.end - a + 1);                      // >= ARF imputed 4% (61-70) / 5% (71+)
+      pen = (pen - draw) * (1 + AS.penRet);
+      const sp = a >= AS.spAge ? AS.sp * f.sp : 0;                         // today's money
+      inflow += netRet(draw / infl, sp, a) * infl;
+    }
+    if (f.partner){ const pa = f.pAge + t; if (pa < 66) inflow += netPay(f.pIncome * wgw / infl) * infl; else inflow += AS.sp * f.sp * infl; }
     inflow += (f.otherM + f.rentM) * 12 * infl;
     let living = working ? f.costsM * 12 * infl : (rg ? rg.amount * infl : f.costsM * 12 * infl * 0.8);
     living += f.oneOffY * infl;
@@ -521,7 +618,7 @@ function project(wi){
     if (dBal > 1){ const pay = Math.min(Math.max(f.debtPayM * 12, dBal * 0.1), dBal * (1 + AS.debtRate)); fixed += pay; dBal = dBal * (1 + AS.debtRate) - pay; }
     if (!(wg && wg.kind === 'retire') && wm < 0 && working) fixed += -wm * 12; // saving less each month
     // earmarked what-if money grows until its goal
-    if (wg && wg.kind !== 'retire' && wm > 0 && a < wg.age) ear = ear * (1 + 0.02) + wm * 12; else if (wg && wg.kind !== 'retire') ear *= 1.02;
+    if (wg && wg.kind !== 'retire' && wm > 0 && a < wg.age) ear = ear * (1 + AS.cash) + wm * 12; else if (wg && wg.kind !== 'retire') ear *= 1 + AS.cash;
     Object.keys(res).forEach(id => res[id] *= 1 + AS.cash);
     // goal costs this year
     const active = [];
@@ -627,7 +724,7 @@ V.D10 = () => { if (!discEnough()){ const first = DQ.findIndex(q => typeof S.ans
   return {id:'D10', note:'Money-story glimpse: personality + risk comfort + cushion + at most one mismatch hint (S1 K13–K17).', kind:'quiz', html:
   '<div class="qtop"><div class="brand"><span class="mark"></span>Your money story</div></div><div class="qbody">' +
   '<div class="panel" style="background:linear-gradient(150deg,var(--sun-l),#fff)"><div class="qeye">Your money personality</div><h2 tabindex="-1" style="font-size:36px;margin:6px 0">' + P.e + ' ' + P.name + '</h2><p class="qsub" style="margin:0;color:var(--ink)">' + P.strap + '</p></div>' +
-  '<div class="grid2"><div class="panel" style="margin:0"><span class="small">Risk comfort</span><b style="display:block;font-size:19px">' + r.comfort + '</b></div><div class="panel" style="margin:0"><span class="small">Cushion</span><b style="display:block;font-size:19px">' + r.cushion + '</b></div></div>' +
+  '<div class="grid2"><div class="panel" style="margin:0"><span class="small">Risk comfort</span><b style="display:block;font-size:19px">' + (r.comfort || '—') + '</b></div><div class="panel" style="margin:0"><span class="small">Cushion</span><b style="display:block;font-size:19px">' + (r.cushion || '—') + '</b></div></div>' +
   (r.mis ? '<div class="panel" style="margin-top:12px"><div class="qeye" style="color:var(--sea-d)">You might notice…</div><p style="margin:6px 0 0;font-size:15px;line-height:1.5">' + esc(r.mis) + '</p></div>' : '') +
   '<p class="disc">A first read, not advice. You can go deeper later in <b>Me</b>. ' + DISC_FORMAL + '</p></div>' +
   '<div class="qfoot" style="flex-direction:column;align-items:stretch;gap:6px"><button class="wbtn" data-a="go" data-p="F1">Build my LifeMap</button><button class="qback" data-a="sheet" data-p="save">Save my answers</button></div>'};
@@ -774,8 +871,8 @@ function findings(P){
   const gs = S.goals.slice(), best = gs.slice().sort((a, b) => P.pct[b.id] - P.pct[a.id] || a.age - b.age)[0], worst = gs.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id] || a.age - b.age)[0];
   const sT = best.kind === 'retire' && P.pct[best.id] >= 95 ? 'Your pension and savings cover retiring at ' + best.age : best.name + ' is ' + P.pct[best.id] + '% covered';
   let gT, dT, ex = null;
-  if (P.pct[worst.id] >= 95){ gT = 'No big gaps right now'; const unprot = S.fin.life !== 'Yes' || S.fin.ip !== 'Yes'; dT = unprot ? 'Check your protection, so illness or death can\'t derail the plan' : 'Keep it on track with a yearly review'; }
-  else { gT = worst.name + ' is ' + P.pct[worst.id] + '% covered'; ex = extraFor(worst); dT = ex ? 'Saving ' + eur(ex) + ' more a month towards ' + worst.name.toLowerCase() + ' closes it' : 'Moving ' + worst.name.toLowerCase() + ' later, or changing the amount, would help most'; }
+  if (P.pct[worst.id] >= 95){ gT = 'No big gaps right now'; const unprot = S.fin.life !== 'Yes' || S.fin.ip !== 'Yes'; dT = unprot ? 'Worth a look: would your plan cope with illness or death? An adviser can check your cover with you' : 'A yearly review keeps it on track'; }
+  else { gT = worst.name + ' is ' + P.pct[worst.id] + '% covered'; ex = extraFor(worst); dT = ex ? 'Saving about ' + eur(ex) + ' more a month could close this gap, on our assumptions' : 'Moving ' + worst.name.toLowerCase() + ' later, or changing the amount, would make the biggest difference'; }
   return {best, worst, sT, gT, dT, ex};
 }
 function wiText(P0, P1){ const ch = S.goals.map(g => ({g, a:P0.pct[g.id], b:P1.pct[g.id]})).filter(x => x.a !== x.b);
@@ -881,7 +978,7 @@ function chartSVG(rows, W){
 function wiCard(){ const w = S.wi, gs = S.goals.slice().sort((a, b) => a.age - b.age), g = gById(w.g);
   return '<div class="card" id="r-wi"><h3 class="h">What if…?</h3><p class="small" style="margin:0 0 10px">Try saving a bit more or less, or adding a one-off amount, and see what changes.</p>' +
     '<div class="fl" style="font-size:12px;font-weight:800;margin-bottom:6px">Put it towards</div><div class="chips" role="group" aria-label="Goal for the what-if">' + gs.map(x => '<button class="chip sm' + (w.g === x.id ? ' sel' : '') + '" aria-pressed="' + (w.g === x.id) + '" data-a="wig" data-p="' + x.id + '">' + x.e + ' ' + esc(x.name) + '</button>').join('') + '</div>' +
-    '<div class="field" style="margin:14px 0 6px"><span class="flabel" id="wim-l">Monthly amount</span><div class="wi-row"><button class="rb" data-a="wim" data-p="-25" aria-label="25 euro less">−</button><div class="wi-val" id="wim-v">' + (w.m > 0 ? '+' : '') + eur(w.m) + '</div><button class="rb" data-a="wim" data-p="25" aria-label="25 euro more">+</button></div><input type="range" min="-500" max="1000" step="25" value="' + w.m + '" data-wi="m" aria-labelledby="wim-l" aria-valuetext="' + eur(w.m) + ' a month"><span class="small" id="wim-h">' + (w.m < 0 ? 'Saving less each month (affects your whole plan)' : w.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (into your pension)' : ' until it happens') : '−€500 to +€1,000 a month') + '</span></div>' +
+    '<div class="field" style="margin:14px 0 6px"><span class="flabel" id="wim-l">Monthly amount</span><div class="wi-row"><button class="rb" data-a="wim" data-p="-25" aria-label="25 euro less">−</button><div class="wi-val" id="wim-v">' + (w.m > 0 ? '+' : '') + eur(w.m) + '</div><button class="rb" data-a="wim" data-p="25" aria-label="25 euro more">+</button></div><input type="range" min="-500" max="1000" step="25" value="' + w.m + '" data-wi="m" aria-labelledby="wim-l" aria-valuetext="' + eur(w.m) + ' a month"><span class="small" id="wim-h">' + (w.m < 0 ? 'Saving less each month (affects your whole plan)' : w.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (counted as retirement saving)' : ' until it happens') : '−€500 to +€1,000 a month') + '</span></div>' +
     '<div class="field" style="margin:10px 0 0"><span class="flabel" id="wil-l">One-off amount <output id="wil-v">' + eur(w.l) + '</output></span><input type="range" min="0" max="50000" step="500" value="' + w.l + '" data-wi="l" aria-labelledby="wil-l"><span class="small">e.g. from savings or a bonus</span></div>' +
     '<div class="wi-out" id="wi-out" aria-live="polite"></div><div class="grid2" style="margin-top:12px"><button class="btn sm" style="width:100%" data-a="wisave">Save as my preferred plan</button><button class="btn sm ghost" style="width:100%" data-a="wireset">Back to my plan</button></div></div>'; }
 function resultsHTML(){
@@ -901,7 +998,7 @@ function liveUpdate(){ const P0 = project(), P = project(S.wi);
   const set = (id, h) => { const e = document.getElementById(id); if (e) e.innerHTML = h; };
   set('r-goals', goalsBox(P)); set('wi-out', wiText(P0, P)); set('r-glance', glanceHTML(P));
   set('wim-v', (S.wi.m > 0 ? '+' : '') + eur(S.wi.m)); set('wil-v', eur(S.wi.l));
-  const g = gById(S.wi.g); set('wim-h', S.wi.m < 0 ? 'Saving less each month (affects your whole plan)' : S.wi.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (into your pension)' : ' until it happens') : '−€500 to +€1,000 a month');
+  const g = gById(S.wi.g); set('wim-h', S.wi.m < 0 ? 'Saving less each month (affects your whole plan)' : S.wi.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (counted as retirement saving)' : ' until it happens') : '−€500 to +€1,000 a month');
 }
 function tlStrip(){ const P = project(), n = S.goals.filter(g => P.pct[g.id] >= 95).length; return '<div class="card row" id="tl-strip" style="background:var(--sea-l)"><div style="flex:1"><b>' + n + ' of ' + S.goals.length + ' goals on track</b><div class="small" style="color:var(--ink)">Updates as you move things.</div></div><button class="btn sm" data-a="seg" data-p="results">See results ↓</button></div>'; }
 
@@ -949,10 +1046,10 @@ V.ME = () => { const m = S.me;
   if (m === 'ums') { const s = UM.find(x => x.n === S.um.sec), off = UM.slice(0, s.n - 1).reduce((a, x) => a + x.qs.length, 0);
     return {id:'ME-UM' + s.n, note:'Understand Me section ' + s.n + ' · ' + s.t + '. Pre-filled answers shown selected, with Change.', head:appHead(s.e + ' ' + s.t, s.intro, 'me|um'),
       html:umSummary(s.qs) + s.qs.map((q, qi) => q.d && typeof S.ans[q.d] === 'number' ? '' : umQCard(q, (off + qi + 1) + ' of 13')).join(''), foot:'<button class="btn" data-a="umsave">Save this section</button>'}; }
-  if (m === 'umr') { const P = personality(), r = riskRead(true), bar = (l, v) => '<div class="row" style="margin-top:8px;font-size:13px;font-weight:700"><span style="width:150px">' + l + '</span><span class="pbar" style="flex:1"><i style="width:' + Math.round(v / 4 * 100) + '%"></i></span></div>';
-    return {id:'ME-R', note:'Understand Me result: money personality + indicative risk profile (5 labels, capped by lower of want and can-afford). Feeds My Plan. Adviser confirms.', head:appHead('Your profile', '', 'me|um'),
+  if (m === 'umr') { const P = personality(), r = riskRead(true), bar = (l, v) => '<div class="row" style="margin-top:8px;font-size:13px;font-weight:700"><span style="width:150px">' + l + '</span><span class="pbar" style="flex:1"><i style="width:' + Math.round(v / 5 * 100) + '%"></i></span></div>';
+    return {id:'ME-R', note:'Understand Me result: money personality + indicative risk profile (5 labels, lowest of want, can afford, time and experience; FP review R2–R6). Feeds My Plan. Adviser confirms.', head:appHead('Your profile', '', 'me|um'),
       html:'<div class="card" style="background:linear-gradient(150deg,var(--sun-l),#fff)"><div class="eyebrow" style="color:var(--acc-d)">Your money personality</div><div style="font-family:var(--fh);font-size:30px;font-weight:800;margin:4px 0">' + P.e + ' ' + P.name + '</div><p style="margin:0 0 8px">' + P.strap + '</p><b>Strengths</b><div class="chips" style="margin:6px 0 10px">' + P.str.map(x => '<span class="pill ok">' + x + '</span>').join('') + '</div><b>One thing to watch</b><p style="margin:4px 0 0" class="small">' + P.watch + '</p></div>' +
-        '<div class="card"><div class="eyebrow">Your indicative risk profile</div><div style="font-family:var(--fh);font-size:26px;font-weight:800;margin:4px 0">' + r.label + '</div>' + bar('Want (appetite)', r.want) + bar('Can afford (capacity)', r.can) + bar('Can wait (time)', r.time) + (r.mis ? '<p class="note" style="margin-top:12px">' + esc(r.mis) + '</p>' : '') + '<p class="small" style="margin:10px 0 0">This now shows on <b>My Plan</b> and in your plan report.</p></div>' +
+        '<div class="card"><div class="eyebrow">Your indicative risk profile</div><div style="font-family:var(--fh);font-size:26px;font-weight:800;margin:4px 0">' + riskLabelText(r) + '</div>' + (r.label ? bar('Want (appetite)', r.want) + bar('Can afford (capacity)', r.can) + bar('Can wait (time)', r.time) + (r.limit === 'experience' ? bar('Experience', r.level) : '') + '<p class="small" style="margin:8px 0 0">Set by: <b>' + RISK_SETBY[r.limit] + '</b></p>' + (r.keNote ? '<p class="small" style="margin:6px 0 0;color:var(--ink)">' + KE_NOTE + '</p>' : '') : '') + (r.mis ? '<p class="note" style="margin-top:12px">' + esc(r.mis) + '</p>' : '') + '<p class="small" style="margin:10px 0 0">This now shows on <b>My Plan</b> and in your plan report.</p></div>' +
         retBtn() + '<p class="disc">This is an indicative profile to guide your conversation. It is not advice. Your adviser confirms your risk profile with you. ' + DISC_FORMAL + '</p>'}; }
   if (m === 'details') return {id:'ME-DET', note:'My details (name, contact, household).', head:appHead('My details', '', 'meback'), html:'<div class="card">' + [['Name', S.acct.name || S.fin.name],['Email', S.acct.email],['Mobile', S.acct.mobile],['Age', S.about.age],['Partner', partnerLine()],['People who rely on you', ['0','1','2','3+'][S.about.deps || 0]],['Retirement age', S.retireAge]].map(x => '<div class="mini"><span>' + x[0] + '</span><b>' + esc(x[1]) + '</b></div>').join('') + '</div><button class="btn ghost" style="margin-top:12px" data-a="fsec" data-p="0">Edit About you</button>'};
   if (m === 'privacy') return {id:'ME-PRIV', note:'Privacy & sharing: consents, what each adviser can see, delete my data.', head:appHead('Privacy & sharing', '', 'meback'),
@@ -973,7 +1070,7 @@ V.ME = () => { const m = S.me;
         '<div class="field" style="margin:16px 0 0"><span class="flabel">Children or others who rely on you</span>' + seg('deps', [[0,'0'],[1,'1'],[2,'2'],[3,'3+']], v => b.deps === v) + '</div></div>' +
       (!discEnough() ? '<div class="card"><div class="eyebrow">Your profile</div><p class="small" style="color:var(--ink);margin:6px 0 0">Answer a few more of your first questions to see your money personality and indicative risk profile.</p><button class="link" data-a="me" data-p="recheck">Answer a few more</button></div>' :
       '<div class="card"><div class="eyebrow">Your profile</div><div class="row" style="margin-top:6px"><span style="font-size:34px" aria-hidden="true">' + P.e + '</span><div style="flex:1"><b style="font-family:var(--fh);font-size:20px">' + P.name + '</b><div class="small">' + P.strap + '</div></div></div>' +
-        '<div class="mini" style="margin-top:8px"><span>Indicative risk profile</span><b>' + r.label + '</b></div><span class="pill ' + (full ? 'ok' : 'sunny') + '">' + (full ? '✓ From all 13 answers' : 'First read · 7 of 13 answers') + '</span>' +
+        '<div class="mini" style="margin-top:8px"><span>Indicative risk profile</span><b>' + riskLabelText(r) + '</b></div><span class="pill ' + (full ? 'ok' : 'sunny') + '">' + (full ? '✓ From all 13 answers' : 'First read · 7 of 13 answers') + '</span>' +
         '<div><button class="link" data-a="me" data-p="' + (full ? 'umr' : 'um') + '">' + (full ? 'See my full profile' : 'Answer 6 more to confirm it') + '</button></div></div>') +
       '<div style="margin-top:12px">' + rowBtn('me', 'recheck', '✅', 'Your first answers', S.um.rechecked ? 'Checked ✓ · 7 answers from when you started' : '7 answers, pre-filled · check they still fit') +
         rowBtn('me', 'um', '🧭', 'Deeper questions', 'Your risk · Your capacity · Your investor behaviour · ' + umNewCount() + ' of 6 answered', ring(Math.round(umCount() / 13 * 100), 46, 'var(--sea-d)')) +
@@ -999,7 +1096,7 @@ V.HOME = () => { const P = project(), gs = S.goals.slice().sort((a, b) => a.age 
       '<p class="disc">Guidance, not advice. Figures are illustrative and based on your details and our assumptions.</p>'}; };
 function planProfileBanner(){ const full = umCount() === 13, r = riskRead(full);
   if (!discEnough()) return '<div class="banner" id="r-prof"><span aria-hidden="true">🧭</span><span><b>Risk profile: not enough answers yet</b></span><button class="link" data-a="me" data-p="recheck">Answer in Me</button></div>';
-  return '<div class="banner" id="r-prof"><span aria-hidden="true">🧭</span><span><b>Risk profile: ' + r.label + '</b> <span class="small">· ' + (full ? 'from your profile in Me' : 'first read from 7 answers') + '</span></span><button class="link" data-a="toprofile">' + (full ? 'View' : 'Finish in Me') + '</button></div>'; }
+  return '<div class="banner" id="r-prof"><span aria-hidden="true">🧭</span><span><b>Risk profile' + (r.provisional && r.label ? ' (first read)' : '') + ': ' + (r.label || 'Not answered yet') + '</b> <span class="small">· ' + (full ? 'from your profile in Me' : 'Finish in Me to confirm') + '</span></span><button class="link" data-a="toprofile">' + (full ? 'View' : 'Finish in Me') + '</button></div>'; }
 function specialist(){ const P = project(), w = S.goals.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id])[0]; return {type:EXPERT_FOR[w ? w.spec : 'planner'], goal:w}; }
 V.EXP = () => { const b = S.book, st = S.exp, A = ADVISERS[b.adv], sp = specialist();
   const advCard = '<div class="card"><div class="adv"><span class="face" aria-hidden="true">' + A.ini + '</span><div><b style="font-size:17px">' + A.n + '</b><div class="small">' + sp.type + ' · ' + A.q + '</div><div class="small">🗣️ ' + A.lang + ' · 📍 ' + A.loc + ' · ' + A.mode + '</div></div></div><p class="small" style="margin:10px 0 0">Matched because <b>' + esc(sp.goal ? sp.goal.name.toLowerCase() : 'your plan') + '</b> is where you could gain most. <span class="pill grey">Sample adviser</span></p></div>';
@@ -1007,7 +1104,7 @@ V.EXP = () => { const b = S.book, st = S.exp, A = ADVISERS[b.adv], sp = speciali
   if (st === 'c1') return {id:'C1', note:'Your match: specialist type from Step 5 mapping (weakest goal).', head:appHead('Your match', 'A ' + sp.type.toLowerCase() + ' who fits your plan.', 'exp|home'), html:(needsProfile() ? nudge('🧭', 'Check your profile before your adviser meeting', 'Check now', 'toprofile') : '') + advCard + '<button class="link" data-a="advnext">See another match</button> · <button class="link" data-a="toast" data-p="' + A.n.split(' ')[0] + ' will call you within 1 working day">Request a call back</button>', foot:'<button class="btn" data-a="exp" data-p="c2">Choose ' + A.n.split(' ')[0] + '</button>'};
   if (st === 'c2'){ const any = Object.values(b.share).some(Boolean); return {id:'C2', note:'Share your plan: explicit consent per item, all unticked. Referral / conflicts disclosed.', head:appHead('Share your plan', 'Choose what ' + A.n.split(' ')[0] + ' can see before you meet.', 'exp|c1'),
     html:'<div class="card">' + [['report','Your plan report','Goals, results and what-ifs'],['fin','Your finances','The figures in your 6 sections'],['docs','Your documents','Statements you uploaded'],['um','Your Understand Me profile','Personality and indicative risk profile']].map(([k, l, d]) => '<label class="check"><input type="checkbox" data-share="' + k + '"' + (b.share[k] ? ' checked' : '') + '><span><b>' + l + '</b><br><span class="small">' + d + '</span></span></label>').join('') + '</div>' +
-      '<div class="card"><label class="check"><input type="checkbox" data-agree="1"' + (b.agree ? ' checked' : '') + '><span>I agree to share the items I\'ve ticked with ' + A.n + '. I can withdraw this at any time.</span></label><p class="small" style="margin:6px 0 0">LifeGoals may be paid a fee by the adviser\'s firm if you go ahead. This never changes what you pay. <button class="link" style="padding:0;font-size:12.5px" data-a="sheet" data-p="money">How LifeGoals makes money</button></p></div>',
+      '<div class="card"><label class="check"><input type="checkbox" data-agree="1"' + (b.agree ? ' checked' : '') + '><span>I agree to share the items I\'ve ticked with ' + A.n + '. I can withdraw this at any time.</span></label><p class="small" style="margin:6px 0 0">LifeGoals may be paid a fee by the adviser\'s firm if you go ahead. Your adviser will tell you how they are paid before you agree to anything. <button class="link" style="padding:0;font-size:12.5px" data-a="sheet" data-p="money">How LifeGoals makes money</button></p></div>',
     foot:'<button class="btn" data-a="exp" data-p="c3" id="sharego"' + (any && b.agree ? '' : ' disabled') + '>Pick a time</button>'}; }
   if (st === 'c3') return {id:'C3', note:'Pick a time: video or in person; request another slot.', head:appHead('Pick a time', '45 minutes · free · no obligation', 'exp|c2'),
     html:'<div class="seg" role="group" aria-label="Meeting type">' + ['Video','In person'].map(x => '<button class="' + (b.mode === x ? 'on' : '') + '" aria-pressed="' + (b.mode === x) + '" data-a="bmode" data-p="' + x + '">' + x + '</button>').join('') + '</div><div class="slots">' + SLOTS.map(s => '<button class="slot' + (b.slot === s ? ' sel' : '') + '" aria-pressed="' + (b.slot === s) + '" data-a="slot" data-p="' + s + '">' + s.replace(' · ', '<br>') + '</button>').join('') + '</div><button class="link" data-a="toast" data-p="We\'ve asked ' + A.n.split(' ')[0] + ' for more times">Request another slot</button>',
@@ -1030,7 +1127,7 @@ const ASK_GEN = [
   ['estimate', 'What happens if I estimate a figure?', 'We fill in a typical figure so you can see results straight away. It is marked "≈ Estimated". Swap in your real figure any time to sharpen your plan.'],
   ['data', 'Is my data safe?', 'Your data is stored in the EU and never sold. Nothing is shared with an adviser unless you tick what to share. You can delete everything in Me › Privacy & sharing.'],
   ['partner', 'Can my partner join?', 'Yes. In Me you can invite your partner to add their own details, or add their name, age and income yourself.'],
-  ['free', 'Does it cost anything?', 'LifeGoals is free for you. If you work with an adviser, their firm may pay us a fee. This never changes what you pay.']
+  ['free', 'Does it cost anything?', 'LifeGoals is free for you. If you work with an adviser, their firm may pay us a fee. Your adviser will tell you how they are paid before you agree to anything.']
 ];
 function askCtx(id){ id = id || '';
   if (/^D/.test(id)) return ['ctx', 'Why do you ask these questions?', 'They help us understand how you feel about money, so the goals and results we show fit you. There are no right or wrong answers, and nothing is saved unless you choose.'];
@@ -1048,8 +1145,8 @@ function askPlan(){ if (!S.app || !S.goals.length) return [];
   const P = project(), F = findings(P), out = [], w = F.worst, pw = P.pct[w.id], rg = retireGoal(), full = umCount() === 13, r = riskRead(full);
   if (pw < 95) out.push(['pgap', 'Why is ' + esc(w.name.toLowerCase()) + ' ' + pw + '% covered?', 'When ' + esc(w.name.toLowerCase()) + ' comes up (age ' + w.age + '), your income and savings are expected to cover about ' + pw + '% of the ' + eur(w.amount) + (w.kind === 'retire' ? ' a year' : '') + ' you set, in today\'s money. The rest is the gap. In <b>What if</b> you can see how saving more, adding a lump sum or moving the date changes it.']);
   else out.push(['pok', 'What does "on track" mean for me?', 'All your goals are at least 95% covered with your figures and our assumptions. It is not a guarantee: prices, pay and markets change, so a yearly check keeps it on track.']);
-  if (rg){ const bad = P.rows.find(x => x.a >= rg.age && isShort(x)); out.push(['pret', 'What happens when I retire at ' + rg.age + '?', 'From ' + rg.age + ', your pension and savings pay for the ' + eur(rg.amount) + ' a year you set. The State Pension (about €15,044 a year) starts at 66. ' + (bad ? 'Around age <b>' + bad.a + '</b> the money runs short in this plan, which is why retirement shows ' + P.pct[rg.id] + '%.' : 'In this plan your money lasts to age 90.')]); }
-  if (discEnough()) out.push(['prisk', 'What does my risk profile mean?', 'Your indicative risk profile is <b>' + r.label + '</b>' + (full ? '' : ' (a first read from 7 answers; answer 6 more in Me to confirm it)') + '. ' + RISK_EXPLAIN[r.label] + ' It is not advice: your adviser confirms it with you.']);
+  if (rg){ const bad = P.rows.find(x => x.a >= rg.age && isShort(x)); out.push(['pret', 'What happens when I retire at ' + rg.age + '?', 'From ' + rg.age + ', your pension and savings pay for the ' + eur(rg.amount) + ' a year you set. The State Pension (about ' + eur(AS.sp) + ' a year) starts at ' + AS.spAge + '. At retirement, 25% of your pension (up to €200,000) is assumed taken tax-free. ' + (bad ? 'Around age <b>' + bad.a + '</b> the money runs short in this plan, which is why retirement shows ' + P.pct[rg.id] + '%.' : 'In this plan your money lasts to age 90.')]); }
+  if (discEnough()) out.push(['prisk', 'What does my risk profile mean?', r.label ? 'Your indicative risk profile is <b>' + r.label + '</b>' + (full ? '' : ' (first read · finish your profile in Me to confirm it; until then it is never shown above Balanced)') + '. ' + RISK_EXPLAIN[r.label] + (full && r.limit ? ' It is set by ' + RISK_SETBY[r.limit] + '.' : '') + ' It is not advice: your adviser confirms it with you.' : 'We can\'t show a risk profile yet: the two questions about ups and downs aren\'t answered. You can answer them in Me.']);
   out.push(['pbest', 'What is my main strength?', esc(F.sT) + '. Of all your goals, this one is best covered by your future income, savings and pension.']);
   return out; }
 const ASK_GUARD = 'I can\'t tell you what to do with your money: that would be advice. I can explain what your results mean. For a personal recommendation, a free adviser meeting is the right place.';
@@ -1075,8 +1172,8 @@ function sheetHTML(sid){ const s = S.sheet; if (!s) return ''; let h = '';
   if (t === 'whyask') h = '<h2 class="t">Why we ask</h2><p class="sub">Your answers help us show goals and results that fit you. We don\'t save anything unless you choose to, and nothing is shared with an adviser without your say. This is guidance, not advice.</p><button class="btn" data-a="closesheet">Got it</button>';
   if (t === 'save') h = '<h2 class="t">Save and come back later</h2><p class="sub">We\'ll email you a secure link. No password, and no money details yet.</p><div class="field"><label for="sv-email">Email</label><input class="in" id="sv-email" type="email" autocomplete="email" value="' + esc(S.save.email) + '"></div><label class="check"><input type="checkbox" id="sv-comms"' + (S.save.comms ? ' checked' : '') + '><span>Optional: send me tips and updates</span></label><p id="sverr" class="small" style="color:var(--gap-t)" role="alert"></p><button class="btn" data-a="dosave">Email me a link</button>';
   if (t === 'saveprompt') h = '<h2 class="t">Save your progress?</h2><p class="sub">Get a link by email so you can finish later. Optional.</p><button class="btn" data-a="sheet" data-p="save">Save my progress</button><button class="btn ghost" style="margin-top:10px" data-a="go" data-p="F4">Continue without saving</button>';
-  if (t === 'money') h = '<h2 class="t">How LifeGoals makes money</h2><p class="sub">LifeGoals is free for you. If you choose to work with an adviser, their firm may pay us a fee. This never changes what you pay. Advisers never pay to see your data, and you decide what they can see.</p><button class="btn" data-a="closesheet">Got it</button>';
-  if (t === 'assume') h = '<h2 class="t">Our assumptions</h2><div class="card" style="box-shadow:none;background:var(--mist)">' + [['Prices rise (inflation)','2% a year'],['Pay rises','2.5% a year'],['Cash savings grow','1% a year'],['Investments and pensions grow','4.5% a year'],['State Pension','€15,044 a year from 66 (' + (S.fin.sp || 'Not sure') + ')'],['Retirement age','' + S.retireAge],['Tax','Simple Irish estimate (income tax, USC, PRSI)'],['Plan ends','Age 90']].map(x => '<div class="mini"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('') + '</div><p class="disc">Figures are in today\'s money unless noted. Illustrative only; not a guarantee.</p><button class="btn" data-a="closesheet">Close</button>';
+  if (t === 'money') h = '<h2 class="t">How LifeGoals makes money</h2><p class="sub">LifeGoals is free for you. If you work with an adviser, their firm may pay us a fee. Your adviser will tell you how they are paid before you agree to anything. Advisers never pay to see your data, and you decide what they can see.</p><button class="btn" data-a="closesheet">Got it</button>';
+  if (t === 'assume') h = '<h2 class="t">Our assumptions</h2><div class="card" style="box-shadow:none;background:var(--mist)">' + assumeRows().map(x => '<div class="mini"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('') + '</div><p class="disc">Figures are in today\'s money unless noted. Investments can fall as well as rise. Illustrative only; not a guarantee.</p><button class="btn" data-a="closesheet">Close</button>';
   if (t === 'explain'){ const F = findings(project()); h = p === 'str' ? '<h2 class="t">Your main strength</h2><p class="sub">' + esc(F.sT) + '. Of all your goals, this one is the best covered by your future income, savings and pension.</p>' : p === 'gap' ? '<h2 class="t">Your main gap</h2><p class="sub">' + esc(F.gT) + '. When that goal comes up, your income and savings won\'t fully cover the cost with today\'s plan.</p>' : '<h2 class="t">Your biggest decision</h2><p class="sub">' + esc(F.dT) + '. Try it in <b>What if</b> below to see the effect. This is guidance, not advice.</p>'; h += '<button class="btn" data-a="closesheet">Got it</button>'; }
   if (t === 'other') h = '<h2 class="t">Something else</h2><p class="sub">Pick one, or name your own.</p><div class="chips">' + OTHER_LIST.map((o, k) => '<button class="chip" data-a="addother" data-p="' + k + '">' + o[0] + ' ' + o[1] + '</button>').join('') + '</div><div class="field" style="margin-top:14px"><label for="oth">Name it yourself</label><input class="in" id="oth" maxlength="30" placeholder="e.g. Kitchen renovation"></div><button class="btn" data-a="addother" data-p="own">Add my goal</button>';
   if (t === 'history') h = '<h2 class="t">Plan history</h2>' + S.versions.map((v, k) => '<div class="mini"><span><b>Version ' + (k + 1) + '</b> · ' + esc(v.note) + '</span><span class="small">' + v.date + '</span></div>').join('') + '<button class="btn" style="margin-top:12px" data-a="closesheet">Close</button>';
@@ -1091,7 +1188,7 @@ function openReport(){
   const flags = checkItems().filter(x => ['look','est','miss'].includes(x.st));
   const rows = P0.rows.map(r => '<tr><td>' + r.a + ' (' + r.yr + ')</td><td>' + eur(r.inflow) + '</td><td>' + eur(r.needs) + '</td><td>' + eur(r.used) + '</td><td style="color:' + (isShort(r) ? 'var(--storm-t)' : 'inherit') + '">' + (r.short > 1 ? eur(r.short) : '—') + '</td><td>' + eur(r.liquid) + '</td></tr>').join('');
   const detail = S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const p = P0.pct[g.id], ex = p < 95 ? extraFor(g) : 0;
-    return '<p><b>' + g.e + ' ' + esc(g.name) + '</b> · ' + (g.kind === 'retire' ? 'from age ' + g.age + ', ' + eur(g.amount) + ' a year' : 'age ' + g.age + ' (' + (YEAR0 + g.age - S.about.age) + '), ' + eur(g.amount)) + ' in today\'s money · ' + g.prio + '.<br>What is on track: <b>' + p + '%</b> covered (' + BANDW[band(p)] + '). ' + (p >= 95 ? 'Your income and savings cover it.' : ex ? 'What would close the gap: saving about <b>' + eur(ex) + ' a month</b> towards it' + (g.kind === 'retire' ? ' into your pension' : '') + ', or moving it later.' : 'What would close the gap: moving it later, a smaller amount, or a bigger change to saving.') + '</p>'; }).join('');
+    return '<p><b>' + g.e + ' ' + esc(g.name) + '</b> · ' + (g.kind === 'retire' ? 'from age ' + g.age + ', ' + eur(g.amount) + ' a year' : 'age ' + g.age + ' (' + (YEAR0 + g.age - S.about.age) + '), ' + eur(g.amount)) + ' in today\'s money · ' + g.prio + '.<br>What is on track: <b>' + p + '%</b> covered (' + BANDW[band(p)] + '). ' + (p >= 95 ? 'Your income and savings cover it.' : ex ? 'What could close the gap, on our assumptions: saving about <b>' + eur(ex) + ' a month</b> more towards it, or moving it later. An adviser can tell you the best way to do this for you.' : 'What could close the gap: moving it later, a smaller amount, or a bigger change to saving. An adviser can tell you the best way to do this for you.') + '</p>'; }).join('');
   const h = '<div class="rep-bar"><b>Your plan</b><button data-r="print" style="background:var(--sun);color:var(--ink)">🖨 Print / save as PDF</button><button data-r="close" style="background:#fff;color:var(--ink)">Close</button></div><article class="rep">' +
     '<h1>' + esc(S.acct.name || 'Your') + '\'s LifeGoals plan</h1><p class="small">Created 29 Sep 2026 · version ' + Math.max(1, S.versions.length) + ' · <b>Preliminary guidance, not financial advice</b></p>' +
     '<section><h2>1. Summary</h2><p>' + esc(F.sT) + '. ' + esc(F.gT) + '. ' + esc(F.dT) + '.</p><div>' + goalsBox(P0) + '</div></section>' +
@@ -1100,9 +1197,9 @@ function openReport(){
     '<section><h2>4. Your detailed plan, in plain words</h2>' + detail + '</section>' +
     '<section><h2>5. What-if you saved</h2>' + (wiP ? '<p>' + (wiP.m ? (wiP.m > 0 ? 'Saving ' + eur(wiP.m) + ' more a month' : 'Saving ' + eur(-wiP.m) + ' less a month') : '') + (wiP.m && wiP.l ? ' and ' : '') + (wiP.l ? 'adding ' + eur(wiP.l) + ' once' : '') + (gById(wiP.g) ? ' towards ' + esc(gById(wiP.g).name.toLowerCase()) : '') + ':</p><p>' + wiText(P0, P) + '</p>' : '<p>You haven\'t tried a what-if yet.</p>') + '</section>' +
     '<section><h2>6. Your money snapshot</h2>' + (S.about.partner ? '<p>Partner: ' + esc(partnerLine()) + '</p>' : '') + '<div class="tscroll"><table><tbody>' + FSEC.map(s => s.f.filter(fieldVisible).map(k => '<tr><td>' + s.t + ' · ' + esc(FF[k].l) + '</td><td>' + fmtField(k) + '</td><td>' + tagFor(k) + '</td></tr>').join('')).join('') + '</tbody></table></div>' + (flags.length ? '<p>' + flags.length + ' item(s) are estimated, missing or need a look.</p>' : '') + '</section>' +
-    '<section><h2>7. Your money personality' + (um ? ' and indicative risk profile' : '') + '</h2>' + (discEnough() ? '<p><b>' + per.e + ' ' + per.name + '</b>: ' + per.strap + '</p>' : '<p>Not enough answers yet to show a money personality.</p>') + (um ? '<p>Indicative risk profile: <b>' + rp.label + '</b>. ' + (rp.mis ? esc(rp.mis) : '') + ' Your adviser confirms your risk profile with you.</p>' : '<p>Complete <i>Understand me</i> to add your indicative risk profile.</p>') + '</section>' +
+    '<section><h2>7. Your money personality' + (um ? ' and indicative risk profile' : '') + '</h2>' + (discEnough() ? '<p><b>' + per.e + ' ' + per.name + '</b>: ' + per.strap + '</p>' : '<p>Not enough answers yet to show a money personality.</p>') + (um ? '<p>Indicative risk profile: <b>' + riskLabelText(rp) + '</b>' + (rp.limit ? ' (set by ' + RISK_SETBY[rp.limit] + ')' : '') + '. ' + (rp.mis ? esc(rp.mis) : '') + (rp.keNote ? ' ' + KE_NOTE : '') + ' Your adviser confirms your risk profile with you.</p>' : (discEnough() && riskRead(false).label ? '<p>Risk profile, first read: <b>' + riskRead(false).label + '</b> · finish your profile to confirm. A first read is never shown above Balanced.</p>' : '') + '<p>Complete <i>Understand me</i> to add your indicative risk profile.</p>') + '</section>' +
     '<section><h2>8. Your questions for an adviser</h2>' + (S.advQs.length ? '<ul>' + S.advQs.map(q => '<li>' + esc(q) + '</li>').join('') + '</ul>' : '<p>None yet.</p>') + '</section>' +
-    '<section><h2>9. Assumptions</h2><p>Inflation 2% · pay rises 2.5% · cash 1% · investments and pensions 4.5% · State Pension €15,044 a year from 66 · retirement at ' + S.retireAge + ' · plan to age 90 · simple Irish tax estimate. All projections are illustrative and not guaranteed. This is preliminary guidance, not financial advice. Only an authorised adviser can give advice. ' + DISC_FORMAL + '</p></section></article>';
+    '<section><h2>9. Assumptions</h2><p>' + assumeRows().map(x => x[0] + ': ' + esc(x[1])).join(' · ') + '. Investments can fall as well as rise. All projections are illustrative and not guaranteed. This is preliminary guidance, not financial advice. Only an authorised adviser can give advice. ' + DISC_FORMAL + '</p></section></article>';
   const R = document.getElementById('report'); R.innerHTML = h; R.classList.add('on'); R.scrollTop = 0; R.querySelector('[data-r="print"]').focus();
   if (!S.versions.some(v => /report/.test(v.note))) S.versions.push({note:'Report downloaded', date:'29 Sep 2026'});
 }
@@ -1194,7 +1291,7 @@ const ACT = {
   umpick:p => { const [key, k] = p.split('|'); if (key[0] === 'd'){ S.ans[key.slice(1)] = +k; delete S.meEdit[key]; focusKey = '[data-a="umedit"][data-p="' + key + '"]'; } else { S.um.a[key] = +k; focusKey = '[data-a="umpick"][data-p="' + p + '"]'; } render(); },
   umchip:p => { const i = S.um.chips.indexOf(p); if (i >= 0) S.um.chips.splice(i, 1); else S.um.chips.push(p); focusKey = '[data-a="umchip"][data-p="' + p + '"]'; render(); },
   umsave:() => { const s = UM.find(x => x.n === S.um.sec); if (s.qs.some(q => q.u === 'u9') && typeof S.um.a.u9 !== 'number') S.um.a.u9 = suggestU9(); S.um.done[s.n] = true; S.meEdit = {}; if (UM.every(x => S.um.done[x.n])) S.um.rechecked = true; S.me = 'um';
-    toast(umCount() === 13 ? 'Saved. Your plan\'s risk profile is now ' + riskRead(true).label : s.t + ' saved'); render(); },
+    toast(umCount() === 13 ? 'Saved. Your plan\'s risk profile is now ' + riskLabelText(riskRead(true)) : s.t + ' saved'); render(); },
   view:p => { S.view = p; focusKey = '[data-a="view"][data-p="' + p + '"]'; const e = document.getElementById('r-glance'); if (e){ e.innerHTML = glanceHTML(project(S.wi)); bindLite(); const b = e.querySelector(focusKey); if (b) b.focus(); focusKey = null; } else render(); },
   chap:p => { S.chapOpen = S.chapOpen === +p ? null : +p; const e = document.getElementById('r-glance'); if (e){ e.innerHTML = glanceHTML(project(S.wi)); const b = e.querySelector('[data-a="chap"][data-p="' + p + '"]'); if (b) b.focus({preventScroll:true}); } else render(); },
   understood:() => { S.understood = true; version('Results understood'); focusKey = '#r-found .chip'; render(); },
