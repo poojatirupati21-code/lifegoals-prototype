@@ -101,52 +101,58 @@ Remove the **"tag" labels** ("FOMO · Herd behaviour", "Panic selling", etc.) fr
 
 Where: **Me → Understand me**. This replaces all 10 `ASSESS` blocks. It is also offered at C0. Layout is one screen per section. Pre-filled answers show as selected with a "From your first answers — change if you like" note. The whole thing takes about 2 minutes, because only 6 questions are new.
 
-### Section 1 · About you & money (4)
-| # | Question | Options | Source |
-|---|---|---|---|
-| 1 | Your friends would say you're always… | (as §2 Q2) | **Pre-filled** (D2) |
-| 2 | How do you feel about your financial future? | (as §2 Q12) | **Pre-filled** (D8) |
-| 3 | A friend's investment doubled in a month. What do you do? | (as §2 Q4) | **Pre-filled** (D3) |
-| 4 | When making an important financial decision, do you prefer to… | Research everything myself · Understand the basics, then speak to an expert · Speak to an expert first · Keep things as simple as possible | **New.** From the ASSESS "planning" block (3 of its options kept, "Compare several options carefully" dropped). Used for adviser matching (MASTER G12 "preferences"). |
+Sections are labelled in the xlsx language (MASTER B7 "1) Risk, 2) Capacity and 3) Investor behaviour"; CUSTOMER JOURNEY B6), per §10.6. On each section screen the pre-filled answers are collapsed into one "Your first answers" card, each with **Change**; only unanswered questions show in full. Me also offers a separate re-check of all 7 first answers (§10.5).
 
-### Section 2 · Your risk profile (6)
-Heading copy: "Three things make up your risk profile: how much risk you **want** to take, how much you **can** afford to take, and **how long** you can wait."
+Hub copy: "Three things make up your risk profile: how much risk you **want** to take, how much you **can** afford to take, and **how long** you can wait."
+
+### Section 1 · Your risk (3)
+Intro: "How much risk you **want** to take, and **how long** you can wait."
 | # | Question | Options | Measures | Source |
 |---|---|---|---|---|
-| 5 | Pick a forecast for your long-term money. | (as §2 Q8) | Attitude to risk / appetite | **Pre-filled** |
-| 6 | Your €10,000 investment drops to €8,500. What do you do? | (as §2 Q9) | Composure / risk tolerance | **Pre-filled** |
-| 7 | How much could you comfortably invest each month? | (as §2 Q6) | Investment capacity | **Pre-filled** |
-| 8 | A €1,000 bill arrives tomorrow. How do you pay it? | (as §2 Q7) | Emergency fund / liquidity | **Pre-filled** |
-| 9 | When will you need this money? *(helper line: "Think of money you'd set aside to grow, not everyday savings.")* | ⏱️ Within 2 years · 📆 In 2 to 5 years · 🗓️ In 5 to 10 years · 🌳 In 10+ years | Time horizon (S1 E) | **New to the customer.** DISC Q10 word for word. The answer is **suggested** from the timeline: the first goal more than 2 years away that has no "saved so far". |
-| 10 | If your investments fell by a fifth, what would it mean for you? *(merges capacity for loss + income stability + dependants)* | I'd have to cut back on essentials · I'd change some plans · I'd be fine — it's long-term money · I'm not sure | Capacity for loss (MiFID "ability to bear losses") | **New** (no xlsx wording exists; short options). Dependants come from D9, debts and emergency fund from finances, so they are not asked again. |
+| 1 | Pick a forecast for your long-term money. | (as §2 Q8) | Attitude to risk / appetite | **Pre-filled** (D6) |
+| 2 | Your €10,000 investment drops to €8,500. What do you do? | (as §2 Q9) | Composure / risk tolerance | **Pre-filled** (D7) |
+| 3 | When will you need this money? *(helper line: "Think of money you'd set aside to grow, not everyday savings.")* | ⏱️ Within 2 years · 📆 In 2 to 5 years · 🗓️ In 5 to 10 years · 🌳 In 10+ years | Time horizon (S1 E) | **New to the customer.** DISC Q10 word for word. The answer is **suggested** from the timeline: the first goal more than 2 years away that has no "saved so far". |
 
-### Section 3 · Experience & values (3)
+### Section 2 · Your capacity (4)
+Intro: "How much risk you **can** afford to take, without it hurting everyday life."
+| # | Question | Options | Measures | Source |
+|---|---|---|---|---|
+| 4 | How much could you comfortably invest each month? | (as §2 Q6) | Investment capacity | **Pre-filled** (D4) |
+| 5 | A €1,000 bill arrives tomorrow. How do you pay it? | (as §2 Q7) | Emergency fund / liquidity | **Pre-filled** (D5) |
+| 6 | If your investments fell by a fifth, what would it mean for you? *(helper line: "For example, €10,000 falling to €8,000.")* | I'd have to cut back on essentials · I'd change some plans · I'd be fine — it's long-term money · I'm not sure | Capacity for loss (MiFID "ability to bear losses") | **New** (no xlsx wording exists; plain, short options, §10.6). Dependants come from D9, debts and emergency fund from finances, so they are not asked again. |
+| 7 | How stable is your income? | Uncertain right now · It varies month to month · Fairly stable · Very stable | Income stability | **New.** From the ASSESS "capacity" block, word for word. |
+
+### Section 3 · Your investor behaviour (6)
+Intro: "How you tend to act and decide with money. There are no right or wrong answers."
 | # | Question | Options | Source |
 |---|---|---|---|
-| 11 | How much experience do you have with investing? + optional chips "Which have you had?": Savings account · Pension · Shares or funds · Crypto · None | None at all · I know the basics · I am fairly comfortable · I am very experienced | **New.** S1 E19, word for word. The chips are optional and cover MiFID "types of products". |
-| 12 | How stable is your income? | Uncertain right now · It varies month to month · Fairly stable · Very stable | **New.** From the ASSESS "capacity" block, word for word. Feeds capacity. |
+| 8 | Your friends would say you're always… | (as §2 Q2) | **Pre-filled** (D2) |
+| 9 | How do you feel about your financial future? | (as §2 Q12) | **Pre-filled** (D8) |
+| 10 | A friend's investment doubled in a month. What do you do? | (as §2 Q4) | **Pre-filled** (D3) |
+| 11 | When making an important financial decision, do you prefer to… | Research everything myself · Understand the basics, then speak to an expert · Speak to an expert first · Keep things as simple as possible | **New.** From the ASSESS "planning" block (3 of its options kept, "Compare several options carefully" dropped). Used for adviser matching (MASTER G12 "preferences"). |
+| 12 | How much experience do you have with investing? + optional chips "Which have you had?": Savings account · Pension · Shares or funds · Crypto · None | None at all · I know the basics · I am fairly comfortable · I am very experienced | **New.** S1 E19, word for word. The chips are optional and cover MiFID "types of products". |
 | 13 | Would you like your plan to include ethical or sustainable options? | Yes, this matters to me · A little · No strong preference · Not sure | **New.** S1 E20, word for word. The xlsx cell reads "Not+A4:I16 sure", a paste error, so show "Not sure". Asked last, as ESMA requires. |
 
-Count: **13** = 7 pre-filled + 6 new (Q4, Q9, Q10, Q11, Q12, Q13). Q11's product chips are an optional add-on to the same question.
+Count: **13** = 7 pre-filled (UM1, 2, 4, 5, 8, 9, 10) + 6 new (UM3, 6, 7, 11, 12, 13). UM12's product chips are an optional add-on to the same question.
 
 **Fact-find coverage check** (QFA / CFP / MiFID II / CBI suitability):
 
 | Requirement | Covered by |
 |---|---|
-| Attitude to risk | UM5, UM6 |
-| Capacity for loss | UM10, UM8, UM12, D9 dependants, finances |
-| Investment capacity | UM7, finances (monthly surplus) |
-| Time horizon | UM9, goal dates |
-| Knowledge & experience | UM11 |
-| Objectives | Goals (F1/F2), UM5 |
-| Liquidity / emergency fund | UM8, Assets (cash) |
+| Attitude to risk | UM1, UM2 |
+| Capacity for loss | UM6, UM5, UM7, D9 dependants, finances |
+| Investment capacity | UM4, finances (monthly surplus) |
+| Time horizon | UM3, goal dates |
+| Knowledge & experience | UM12 |
+| Objectives | Goals (F1/F2), UM1 |
+| Liquidity / emergency fund | UM5, Assets (cash) |
 | Dependants | D9 |
-| Income stability | UM12 |
+| Income stability | UM7 |
 | Debts | Liabilities |
 | Protection | Protection section |
 | Sustainability preferences | UM13 |
-| Behaviour / biases | UM3, UM6 |
-| Advice preferences | UM4 |
+| Behaviour / biases | UM10, UM2 |
+| Advice preferences | UM11 |
 
 Not covered here, on purpose: formal KYC (ID, PPS, proof of address). Step 4 C18 says these docs are "not for our portal", so the adviser handles them.
 

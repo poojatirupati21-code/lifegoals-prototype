@@ -181,7 +181,8 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 .vt{display:flex;gap:4px;background:#E6EEEA;border-radius:14px;padding:4px;margin:12px 0}
 .vt button{flex:1;border:0;background:none;border-radius:11px;min-height:44px;font-weight:800;font-size:13px;cursor:pointer;color:var(--muted);padding:0 4px}
 .vt button.on{background:var(--ink);color:#fff}
-.chapgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chapgrid{display:grid;grid-template-columns:1fr;gap:10px}
+.rep .chapgrid{grid-template-columns:1fr 1fr}
 .chap{border:1.5px solid var(--line);border-radius:18px;padding:12px;background:#fff;cursor:pointer;text-align:left;display:block;width:100%;font-size:inherit}
 .chap.ok{border-color:#BFE3CD;background:#F6FBF8}.chap.warn{border-color:#F3DDB5;background:#FDFAF2}.chap.bad{border-color:#EFC7C7;background:#FDF5F5}
 .chap.open{grid-column:1/-1}
@@ -543,6 +544,11 @@ const rowCol = r => isShort(r) ? 'var(--gap)' : r.used > 1 ? 'var(--dip)' : 'var
 function extraFor(g){ for (const m of [25,50,75,100,150,200,250,300,400,500,600,750,1000,1250,1500,2000]){ if (project({g:g.id, m, l:0}).pct[g.id] >= 95) return m; } return null; }
 function yearsTxt(g){ const n = g.age - S.about.age; return g.kind === 'retire' ? 'at ' + g.age : 'in ' + n + ' year' + (n === 1 ? '' : 's'); }
 function qualityCount(){ let n = 0; FSEC.forEach(s => s.f.forEach(k => { if (fieldVisible(k) && !FF[k].opt && (S.src[k] === 'est' || !S.src[k])) n++; })); return n; }
+function skippedSecs(){ return FSEC.filter(sec => { const fs = sec.f.filter(fieldVisible); return fs.length && fs.every(k => !S.src[k] && !S.look[k]); }); }
+function roughNote(){ const sk = skippedSecs(), rough = qualityCount() > 2; if (!sk.length && !rough) return '';
+  const and = xs => xs.length > 1 ? xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1] : xs[0], money = sk.filter(x => x.id !== 'prot').map(x => x.t), prot = sk.some(x => x.id === 'prot');
+  const msg = (money.length ? and(money) + (money.length > 1 ? ' are' : ' is') + ' missing, so ' + (money.length > 1 ? 'they count' : 'it counts') + ' as €0. ' : '') + (prot ? 'Your protection cover isn\'t added yet. ' : '') + (!sk.length ? 'Some figures are estimated or missing. ' : '');
+  return '<div class="nudge" id="r-rough" style="background:var(--sun-l);border:1.5px solid var(--sun)"><span aria-hidden="true" style="font-size:20px">🧩</span><span><b>Rough picture.</b> ' + msg + (sk.length === 1 ? 'Add it' : 'Add them') + ' to sharpen your plan.</span><button class="link" data-a="me" data-p="money">Add now</button></div>'; }
 function fieldVisible(k){ const d = FF[k]; return !d.show || d.show(); }
 function secStatus(sec){
   const fs = sec.f.filter(fieldVisible), req = fs.filter(k => !FF[k].opt);
@@ -628,10 +634,13 @@ function goalTile(k){ const c = GC(k), ret = k === 'retire', other = k === 'othe
 function tlBoard(){
   const a0 = S.about.age, gs = S.goals;
   return '<div class="tl-board"><div class="tl-track" id="tl" data-a0="' + a0 + '">' +
-    gs.map(g => { const ret = g.kind === 'retire'; return '<div class="tl-chip' + (ret ? ' ret' : '') + (S.tlHl === g.id ? ' hl' : '') + '" data-g="' + g.id + '" tabindex="0" role="slider" aria-label="' + esc(g.name) + '" aria-valuemin="' + (ret ? 55 : a0 + 1) + '" aria-valuemax="' + (ret ? 75 : 90) + '" aria-valuenow="' + g.age + '" aria-valuetext="' + esc(g.name) + ', age ' + g.age + ', ' + (YEAR0 + g.age - a0) + '">' + chipInner(g) + '</div>'; }).join('') +
+    gs.map(g => { const ret = g.kind === 'retire'; return '<div class="tl-chip' + (ret ? ' ret' : '') + (S.tlHl === g.id ? ' hl' : '') + '" data-g="' + g.id + '" title="' + esc(g.name) + '" tabindex="0" role="slider" aria-label="' + esc(g.name) + '" aria-valuemin="' + (ret ? 55 : a0 + 1) + '" aria-valuemax="' + (ret ? 75 : 90) + '" aria-valuenow="' + g.age + '" aria-valuetext="' + esc(g.name) + ', age ' + g.age + ', ' + (YEAR0 + g.age - a0) + '">' + chipInner(g) + '</div>'; }).join('') +
     '</div><div class="tl-hint">↔ Drag a goal (or use the arrow keys) to change when it happens</div></div>';
 }
-function chipInner(g){ const n = g.age - S.about.age, nm = g.name.length > 13 ? g.name.slice(0, 12) + '…' : g.name;
+/* Short chip labels so names never truncate on the timeline; the full name stays in the row below, the aria-label and the drag tip */
+const SHORT = {home:'Home', family:'Family', edu:'Education', travel:'Travel', business:'Business', mfree:'Mortgage-free', safety:'Safety net', wealth:'Wealth', helpfam:'Help family', legacy:'Legacy', wedding:'Wedding', car:'Car', health:'Health'};
+function shortName(g){ const c = GC(g.k); if (c && g.name === c.t && SHORT[g.k]) return SHORT[g.k]; if (g.name.length <= 14) return g.name; const w = g.name.split(' ').filter(x => x.length > 2)[0] || g.name; return w.length <= 14 ? w : w.slice(0, 13) + '…'; }
+function chipInner(g){ const n = g.age - S.about.age, nm = shortName(g);
   return g.kind === 'retire' ? '<span aria-hidden="true">🏁</span>Retire <span class="yr">' + g.age + '</span>' : '<span aria-hidden="true">' + g.e + '</span>' + esc(nm) + ' <span class="yr">in ' + n + ' yr' + (n === 1 ? '' : 's') + '</span>'; }
 function whenTxt(g){ const n = g.age - S.about.age; return (g.kind === 'retire' ? 'Age ' + g.age : 'in ' + n + ' yr' + (n === 1 ? '' : 's') + ' · age ' + g.age) + ' · ' + (YEAR0 + n); }
 function gRows(only){
@@ -778,17 +787,23 @@ function journeySVG(P, W){
   const fx = ri >= 0 ? X(ri) : null;
   if (ri >= 0) marks += '<line x1="' + fx + '" y1="' + Y(ri) + '" x2="' + fx + '" y2="' + (Y(ri) - 44) + '" stroke="var(--ink)" stroke-width="2.5"/><path d="M' + fx + ' ' + (Y(ri) - 44) + ' l24 7 l-24 7 z" fill="#E4518A"/><text x="' + (fx + (fx > W - 90 ? -6 : 4)) + '" y="' + (Y(ri) - 50) + '" font-size="11" font-weight="800" fill="var(--ink)" text-anchor="' + (fx > W - 90 ? 'end' : 'start') + '">Retire ' + rows[ri].a + '</text>';
   marks += '<text x="' + (X(n - 1) - 8) + '" y="' + (Y(n - 1) - 12) + '" font-size="18" aria-hidden="true">🌅</text>';
-  // milestones: slot-based placement so rings and labels never collide
-  const gs = S.goals.filter(g => g.kind !== 'retire').slice().sort((a, b) => a.age - b.age), gap = wide ? 96 : 30;
-  const slots = wide ? [-56, 58, -100, 100] : [-40, 42, -74, 74], last = slots.map(() => -1e9); last[1] = X(0) + (wide ? 40 : 34); let ms = '';
-  gs.forEach(g => { const i = clamp(g.age - a0, 0, n - 1), cx = X(i), cy = Y(i), p = P.pct[g.id], col = 'var(--' + band(p) + ')';
-    let s = slots.findIndex((d, k) => cx - last[k] >= gap && !(d < 0 && fx != null && Math.abs(cx - fx) < (wide ? 60 : 24) && Math.abs(d) < 60));
-    if (s < 0) s = last.indexOf(Math.min(...last));
-    last[s] = cx; const ly = clamp(cy + slots[s], 16, H - 34);
-    ms += '<g><line x1="' + cx + '" y1="' + cy + '" x2="' + cx + '" y2="' + ly + '" stroke="#B9C9D6" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="' + cx + '" cy="' + ly + '" r="' + (wide ? 18 : 13) + '" fill="#fff" stroke="' + col + '" stroke-width="3"/><text x="' + cx + '" y="' + (ly + (wide ? 6 : 4.5)) + '" font-size="' + (wide ? 16 : 12.5) + '" text-anchor="middle">' + g.e + '</text>' +
-      (wide ? '<text x="' + cx + '" y="' + (ly + (slots[s] < 0 ? -25 : 34)) + '" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="middle">' + esc(g.name.length > 16 ? g.name.slice(0, 15) + '…' : g.name) + '</text>' : '') + '<title>' + esc(g.name) + ': ' + p + '% covered</title></g>'; });
+  // milestones: goals close together merge into one marker with a count badge (tap lists them); markers keep clear of labels
+  const gs = S.goals.filter(g => g.kind !== 'retire').slice().sort((a, b) => a.age - b.age), R = wide ? 18 : 13, merge = wide ? 64 : 34;
+  const cl = []; gs.forEach(g => { const i = clamp(g.age - a0, 0, n - 1), x = X(i), c = cl[cl.length - 1]; if (c && x - c.x < merge) c.gs.push(g); else cl.push({i, x, gs:[g]}); });
+  const slots = wide ? [-56, 58, -100, 100] : [-40, 42, -76, 76], need = wide ? 100 : 2 * R + 4, last = slots.map(() => -1e9); let ms = '';
+  cl.forEach((c, ci) => { const cx = c.x, cy = Y(c.i), worst = Math.min(...c.gs.map(g => P.pct[g.id])), col = 'var(--' + band(worst) + ')', multi = c.gs.length > 1;
+    const nearFlag = fx != null && cx > fx - R - 16 && cx < fx + (fx > W - 90 ? R + 16 : 62 + R), nearStart = cx < X(0) + 70 + R, nearEnd = cx > X(n - 1) - 30 - R;
+    const ok = d => !((d < 0 && (nearFlag || nearEnd)) || (d > 0 && nearStart));
+    let si = slots.findIndex((d, k) => ok(d) && cx - last[k] >= need); if (si < 0) si = slots.findIndex(ok); if (si < 0) si = 0;
+    last[si] = cx; const ly = clamp(cy + slots[si], R + 4, H - 30 - R), open = S.jcl === ci;
+    const names = c.gs.map(g => g.name + ' ' + P.pct[g.id] + '%').join(', ');
+    ms += '<g' + (multi ? ' data-a="jcl" data-p="' + ci + '" style="cursor:pointer"' : '') + '><line x1="' + cx + '" y1="' + cy + '" x2="' + cx + '" y2="' + ly + '" stroke="#B9C9D6" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="' + cx + '" cy="' + ly + '" r="' + R + '" fill="' + (open ? 'var(--sea-l)' : '#fff') + '" stroke="' + col + '" stroke-width="3"/>' +
+      (multi ? '<text x="' + cx + '" y="' + (ly + (wide ? 6 : 5)) + '" font-size="' + (wide ? 16 : 14) + '" font-weight="800" fill="var(--ink)" text-anchor="middle">' + c.gs.length + '</text>' : '<text x="' + cx + '" y="' + (ly + (wide ? 6 : 4.5)) + '" font-size="' + (wide ? 16 : 12.5) + '" text-anchor="middle">' + c.gs[0].e + '</text>') +
+      (wide ? '<text x="' + cx + '" y="' + (ly + (slots[si] < 0 ? -25 : 34)) + '" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="middle">' + (multi ? c.gs.map(g => g.e).join('') + ' ' + c.gs.length + ' goals' : esc(c.gs[0].name.length > 16 ? c.gs[0].name.slice(0, 15) + '…' : c.gs[0].name)) + '</text>' : '') + '<title>' + esc(names) + (multi ? ' (tap to list)' : '') + '</title></g>'; });
+  const jc = S.jcl != null && cl[S.jcl] && cl[S.jcl].gs.length > 1 ? cl[S.jcl] : null;
   const desc = 'Road from age ' + a0 + ' to 90. ' + (rows.some(isShort) ? 'Some red shortfall years.' : 'No shortfall years.');
   return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + desc + '" style="display:block;margin-top:6px">' + base + road + ms + marks + ticks + '</svg>' +
+    (jc ? '<p class="note" id="jcl-list" style="margin-top:8px">Ages ' + jc.gs[0].age + '–' + jc.gs[jc.gs.length - 1].age + ': ' + jc.gs.map(g => g.e + ' ' + esc(g.name) + ' <b>' + P.pct[g.id] + '%</b>').join(' · ') + '</p>' : '') +
     (wide ? '' : '<div class="mlist">' + gs.map(g => { const p = P.pct[g.id]; return '<div><span class="sw" style="border-radius:6px;background:var(--' + band(p) + ')"></span><span aria-hidden="true">' + g.e + '</span> ' + esc(g.name) + ' <span class="small">· age ' + g.age + ' · <b style="color:var(--' + band(p) + '-t)">' + p + '%</b></span></div>'; }).join('') + '</div>');
 }
 function chapters(P){ const ch = []; P.rows.forEach(r => { let d = Math.floor(r.a / 10) * 10; if (d === 90 && ch.length) d = 80; let c = ch[ch.length - 1]; if (!c || c.dec !== d){ c = {dec:d, from:r.a, to:r.a, rows:[]}; ch.push(c); } c.to = r.a; c.rows.push(r); }); return ch; }
@@ -819,7 +834,7 @@ function wiCard(){ const w = S.wi, gs = S.goals.slice().sort((a, b) => a.age - b
 function resultsHTML(){
   const P0 = project(), P = project(S.wi), F = findings(P0), rough = qualityCount() > 2;
   return '<div class="prelim"><span aria-hidden="true">ℹ️</span><span>Preliminary guidance · based on your figures and our assumptions · not financial advice. <button class="link" style="padding:0;font-size:12.5px" data-a="sheet" data-p="assume">Assumptions</button></span></div>' +
-    (rough ? '<p class="note" style="margin:0 0 12px">Rough picture: some figures are estimated or missing. Add documents to sharpen it.</p>' : '') + planProfileBanner() +
+    roughNote() + planProfileBanner() +
     '<div class="card"><h3 class="h">Your goals</h3><p class="small" style="margin:0 0 6px">How much of each goal your future income and savings can cover.</p><div id="r-goals">' + goalsBox(P) + '</div></div>' +
     '<div class="card" id="r-found"><h3 class="h">What we found</h3><div class="found" style="margin-top:8px">' +
       [['💪','Your main strength',F.sT,'var(--ok-t)','str'],['🔎','Your main gap',F.gT,'var(--gap-t)','gap'],['🎯','Your biggest decision',F.dT,'var(--acc-d)','dec']].map(c => '<div class="fcard"><div class="k" style="color:' + c[3] + '">' + c[0] + ' ' + c[1] + '</div><b>' + esc(c[2]) + '</b><button class="link" style="font-size:12.5px;padding:2px 0" data-a="sheet" data-p="explain|' + c[4] + '">Explain this</button></div>').join('') + '</div>' +
@@ -924,7 +939,7 @@ function nextStep(){ const P = project(), gs = S.goals.slice().sort((a, b) => P.
   return {e:'✅', t:"You're all set", d:'Your meeting: ' + esc(S.book.slot) + '.', a:'tab', p:'exp', b:'See my meeting'}; }
 V.HOME = () => { const P = project(), gs = S.goals.slice().sort((a, b) => a.age - b.age), avg = gs.length ? Math.round(gs.reduce((t, g) => t + P.pct[g.id], 0) / gs.length) : 0, ok = gs.filter(g => P.pct[g.id] >= 95).length, bd = band(avg), n = nextStep();
   return {id:'HOME', note:'Home: light dashboard. Overall readiness, next best step, goals at a glance, shortcuts. Links into My Plan / Me / Experts; no full screens duplicated.', head:appHead('Hi ' + esc(S.acct.name || 'there'), 'Here\'s where you stand today.'),
-    html:'<div class="card row" style="gap:14px">' + ring(avg, 84, 'var(--' + bd + ')') + '<div style="flex:1"><div class="eyebrow">Overall readiness</div><b style="font-size:17px">' + ok + ' of ' + gs.length + ' goals on track</b><div class="small">How much of your goals your money can cover, on average.</div></div></div>' +
+    html:'<div class="card row" style="gap:14px">' + ring(avg, 84, 'var(--' + bd + ')') + '<div style="flex:1"><div class="eyebrow">Overall readiness' + (skippedSecs().length || qualityCount() > 2 ? ' · rough' : '') + '</div><b style="font-size:17px">' + ok + ' of ' + gs.length + ' goals on track</b><div class="small">How much of your goals your money can cover, on average.</div></div></div>' + roughNote() +
       '<div class="card" style="background:linear-gradient(150deg,var(--sun-l),#fff)"><div class="eyebrow" style="color:var(--acc-d)">Your next best step</div><div class="row" style="margin-top:6px;align-items:flex-start"><span style="font-size:28px" aria-hidden="true">' + n.e + '</span><div style="flex:1"><b style="font-size:16px">' + n.t + '</b><div class="small" style="color:var(--ink)">' + n.d + '</div></div></div><button class="btn sm" style="width:100%;margin-top:10px" data-a="' + n.a + '"' + (n.p != null ? ' data-p="' + n.p + '"' : '') + '>' + n.b + '</button></div>' +
       '<div class="sec"><h3>Your goals at a glance</h3><button class="link" data-a="seg" data-p="results">See results</button></div><div class="card" style="padding:6px 14px">' + gs.map(g => { const p = P.pct[g.id], b = band(p); return '<div class="mini" style="align-items:center"><span><span aria-hidden="true">' + g.e + '</span> <b>' + esc(g.name) + '</b> <span class="small">· ' + yearsTxt(g) + '</span></span><span class="pill" style="background:var(--' + b + '-l);color:var(--' + b + '-t)">' + p + '%</span></div>'; }).join('') + '</div>' +
       '<div class="sec"><h3>Shortcuts</h3></div><div class="shortcuts">' + [['seg','timeline','🗓️','My timeline'],['gowi','','🔮','Try a what-if'],['upl','smart','📥','Add a document'],['report','','⬇️','Download my plan']].map(([a, p, e, t]) => '<button class="tile" data-a="' + a + '"' + (p ? ' data-p="' + p + '"' : '') + '><span class="e" aria-hidden="true">' + e + '</span>' + t + '</button>').join('') + '</div>' +
@@ -1127,6 +1142,7 @@ const ACT = {
   umsave:() => { const s = UM.find(x => x.n === S.um.sec); if (s.qs.some(q => q.u === 'u9') && typeof S.um.a.u9 !== 'number') S.um.a.u9 = suggestU9(); S.um.done[s.n] = true; S.meEdit = {}; if (UM.every(x => S.um.done[x.n])) S.um.rechecked = true; S.me = 'um';
     toast(umCount() === 13 ? 'Saved. Your plan\'s risk profile is now ' + riskRead(true).label : s.t + ' saved'); render(); },
   view:p => { S.view = p; focusKey = '[data-a="view"][data-p="' + p + '"]'; const e = document.getElementById('r-glance'); if (e){ e.innerHTML = glanceHTML(project(S.wi)); bindLite(); const b = e.querySelector(focusKey); if (b) b.focus(); focusKey = null; } else render(); },
+  jcl:p => { S.jcl = S.jcl === +p ? null : +p; const e = document.getElementById('r-glance'); if (e) e.innerHTML = glanceHTML(project(S.wi)); else render(); },
   chap:p => { S.chapOpen = S.chapOpen === +p ? null : +p; const e = document.getElementById('r-glance'); if (e){ e.innerHTML = glanceHTML(project(S.wi)); const b = e.querySelector('[data-a="chap"][data-p="' + p + '"]'); if (b) b.focus({preventScroll:true}); } else render(); },
   understood:() => { S.understood = true; version('Results understood'); focusKey = '#r-found .chip'; render(); },
   advq:p => { const i = S.advQs.indexOf(p); if (i >= 0) S.advQs.splice(i, 1); else S.advQs.push(p); focusKey = '[data-a="advq"][data-p="' + CSS.escape(p) + '"]'; render(); },
@@ -1274,7 +1290,7 @@ function loadSample(){
   put('name', 'Aoife', 'pre'); put('age', 38, 'pre'); put('retireAge', 63, 'pre'); put('pAge', 37, 'typed');
   put('work', 'Employed', 'doc', 99); put('income', 58000, 'doc', 98); put('pIncome', 22000, 'typed'); put('otherM', 0, 'none'); put('costsM', 3600, 'est'); put('oneOffY', 1800, 'doc', 81);
   put('home', 'Own with mortgage', 'doc', 99); put('homeValue', 420000, 'typed'); put('cash', 9000, 'doc', 97); put('invest', 6200, 'doc', 88);
-  put('mortBal', 212000, 'doc', 96); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('debt', 2800, 'doc', 85); put('debtPayM', 140, 'doc', 78);
+  put('mortBal', 208000, 'doc', 96); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('debt', 2800, 'doc', 85); put('debtPayM', 140, 'doc', 78);
   put('life', 'Yes', 'doc', 95); put('ip', 'No', 'typed'); put('ci', 'Not sure', 'typed'); put('workCover', 'Yes', 'doc', 90); put('health', 'Yes', 'typed');
   put('pension', 72000, 'doc', 95); put('pensionM', 520, 'doc', 91); put('sp', 'Expect full', 'typed'); S.look.pension = 'Statement is over 12 months old';
   S.partner = {mode:'manual', email:'', sent:false, name:'Cian'};
