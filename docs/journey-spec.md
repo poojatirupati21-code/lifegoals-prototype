@@ -367,3 +367,19 @@ There are **no repeated questions** anywhere.
 6. **UM10 capacity-for-loss question** is new wording (nothing in the xlsx covers it). Are you happy with the wording, or would you prefer we use an existing ASSESS question?
 7. **D1 "What brought you here?" chips**: are these 5 options right?
 8. **Goal tile list**: happy to reuse the Lifecast Q11 tiles (11 + Something else) with Health / Wedding / Car under "Something else"?
+
+## 10. Pooja's answers to the open questions (binding, supersedes defaults above)
+
+1. **Home tab: YES.** Tabs are Home · My Plan · Me · Experts. Home is a light dashboard: overall readiness, next best step, goals at a glance, and shortcuts. Nothing on it duplicates a full screen.
+2. **AI "Ask" chat: KEEP.** It is a small floating button in the top-right corner of every screen (help and plain-English explanations only, never advice).
+3. **Bank connection: NO** in this version.
+4. **Partner: YES.** There are two choices side by side: "Invite my partner" (email, mock) **or** "Add their details myself" (manual).
+5. **Understand Me (Me tab)** is the customer's profile hub:
+   - Their name, partner details (invite or add manually) and dependants.
+   - Their profile: money personality and indicative risk profile.
+   - A re-check of the Discover answers they already gave. These are pre-filled; the customer confirms or changes them.
+   - The deeper questions, **connected to My Plan**: answers feed the plan, and My Plan links back to Me for any answer it needs.
+   - It is not a gate before results or booking. My Plan and booking nudge the customer to complete it, e.g. "Check your profile before your adviser meeting".
+6. **Capacity-for-loss wording.** Take the framing from the MASTER JOURNEY (B7: "Discover – 1) Risk, 2) Capacity and 3) Investor behaviour") and CUSTOMER JOURNEY (B6: "risk, capacity and investor-behaviour questions") sheets. Label the Understand Me sections in that language and keep the question plain and short.
+7. **"What brought you here?" chips**: the proposed options were shown to Pooja for confirmation; keep them until she replies.
+8. **Goal tiles: keep separate Health, Wedding and Car tiles.** Use the LifeGoals 2.0 tile style (`reference/LifeGoals-2.0-Plan-Prototype-decoded.html` lines 165–171 CSS, GOAL_TYPES ~592): white card, 2px border, big emoji on top, name below, teal border + light-teal fill + tick when selected, restyled in the navy tokens. Tiles: 💍 Wedding, 🚗 Change the car, 🩺 Health & care (none in 2.0; added).

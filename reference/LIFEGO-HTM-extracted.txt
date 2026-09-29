@@ -1,0 +1,83 @@
+◔ LifeGoals
+by DigiPro.AI
+? Help
+⏱ Takes about 10 minutes — save an hour in your advisor meeting
+See if your life goals are on track
+Most of us have goals — a home, our children's education, a comfortable retirement. Few of us know whether our finances will actually get us there. LifeGoals shows you, in plain English.
+1Tell us what matters — your priorities and the life moments you're planning for.
+2Add your finances in minutes — upload statements and our smart document reader fills in the details for you.
+3See your future, clearly — which goals are on track, which need attention, and what you can do about it.
+Get started → Try with a sample family
+🏡 New home — on track
+🎓 Kids' education — needs a plan
+🌅 Retire at 65 — on track
+💬 Talk it through with an advisor — free, no obligation
+Choose your life goals
+Pick the moments and milestones you want to plan for. Choose as many as you like — you can prioritise later.
+iNot sure? Pick anything you're even considering. Seeing it on your timeline is the best way to decide if it's real.
+No goals selected yet
+← Back Next: place them on your timeline →
+Your timeline
+When do you want each goal to happen, and roughly what will it cost? Drag the goals along your timeline — don't worry about being exact.
+↔ Drag a goal left or right to change when it happens
+← Back Next: add your finances →
+Now, your finances
+To check whether your goals are affordable, we need a picture of your money today. The fastest way: let our document reader do the typing.
+📄✨
+Upload your documents
+Payslips, mortgage or pension statements — our intelligent document reader extracts the details in seconds. You just review.
+RECOMMENDED · POWERED BY DIGIPRO IDP
+⌨️
+Enter details myself
+Prefer to type? A short form covers income, savings, pension and mortgage. About 5 minutes.
+📥
+Drop your documents here or click to browse
+You can also just try it with sample documents.
+PDF · JPG · PNG — payslips, bank / mortgage / pension / investment statements
+Use sample documents
+🔍 Reading your documents…
+Initialising document reader…
+✨Extracted automatically. We read your documents and filled in the fields below — please check anything marked with a confidence score and correct if needed.
+Include my spouse / partner in the plan
+← Back See my results →
+← Back
+Your goals
+How much of each goal your future income and savings can cover.
+What you can do
+Practical ways to close the gaps — talk them through with an advisor.
+Your future, at a glance
+🛤️ Journey 📖 Life chapters 📊 Detail
+Try a what-if
+Small changes compound over decades. Slide, and watch your future change above — instantly.
+💶 Save a bit more each month
+Redirect some everyday spending into your plan and let it grow.
+€0 / month extra
+📈 Put sleeping savings to work
+Irish households hold around €160bn on deposit earning close to nothing. Moving a risk-appropriate slice into investments (modelled at 4% growth vs 0.5% on deposit) can transform a plan.
+Keep everything in cash
+Your financial foundations
+Good planning is built from the bottom up. Here's how your foundations look, from essentials to extras.
+Ready to make it happen?
+Your plan is a starting point, not a verdict. A LifeGoals advisor can refine the numbers, explore what-if scenarios, and help you put the right building blocks in place. Free, and there's never any obligation.
+📅 Book my advisor meeting Download my plan summary Adjust my goals
+×
+Book your LifeGoals meeting
+A 45-minute video or in-person conversation. Your advisor will already have your plan — no need to repeat yourself.
+Video call (or untick for in-branch)
+Confirm booking
+✅
+You're booked in
+We've sent a confirmation email with a secure link to your plan. Your advisor will review it before you meet.
+×
+Help & common questions
+Is this financial advice?
+No. LifeGoals gives you guidance and a projection based on the information you provide. Personal advice happens in your meeting with a qualified advisor.
+Do I have to buy anything?
+Never. The plan is free and there's no obligation at any point — even after meeting an advisor.
+Is my information safe?
+Your data is encrypted and used only to build your plan. Documents you upload are read automatically and are not shared without your consent.
+What if my numbers aren't exact?
+That's fine — reasonable estimates are enough to see the big picture. Your advisor can refine everything later.
+How are the projections calculated?
+Your figures are run through a professional cashflow-modelling engine (the same one advisors use), with standard assumptions for inflation, investment growth and income growth. Every projection is illustrative, not a guarantee.
+Prototype — LifeGoals 2.0 concept by DigiPro. Projections are illustrative only and do not constitute financial advice. Cashflow calculations: Voyant API (simulated in this prototype).
