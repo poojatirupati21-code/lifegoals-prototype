@@ -9,6 +9,9 @@
   --sea:#0F9D8F;--sea-d:#0B7A70;--sea-l:#D9F2EE;--sun:#F2B134;--sun-l:#FDF0D2;--acc-d:#7A5200;--sand:#F8F5EE;
   --sky:#4E9BD8;--sky-l:#E1EFFA;--storm:#5E548E;--storm-l:#E7E3F4;--coral:#E8674A;
   --plain1:#CDEBE7;--plain2:#EAF5F4;--mark1:#6BE3D3;--mark2:#0F9D8F;--mark3:#0B2545;--r:22px;
+  /* goal-status palette (Lifecast weather): bright colours are fills only; -t are text colours that pass 4.5:1 on white and on the -l tints */
+  --sunny:#F5B324;--sunny-t:#7A5200;--sunny-l:#FFF1D1;--showers:#4E9BD8;--showers-t:#1F5F92;--showers-l:#E1EFFA;--storm-t:#5E548E;
+  /* non-status tokens (data tags, confirmations, errors) */
   --ok:#2E9E6A;--ok-t:#1A7F4B;--ok-l:#E3F4EA;--dip:#F2B134;--dip-t:#8A5A00;--dip-l:#FDF0D2;--gap:#D9534F;--gap-t:#B42318;--gap-l:#FBE7E6;
   --fh:'Bricolage Grotesque','Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --fb:'Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
@@ -197,7 +200,7 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 .rep .chapgrid{grid-template-columns:1fr 1fr}
 .chap{border:1.5px solid var(--line);border-radius:20px;padding:14px;background:#fff;cursor:pointer;text-align:left;display:flex;gap:12px;align-items:flex-start;width:100%;font-size:inherit}
 .chap .cb{flex:1;min-width:0}
-.chap.ok{border-color:#BFE3CD;background:#F6FBF8}.chap.warn{border-color:#F3DDB5;background:#FDFAF2}.chap.bad{border-color:#EFC7C7;background:#FDF5F5}
+.chap.ok{border-color:#F7D98C;background:#FFFAEC}.chap.warn{border-color:#B5D6F0;background:#F2F8FD}.chap.bad{border-color:#C9C2E3;background:#F5F3FA}
 .chap.open{grid-column:1/-1}
 .chap .w{font-size:34px;line-height:1;flex-shrink:0;width:40px;text-align:center}.chap .tt{font-family:var(--fh);font-weight:800;font-size:16px}.chap .ag{font-size:11.5px;color:var(--muted);margin-bottom:6px}
 .chap .st{font-size:12.5px;line-height:1.45}.chap .ev{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;font-size:12.5px;display:grid;gap:3px}
@@ -317,7 +320,7 @@ const TYPES = {A:{name:'Achiever', e:'🎯', strap:'In control, goal-driven, dis
   B:{name:'Balancer', e:'⚖️', strap:'Value-seeking, vigilant, careful with risk.', str:['Careful with money','You weigh things up'], watch:'Playing so safe that cash quietly loses value to rising prices.'},
   E:{name:'Explorer', e:'🧭', strap:'Curious, open to new ideas, comfortable with risk.', str:['Open to new ideas','Comfortable with change'], watch:'Jumping in before your safety net is in place.'},
   C:{name:'Contented', e:'🛋️', strap:'Comfortable, steady, low-maintenance with money.', str:['Calm about money','Not easily rattled'], watch:'Putting off decisions, such as pension top-ups.'}};
-const WHY = ['Am I on track?', 'A big life change', 'Thinking about retirement', 'My adviser or employer sent me', 'Just curious'];
+const WHY = ['Am I on track?', 'A big life change', 'Thinking about retirement', 'My adviser or employer sent me', 'Just curious', 'Something else'];
 const DISC_FORMAL = 'This tool is designed to help you explore your preferences. It does not replace a formal suitability or risk assessment where financial advice is provided.';
 
 /* Goal tiles: DISC Q11 order, word for word */
@@ -412,7 +415,7 @@ const ADV_QS = ['Can I retire earlier?','Am I saving enough?','How do I protect 
 let S = null;
 function fresh(){
   return {scr:'D0', app:false, tab:'plan', planSeg:'main', planGo:null, planEdit:false, me:'home', exp:'home', entry:'direct',
-    why:[], di:0, ans:{}, about:{age:38, partner:null, deps:null}, goals:[], gid:1, retireAge:66,
+    why:[], whyNote:'', di:0, ans:{}, about:{age:38, partner:null, deps:null}, goals:[], gid:1, retireAge:66,
     save:{email:'', comms:false, done:false, asked:false}, tlOpen:{}, tlHl:null,
     acct:{name:'', email:'', mobile:'', c1:false, c2:false, ev:false, sv:false, pk:false},
     fin:{}, src:{}, conf:{}, look:{}, ack:{}, fsec:null, fmode:{}, upl:null, checked:false, from:null,
@@ -550,10 +553,10 @@ function project(wi){
   const pct = {}; goals.forEach(g => { const x = gf[g.id]; pct[g.id] = x.cost > 0 ? clamp(Math.round(x.cov / x.cost * 100), 0, 100) : 100; });
   return {rows, pct};
 }
-const band = p => p >= 95 ? 'ok' : p >= 70 ? 'dip' : 'gap';
-const BANDW = {ok:'On track', dip:'Nearly there', gap:'Needs a plan'};
+const band = p => p >= 95 ? 'sunny' : p >= 70 ? 'showers' : 'storm';
+const BANDW = {sunny:'On track', showers:'Needs a nudge', storm:'Needs attention'}, BANDE = {sunny:'☀️', showers:'🌦️', storm:'⛈️'};
 const isShort = r => r.short > Math.max(500, r.needs * 0.02);
-const rowCol = r => isShort(r) ? 'var(--gap)' : r.used > 1 ? 'var(--dip)' : 'var(--ok)';
+const rowCol = r => isShort(r) ? 'var(--storm)' : r.used > 1 ? 'var(--showers)' : 'var(--sunny)';
 function extraFor(g){ for (const m of [25,50,75,100,150,200,250,300,400,500,600,750,1000,1250,1500,2000]){ if (project({g:g.id, m, l:0}).pct[g.id] >= 95) return m; } return null; }
 function yearsTxt(g){ const n = g.age - S.about.age; return g.kind === 'retire' ? 'at ' + g.age : 'in ' + n + ' year' + (n === 1 ? '' : 's'); }
 function qualityCount(){ let n = 0; FSEC.forEach(s => s.f.forEach(k => { if (fieldVisible(k) && !FF[k].opt && (S.src[k] === 'est' || !S.src[k])) n++; })); return n; }
@@ -591,9 +594,10 @@ V.D0 = () => ({id:'D0', note:'Welcome. Value promise + trust line. No sign-up. E
   '<div class="qbody" style="display:flex;flex-direction:column;justify-content:center"><div class="medal" aria-hidden="true">🗺️</div><h2 tabindex="-1" style="font-size:34px">Your life. Your plan.</h2><p class="qsub" style="font-size:17px">See how your money can carry you towards the things you want, from today to later life.</p>' +
   '<div class="panel" style="font-size:14px;line-height:1.5"><b>Free · No obligation · Nothing saved or shared without your say</b><br><span class="small">We only use your answers to show your results. Nothing is saved unless you choose.</span> <button class="link" data-a="sheet" data-p="whyask">Why we ask</button></div></div>' +
   '<div class="qfoot" style="flex-direction:column;align-items:stretch;gap:8px"><button class="wbtn" data-a="go" data-p="D1">Start · about 2 min</button><p class="small" style="text-align:center;margin:2px 0 0">Guidance, not advice.</p></div>'});
-V.D1 = () => ({id:'D1', note:'Optional motivation chips (MASTER B5). Tags only.', kind:'quiz', html:
+V.D1 = () => ({id:'D1', note:'Optional motivation chips (MASTER B5). “Something else” opens an optional few-words field (max 60). Tags only. One skippable screen.', kind:'quiz', html:
   '<div class="qtop"><button class="qx" data-a="go" data-p="D0" aria-label="Back">‹</button><span style="flex:1"></span></div><div class="qbody"><div class="qeye">Before we start</div><h2 tabindex="-1">What brought you here?</h2><p class="qsub">Pick any that fit. Or skip.</p><div class="chips" role="group" aria-label="What brought you here">' +
-  WHY.map((w, k) => '<button class="chip' + (S.why.includes(k) ? ' sel' : '') + '" aria-pressed="' + S.why.includes(k) + '" data-a="why" data-p="' + k + '">' + esc(w) + '</button>').join('') + '</div></div>' +
+  WHY.map((w, k) => '<button class="chip' + (S.why.includes(k) ? ' sel' : '') + '" aria-pressed="' + S.why.includes(k) + '" data-a="why" data-p="' + k + '">' + esc(w) + '</button>').join('') + '</div>' +
+  (S.why.includes(5) ? '<div class="field" style="margin:14px 0 0"><label for="why-note">Tell us in a few words <span class="small" style="font-weight:600">Optional</span></label><input class="in" id="why-note" data-whynote="1" maxlength="60" autocomplete="off" placeholder="e.g. Planning a move abroad" value="' + esc(S.whyNote) + '"></div>' : '') + '</div>' +
   '<div class="qfoot"><button class="qback" data-a="dstart">Skip</button><button class="wbtn" data-a="dstart"' + (S.why.length ? '' : ' disabled') + '>Next</button></div>'});
 function chapBar(){ return '<div class="chaps" aria-hidden="true">' + [1,2,3,4,5].map(c => { const qs = DQ.filter(q => q.act === c), d = qs.filter(q => S.ans[q.id] != null).length; return '<i><b style="width:' + d / qs.length * 100 + '%"></b></i>'; }).join('') + '</div>'; }
 V.DQ = () => { const q = DQ[S.di], v = S.ans[q.id];
@@ -765,7 +769,7 @@ V.P4 = () => { const it = checkItems(), flag = it.filter(x => ['look','est','mis
 V.U1 = () => ({id:'U1', note:'Loader. Never shows a made-up result.', head:flowHead(4, 'Step 4 · Understand', 'Building your plan', '', ''), html:'<div style="padding:60px 0;text-align:center"><div class="spin" aria-hidden="true"></div><p class="sub" style="margin-top:18px" role="status">Running your numbers…</p><p class="small">If this takes a while, we\'ll let you know by email and SMS when it\'s ready.</p></div>'});
 /* ================= RESULTS ================= */
 function goalsBox(P){ return S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const p = P.pct[g.id], b = band(p);
-  return '<div class="gs"><span class="e" aria-hidden="true">' + g.e + '</span><div class="m"><div class="nm">' + esc(g.name) + ' <span>· ' + yearsTxt(g) + '</span></div><div class="bar" role="img" aria-label="' + p + '% covered"><i style="width:' + p + '%;background:var(--' + b + ')"></i></div></div><div class="p" style="color:var(--' + b + '-t)">' + p + '%<small>' + BANDW[b] + '</small></div></div>'; }).join(''); }
+  return '<div class="gs"><span class="e" aria-hidden="true">' + g.e + '</span><div class="m"><div class="nm">' + esc(g.name) + ' <span>· ' + yearsTxt(g) + '</span></div><div class="bar" role="img" aria-label="' + p + '% covered"><i style="width:' + p + '%;background:var(--' + b + ')"></i></div></div><div class="p" style="color:var(--' + b + '-t)">' + p + '%<small><span aria-hidden="true">' + BANDE[b] + '</span> ' + BANDW[b] + '</small></div></div>'; }).join(''); }
 function findings(P){
   const gs = S.goals.slice(), best = gs.slice().sort((a, b) => P.pct[b.id] - P.pct[a.id] || a.age - b.age)[0], worst = gs.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id] || a.age - b.age)[0];
   const sT = best.kind === 'retire' && P.pct[best.id] >= 95 ? 'Your pension and savings cover retiring at ' + best.age : best.name + ' is ' + P.pct[best.id] + '% covered';
@@ -786,34 +790,74 @@ function glanceHTML(P){ const v = S.view;
     (land ? '' : '<div class="rotnote"><svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="10" y="3" width="12" height="20" rx="2.5"/><path d="M15 19.5h2"/><path d="M5 22a11 11 0 0 0 17 7"/><path d="M22 25.5v3.8h-3.8"/></svg><span>Turn your phone sideways to see your road on a bigger screen</span></div>') +
     journeySVG(P, land ? Math.max(322, Math.min(780, innerWidth - 72)) : 322, land) + journeyNote(P);
   else if (v === 'chapters') body = '<p class="small">Your future as chapters of your life. ☀️ comfortable · 🌤️ some years use savings · 🌦️ often using savings · ⛈️ a gap to plan for. Tap a chapter to see its years.</p>' + chaptersHTML(P);
-  else body = '<p class="small">Each bar is one year of your life; the dashed line is your income.</p>' + chartSVG(P.rows, 322) + '<div class="legend"><span><i class="sw" style="background:var(--ok)"></i>Needs fully covered</span><span><i class="sw" style="background:var(--dip)"></i>Dipping into savings</span><span><i class="sw" style="background:var(--gap)"></i>Shortfall, not covered</span><span><i class="sw" style="background:var(--ink)"></i>▼ Retirement begins</span><span><i class="sw" style="background:none;border-top:2px dashed var(--ink);height:0;border-radius:0"></i>Your income each year</span></div>' + chartNote(P);
+  else body = '<p class="small">Each bar is one year of your life; the dashed line is your income.</p>' + chartSVG(P.rows, 322) + '<div class="legend"><span><i class="sw" style="background:var(--sunny)"></i>☀️ Gold: needs fully covered</span><span><i class="sw" style="background:var(--showers)"></i>🌦️ Blue: dipping into savings</span><span><i class="sw" style="background:var(--storm)"></i>⛈️ Purple: shortfall, not covered</span><span><i class="sw" style="background:var(--ink)"></i>▼ Retirement begins</span><span><i class="sw" style="background:none;border-top:2px dashed var(--ink);height:0;border-radius:0"></i>Your income each year</span></div>' + chartNote(P);
   return tabs + '<div role="tabpanel">' + body + '</div>'; }
-function journeyNote(P){ const bad = P.rows.find(isShort); return '<p class="pnote"><b>Reading your road:</b> green means your income covers life; amber means you\'re drawing on savings, which is what they\'re for. ' + (bad ? 'The road turns red around <b>age ' + bad.a + '</b>: money runs short there unless the plan changes.' : 'There\'s no red on your road: you don\'t run out of money before 90.') + '</p>'; }
-function chartNote(P){ const n = P.rows.filter(isShort).length; return '<p class="pnote"><b>In plain English:</b> ' + (n ? 'in ' + n + ' year' + (n > 1 ? 's' : '') + ' of your plan, your income and savings don\'t fully cover what you\'ll need (the red bars). These are the gaps to close, by saving more, changing timing, or rethinking a goal.' : 'every year of your plan is covered by your income and savings. No red bars. That\'s what "on track" looks like.') + '</p>'; }
+function journeyNote(P){ const bad = P.rows.find(isShort); return '<p class="pnote"><b>Reading your road:</b> ☀️ gold means your income covers life; 🌦️ blue means you\'re drawing on savings, which is what they\'re for. ' + (bad ? 'The road turns ⛈️ purple around <b>age ' + bad.a + '</b>: money runs short there unless the plan changes.' : 'There\'s no ⛈️ purple on your road: you don\'t run out of money before 90.') + ' Each milestone ring shows its goal\'s status the same way.' + '</p>'; }
+function chartNote(P){ const n = P.rows.filter(isShort).length; return '<p class="pnote"><b>In plain English:</b> ' + (n ? 'in ' + n + ' year' + (n > 1 ? 's' : '') + ' of your plan, your income and savings don\'t fully cover what you\'ll need (the ⛈️ purple bars). These are the gaps to close, by saving more, changing timing, or rethinking a goal.' : 'every year of your plan is covered by your income and savings. No ⛈️ purple bars. That\'s what "on track" looks like.') + '</p>'; }
+let _mcv = null;
+function textW(t, px){ // width of a bold label, measured with whatever font is rendering now
+  try { _mcv = _mcv || document.createElement('canvas').getContext('2d'); _mcv.font = '700 ' + px + 'px Figtree, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif'; return _mcv.measureText(t).width * 1.06 + 4; } catch (e) { return t.length * px * 0.62 + 4; } }
 function journeySVG(P, W, land){
-  // land = landscape phone: flatter road and tighter slots so the whole road fits the short screen
-  const rows = P.rows, n = rows.length, wide = W > 500, H = land ? 324 : wide ? 360 : 236, pad = 18, mid = land ? 162 : wide ? 184 : 118, amp = land ? 20 : wide ? 34 : 24;
+  // land = landscape phone: flatter road so the whole road fits the short screen
+  const rows = P.rows, n = rows.length, wide = W > 500, H = land ? 324 : wide ? 400 : 360, pad = 18, mid = land ? 162 : wide ? 196 : 176, amp = land ? 20 : wide ? 34 : 24;
   const X = i => pad + i / (n - 1) * (W - 2 * pad), Y = i => mid + amp * Math.sin(i / (n - 1) * Math.PI * 2.4) - i / (n - 1) * 8;
+  const Yx = x => { const f = clamp((x - pad) / (W - 2 * pad) * (n - 1), 0, n - 1), i = Math.floor(f), j = Math.min(n - 1, i + 1); return Y(i) + (Y(j) - Y(i)) * (f - i); };
   let base = '', road = '', ticks = '';
   for (let i = 0; i < n - 1; i++){ base += '<line x1="' + X(i) + '" y1="' + Y(i) + '" x2="' + X(i + 1) + '" y2="' + Y(i + 1) + '" stroke="#DCE4EC" stroke-width="' + (wide ? 16 : 13) + '" stroke-linecap="round"/>'; road += '<line x1="' + X(i) + '" y1="' + Y(i) + '" x2="' + X(i + 1) + '" y2="' + Y(i + 1) + '" stroke="' + rowCol(rows[i]) + '" stroke-width="' + (wide ? 9 : 7) + '" stroke-linecap="round"/>'; }
-  rows.forEach((r, i) => { if (r.a % 10 === 0) ticks += '<text x="' + X(i) + '" y="' + (H - 6) + '" font-size="10.5" fill="#51627A" text-anchor="middle">age ' + r.a + '</text>'; });
-  const a0 = rows[0].a, ri = rows.findIndex(r => r.rmark);
-  let marks = '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="6.5" fill="var(--ink)" stroke="#fff" stroke-width="2"/><text x="' + (X(0) - 6) + '" y="' + (Y(0) + 24) + '" font-size="11" font-weight="800" fill="var(--ink)">You, today</text>';
-  const fx = ri >= 0 ? X(ri) : null;
-  if (ri >= 0) marks += '<line x1="' + fx + '" y1="' + Y(ri) + '" x2="' + fx + '" y2="' + (Y(ri) - 44) + '" stroke="var(--ink)" stroke-width="2.5"/><path d="M' + fx + ' ' + (Y(ri) - 44) + ' l24 7 l-24 7 z" fill="#E4518A"/><text x="' + (fx + (fx > W - 90 ? -6 : 4)) + '" y="' + (Y(ri) - 50) + '" font-size="11" font-weight="800" fill="var(--ink)" text-anchor="' + (fx > W - 90 ? 'end' : 'start') + '">Retire ' + rows[ri].a + '</text>';
-  marks += '<text x="' + (X(n - 1) - 8) + '" y="' + (Y(n - 1) - 12) + '" font-size="18" aria-hidden="true">🌅</text>';
-  // milestones: slot-based placement so rings and labels never collide
-  const gs = S.goals.filter(g => g.kind !== 'retire').slice().sort((a, b) => a.age - b.age), gap = land ? 118 : wide ? 96 : 30;
-  const slots = land ? [-50, 52, -112, 114] : wide ? [-56, 58, -124, 124] : [-40, 42, -74, 74], last = slots.map(() => -1e9); last[1] = X(0) + (wide ? 40 : 34); let ms = '';
-  gs.forEach(g => { const i = clamp(g.age - a0, 0, n - 1), cx = X(i), cy = Y(i), p = P.pct[g.id], col = 'var(--' + band(p) + ')';
-    let s = slots.findIndex((d, k) => cx - last[k] >= gap && !(d < 0 && fx != null && Math.abs(cx - fx) < (wide ? 60 : 24) && Math.abs(d) < 60));
-    if (s < 0) s = last.indexOf(Math.min(...last));
-    last[s] = cx; const ly = clamp(cy + slots[s], 16, H - 34);
-    ms += '<g><line x1="' + cx + '" y1="' + cy + '" x2="' + cx + '" y2="' + ly + '" stroke="#B9C9D6" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="' + cx + '" cy="' + ly + '" r="' + (wide ? 18 : 13) + '" fill="#fff" stroke="' + col + '" stroke-width="3"/><text x="' + cx + '" y="' + (ly + (wide ? 6 : 4.5)) + '" font-size="' + (wide ? 16 : 12.5) + '" text-anchor="middle">' + g.e + '</text>' +
-      (wide ? '<text x="' + (Math.abs(slots[s]) > 100 ? cx + 23 : clamp(cx, 4 + Math.min(16, g.name.length) * 3.2, W - 4 - Math.min(16, g.name.length) * 3.2)) + '" y="' + (Math.abs(slots[s]) > 100 ? ly + 4 : ly + (slots[s] < 0 ? -25 : 34)) + '" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="' + (Math.abs(slots[s]) > 100 ? 'start' : 'middle') + '">' + esc(g.name.length > 16 ? g.name.slice(0, 15) + '…' : g.name) + '</text>' : '') + '<title>' + esc(g.name) + ': ' + p + '% covered</title></g>'; });
-  const desc = 'Road from age ' + a0 + ' to 90. ' + (rows.some(isShort) ? 'Some red shortfall years.' : 'No shortfall years.');
-  return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + desc + '"' + (land ? ' class="road-land"' : '') + ' style="display:block;margin-top:6px">' + base + road + ms + marks + ticks + '</svg>' +
-    (wide ? '' : '<div class="mlist">' + gs.map(g => { const p = P.pct[g.id]; return '<div><span class="sw" style="border-radius:6px;background:var(--' + band(p) + ')"></span><span aria-hidden="true">' + g.e + '</span> ' + esc(g.name) + ' <span class="small">· age ' + g.age + ' · <b style="color:var(--' + band(p) + '-t)">' + p + '%</b></span></div>'; }).join('') + '</div>');
+  const a0 = rows[0].a, ri = rows.findIndex(r => r.rmark), fx = ri >= 0 ? X(ri) : null;
+  // fixed items that milestones must keep clear of: "You, today", the retirement flag + label, the sunset
+  const busy = [], box = (l, t, r, b) => ({l, t, r, b});
+  let marks = '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="6.5" fill="var(--ink)" stroke="#fff" stroke-width="2"/>';
+  busy.push(box(X(0) - 9, Y(0) - 9, X(0) + 9, Y(0) + 9), Object.assign(box(X(0) - 3, Y(0), X(0) + 3, H), {col:1}));
+  if (ri >= 0){ const fr = fx > W - 90, fl = 'Retire ' + rows[ri].a, fw = textW(fl, 11);
+    marks += '<line x1="' + fx + '" y1="' + Y(ri) + '" x2="' + fx + '" y2="' + (Y(ri) - 44) + '" stroke="var(--ink)" stroke-width="2.5"/><path d="M' + fx + ' ' + (Y(ri) - 44) + ' l24 7 l-24 7 z" fill="#E4518A"/><text x="' + (fx + (fr ? -6 : 4)) + '" y="' + (Y(ri) - 50) + '" font-size="11" font-weight="800" fill="var(--ink)" text-anchor="' + (fr ? 'end' : 'start') + '">' + fl + '</text>';
+    busy.push(box(fr ? fx - 6 - fw : fx - 3, Y(ri) - 64, fr ? fx + 27 : Math.max(fx + 27, fx + 4 + fw), Y(ri) - 6)); }
+  const sx = X(n - 1) - 8, sy = Y(n - 1) - 12;
+  marks += '<text x="' + sx + '" y="' + sy + '" font-size="18" aria-hidden="true">🌅</text>'; busy.push(box(sx - 2, sy - 22, sx + 26, sy + 6));
+  // milestones: strictly alternate above / below the road in age order; each hangs on a dashed leader from its exact age point.
+  // If a neighbour on the same side is in the way, step out to the next tier and/or nudge sideways (leader angles back).
+  const gs = S.goals.filter(g => g.kind !== 'retire').slice().sort((a, b) => a.age - b.age || a.id - b.id);
+  const R = wide ? 18 : 13, LH = wide ? 15 : 0, gapV = 4, first = R + (wide ? 12 : 10), step = 2 * R + LH + gapV + (wide ? 2 : 4);
+  const top = 4, bottom = H - 20, hit = (a, c) => a.l < c.r && c.l < a.r && a.t < c.b && c.t < a.b;
+  const segHit = (x1, y1, x2, y2, b) => { let t0 = 0, t1 = 1; const dx = x2 - x1, dy = y2 - y1; // Liang-Barsky: does a leader cross a box?
+    for (const [p, q] of [[-dx, x1 - b.l], [dx, b.r - x1], [-dy, y1 - b.t], [dy, b.b - y1]]){ if (p === 0){ if (q < 0) return false; } else { const r = q / p; if (p < 0) t0 = Math.max(t0, r); else t1 = Math.min(t1, r); if (t0 > t1) return false; } } return true; };
+  const placed = [], rings = busy.slice(), leads = [];
+  gs.forEach((g, k) => { const i = clamp(g.age - a0, 0, n - 1), cx = X(i), cy = Y(i), up = k % 2 === 0;
+    const nm = g.name.length > 20 ? g.name.slice(0, 19) + '…' : g.name, lw = wide ? textW(nm, 11) : 0;
+    const cands = [], ns = wide ? 22 : 16, ringU = (2 * R + 4) / ns;
+    for (let t = 0; t < 6; t++) for (let s = -Math.ceil(W / ns); s <= Math.ceil(W / ns); s++) cands.push({t, dx:s * ns, c:t + Math.abs(s) / ringU + (s < 0 ? 0.35 : 0)});
+    cands.sort((a, b) => a.c - b.c || a.t - b.t);
+    let best = null, pass = 0;
+    const far = 4 * (2 * R + 4);
+    for (;;){ for (const c of cands){ const x = cx + c.dx; if (x - R < 2 || x + R > W - 2 || (pass < 2 && Math.abs(c.dx) > far)) continue;
+      let ext = cy; for (let xx = x - R - 4; xx <= x + R + 4; xx += 4){ const yy = Yx(xx); ext = up ? Math.min(ext, yy) : Math.max(ext, yy); }
+      const y = up ? ext - first - c.t * step : ext + first + c.t * step;
+      const lx = wide ? clamp(x, lw / 2 + 2, W - lw / 2 - 2) : x, ly = up ? y - R - 5 : y + R + 14;
+      const rb = box(x - R - 2, y - R - 2, x + R + 2, y + R + 2), lb = wide ? box(lx - lw / 2, up ? y - R - LH - 3 : y + R + 1, lx + lw / 2, up ? y - R - 1 : y + R + LH + 3) : null;
+      const bb = [rb].concat(lb ? [lb] : []);
+      if (bb.some(b => b.t < top || b.b > bottom)) continue;
+      if (bb.some(b => busy.some(o => hit(b, o)))) continue;
+      const sh = b => ({l:b.l + 3, t:b.t + 3, r:b.r - 3, b:b.b - 3}), ey = up ? y + R : y - R; // leaders must not cut through other rings or labels
+      if (pass === 0 && (rings.some(o => segHit(cx, cy, x, ey, sh(o))) || leads.some(L => bb.some(b => segHit(L[0], L[1], L[2], L[3], sh(b)))))) continue;
+      best = {x, y, lx, ly, bb, ey}; break; }
+    if (!best && pass < 2){ pass++; continue; } break; }
+    if (!best) best = {x:cx, y:up ? cy - first : cy + first, lx:cx, ly:up ? cy - first - R - 5 : cy + first + R + 14, bb:[]};
+    best.bb.forEach(b => { busy.push(b); rings.push(b); }); leads.push([cx, cy, best.x, best.ey == null ? best.y : best.ey]); placed.push({g, cx, cy, nm, ...best}); });
+  let lead = '', ms = '';
+  placed.forEach(m => { const p = P.pct[m.g.id], col = 'var(--' + band(p) + ')';
+    lead += '<line x1="' + m.cx.toFixed(1) + '" y1="' + m.cy.toFixed(1) + '" x2="' + m.x.toFixed(1) + '" y2="' + m.y.toFixed(1) + '" stroke="#9FB3C4" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="' + m.cx.toFixed(1) + '" cy="' + m.cy.toFixed(1) + '" r="3" fill="#fff" stroke="var(--ink)" stroke-width="1.5"/>';
+    ms += '<g><circle cx="' + m.x.toFixed(1) + '" cy="' + m.y.toFixed(1) + '" r="' + R + '" fill="#fff" stroke="' + col + '" stroke-width="3.5"/><text x="' + m.x.toFixed(1) + '" y="' + (m.y + (wide ? 6 : 4.5)).toFixed(1) + '" font-size="' + (wide ? 16 : 12.5) + '" text-anchor="middle">' + m.g.e + '</text>' +
+      (wide ? '<text x="' + m.lx.toFixed(1) + '" y="' + m.ly.toFixed(1) + '" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="middle">' + esc(m.nm) + '</text>' : '') + '<title>' + esc(m.g.name) + ', age ' + m.g.age + ': ' + p + '% covered, ' + BANDW[band(p)].toLowerCase() + '</title></g>'; });
+  // crop the canvas to what is drawn, so a quiet road stays compact and a busy one gets the height it needs
+  let y0 = Math.min(...rows.map((r, i) => Y(i))) - 12, y1 = Math.max(...rows.map((r, i) => Y(i))) + 12; busy.forEach(b => { if (!b.col){ y0 = Math.min(y0, b.t); y1 = Math.max(y1, b.b); } });
+  y0 = Math.floor(y0 - 4); y1 = Math.ceil(y1 + (wide ? 22 : 32));
+  // "You, today" sits on the age axis under the start of the road, where milestones never go
+  const tw = wide ? textW('You, today', 11) : textW('today', 11); ticks += '<line x1="' + X(0) + '" y1="' + (Y(0) + 9) + '" x2="' + X(0) + '" y2="' + (y1 - (wide ? 19 : 30)) + '" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="1 3" stroke-linecap="round"/>' +
+    (wide ? '<text x="' + (X(0) - 8) + '" y="' + (y1 - 6) + '" font-size="11" font-weight="800" fill="var(--ink)">You, today</text>' : '<text x="' + (X(0) - 8) + '" y="' + (y1 - 18) + '" font-size="11" font-weight="800" fill="var(--ink)">You,<tspan x="' + (X(0) - 8) + '" dy="12">today</tspan></text>');
+  rows.forEach((r, i) => { if (r.a % 10 === 0 && X(i) - textW('age ' + r.a, 10.5) / 2 > X(0) - 8 + tw + 4) ticks += '<text x="' + X(i) + '" y="' + (y1 - 6) + '" font-size="10.5" fill="#51627A" text-anchor="middle">age ' + r.a + '</text>'; });
+  const desc = 'Road from age ' + a0 + ' to 90. ' + (rows.some(isShort) ? 'Some purple shortfall years.' : 'No shortfall years.');
+  return '<svg viewBox="0 ' + y0 + ' ' + W + ' ' + (y1 - y0) + '" width="100%" role="img" aria-label="' + desc + '"' + (land ? ' class="road-land"' : '') + ' style="display:block;margin-top:6px">' + base + road + lead + marks + ms + ticks + '</svg>' +
+    (wide ? '' : '<div class="mlist">' + gs.map(g => { const p = P.pct[g.id]; return '<div><span class="sw" style="border-radius:6px;background:var(--' + band(p) + ')"></span><span aria-hidden="true">' + g.e + '</span> ' + esc(g.name) + ' <span class="small">· age ' + g.age + ' · <b style="color:var(--' + band(p) + '-t)">' + p + '%</b> <span aria-hidden="true">' + BANDE[band(p)] + '</span><span class="sr"> ' + BANDW[band(p)] + '</span></span></div>'; }).join('') + '</div>');
 }
 function chapters(P){ const ch = []; P.rows.forEach(r => { let d = Math.floor(r.a / 10) * 10; if (d === 90 && ch.length) d = 80; let c = ch[ch.length - 1]; if (!c || c.dec !== d){ c = {dec:d, from:r.a, to:r.a, rows:[]}; ch.push(c); } c.to = r.a; c.rows.push(r); }); return ch; }
 function chaptersHTML(P){ const a0 = P.rows[0].a;
@@ -824,7 +868,7 @@ function chaptersHTML(P){ const a0 = P.rows[0].a;
     S.goals.filter(g => g.kind !== 'retire' && g.age >= c.from && g.age <= c.to).forEach(g => ev.push(g.e + ' ' + esc(g.name) + ' <b style="color:var(--' + band(P.pct[g.id]) + '-t)">' + P.pct[g.id] + '%</b>'));
     const open = S.chapOpen === ci;
     return '<button class="chap ' + cls + (open ? ' open' : '') + '" data-a="chap" data-p="' + ci + '" aria-expanded="' + open + '"><div class="w" aria-hidden="true">' + wx + '</div><div class="cb"><div class="tt">Your ' + c.dec + 's</div><div class="ag">age ' + c.from + '–' + c.to + (allRet ? ' · retired' : '') + '</div><div class="st">' + story + '</div>' + (ev.length ? '<div class="ev">' + ev.map(e => '<div>' + e + '</div>').join('') + '</div>' : '') +
-      '<div class="mo">' + (open ? '▲ Hide the years' : '▼ See it year by year') + '</div>' + (open ? '<div class="ev">' + c.rows.map(r => { const m = isShort(r), d = r.used > 1 && !m; return '<div class="cy"><b style="width:26px">' + r.a + '</b><span class="d" style="background:' + (m ? 'var(--gap)' : d ? 'var(--dip)' : 'var(--ok)') + '"></span>' + (m ? '<b>Gap to plan for</b>: short ' + eur(r.short) : d ? 'Using savings' : 'Comfortable') + '</div>'; }).join('') + '</div>' : '') + '</div></button>'; }).join('') + '</div>'; }
+      '<div class="mo">' + (open ? '▲ Hide the years' : '▼ See it year by year') + '</div>' + (open ? '<div class="ev">' + c.rows.map(r => { const m = isShort(r), d = r.used > 1 && !m; return '<div class="cy"><b style="width:26px">' + r.a + '</b><span class="d" style="background:' + (m ? 'var(--storm)' : d ? 'var(--showers)' : 'var(--sunny)') + '"></span>' + (m ? '<b>Gap to plan for</b>: short ' + eur(r.short) : d ? 'Using savings' : 'Comfortable') + '</div>'; }).join('') + '</div>' : '') + '</div></button>'; }).join('') + '</div>'; }
 function chartSVG(rows, W){
   const H = W > 500 ? 240 : 200, top = 30, bot = 22, n = rows.length, bw = (W - 16) / n, maxV = Math.max(...rows.map(r => Math.max(r.inflow, r.needs)), 1), sy = v => H - bot - v / maxV * (H - top - bot);
   let bars = '', mk = '', line = '';
@@ -846,7 +890,7 @@ function resultsHTML(){
     roughNote() + planProfileBanner() +
     '<div class="card"><h3 class="h">Your goals</h3><p class="small" style="margin:0 0 6px">How much of each goal your future income and savings can cover.</p><div id="r-goals">' + goalsBox(P) + '</div></div>' +
     '<div class="card" id="r-found"><h3 class="h">What we found</h3><div class="found" style="margin-top:8px">' +
-      [['💪','Your main strength',F.sT,'var(--ok-t)','str'],['🔎','Your main gap',F.gT,'var(--gap-t)','gap'],['🎯','Your biggest decision',F.dT,'var(--acc-d)','dec']].map(c => '<div class="fcard"><div class="k" style="color:' + c[3] + '">' + c[0] + ' ' + c[1] + '</div><b>' + esc(c[2]) + '</b><button class="link" style="font-size:12.5px;padding:2px 0" data-a="sheet" data-p="explain|' + c[4] + '">Explain this</button></div>').join('') + '</div>' +
+      [['💪','Your main strength',F.sT,'var(--sunny-t)','str'],['🔎','Your main gap',F.gT,'var(--storm-t)','gap'],['🎯','Your biggest decision',F.dT,'var(--acc-d)','dec']].map(c => '<div class="fcard"><div class="k" style="color:' + c[3] + '">' + c[0] + ' ' + c[1] + '</div><b>' + esc(c[2]) + '</b><button class="link" style="font-size:12.5px;padding:2px 0" data-a="sheet" data-p="explain|' + c[4] + '">Explain this</button></div>').join('') + '</div>' +
       (S.understood ? '<p class="pill ok" style="margin:12px 0 8px">✓ Thanks, noted</p><div class="small" style="font-weight:800;margin-bottom:6px">What would you like to ask an adviser? (optional)</div><div class="chips">' + ADV_QS.map(q => '<button class="chip sm' + (S.advQs.includes(q) ? ' sel' : '') + '" aria-pressed="' + S.advQs.includes(q) + '" data-a="advq" data-p="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div>' : '<button class="btn" style="margin-top:12px" data-a="understood">That makes sense</button>') + '</div>' +
     wiCard() +
     '<div class="card" id="r-glancec"><h3 class="h">Your future, at a glance</h3><div id="r-glance">' + glanceHTML(P) + '</div></div>' +
@@ -1045,7 +1089,7 @@ function sheetHTML(sid){ const s = S.sheet; if (!s) return ''; let h = '';
 function openReport(){
   const P0 = project(), wiP = S.pref || (S.wi.m || S.wi.l ? S.wi : null), P = wiP ? project(wiP) : P0, F = findings(P0), um = umCount() === 13, rp = um ? riskRead(true) : null, per = personality();
   const flags = checkItems().filter(x => ['look','est','miss'].includes(x.st));
-  const rows = P0.rows.map(r => '<tr><td>' + r.a + ' (' + r.yr + ')</td><td>' + eur(r.inflow) + '</td><td>' + eur(r.needs) + '</td><td>' + eur(r.used) + '</td><td style="color:' + (isShort(r) ? 'var(--gap-t)' : 'inherit') + '">' + (r.short > 1 ? eur(r.short) : '—') + '</td><td>' + eur(r.liquid) + '</td></tr>').join('');
+  const rows = P0.rows.map(r => '<tr><td>' + r.a + ' (' + r.yr + ')</td><td>' + eur(r.inflow) + '</td><td>' + eur(r.needs) + '</td><td>' + eur(r.used) + '</td><td style="color:' + (isShort(r) ? 'var(--storm-t)' : 'inherit') + '">' + (r.short > 1 ? eur(r.short) : '—') + '</td><td>' + eur(r.liquid) + '</td></tr>').join('');
   const detail = S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const p = P0.pct[g.id], ex = p < 95 ? extraFor(g) : 0;
     return '<p><b>' + g.e + ' ' + esc(g.name) + '</b> · ' + (g.kind === 'retire' ? 'from age ' + g.age + ', ' + eur(g.amount) + ' a year' : 'age ' + g.age + ' (' + (YEAR0 + g.age - S.about.age) + '), ' + eur(g.amount)) + ' in today\'s money · ' + g.prio + '.<br>What is on track: <b>' + p + '%</b> covered (' + BANDW[band(p)] + '). ' + (p >= 95 ? 'Your income and savings cover it.' : ex ? 'What would close the gap: saving about <b>' + eur(ex) + ' a month</b> towards it' + (g.kind === 'retire' ? ' into your pension' : '') + ', or moving it later.' : 'What would close the gap: moving it later, a smaller amount, or a bigger change to saving.') + '</p>'; }).join('');
   const h = '<div class="rep-bar"><b>Your plan</b><button data-r="print" style="background:var(--sun);color:var(--ink)">🖨 Print / save as PDF</button><button data-r="close" style="background:#fff;color:var(--ink)">Close</button></div><article class="rep">' +
@@ -1107,7 +1151,7 @@ function openSec(i){ S.fsec = +i; S.upl = null; if (S.app){ if (S.tab !== 'exp')
 const ACT = {
   go:p => go(p), sheet:p => { S.sheet = p; render(); }, closesheet:() => { S.sheet = null; render(); }, noop:() => {}, toast:p => toast(p),
   invite:() => { const v = (document.getElementById('inv') || {}).value; S.entry = 'adviser invite' + (v ? ' ' + v : ''); S.sheet = null; render(); toast('Invite linked'); },
-  why:p => { const k = +p, i = S.why.indexOf(k); if (i >= 0) S.why.splice(i, 1); else S.why.push(k); focusKey = '[data-a="why"][data-p="' + k + '"]'; render(); },
+  why:p => { const k = +p, i = S.why.indexOf(k); if (i >= 0) { S.why.splice(i, 1); if (k === 5) S.whyNote = ''; } else S.why.push(k); focusKey = '[data-a="why"][data-p="' + k + '"]'; render(); },
   dstart:() => { S.di = 0; go('D2'); },
   dpick:p => { const q = DQ[S.di]; S.ans[q.id] = +p; render(); const i = S.di; setTimeout(() => { if (S.scr === 'D' + (i + 2) && DQ[S.di] === q) dnext(); }, RM() ? 0 : 280); },
   dnext:() => dnext(), dgoto:p => { S.di = +p; go('D' + (S.di + 2)); }, dprev:() => { if (S.scr === 'D9'){ S.di = 6; go('D8'); return; } if (S.di <= 0) go('D1'); else { S.di--; go('D' + (S.di + 2)); } },
@@ -1227,6 +1271,7 @@ function bind(){
   ph.querySelectorAll('[data-agree]').forEach(i => i.addEventListener('change', () => { S.book.agree = i.checked; shareBtn(); }));
   ph.querySelectorAll('input[data-wi]').forEach(r => r.addEventListener('input', () => { if (S.wi.g == null) S.wi.g = defaultWiGoal(); S.wi[r.dataset.wi] = +r.value; r.setAttribute('aria-valuetext', eur(+r.value)); liveUpdate(); }));
   if (ph.querySelector('#wi-out')) { if (S.wi.g == null) S.wi.g = defaultWiGoal(); liveUpdate(); const c = ph.querySelector('[data-a="wig"][data-p="' + S.wi.g + '"]'); if (c) { c.classList.add('sel'); c.setAttribute('aria-pressed', 'true'); } }
+  ph.querySelectorAll('[data-whynote]').forEach(i => i.addEventListener('input', () => { S.whyNote = i.value.slice(0, 60); }));
   ph.querySelectorAll('[data-partner]').forEach(i => i.addEventListener('input', () => { S.partner[i.dataset.partner] = i.value.slice(0, 60); }));
   const ai = ph.querySelector('#ask-in'); if (ai) ai.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ACT.askgo(); } });
   if (ph.querySelector('#tl')) { layoutTL(); bindTL(); }
