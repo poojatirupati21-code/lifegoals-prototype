@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LifeGoals Discover</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%}
+body{font-family:'Plus Jakarta Sans',system-ui,'Segoe UI',sans-serif;color:#fff;background:radial-gradient(120% 80% at 85% 0%,#4B1E74,#2A1452 45%,#160933);min-height:100vh}
+html{background:#160933}
+header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;max-width:760px;margin:0 auto}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px}.logo i{width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,#7B2FF7,#FF3DB4);display:inline-flex;align-items:center;justify-content:center;font-style:normal}
+.logo small{font-weight:500;font-size:12px;opacity:.7}
+main{max-width:760px;margin:0 auto;padding:6px 20px 40px}
+.bar{display:flex;gap:6px;margin:4px 0 18px}.bar i{flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden;position:relative}.bar i b{position:absolute;inset:0;width:0;background:#5EEAD4;transition:width .3s}
+.eye{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#5EEAD4}
+h1{font-size:clamp(26px,5vw,38px);line-height:1.12;margin:8px 0 8px;letter-spacing:-.01em;text-wrap:balance}
+.sub{color:#D9D3F0;font-size:15px;margin:0 0 20px;line-height:1.5}
+.grid{display:grid;gap:12px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(max-width:520px){.grid.two{grid-template-columns:1fr}}
+.card{position:relative;border:0;border-radius:20px;padding:16px 18px;min-height:78px;color:#fff;text-align:left;font:inherit;font-size:16px;font-weight:700;line-height:1.35;cursor:pointer;display:flex;align-items:center;gap:14px;box-shadow:0 8px 20px rgba(0,0,0,.22);transition:transform .15s,outline-color .15s;outline:3px solid transparent;outline-offset:2px}
+.grid.two .card{min-height:120px;justify-content:space-between}
+.card:hover{transform:translateY(-2px)}.card:focus-visible{outline-color:#fff}
+.card.sel{outline-color:#5EEAD4}
+.card .tag{display:inline-block;margin-top:8px;font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(0,0,0,.22);padding:4px 8px;border-radius:8px}
+.card .em{font-size:34px;flex-shrink:0;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25))}
+.grid.two .card{flex-direction:row-reverse}
+.card .tick{position:absolute;top:8px;right:10px;width:26px;height:26px;border-radius:13px;background:#fff;color:#2A1452;font-size:14px;display:none;align-items:center;justify-content:center;font-weight:800}
+.card.sel .tick{display:flex}
+.g0{background:linear-gradient(135deg,#7C3AED,#A855F7)}.g1{background:linear-gradient(135deg,#C2410C,#E0569B)}.g2{background:linear-gradient(135deg,#1D4ED8,#3B82F6)}.g3{background:linear-gradient(135deg,#B45309,#D97706)}
+.g4{background:linear-gradient(135deg,#047857,#10B981)}.g5{background:linear-gradient(135deg,#BE185D,#7C3AED)}.g6{background:linear-gradient(135deg,#0E7490,#2563EB)}.g7{background:linear-gradient(135deg,#0F766E,#14B8A6)}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:1.5px solid rgba(255,255,255,.35);background:rgba(255,255,255,.06);color:#fff;border-radius:24px;min-height:48px;padding:0 16px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.chip.sel{background:#5EEAD4;color:#160933;border-color:#5EEAD4}
+.panel{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:18px;margin-bottom:16px}
+.big{font-size:clamp(28px,8vw,44px);font-weight:800;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:#5EEAD4;height:32px}
+.step{display:flex;align-items:center;gap:18px;justify-content:center}.step button{width:56px;height:56px;border-radius:28px;border:0;background:#fff;color:#2A1452;font-size:26px;font-weight:800;cursor:pointer}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:22px;gap:12px}
+.ghost{background:none;border:0;color:#D9D3F0;font:inherit;font-weight:600;cursor:pointer;min-height:44px}
+.go{background:#fff;color:#2A1452;border:0;border-radius:28px;min-height:52px;padding:0 26px;font:inherit;font-weight:800;font-size:16px;cursor:pointer}
+.go[disabled]{opacity:.4;cursor:default}
+.lbl{display:flex;justify-content:space-between;font-weight:700;margin-bottom:2px}.lbl output{color:#5EEAD4}
+.left{display:flex;height:22px;border-radius:11px;overflow:hidden;margin:10px 0 6px;background:rgba(255,255,255,.12)}
+.left span{display:block;height:100%}
+.reveal{background:rgba(94,234,212,.14);border:1px solid rgba(94,234,212,.4);border-radius:16px;padding:14px 16px;margin-top:16px;line-height:1.5}
+.type{font-size:clamp(40px,9vw,64px);font-weight:800;line-height:1;background:linear-gradient(90deg,#5EEAD4,#C4B5FD,#F9A8D4);-webkit-background-clip:text;background-clip:text;color:transparent;margin:6px 0}
+.bars{display:grid;gap:8px;margin:14px 0}.b{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center;font-weight:700;font-size:14px}.b .t{height:10px;border-radius:5px;background:rgba(255,255,255,.14);overflow:hidden}.b .t i{display:block;height:100%;background:linear-gradient(90deg,#5EEAD4,#C4B5FD)}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#CFC7EA;font-weight:700}
+.v{font-size:20px;font-weight:800;margin-top:4px}
+.note{font-size:12.5px;color:#CFC7EA;line-height:1.5;margin-top:18px}
+.actintro{text-align:left;padding-top:20px}.actintro .num{font-size:64px;font-weight:800;opacity:.25;line-height:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+<header><div class="logo"><i>◔</i>LifeGoals <small>by DigiPro.AI</small></div><span class="eye" id="time"></span></header>
+<main id="app"></main>
+<script>
+const DATA = {"ACTS": [{"id": 1, "name": "Your money story", "blurb": "Where your money habits come from.", "mins": 1, "em": "📖", "what": "Money mindset"}, {"id": 2, "name": "How you decide", "blurb": "The instincts behind your money moves.", "mins": 1, "em": "🧠", "what": "Behavioural check"}, {"id": 3, "name": "What you can invest", "blurb": "What your money can comfortably do.", "mins": 1, "em": "💶", "what": "Capacity to invest"}, {"id": 4, "name": "Weathering the storms", "blurb": "How you ride the ups and downs.", "mins": 1, "em": "🌦️", "what": "Ability to take risk + emotions"}, {"id": 5, "name": "Your next chapter", "blurb": "What you're building towards.", "mins": 1, "em": "🌅", "what": "Future plans + feelings"}], "Q": [{"id": "1", "act": 1, "eye": "Chapter 1 · Your money story", "q": "Growing up, money in your house was…", "sub": "Our first money lessons stay with us.", "type": "cards", "grid": true, "o": [{"e": "🧮", "t": "Planned to the cent. Every euro had a job.", "tag": "The Planner", "w": {"A": 2}}, {"e": "🫙", "t": "Saved for a rainy day. Nothing went to waste.", "tag": "The Saver", "w": {"B": 2}}, {"e": "🎉", "t": "Here today, spent today. Life was for living.", "tag": "The Spender", "w": {"E": 1, "C": 1}}, {"e": "🤫", "t": "Rarely talked about. Money wasn't the point.", "tag": "The Money Monk", "w": {"C": 2}}], "measures": "Money scripts (origin of money beliefs)", "src": "New. Money-script style (Planner / Saver / Spender / Money Monk)", "feeds": ""}, {"id": "2", "act": 1, "eye": "Chapter 1 · Your money story", "q": "Which one would your friends say is you?", "sub": "", "type": "cards", "grid": true, "o": [{"e": "📊", "t": "Has a spreadsheet for everything, even holidays", "tag": "Goal-setter", "w": {"A": 2}}, {"e": "🔍", "t": "Checks the balance before every tap", "tag": "Money Vigilant", "w": {"B": 2}}, {"e": "💡", "t": "First to try the new app, fund or side hustle", "tag": "The Opportunist", "w": {"E": 2}}, {"e": "🧘", "t": "Money? Not really their thing", "tag": "The Money Monk", "w": {"C": 2}}], "measures": "Money mindset (self-image)", "src": "New; replaces Excel Q1 and HTM round 1 (same purpose)", "feeds": ""}, {"id": "3", "act": 1, "eye": "Chapter 1 · Your money story", "q": "€5,000 lands in your account out of nowhere. What happens next?", "sub": "Be honest. Nobody's watching.", "type": "cards", "grid": true, "o": [{"e": "🎯", "t": "Straight into one of my goals", "tag": "Goal-setter", "w": {"A": 2}}, {"e": "🏦", "t": "Savings, or I clear a debt", "tag": "The Saver", "w": {"B": 2}}, {"e": "🚀", "t": "Into that investment I've been eyeing", "tag": "Risk-taker", "w": {"E": 2}}, {"e": "🛍️", "t": "A treat. The rest just sits there", "tag": "The Enjoyer", "w": {"C": 2}}], "measures": "Money mindset (actual behaviour)", "src": "New (scenario)", "feeds": ""}, {"id": "4", "act": 2, "eye": "Chapter 2 · How you decide", "q": "A friend says an investment doubled in a month. You…", "sub": "", "type": "cards", "o": [{"e": "🏃", "t": "Get in fast before I miss out", "tag": "Herd behaviour · FOMO", "trait": "Herd behaviour", "w": {"E": 1}}, {"e": "🔎", "t": "Look into it properly first", "tag": "Due diligence", "trait": "Research-led", "w": {"A": 1}}, {"e": "🧑‍💼", "t": "Ask someone I trust, or an adviser", "tag": "Advice-seeker", "trait": "Advice-seeker", "w": {"B": 1}}, {"e": "🙅", "t": "Pass. Sounds too good to be true", "tag": "Loss aversion", "trait": "Loss aversion", "w": {"B": 1, "C": 1}}], "measures": "Behavioural bias: herd behaviour / FOMO vs due diligence", "src": "New (behavioural finance)", "feeds": ""}, {"id": "5", "act": 2, "eye": "Chapter 2 · How you decide", "q": "Your pension or savings have sat in the same place for years. Why?", "sub": "Pick the closest.", "type": "cards", "o": [{"e": "📅", "t": "They haven't. I review them every year", "tag": "Active review", "trait": "Disciplined reviewer", "w": {"A": 1}}, {"e": "👌", "t": "It seems fine, so why change it?", "tag": "Status quo bias", "trait": "Status quo bias", "w": {"C": 1}}, {"e": "🌀", "t": "It feels complicated, so I leave it", "tag": "Decision paralysis", "trait": "Decision paralysis", "w": {"C": 1}}, {"e": "🔒", "t": "Moving it feels risky", "tag": "Loss aversion", "trait": "Loss aversion", "w": {"B": 1}}], "measures": "Behavioural bias: inertia / status quo bias", "src": "New (behavioural finance)", "feeds": ""}, {"id": "6", "act": 3, "eye": "Chapter 3 · What you can invest", "q": "How much could you put aside each month without feeling the pinch?", "sub": "", "type": "cards", "o": [{"e": "🪙", "t": "Under €100", "s": 1}, {"e": "💶", "t": "€100 to €300", "s": 2}, {"e": "💰", "t": "€300 to €750", "s": 3}, {"e": "🏦", "t": "Over €750", "s": 4}, {"e": "🎢", "t": "It changes month to month", "s": 2}], "measures": "Investment capacity (disposable surplus)", "src": "Your Excel Q8 (+ irregular income option)", "feeds": ""}, {"id": "7", "act": 3, "eye": "Chapter 3 · What you can invest", "q": "A €1,000 surprise bill lands tomorrow. You'd…", "sub": "", "type": "cards", "o": [{"e": "✅", "t": "Pay it. No problem", "tag": "Strong liquidity buffer", "s": 4}, {"e": "🐷", "t": "Dip into savings meant for something else", "tag": "Thin buffer", "s": 2}, {"e": "💳", "t": "Put it on a card, or borrow", "tag": "No emergency fund", "s": 1}, {"e": "😬", "t": "Honestly, I'm not sure how", "tag": "Needs a safety net", "s": 1}], "measures": "Capacity for loss: emergency buffer / liquidity", "src": "Your Excel Q9 (made concrete)", "feeds": ""}, {"id": "8", "act": 4, "eye": "Chapter 4 · Weathering the storms", "q": "Pick the forecast you'd choose for your long-term money.", "sub": "Sunnier skies grow slowly. Stormier ones can grow more, with bigger swings.", "type": "ride", "o": [{"e": "☀️", "t": "Calm and steady, all year", "tag": "Capital preservation", "s": 1, "path": "M0 40 L140 28"}, {"e": "🌤️", "t": "Mostly sunny, the odd shower", "tag": "Cautious", "s": 2, "path": "M0 42 L20 36 L40 40 L60 30 L80 34 L100 26 L120 28 L140 20"}, {"e": "🌦️", "t": "Changeable, with bright spells", "tag": "Balanced growth", "s": 3, "path": "M0 44 L20 26 L40 44 L60 18 L80 36 L100 12 L120 28 L140 8"}, {"e": "⛈️", "t": "Stormy at times, but it can be spectacular", "tag": "Aggressive growth", "s": 4, "path": "M0 46 L20 20 L40 48 L60 10 L80 42 L100 4 L120 30 L140 2"}], "measures": "Risk tolerance (willingness)", "src": "Your Excel Q3 + Q4 merged; weather ties to HTM Life Chapters", "feeds": ""}, {"id": "9", "act": 4, "eye": "Chapter 4 · Weathering the storms", "q": "You invested €10,000. A month later it's worth €8,500. How do you feel, and what do you do?", "sub": "", "type": "scenario", "from": 10000, "to": 8500, "o": [{"e": "😱", "t": "Panicked. I'd sell before it drops more", "tag": "Panic selling · loss aversion", "s": 1, "trait": "Loss aversion"}, {"e": "😬", "t": "Uneasy. I'd wait until it's back to €10,000, then get out", "tag": "Anchoring", "s": 2, "trait": "Anchoring"}, {"e": "😌", "t": "Calm. I'd stick to the plan", "tag": "Long-term discipline", "s": 3, "trait": "Disciplined investor"}, {"e": "🛒", "t": "Excited. It's on sale, so I'd buy more", "tag": "Buying the dip", "s": 4, "trait": "Contrarian"}], "measures": "Emotional composure in volatility + behavioural response", "src": "Your Excel Q5/Q6/Q7 combined into one euro scenario", "feeds": ""}, {"id": "10", "act": 4, "eye": "Chapter 4 · Weathering the storms", "q": "How long could this money be left alone before you need it?", "sub": "", "type": "cards", "o": [{"e": "⏱️", "t": "Less than 2 years", "tag": "Short horizon", "s": 1}, {"e": "📆", "t": "2 to 5 years", "tag": "Medium horizon", "s": 2}, {"e": "🗓️", "t": "5 to 10 years", "tag": "Long horizon", "s": 3}, {"e": "🌳", "t": "10 years or more", "tag": "Very long horizon", "s": 4}], "measures": "Risk capacity (investment horizon)", "src": "Your Excel Q10", "feeds": ""}, {"id": "11", "act": 5, "eye": "Chapter 5 · Your next chapter", "q": "What's in your next chapter?", "sub": "Pick up to 3. You'll place them on your timeline next.", "type": "multi", "max": 3, "o": [{"e": "🏡", "t": "Buy or move home"}, {"e": "🌅", "t": "Retire comfortably"}, {"e": "👶", "t": "Start or grow a family"}, {"e": "🎓", "t": "Kids' education"}, {"e": "✈️", "t": "Travel"}, {"e": "💼", "t": "Start a business"}, {"e": "🏦", "t": "Be mortgage-free"}, {"e": "🪂", "t": "Build a safety net"}, {"e": "📈", "t": "Grow my wealth"}, {"e": "🔑", "t": "Help family"}, {"e": "🎁", "t": "Leave a legacy"}, {"e": "⭐", "t": "Something else"}], "measures": "Future plans (life goals)", "src": "HTM goal grid (condensed) → HTM timeline", "feeds": ""}, {"id": "12", "act": 5, "eye": "Chapter 5 · Your next chapter", "q": "Thinking about the years ahead, how do you feel?", "sub": "Every answer is completely normal.", "type": "cards", "o": [{"e": "😟", "t": "Worried", "tag": "Financial anxiety", "s": 1}, {"e": "🤞", "t": "Hopeful, but not sure", "tag": "Uncertain", "s": 2}, {"e": "😌", "t": "Calm and in control", "tag": "Confident", "s": 4}, {"e": "🙈", "t": "I try not to think about it", "tag": "Money avoidance", "s": 1}], "measures": "Financial wellbeing / emotions", "src": "Your Excel Q2", "feeds": ""}], "TYPES": {"A": {"name": "Achiever", "e": "🎯", "strap": "In control, goal-driven, disciplined with money."}, "B": {"name": "Balancer", "e": "⚖️", "strap": "Value-seeking, vigilant, careful with risk."}, "E": {"name": "Explorer", "e": "🧭", "strap": "Curious, open to new ideas, comfortable with risk."}, "C": {"name": "Contented", "e": "🛋️", "strap": "Comfortable, steady, low-maintenance with money."}}};
+const {ACTS, Q, TYPES} = DATA;
+const S = {i:-1, act:0, ans:{}, showActIntro:true};
+const G = ['g0','g2','g4','g1','g3','g6','g5','g7'];
+const app = document.getElementById('app');
+const euro = n => '€' + Math.round(n).toLocaleString('en-IE');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function barHTML(){ return '<div class="bar">' + ACTS.map(a => { const qs = Q.filter(q => q.act === a.id), done = qs.filter(q => S.ans[q.id] != null).length; return '<i><b style="width:' + (done / qs.length * 100) + '%"></b></i>'; }).join('') + '</div>'; }
+function start(){ S.i = 0; S.showActIntro = true; render(); }
+function cur(){ return Q[S.i]; }
+function render(){
+  document.getElementById('time').textContent = S.i >= 0 && S.i < Q.length ? 'About ' + Math.max(1, Math.round((Q.length - S.i) * 0.33)) + ' min left' : '';
+  if (S.i < 0) { app.innerHTML = '<div class="actintro"><div class="eye">Discover you</div><h1>Every life is a story. Let’s read yours.</h1><p class="sub">12 quick questions in 5 short chapters. About 4 minutes, all taps. No right or wrong answers.</p>' +
+      '<div class="grid">' + ACTS.map((a, k) => '<div class="card ' + G[k] + '" style="cursor:default"><span class="em">' + a.em + '</span><span>Chapter ' + a.id + ' · ' + a.name + '<br><span style="font-weight:500;font-size:14px;opacity:.9">' + a.blurb + '</span></span></div>').join('') + '</div><div class="foot"><span></span><button class="go" onclick="start()">Let’s go →</button></div></div>'; return; }
+  if (S.i >= Q.length) { app.innerHTML = resultHTML(); return; }
+  const q = cur(), a = ACTS.find(x => x.id === q.act);
+  if (S.showActIntro && (S.i === 0 || Q[S.i - 1].act !== q.act)) {
+    app.innerHTML = barHTML() + '<div class="actintro"><div class="num">Chapter ' + a.id + '</div><div class="eye">Chapter ' + a.id + ' of 5 · ' + a.what + '</div><h1>' + a.em + ' ' + a.name + '</h1><p class="sub">' + a.blurb + '</p><div class="foot"><button class="ghost" onclick="back()">← Back</button><button class="go" onclick="S.showActIntro=false;render()">Start →</button></div></div>';
+    return;
+  }
+  let body = '';
+  const v = S.ans[q.id];
+  if (q.type === 'cards' || q.type === 'ride' || q.type === 'scenario') {
+    if (q.type === 'scenario') { const pct = Math.round(q.to / q.from * 100); body += '<div class="panel"><div style="display:flex;justify-content:space-between;gap:10px"><div><div class="k">You put in</div><div class="big">' + euro(q.from) + '</div></div><div style="text-align:right"><div class="k">A month later</div><div class="big" style="color:#FDA4AF">' + euro(q.to) + '</div></div></div><div class="left"><span style="width:' + pct + '%;background:linear-gradient(90deg,#5EEAD4,#C4B5FD)"></span></div><div style="color:#FDA4AF;font-weight:700">−' + (100 - pct) + '%</div></div>'; }
+    body += '<div class="grid' + (q.grid ? ' two' : '') + '">' + q.o.map((o, k) => '<button class="card ' + G[k % 8] + (v === k ? ' sel' : '') + '" onclick="pick(' + k + ')"><span class="tick">✓</span>' +
+      (q.type === 'ride' ? '<span class="em">' + o.e + '</span><span style="flex:1">' + esc(o.t) + (o.tag ? '<br><span class="tag">' + esc(o.tag) + '</span>' : '') + '</span><svg width="110" height="48" viewBox="0 0 140 50" aria-hidden="true"><path d="' + o.path + '" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>' : '<span class="em">' + o.e + '</span><span>' + esc(o.t) + (o.tag ? '<br><span class="tag">' + esc(o.tag) + '</span>' : '') + '</span>') + '</button>').join('') + '</div>';
+    if (q.reveal && v != null) body += '<div class="reveal">💡 ' + esc(q.reveal) + '</div>';
+  } else if (q.type === 'multi') {
+    const set = v || [];
+    body += '<div class="chips">' + q.o.map((o, k) => '<button class="chip' + (set.includes(k) ? ' sel' : '') + '" onclick="toggle(' + k + ')">' + o.e + ' ' + esc(o.t) + '</button>').join('') + '</div>';
+  } else if (q.type === 'stepper') {
+    const n = v != null ? v : q.v;
+    body += '<div class="panel step"><button onclick="bump(-1)" aria-label="Less">−</button><div class="big" style="min-width:110px;text-align:center">' + n + '</div><button onclick="bump(1)" aria-label="More">+</button></div>';
+  } else if (q.type === 'slider') {
+    const n = v != null ? v : q.v;
+    body += '<div class="panel"><div class="big" id="sv">' + euro(n) + '</div><input type="range" id="sl" min="' + q.min + '" max="' + q.max + '" step="' + q.step + '" value="' + n + '" oninput="slide(this.value)" aria-label="Monthly take-home"><div class="chips" style="margin-top:10px"><button class="chip" onclick="S.ans[\'' + q.id + '\']=\'rather not say\';next()">🤐 Rather not say</button></div></div>';
+  } else if (q.type === 'sliders') {
+    const vals = v || q.o.map(o => o.v);
+    body += '<div class="panel">' + q.o.map((o, k) => '<div class="lbl"><span>' + o.e + ' ' + o.t + '</span><output id="o' + k + '">' + euro(vals[k]) + '</output></div><input type="range" min="' + o.min + '" max="' + o.max + '" step="' + o.step + '" value="' + vals[k] + '" oninput="multiSlide(' + k + ',this.value)" aria-label="' + esc(o.t) + '">').join('') + '<div id="leftover"></div></div>';
+  }
+  const canNext = q.type === 'multi' ? (v || []).length > 0 : ['stepper','slider','sliders'].includes(q.type) ? true : v != null;
+  const autoAdv = ['cards','ride','scenario'].includes(q.type) && !q.reveal;
+  app.innerHTML = barHTML() + '<div class="eye">' + esc(q.eye) + '</div><h1>' + esc(q.q) + '</h1>' + (q.sub ? '<p class="sub">' + esc(q.sub) + '</p>' : '<p class="sub"></p>') + body +
+    '<div class="foot"><button class="ghost" onclick="back()">← Back</button>' + (autoAdv ? '<button class="ghost" onclick="skip()">Skip</button>' : '<button class="go" ' + (canNext ? '' : 'disabled') + ' onclick="next()">Next →</button>') + '</div>';
+  if (q.type === 'sliders') leftover();
+}
+function pick(k){ const q = cur(); S.ans[q.id] = k; render(); if (!q.reveal) setTimeout(next, 280); }
+function toggle(k){ const q = cur(); let s = S.ans[q.id] || []; const none = q.o.findIndex(o => /Nothing|None yet|Just me/.test(o.t));
+  s = s.includes(k) ? s.filter(x => x !== k) : (k === none ? [k] : s.filter(x => x !== none).concat([k])); if (q.max && s.length > q.max) s = s.slice(s.length - q.max); S.ans[q.id] = s; render(); }
+function bump(d){ const q = cur(); const n = (S.ans[q.id] != null ? S.ans[q.id] : q.v) + d; S.ans[q.id] = Math.max(q.min, Math.min(q.max, n)); render(); }
+function slide(v){ const q = cur(); S.ans[q.id] = +v; document.getElementById('sv').textContent = euro(v); }
+function multiSlide(k, v){ const q = cur(); const vals = S.ans[q.id] || q.o.map(o => o.v); vals[k] = +v; S.ans[q.id] = vals; document.getElementById('o' + k).textContent = euro(v); leftover(); }
+function leftover(){ const q = cur(), vals = S.ans[q.id] || q.o.map(o => o.v), inc = typeof S.ans['4.2'] === 'number' ? S.ans['4.2'] : 3000, spent = vals.reduce((a, b) => a + b, 0), left = inc - spent;
+  const cols = ['#C4B5FD','#F9A8D4','#FCD34D']; const tot = Math.max(inc, spent) || 1;
+  document.getElementById('leftover').innerHTML = '<div class="left">' + vals.map((x, k) => '<span style="width:' + (x / tot * 100) + '%;background:' + cols[k] + '"></span>').join('') + (left > 0 ? '<span style="width:' + (left / tot * 100) + '%;background:#5EEAD4"></span>' : '') + '</div><div style="font-weight:800;font-size:18px">' + (left >= 0 ? 'Left over each month: <span style="color:#5EEAD4">' + euro(left) + '</span>' : 'Spending is ' + euro(-left) + ' more than comes in') + '</div>'; }
+function next(){ const q = cur(); if (q.type === 'stepper' && S.ans[q.id] == null) S.ans[q.id] = q.v; if (q.type === 'slider' && S.ans[q.id] == null) S.ans[q.id] = q.v; if (q.type === 'sliders' && S.ans[q.id] == null) S.ans[q.id] = q.o.map(o => o.v); S.i++; S.showActIntro = true; render(); window.scrollTo(0, 0); }
+function skip(){ S.i++; S.showActIntro = true; render(); }
+function back(){ if (S.i <= 0) { S.i = -1; render(); return; } const q = cur(); if (S.showActIntro && (S.i === 0 || Q[S.i - 1].act !== q.act)) { S.i--; S.showActIntro = false; } else if (S.i > 0 && Q[S.i - 1].act !== q.act && !S.showActIntro) { S.showActIntro = true; } else { S.i--; S.showActIntro = false; } render(); }
+function score(id){ const q = Q.find(x => x.id === id), k = S.ans[id]; return k == null ? null : q.o[k].s; }
+function resultHTML(){
+  const t = {A:0,B:0,E:0,C:0}, traits = [];
+  Q.forEach(q => { const k = S.ans[q.id]; if (typeof k !== 'number' || !q.o[k]) return; const o = q.o[k]; if (o.w) Object.entries(o.w).forEach(([x, n]) => t[x] += n); if (o.trait && !traits.includes(o.trait)) traits.push(o.trait); });
+  const rank = Object.entries(t).sort((a, b) => b[1] - a[1]), max = Math.max(1, rank[0][1]);
+  const P = TYPES[rank[0][0]], S2 = TYPES[rank[1][0]];
+  const sc = id => { const q = Q.find(x => x.id === id), k = S.ans[id]; return typeof k === 'number' ? q.o[k].s : null; };
+  const avg = a => { const v = a.filter(x => x != null); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : null; };
+  const W = sc('8'), C = sc('9'), K = avg([sc('6'), sc('7'), sc('10')]);
+  const lvl = x => x == null ? '—' : x >= 3.25 ? 'High' : x >= 2.5 ? 'Moderate' : x >= 1.75 ? 'Low–moderate' : 'Low';
+  let atr = null, flag = '';
+  if (W && C && K) { const b = (Math.min(W, C, K) + (W + C + K) / 3) / 2; atr = Math.round(1 + (b - 1) / 3 * 5);
+    flag = W >= 3 && C <= 2 ? 'You like the idea of growth, but dips feel uncomfortable. Very common. A calmer plan may suit you.' : W >= 3 && K <= 2 ? 'You’re open to risk, but your cushion or timeframe is tight right now. Building the safety net comes first.' : W <= 2 && K >= 3 ? 'Your finances could handle more ups and downs than you’d choose. That’s fine. It’s worth seeing what playing very safe costs over time.' : W <= 2 && C <= 2 && K <= 2 ? 'Protection and an emergency fund are your best first steps.' : W >= 3 && C >= 3 && K >= 3 ? 'Comfortable, calm and able: ready for a growth conversation.' : 'How you feel and what you can handle are broadly in line. A great starting point.'; }
+  const fq = Q.find(q => q.id === '12'), feel = typeof S.ans['12'] === 'number' ? fq.o[S.ans['12']] : null;
+  const gq = Q.find(q => q.id === '11'), goals = (S.ans['11'] || []).map(k => gq.o[k]);
+  const fc = W == null ? '' : ['☀️','🌤️','🌦️','⛈️'][W - 1];
+  return '<div class="eye">Your money personality</div><div class="type">' + P.e + ' ' + P.name + '</div><p class="sub" style="font-size:17px">' + P.strap + ' With a streak of <b style="color:#fff">' + S2.name + '</b>.</p>' +
+    '<div class="panel"><div class="bars">' + rank.map(([k, n]) => '<div class="b"><span>' + TYPES[k].e + ' ' + TYPES[k].name + '</span><div class="t"><i style="width:' + Math.max(6, n / max * 100) + '%"></i></div></div>').join('') + '</div></div>' +
+    (traits.length ? '<div class="panel"><div class="k">Your decision patterns</div><div class="chips" style="margin-top:10px">' + traits.map(x => '<span class="chip sel" style="cursor:default">' + x + '</span>').join('') + '</div></div>' : '') +
+    '<div class="cols"><div class="panel"><div class="k">Risk tolerance</div><div class="v">' + fc + ' ' + lvl(W) + '</div></div><div class="panel"><div class="k">Composure in a dip</div><div class="v">' + lvl(C) + '</div></div><div class="panel"><div class="k">Capacity to invest</div><div class="v">' + lvl(K) + '</div></div></div>' +
+    (flag ? '<div class="reveal">💡 ' + flag + '</div>' : '') +
+    '<div class="cols" style="margin-top:14px"><div class="panel"><div class="k">Your next chapter</div><div class="v" style="font-size:16px">' + (goals.length ? goals.map(g => g.e + ' ' + g.t).join('<br>') : '—') + '</div></div><div class="panel"><div class="k">How the future feels</div><div class="v">' + (feel ? feel.e + ' ' + feel.t : '—') + '</div></div></div>' +
+    (atr ? '<div class="panel"><div class="k">For your adviser</div><div class="v">Indicative attitude to risk: ' + atr + ' of 6</div><div class="note" style="margin-top:6px">Discovery only. A qualified adviser confirms any formal risk rating.</div></div>' : '') +
+    '<div class="foot"><button class="ghost" onclick="S.i=Q.length-1;S.showActIntro=false;render()">← Back</button><button class="go" onclick="S.i=-1;S.ans={};render()">Start again</button></div><p class="note">Next in LifeGoals: place your goals on your timeline, then add your finances. Prototype: answers stay in this page and are not saved or sent anywhere.</p>';
+}
+
+render();
+</script></body></html>
