@@ -48,7 +48,7 @@ h1,h2,h3,.disp{font-family:var(--fh);letter-spacing:-.01em}
 .backb{border:0;background:rgba(255,255,255,.8);height:38px;padding:0 14px 0 10px;border-radius:19px;font-weight:800;font-size:14px;cursor:pointer}
 .scroll{flex-grow:1;overflow-y:auto;overflow-x:hidden;padding:6px 18px 24px;scroll-behavior:smooth}
 .foot{flex-shrink:0;padding:10px 18px 26px;background:linear-gradient(180deg,rgba(243,247,249,0),var(--mist) 30%);display:grid;gap:8px}
-.tabs{flex-shrink:0;height:80px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);align-items:start;padding-top:8px}
+.tabs{flex-shrink:0;height:80px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);align-items:start;padding-top:8px}
 .tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:#5C7477;cursor:pointer;min-height:50px}
 .tabs button.on{color:var(--ink)}.tabs svg{width:24px;height:24px}
 .tabs .center{margin-top:-28px}
@@ -213,6 +213,34 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 .upl{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .tile{border:1.5px solid var(--line);border-radius:18px;padding:12px;min-height:86px;background:#fff;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;font-weight:800;font-size:13.5px;line-height:1.3}
 .tile .e{font-size:24px}
+/* goal tiles (LifeGoals 2.0 style, navy tokens) */
+.gtiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.gtile{position:relative;background:#fff;border:2px solid var(--line);border-radius:16px;padding:14px 6px 12px;min-height:96px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:6px;transition:border-color .15s,transform .15s,background .15s;font-size:inherit}
+.gtile:hover{border-color:var(--sea);transform:translateY(-2px)}
+.gtile .em{font-size:30px;line-height:1}
+.gtile .nm{font-size:13px;font-weight:700;color:var(--ink);line-height:1.25}
+.gtile.sel{border-color:var(--sea);background:var(--sea-l)}
+.gtile .tick{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:10px;background:var(--sea-d);color:#fff;font-size:11px;font-weight:900;display:none;align-items:center;justify-content:center}
+.gtile.sel .tick{display:flex}
+.gtile:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+/* Ask button + help sheet */
+.askfab{position:absolute;top:9px;right:26px;z-index:15;height:32px;padding:0 12px 0 10px;border-radius:16px;border:0;background:var(--ink);color:#fff;font-weight:800;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 4px 12px rgba(11,37,69,.28)}
+.askfab:hover{background:var(--ink2)}
+@media (max-width:800px){.askfab{right:12px}}
+.askq{display:flex;width:100%;justify-content:space-between;align-items:center;gap:10px;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;min-height:50px;padding:10px 2px;font-weight:700;font-size:14.5px;cursor:pointer}
+.askq .chev{color:var(--muted);font-size:18px;flex-shrink:0}
+.aska{background:var(--mist);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.55;margin:8px 0 10px}
+.askh{font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--sea-d);margin:16px 0 2px}
+/* partner choice */
+.pchoice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.ptile{position:relative;border:2px solid var(--line);border-radius:16px;background:#fff;padding:12px 10px;min-height:112px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px;font-size:inherit}
+.ptile .em{font-size:26px}.ptile b{font-size:14.5px;line-height:1.25}.ptile span.small{font-size:12px}
+.ptile.sel{border-color:var(--sea);background:var(--sea-l)}
+.ptile.sel::after{content:'✓';position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:10px;background:var(--sea-d);color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.nudge{display:flex;gap:10px;align-items:center;background:var(--sun-l);color:var(--acc-d);border-radius:16px;padding:10px 12px;margin:0 0 12px;font-size:13.5px;font-weight:700;line-height:1.35}
+.nudge .link{margin-left:auto;padding:4px 0;white-space:nowrap;color:var(--ink)}
+.shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pq{border-top:1px solid var(--line);padding:10px 0}.pq:first-child{border-top:0}
 /* sheets & toast */
 .sheet-bg{position:absolute;inset:0;background:rgba(11,31,34,.45);display:flex;align-items:flex-end;z-index:20}
 .sheet{position:relative;background:#fff;color:var(--ink);width:100%;max-height:88%;overflow-y:auto;border-radius:28px 28px 0 0;padding:10px 18px 28px;animation:up .3s ease}
@@ -287,22 +315,25 @@ const GOALCAT = [
   {k:'wealth', t:'Grow my wealth', e:'📈', amt:50000, yrs:10, kind:'pot', spec:'investment', unit:'Target pot'},
   {k:'helpfam', t:'Help my family', e:'🤝', amt:20000, yrs:8, kind:'spend', spec:'planner', unit:'One-off'},
   {k:'legacy', t:'Leave a legacy', e:'🎁', amt:100000, age:85, kind:'legacy', spec:'planner', unit:'Amount'},
+  {k:'wedding', t:'Wedding', e:'💍', amt:25000, yrs:3, kind:'spend', spec:'planner', unit:'One-off'},
+  {k:'car', t:'Change the car', e:'🚗', amt:30000, yrs:3, kind:'spend', spec:'planner', unit:'One-off'},
+  {k:'health', t:'Health & care', e:'🩺', amt:10000, yrs:5, kind:'spend', spec:'protection', unit:'One-off'},
   {k:'other', t:'Something else', e:'⭐', amt:10000, yrs:4, kind:'spend', spec:'planner', unit:'Custom'}
 ];
 const GC = k => GOALCAT.find(g => g.k === k);
-const OTHER_LIST = [['🩺','Health (medical reserve)',5000,3],['💍','Wedding',25000,2],['🚗','Buying a car',25000,3],['🧳','Career break',15000,5],['🌍','Moving abroad',20000,4],['🏥','Long-term care',60000,40],['📚','Fund a course',8000,2]];
+const OTHER_LIST = [['🧳','Career break',15000,5],['🌍','Moving abroad',20000,4],['🏥','Long-term care',60000,40],['📚','Fund a course',8000,2]];
 const SUGGEST = age => age < 35 ? ['safety','home','wealth'] : age < 45 ? ['family','edu','home'] : age < 55 ? ['retire','mfree'] : ['legacy','helpfam','retire'];
 
 /* Understand Me: 13 questions (7 from Discover + 6 new) */
 const UM = [
-  {n:1, t:'About you & money', e:'🧭', intro:'', qs:[{d:'2'}, {d:'12'}, {d:'4'},
-    {u:'u4', q:'When making an important financial decision, do you prefer to…', o:[{e:'🔬',t:'Research everything myself'},{e:'🧑‍🏫',t:'Understand the basics, then speak to an expert'},{e:'📞',t:'Speak to an expert first'},{e:'✨',t:'Keep things as simple as possible'}]}]},
-  {n:2, t:'Your risk profile', e:'🌦️', intro:'Three things make up your risk profile: how much risk you <b>want</b> to take, how much you <b>can</b> afford to take, and <b>how long</b> you can wait.', qs:[{d:'8'}, {d:'9'}, {d:'6'}, {d:'7'},
-    {u:'u9', q:'When will you need this money?', help:"Think of money you'd set aside to grow, not everyday savings.", o:[{e:'⏱️',t:'Within 2 years',s:1},{e:'📆',t:'In 2 to 5 years',s:2},{e:'🗓️',t:'In 5 to 10 years',s:3},{e:'🌳',t:'In 10+ years',s:4}]},
-    {u:'u10', q:'If your investments fell by a fifth, what would it mean for you?', o:[{e:'😟',t:"I'd have to cut back on essentials",s:1},{e:'🔁',t:"I'd change some plans",s:2},{e:'😌',t:"I'd be fine — it's long-term money",s:4},{e:'🤔',t:"I'm not sure",s:2}]}]},
-  {n:3, t:'Experience & values', e:'🌱', intro:'', qs:[
+  {n:1, t:'Your risk', e:'🌦️', intro:'How much risk you <b>want</b> to take, and <b>how long</b> you can wait.', qs:[{d:'8'}, {d:'9'},
+    {u:'u9', q:'When will you need this money?', help:"Think of money you'd set aside to grow, not everyday savings.", o:[{e:'⏱️',t:'Within 2 years',s:1},{e:'📆',t:'In 2 to 5 years',s:2},{e:'🗓️',t:'In 5 to 10 years',s:3},{e:'🌳',t:'In 10+ years',s:4}]}]},
+  {n:2, t:'Your capacity', e:'🛟', intro:'How much risk you <b>can</b> afford to take, without it hurting everyday life.', qs:[{d:'6'}, {d:'7'},
+    {u:'u10', q:'If your investments fell by a fifth, what would it mean for you?', help:'For example, €10,000 falling to €8,000.', o:[{e:'😟',t:"I'd have to cut back on essentials",s:1},{e:'🔁',t:"I'd change some plans",s:2},{e:'😌',t:"I'd be fine — it's long-term money",s:4},{e:'🤔',t:"I'm not sure",s:2}]},
+    {u:'u12', q:'How stable is your income?', o:[{e:'🌪️',t:'Uncertain right now',s:1},{e:'🌦️',t:'It varies month to month',s:2},{e:'⛅',t:'Fairly stable',s:3},{e:'☀️',t:'Very stable',s:4}]}]},
+  {n:3, t:'Your investor behaviour', e:'🧭', intro:'How you tend to act and decide with money. There are no right or wrong answers.', qs:[{d:'2'}, {d:'12'}, {d:'4'},
+    {u:'u4', q:'When making an important financial decision, do you prefer to…', o:[{e:'🔬',t:'Research everything myself'},{e:'🧑‍🏫',t:'Understand the basics, then speak to an expert'},{e:'📞',t:'Speak to an expert first'},{e:'✨',t:'Keep things as simple as possible'}]},
     {u:'u11', q:'How much experience do you have with investing?', o:[{e:'🌱',t:'None at all'},{e:'📘',t:'I know the basics'},{e:'👍',t:'I am fairly comfortable'},{e:'🏆',t:'I am very experienced'}], chips:['Savings account','Pension','Shares or funds','Crypto','None']},
-    {u:'u12', q:'How stable is your income?', o:[{e:'🌪️',t:'Uncertain right now',s:1},{e:'🌦️',t:'It varies month to month',s:2},{e:'⛅',t:'Fairly stable',s:3},{e:'☀️',t:'Very stable',s:4}]},
     {u:'u13', q:'Would you like your plan to include ethical or sustainable options?', o:[{e:'🌍',t:'Yes, this matters to me'},{e:'🌿',t:'A little'},{e:'⚖️',t:'No strong preference'},{e:'🤔',t:'Not sure'}]}]}
 ];
 
@@ -320,10 +351,10 @@ const FF = {
   name:{l:'First name', type:'text', pre:1},
   age:{l:'Your age', type:'num', min:18, max:80, pre:1},
   retireAge:{l:'Retirement age', type:'num', min:50, max:75, pre:1, hint:'From your timeline flag'},
-  pAge:{l:"Partner's age", type:'num', min:18, max:85, est:() => S.about.age, show:() => S.about.partner},
+  pAge:{l:"Partner's age", type:'num', min:18, max:85, est:() => S.about.age, show:() => S.about.partner && S.partner.mode !== 'invite'},
   work:{l:'Your work', type:'choice', o:['Employed','Self-employed','Not working'], est:'Employed'},
   income:{l:'Your gross yearly income', type:'eur', est:45000, hint:'Before tax'},
-  pIncome:{l:"Partner's gross yearly income", type:'eur', est:38000, show:() => S.about.partner},
+  pIncome:{l:"Partner's gross yearly income", type:'eur', est:38000, show:() => S.about.partner && S.partner.mode !== 'invite'},
   otherM:{l:'Other income a month', type:'eur', est:0, opt:1, hint:'Optional'},
   costsM:{l:'Monthly living costs', type:'eur', est:() => 2000 + (S.about.partner ? 800 : 0) + 450 * (S.about.deps || 0), hint:'Rent, bills, food and extras. Leave out mortgage and loan repayments.'},
   oneOffY:{l:'Yearly one-off costs', type:'eur', est:1500, opt:1, hint:'Optional. Car tax, insurance, holidays'},
@@ -371,6 +402,7 @@ function fresh(){
     um:{a:{}, chips:[], done:{}, sec:null}, wi:{g:null, m:0, l:0}, pref:null, versions:[], understood:false, advQs:[],
     view:'journey', chapOpen:null,
     book:{stage:null, adv:0, share:{report:false, fin:false, docs:false, um:false}, agree:false, mode:'Video', slot:null, done:false, from:'plan'},
+    partner:{mode:null, email:'', sent:false, name:''}, ask:{open:null, q:'', a:null}, meEdit:{},
     sheet:null, toast:null};
 }
 
@@ -554,7 +586,7 @@ V.D9 = () => { const b = S.about;
   return {id:'D9', note:'Basic details about self and dependants (MASTER B7). Name comes later at account creation.', kind:'quiz', html:
   '<div class="qtop">' + chapBar() + '<button class="qx" data-a="go" data-p="D0" aria-label="Close">✕</button></div><div class="qbody"><div class="qeye">Almost done</div><h2 tabindex="-1">A bit about you</h2><p class="qsub">So we can suggest the goals that fit your life stage.</p>' +
   '<div class="panel"><div class="field"><span class="flabel" id="lab-age">Your age</span>' + stepper('age', 'x', b.age, 'Your age') + '<input type="range" min="18" max="80" value="' + b.age + '" data-in="age" aria-labelledby="lab-age"></div>' +
-  '<div class="field"><span class="flabel">Planning with a partner?</span><div class="seg" role="group" aria-label="Planning with a partner">' + ['Yes','No'].map(x => '<button class="' + ((b.partner === true && x === 'Yes') || (b.partner === false && x === 'No') ? 'on' : '') + '" aria-pressed="' + ((b.partner === true && x === 'Yes') || (b.partner === false && x === 'No')) + '" data-a="partner" data-p="' + x + '">' + x + '</button>').join('') + '</div></div>' +
+  '<div class="field"><span class="flabel">Planning with a partner?</span><div class="seg" role="group" aria-label="Planning with a partner">' + ['Yes','No'].map(x => '<button class="' + ((b.partner === true && x === 'Yes') || (b.partner === false && x === 'No') ? 'on' : '') + '" aria-pressed="' + ((b.partner === true && x === 'Yes') || (b.partner === false && x === 'No')) + '" data-a="partner" data-p="' + x + '">' + x + '</button>').join('') + '</div>' + (b.partner ? '<span class="small">Later you can invite them, or add their details yourself.</span>' : '') + '</div>' +
   '<div class="field" style="margin:0"><span class="flabel">Children or others who rely on you</span><div class="seg" role="group" aria-label="Dependants">' + ['0','1','2','3+'].map((x, k) => '<button class="' + (b.deps === k ? 'on' : '') + '" aria-pressed="' + (b.deps === k) + '" data-a="deps" data-p="' + k + '">' + x + '</button>').join('') + '</div></div></div></div>' +
   '<div class="qfoot"><button class="qback" data-a="dprev">← Back</button><button class="wbtn" data-a="go" data-p="D10"' + (b.partner == null || b.deps == null ? ' disabled' : '') + '>See my money story</button></div>'};
 };
@@ -574,13 +606,15 @@ function saveBanner(){ return S.save.done ? '<div class="banner">✅ <span>Progr
 V.F1 = () => { ensureRetire(); const sug = SUGGEST(S.about.age).slice(); if (S.why.includes(2) && !sug.includes('retire')) sug.unshift('retire');
   const order = sug.concat(GOALCAT.map(g => g.k).filter(k => !sug.includes(k))), have = k => S.goals.some(g => g.k === k);
   const n = S.goals.filter(g => g.kind !== 'retire').length;
-  return {id:'F1', note:'Goal picker = DISC Q11 word for word, ordered by life stage from age. No limit. Retirement is always on the timeline.', head:flowHead(2, 'Step 2 · Define', "What's next in your life story?", "Pick any. You'll place them on your timeline next.", 'backd'),
-  html:saveBanner() + '<div class="eyebrow" style="margin:4px 0 8px">Suggested for you</div><div class="chips" role="group" aria-label="Suggested goals">' + order.slice(0, sug.length).map(chipG).join('') + '</div><div class="eyebrow" style="margin:16px 0 8px">More goals</div><div class="chips" role="group" aria-label="More goals">' + order.slice(sug.length).map(chipG).join('') + '</div>' +
+  return {id:'F1', note:'Goal picker: DISC Q11 tiles + Wedding, Change the car, Health & care (LifeGoals 2.0 tile style), ordered by life stage. No limit. Retirement is always on the timeline.', head:flowHead(2, 'Step 2 · Define', "What's next in your life story?", "Pick any. You'll place them on your timeline next.", 'backd'),
+  html:saveBanner() + '<div class="eyebrow" style="margin:4px 0 8px">Suggested for you</div><div class="gtiles" role="group" aria-label="Suggested goals">' + order.slice(0, sug.length).map(k => goalTile(k)).join('') + '</div><div class="eyebrow" style="margin:18px 0 8px">More goals</div><div class="gtiles" role="group" aria-label="More goals">' + order.slice(sug.length).map(k => goalTile(k)).join('') + '</div>' +
     S.goals.filter(g => g.k === 'other').map(g => '<div class="pill mint" style="margin-top:10px">' + g.e + ' ' + esc(g.name) + '</div> ').join('') +
     (n > 6 ? '<p class="note" style="margin-top:12px">Lots of plans! You can add more later too.</p>' : '') + '<p class="small" style="margin-top:14px">🌅 Retirement is always on your timeline, so we can check your later years.</p>',
   foot:'<button class="btn" data-a="go" data-p="F2">Place them on my timeline</button>'};
-  function chipG(k){ const c = GC(k), on = k === 'retire' || have(k); return '<button class="chip' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" data-a="gpick" data-p="' + k + '"' + (k === 'retire' ? ' aria-disabled="true" title="Always on your timeline"' : '') + '>' + c.e + ' ' + esc(c.t) + (k === 'retire' ? ' 🔒' : '') + '</button>'; }
 };
+/* Goal tile (LifeGoals 2.0 .goal-card): big emoji, name below, teal border + fill + tick when picked */
+function goalTile(k){ const c = GC(k), ret = k === 'retire', other = k === 'other', on = ret || (!other && S.goals.some(g => g.k === k)) || (other && S.goals.some(g => g.k === 'other'));
+  return '<button class="gtile' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" data-a="gpick" data-p="' + k + '"' + (ret ? ' aria-disabled="true" title="Always on your timeline"' : '') + '><span class="tick" aria-hidden="true">' + (ret ? '🔒' : '✓') + '</span><span class="em" aria-hidden="true">' + c.e + '</span><span class="nm">' + esc(c.t) + '</span></button>'; }
 function tlBoard(){
   const a0 = S.about.age, gs = S.goals;
   return '<div class="tl-board"><div class="tl-track" id="tl" data-a0="' + a0 + '">' +
@@ -647,8 +681,20 @@ function fieldHTML(k){ const d = FF[k], v = S.fin[k];
   else inp = '<div class="inw">' + (d.type === 'eur' ? '<span class="cur" aria-hidden="true">€</span>' : '') + '<input class="in' + (d.type === 'eur' ? ' eur' : '') + '" id="' + id + '" inputmode="numeric" data-fin="' + k + '" value="' + (v == null ? '' : Math.round(+v)) + '"' + (d.hint ? ' aria-describedby="h-' + k + '"' : '') + '></div>';
   return '<div class="field">' + lab + inp + (d.hint ? '<span class="small" id="h-' + k + '">' + esc(d.hint) + '</span>' : '') + (d.pre || d.type === 'text' ? '' : '<div class="fhelp"><button class="link" data-a="fest" data-p="' + k + '">Not sure? Estimate for me</button><button class="link" data-a="fnone" data-p="' + k + '">I don\'t have this</button></div>') + '</div>';
 }
+/* Partner: two choices side by side (Pooja Q4). Same state in Your finances and the Me tab, so it is never asked twice. */
+function partnerBlock(){ const pt = S.partner, m = pt.mode;
+  let h = '<div class="pchoice" role="group" aria-label="How to add your partner">' + [['invite','💌','Invite my partner','They add their own details, privately'],['manual','✍️','Add their details myself','Name, age and income (optional)']].map(([k, e, t, d]) => '<button class="ptile' + (m === k ? ' sel' : '') + '" aria-pressed="' + (m === k) + '" data-a="pmode" data-p="' + k + '"><span class="em" aria-hidden="true">' + e + '</span><b>' + t + '</b><span class="small">' + d + '</span></button>').join('') + '</div>';
+  if (m === 'invite') h += pt.sent ? '<div class="card" style="background:var(--ok-l);box-shadow:none;margin-top:12px"><b>💌 Invite sent to ' + esc(pt.email) + '</b><p class="small" style="color:var(--ink);margin:4px 0 0">They get a secure link to add their own details. You only see what they choose to share.</p><div class="row" style="gap:16px"><button class="link" data-a="presend">Resend</button><button class="link" data-a="pcancel">Cancel invite</button></div></div>'
+    : '<div class="field" style="margin:12px 0 0"><label for="p-email">Their email</label><input class="in" id="p-email" type="email" autocomplete="off" data-partner="email" value="' + esc(pt.email) + '"><p id="perr" class="small" style="color:var(--gap-t);margin:0;min-height:4px" role="alert"></p><button class="btn sm" style="width:100%;margin-top:6px" data-a="pinvite">Send invite</button></div>';
+  if (m === 'manual') h += '<div style="margin-top:12px"><div class="field"><label for="p-name">Their first name</label><input class="in" id="p-name" data-partner="name" autocomplete="off" value="' + esc(pt.name) + '"></div>' +
+    '<div class="field"><label for="f-pAge">Their age <span id="tag-pAge">' + tagFor('pAge') + '</span></label><input class="in" id="f-pAge" inputmode="numeric" data-fin="pAge" value="' + (S.fin.pAge == null ? '' : S.fin.pAge) + '"></div>' +
+    '<div class="field" style="margin:0"><label for="f-pIncome">Their gross yearly income <span class="small" style="font-weight:600">Optional</span></label><div class="inw"><span class="cur" aria-hidden="true">€</span><input class="in eur" id="f-pIncome" inputmode="numeric" data-fin="pIncome" value="' + (S.fin.pIncome == null ? '' : Math.round(S.fin.pIncome)) + '"></div><span class="small">Before tax. Leave it blank and we\'ll ask in Income, or estimate it.</span></div></div>';
+  if (!m) h += '<p class="small" style="margin:10px 0 0">Pick one. You can change it later in <b>Me</b>.</p>';
+  return h; }
 V.P3 = () => { const sec = FSEC[S.fsec], mode = sec.docs.length ? (S.fmode[sec.id] || 'type') : 'type';
-  const body = mode === 'upload' ? uploadPick(sec) : '<div class="card">' + sec.f.filter(fieldVisible).map(fieldHTML).join('') + '</div>';
+  const body = mode === 'upload' ? uploadPick(sec) : '<div class="card">' + sec.f.filter(fieldVisible).filter(k => !(sec.id === 'about' && k === 'pAge')).map(fieldHTML).join('') +
+    (sec.id === 'income' && S.about.partner && S.partner.mode === 'invite' ? '<p class="note">💌 Your partner adds their own income' + (S.partner.sent ? ' (invite sent to ' + esc(S.partner.email) + ')' : '') + '. Until then we use an estimate.</p>' : '') + '</div>' +
+    (sec.id === 'about' && S.about.partner ? '<div class="card"><b>Your partner</b>' + partnerBlock() + '</div>' : '');
   return {id:'P3-' + (S.fsec + 1), note:'Section ' + (S.fsec + 1) + ' of 6 · ' + sec.t + '. Upload vs Type it; every field has Estimate for me / I don\'t have this.', head:flowHead(3, 'Your finances · ' + (S.fsec + 1) + ' of 6', sec.e + ' ' + sec.t, sec.id === 'about' ? 'Mostly filled in from your answers. Just check it.' : 'Upload a document or type it in. Round figures are fine.', 'fback'),
   html:(sec.docs.length ? '<div class="seg" role="group" aria-label="How to add">' + [['upload','📄 Upload'],['type','⌨️ Type it']].map(([m, l]) => '<button class="' + (mode === m ? 'on' : '') + '" aria-pressed="' + (mode === m) + '" data-a="fmode" data-p="' + m + '">' + l + '</button>').join('') + '</div>' : '<p class="small">No documents needed here. ID and proof of address are handled by your adviser later.</p>') + body,
   foot:'<button class="btn" data-a="fsave">Save this section</button>'};
@@ -755,7 +801,7 @@ function wiCard(){ const w = S.wi, gs = S.goals.slice().sort((a, b) => a.age - b
 function resultsHTML(){
   const P0 = project(), P = project(S.wi), F = findings(P0), rough = qualityCount() > 2;
   return '<div class="prelim"><span aria-hidden="true">ℹ️</span><span>Preliminary guidance · based on your figures and our assumptions · not financial advice. <button class="link" style="padding:0;font-size:12.5px" data-a="sheet" data-p="assume">Assumptions</button></span></div>' +
-    (rough ? '<p class="note" style="margin:0 0 12px">Rough picture: some figures are estimated or missing. Add documents to sharpen it.</p>' : '') +
+    (rough ? '<p class="note" style="margin:0 0 12px">Rough picture: some figures are estimated or missing. Add documents to sharpen it.</p>' : '') + planProfileBanner() +
     '<div class="card"><h3 class="h">Your goals</h3><p class="small" style="margin:0 0 6px">How much of each goal your future income and savings can cover.</p><div id="r-goals">' + goalsBox(P) + '</div></div>' +
     '<div class="card" id="r-found"><h3 class="h">What we found</h3><div class="found" style="margin-top:8px">' +
       [['💪','Your main strength',F.sT,'var(--ok-t)','str'],['🔎','Your main gap',F.gT,'var(--gap-t)','gap'],['🎯','Your biggest decision',F.dT,'var(--acc-d)','dec']].map(c => '<div class="fcard"><div class="k" style="color:' + c[3] + '">' + c[0] + ' ' + c[1] + '</div><b>' + esc(c[2]) + '</b><button class="link" style="font-size:12.5px;padding:2px 0" data-a="sheet" data-p="explain|' + c[4] + '">Explain this</button></div>').join('') + '</div>' +
@@ -774,7 +820,7 @@ function liveUpdate(){ const P0 = project(), P = project(S.wi);
 function tlStrip(){ const P = project(), n = S.goals.filter(g => P.pct[g.id] >= 95).length; return '<div class="card row" id="tl-strip" style="background:var(--sea-l)"><div style="flex:1"><b>' + n + ' of ' + S.goals.length + ' goals on track</b><div class="small" style="color:var(--ink)">Updates as you move things.</div></div><button class="btn sm" data-a="seg" data-p="results">See results</button></div>'; }
 
 /* ================= APP SHELL ================= */
-const ICON = {plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 18c3-6 6 2 9-4s4-6 7-6"/><circle cx="20" cy="8" r="1.6" fill="currentColor"/></svg>',
+const ICON = {home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>', plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 18c3-6 6 2 9-4s4-6 7-6"/><circle cx="20" cy="8" r="1.6" fill="currentColor"/></svg>',
   me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
   exp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.7A8 8 0 1 1 21 12Z"/></svg>'};
 function appHead(title, sub, back){ return brandBar(back, '<button class="tb-btn" data-a="sheet" data-p="profile" aria-label="Profile and privacy">' + esc((S.acct.name || 'A')[0]) + '</button>') + '<h2 class="t" tabindex="-1" style="margin-top:10px">' + title + '</h2>' + (sub ? '<p class="sub" style="margin:0">' + sub + '</p>' : ''); }
@@ -783,45 +829,86 @@ V.PLAN = () => { const seg = S.planSeg;
   if (seg === 'timeline') return {id:'PLAN-TL', note:'My Plan · Timeline (centre of My Plan). Drag to adjust; results recalculate.', head:appHead('My Plan', 'Drag your goals; results update.'), html:segs + tlBoard() + tlStrip() + '<div class="sec"><h3>Your goals</h3><button class="link" data-a="addgoal">＋ Add a goal</button></div>' + gRows()};
   return {id:'U2', note:'Results in the spec order: goals % → what we found → what if → your future at a glance → 3 end actions.', head:appHead('Your results', 'Here\'s how your plan looks.'), html:segs + resultsHTML()};
 };
-V.GOALS = () => ({id:'PLAN-ADD', note:'Add a goal from My Plan (same Q11 tiles).', head:appHead('Add a goal', '', 'seg|timeline'), html:'<div class="chips">' + GOALCAT.filter(c => c.k !== 'retire').map(c => { const on = S.goals.some(g => g.k === c.k); return '<button class="chip' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" data-a="gpick" data-p="' + c.k + '">' + c.e + ' ' + esc(c.t) + '</button>'; }).join('') + '</div>', foot:'<button class="btn" data-a="seg" data-p="timeline">Back to my timeline</button>'});
+V.GOALS = () => ({id:'PLAN-ADD', note:'Add a goal from My Plan (same goal tiles).', head:appHead('Add a goal', 'Tap to add or remove.', 'seg|timeline'), html:'<div class="gtiles" role="group" aria-label="Goals">' + GOALCAT.filter(c => c.k !== 'retire').map(c => goalTile(c.k)).join('') + '</div>' + S.goals.filter(g => g.k === 'other').map(g => '<div class="pill mint" style="margin-top:10px">' + g.e + ' ' + esc(g.name) + '</div> ').join(''), foot:'<button class="btn" data-a="seg" data-p="timeline">Back to my timeline</button>'});
+const UM_NEW = ['u4','u9','u10','u11','u12','u13'];
+const umNewCount = () => UM_NEW.filter(u => typeof S.um.a[u] === 'number').length;
+function nudge(e, t, btn, a, p){ return '<div class="nudge"><span aria-hidden="true">' + e + '</span><span>' + t + '</span>' + (btn ? '<button class="link" data-a="' + a + '"' + (p != null ? ' data-p="' + p + '"' : '') + '>' + btn + '</button>' : '') + '</div>'; }
+function needsProfile(){ return umCount() < 13 || !S.um.rechecked; }
+function retBtn(){ const r = S.um.ret; return r === 'c1' ? '<button class="btn ' + (umCount() === 13 ? 'ghost' : 'sun') + '" style="margin-top:10px" data-a="book2">Continue to my adviser match</button>' : r === 'plan' ? '<button class="btn ghost" style="margin-top:10px" data-a="umback" data-p="plan">Back to my plan</button>' : r === 'exp' ? '<button class="btn ghost" style="margin-top:10px" data-a="umback" data-p="exp">Back to my meeting</button>' : ''; }
+/* One Understand Me question. Pre-filled Discover answers show as a selected answer with "Change". */
+function umQCard(q, label){ const d = q.d ? DQ_BY(q.d) : q, key = q.d ? 'd' + q.d : q.u, sug = suggestU9(); let sel = q.d ? S.ans[q.d] : S.um.a[q.u]; const sugg = q.u === 'u9' && typeof sel !== 'number'; if (sugg) sel = sug;
+  const pre = q.d && typeof S.ans[q.d] === 'number', compact = pre && !S.meEdit[key];
+  return '<div class="card"><div class="small" style="font-weight:800">' + label + '</div><h3 class="h" style="font-size:17px;margin:4px 0 6px">' + esc(d.q) + '</h3>' + (q.help ? '<p class="small" style="margin:0 0 8px">' + esc(q.help) + '</p>' : '') +
+    (pre ? '<span class="pill mint" style="margin-bottom:8px">✓ From your first answers — change if you like</span>' : '') + (sugg ? '<span class="pill sunny" style="margin-bottom:8px">Suggested from your timeline — confirm or change</span>' : '') +
+    (compact ? '<div class="opt row1 sel" style="cursor:default"><span class="em" style="background:var(--sand)" aria-hidden="true">' + d.o[sel].e + '</span><span class="tx">' + esc(d.o[sel].t) + '</span></div><button class="link" data-a="umedit" data-p="' + key + '" aria-label="Change your answer to: ' + esc(d.q) + '">Change</button>'
+      : '<div class="opts" role="group" aria-label="' + esc(d.q) + '">' + d.o.map((o, k) => '<button class="opt row1' + (sel === k ? ' sel' : '') + '" aria-pressed="' + (sel === k) + '" data-a="umpick" data-p="' + key + '|' + k + '"><span class="em" style="background:var(--sand)" aria-hidden="true">' + o.e + '</span><span class="tx">' + esc(o.t) + '</span></button>').join('') + '</div>') +
+    (q.chips ? '<div class="small" style="font-weight:800;margin:12px 0 6px">Which have you had? (optional)</div><div class="chips">' + q.chips.map(c => '<button class="chip sm' + (S.um.chips.includes(c) ? ' sel' : '') + '" aria-pressed="' + S.um.chips.includes(c) + '" data-a="umchip" data-p="' + c + '">' + c + '</button>').join('') + '</div>' : '') + '</div>'; }
+function rowBtn(a, p, e, t, d, right){ return '<button class="goal" data-a="' + a + '" data-p="' + p + '"><span class="ic" aria-hidden="true">' + e + '</span><span style="flex:1;min-width:0"><b>' + t + '</b><br><span class="small">' + d + '</span></span>' + (right || '<span class="chev" aria-hidden="true">›</span>') + '</button>'; }
 V.ME = () => { const m = S.me;
-  if (m === 'um') { const ret = S.um.ret; return {id:'ME-UM', note:'Understand Me: 13 questions in 3 sections; 7 pre-filled from Discover.', head:appHead('Understand me', 'About 2 minutes. Only 6 questions are new.', 'meback'),
-    html:'<div class="card row">' + ring(Math.round(umCount() / 13 * 100), 64, 'var(--sea-d)') + '<div><b>' + umCount() + ' of 13 answered</b><div class="small">7 came from your first answers</div></div></div>' +
-      UM.map(s => { const tot = s.qs.length, got = s.qs.filter(q => q.d ? typeof S.ans[q.d] === 'number' : typeof S.um.a[q.u] === 'number').length, st = S.um.done[s.n] ? 'done' : got ? 'part' : 'none';
-        return '<button class="goal" style="margin-top:10px" data-a="umsec" data-p="' + s.n + '"><span class="ic" aria-hidden="true">' + s.e + '</span><span style="flex:1"><b>' + s.n + ' · ' + s.t + '</b><br><span class="small">' + got + ' of ' + tot + ' answered</span></span><span class="sr">' + statusWord(st) + '</span>' + statIcon(st) + '</button>'; }).join('') +
-      (umCount() === 13 ? '<button class="btn" data-a="me" data-p="umr" style="margin-top:6px">See my profile</button>' : '') + (ret ? '<button class="btn ' + (umCount() === 13 ? 'ghost' : 'sun') + '" style="margin-top:10px" data-a="book2">Continue to my adviser match</button>' : '')}; }
-  if (m === 'ums') { const s = UM.find(x => x.n === S.um.sec), sug = suggestU9();
-    return {id:'ME-UM' + s.n, note:'Understand Me section ' + s.n + ': one screen. Pre-filled answers shown selected with a note.', head:appHead(s.e + ' ' + s.t, s.intro, 'me|um'),
-      html:s.qs.map((q, qi) => { const d = q.d ? DQ_BY(q.d) : q, key = q.d ? 'd' + q.d : q.u; let sel = q.d ? S.ans[q.d] : S.um.a[q.u]; const sugg = q.u === 'u9' && typeof sel !== 'number'; if (sugg) sel = sug;
-        return '<div class="card"><div class="small" style="font-weight:800">' + (UM.slice(0, s.n - 1).reduce((a, x) => a + x.qs.length, 0) + qi + 1) + ' of 13</div><h3 class="h" style="font-size:17px;margin:4px 0 6px">' + esc(d.q) + '</h3>' + (q.help ? '<p class="small" style="margin:0 0 8px">' + esc(q.help) + '</p>' : '') +
-          (q.d && typeof S.ans[q.d] === 'number' ? '<span class="pill mint" style="margin-bottom:8px">✓ From your first answers — change if you like</span>' : '') + (sugg ? '<span class="pill sunny" style="margin-bottom:8px">Suggested from your timeline — confirm or change</span>' : '') +
-          '<div class="opts" role="group" aria-label="' + esc(d.q) + '">' + d.o.map((o, k) => '<button class="opt row1' + (sel === k ? ' sel' : '') + '" aria-pressed="' + (sel === k) + '" data-a="umpick" data-p="' + key + '|' + k + '"><span class="em" style="background:var(--sand)" aria-hidden="true">' + o.e + '</span><span class="tx">' + esc(o.t) + '</span></button>').join('') + '</div>' +
-          (q.chips ? '<div class="small" style="font-weight:800;margin:12px 0 6px">Which have you had? (optional)</div><div class="chips">' + q.chips.map(c => '<button class="chip sm' + (S.um.chips.includes(c) ? ' sel' : '') + '" aria-pressed="' + S.um.chips.includes(c) + '" data-a="umchip" data-p="' + c + '">' + c + '</button>').join('') + '</div>' : '') + '</div>'; }).join(''),
-      foot:'<button class="btn" data-a="umsave">Save this section</button>'}; }
+  if (m === 'recheck') return {id:'ME-CHK', note:'Re-check of the 7 Discover answers, pre-filled. Confirm or change (Pooja Q5).', head:appHead('Your first answers', 'From when you started. Do they still fit you?', 'meback'),
+    html:DQ.map((q, i) => umQCard({d:q.id}, (i + 1) + ' of 7')).join(''), foot:'<button class="btn" data-a="recheckok">These still look right</button>'};
+  if (m === 'um') return {id:'ME-UM', note:'Understand Me: 13 questions in 3 sections labelled Risk · Capacity · Investor behaviour (MASTER B7). 7 pre-filled from Discover.', head:appHead('Understand me', 'Risk · Capacity · Investor behaviour. About 2 minutes: only 6 questions are new.', 'meback'),
+      html:'<div class="card row">' + ring(Math.round(umCount() / 13 * 100), 64, 'var(--sea-d)') + '<div><b>' + umCount() + ' of 13 answered</b><div class="small">7 came from your first answers</div></div></div>' +
+        '<p class="small" style="margin:12px 2px 0">Three things make up your risk profile: how much risk you <b>want</b> to take, how much you <b>can</b> afford to take, and <b>how long</b> you can wait.</p>' +
+        UM.map(s => { const tot = s.qs.length, got = s.qs.filter(q => q.d ? typeof S.ans[q.d] === 'number' : typeof S.um.a[q.u] === 'number').length, st = S.um.done[s.n] ? 'done' : got ? 'part' : 'none';
+          return '<button class="goal" style="margin-top:10px" data-a="umsec" data-p="' + s.n + '"><span class="ic" aria-hidden="true">' + s.e + '</span><span style="flex:1"><b>' + s.n + ' · ' + s.t + '</b><br><span class="small">' + got + ' of ' + tot + ' answered</span></span><span class="sr">' + statusWord(st) + '</span>' + statIcon(st) + '</button>'; }).join('') +
+        (umCount() === 13 ? '<button class="btn" data-a="me" data-p="umr" style="margin-top:6px">See my profile</button>' : '') + retBtn()};
+  if (m === 'ums') { const s = UM.find(x => x.n === S.um.sec), off = UM.slice(0, s.n - 1).reduce((a, x) => a + x.qs.length, 0);
+    return {id:'ME-UM' + s.n, note:'Understand Me section ' + s.n + ' · ' + s.t + '. Pre-filled answers shown selected, with Change.', head:appHead(s.e + ' ' + s.t, s.intro, 'me|um'),
+      html:s.qs.map((q, qi) => umQCard(q, (off + qi + 1) + ' of 13')).join(''), foot:'<button class="btn" data-a="umsave">Save this section</button>'}; }
   if (m === 'umr') { const P = personality(), r = riskRead(true), bar = (l, v) => '<div class="row" style="margin-top:8px;font-size:13px;font-weight:700"><span style="width:150px">' + l + '</span><span class="pbar" style="flex:1"><i style="width:' + Math.round(v / 4 * 100) + '%"></i></span></div>';
-    return {id:'ME-R', note:'Understand Me result: money personality + indicative risk profile (5 labels, capped by lower of want and can-afford). Adviser confirms.', head:appHead('Your profile', '', 'me|um'),
+    return {id:'ME-R', note:'Understand Me result: money personality + indicative risk profile (5 labels, capped by lower of want and can-afford). Feeds My Plan. Adviser confirms.', head:appHead('Your profile', '', 'me|um'),
       html:'<div class="card" style="background:linear-gradient(150deg,var(--sun-l),#fff)"><div class="eyebrow" style="color:var(--acc-d)">Your money personality</div><div style="font-family:var(--fh);font-size:30px;font-weight:800;margin:4px 0">' + P.e + ' ' + P.name + '</div><p style="margin:0 0 8px">' + P.strap + '</p><b>Strengths</b><div class="chips" style="margin:6px 0 10px">' + P.str.map(x => '<span class="pill ok">' + x + '</span>').join('') + '</div><b>One thing to watch</b><p style="margin:4px 0 0" class="small">' + P.watch + '</p></div>' +
-        '<div class="card"><div class="eyebrow">Your indicative risk profile</div><div style="font-family:var(--fh);font-size:26px;font-weight:800;margin:4px 0">' + r.label + '</div>' + bar('Want (appetite)', r.want) + bar('Can afford (capacity)', r.can) + bar('Can wait (time)', r.time) + (r.mis ? '<p class="note" style="margin-top:12px">' + esc(r.mis) + '</p>' : '') + '</div>' +
-        '<p class="disc">This is an indicative profile to guide your conversation. It is not advice. Your adviser confirms your risk profile with you. ' + DISC_FORMAL + '</p>'}; }
-  if (m === 'details') return {id:'ME-DET', note:'My details (name, household).', head:appHead('My details', '', 'meback'), html:'<div class="card">' + [['Name', S.acct.name || S.fin.name],['Email', S.acct.email],['Mobile', S.acct.mobile],['Age', S.about.age],['Partner', S.about.partner ? 'Yes' + (S.fin.pAge ? ', age ' + S.fin.pAge : '') : 'No'],['People who rely on you', ['0','1','2','3+'][S.about.deps || 0]],['Retirement age', S.retireAge]].map(x => '<div class="mini"><span>' + x[0] + '</span><b>' + esc(x[1]) + '</b></div>').join('') + '</div><button class="btn ghost" style="margin-top:12px" data-a="fsec" data-p="0">Edit About you</button>'};
+        '<div class="card"><div class="eyebrow">Your indicative risk profile</div><div style="font-family:var(--fh);font-size:26px;font-weight:800;margin:4px 0">' + r.label + '</div>' + bar('Want (appetite)', r.want) + bar('Can afford (capacity)', r.can) + bar('Can wait (time)', r.time) + (r.mis ? '<p class="note" style="margin-top:12px">' + esc(r.mis) + '</p>' : '') + '<p class="small" style="margin:10px 0 0">This now shows on <b>My Plan</b> and in your plan report.</p></div>' +
+        retBtn() + '<p class="disc">This is an indicative profile to guide your conversation. It is not advice. Your adviser confirms your risk profile with you. ' + DISC_FORMAL + '</p>'}; }
+  if (m === 'details') return {id:'ME-DET', note:'My details (name, contact, household).', head:appHead('My details', '', 'meback'), html:'<div class="card">' + [['Name', S.acct.name || S.fin.name],['Email', S.acct.email],['Mobile', S.acct.mobile],['Age', S.about.age],['Partner', partnerLine()],['People who rely on you', ['0','1','2','3+'][S.about.deps || 0]],['Retirement age', S.retireAge]].map(x => '<div class="mini"><span>' + x[0] + '</span><b>' + esc(x[1]) + '</b></div>').join('') + '</div><button class="btn ghost" style="margin-top:12px" data-a="fsec" data-p="0">Edit About you</button>'};
   if (m === 'privacy') return {id:'ME-PRIV', note:'Privacy & sharing: consents, what each adviser can see, delete my data.', head:appHead('Privacy & sharing', '', 'meback'),
     html:'<div class="card"><label class="check"><input type="checkbox" checked disabled><span>Use my details to build my plan (needed for the service)</span></label><label class="check"><input type="checkbox" data-acct="c2"' + (S.acct.c2 ? ' checked' : '') + '><span>Send me reminders and updates</span></label></div>' +
       '<div class="card"><b>What your adviser can see</b>' + (S.book.done ? Object.entries({report:'Plan report', fin:'Finances', docs:'Documents', um:'Understand Me profile'}).map(([k, l]) => '<div class="mini"><span>' + l + '</span><b>' + (S.book.share[k] ? 'Shared' : 'Not shared') + '</b></div>').join('') : '<p class="small" style="margin:6px 0 0">Nothing is shared. You choose what to share when you book.</p>') + '</div>' +
       '<button class="btn ghost" style="margin-top:12px;color:var(--gap-t)" data-a="sheet" data-p="delete">Delete my data</button><button class="link" data-a="sheet" data-p="money">How LifeGoals makes money</button>'};
   if (m === 'money'){ const flags = checkItems().filter(x => ['look','est','miss'].includes(x.st));
-    return {id:'ME-MONEY', note:'My money: the 6 finance sections, checklist of missing / estimated items, add a document.', head:appHead('My money', 'Keep your figures up to date. Your plan recalculates.', 'meback'),
+    return {id:'ME-MONEY', note:'My money: the 6 finance sections, checklist of missing / estimated items, add a document. No bank connection in this version.', head:appHead('My money', 'Keep your figures up to date. Your plan recalculates.', 'meback'),
       html:'<button class="btn sm" style="width:100%" data-a="upl" data-p="smart">📥 Add a document</button><div style="margin-top:12px">' + FSEC.map((s, i) => { const st = secStatus(s); return '<button class="goal" data-a="fsec" data-p="' + i + '"><span class="ic" aria-hidden="true">' + s.e + '</span><span style="flex:1;min-width:0"><b>' + s.t + '</b><br><span class="small">' + esc(secSummary(s)) + '</span></span><span class="sr">' + statusWord(st) + '</span>' + statIcon(st) + '</button>'; }).join('') + '</div>' +
         (flags.length ? '<div class="card"><b>To sharpen your plan</b>' + flags.map(x => '<div class="mini"><span>' + ({look:'⚠️', est:'≈', miss:'❓'})[x.st] + ' ' + esc(FF[x.k].l) + '</span><button class="link" data-a="fix" data-p="' + FSEC.indexOf(x.s) + '">Fix</button></div>').join('') + '</div>' : '')}; }
-  const r = umCount() === 13 ? riskRead(true) : null;
-  return {id:'ME-01', note:'Me tab: Understand me · My money · My details · Privacy & sharing.', head:appHead('Me', 'How you think about money, and what we hold about you.'),
-    html:'<button class="goal" data-a="me" data-p="' + (umCount() === 13 ? 'umr' : 'um') + '"><span class="ic" aria-hidden="true">🧭</span><span style="flex:1"><b>Understand me</b><br><span class="small">' + (r ? personality().name + ' · ' + r.label + ' (indicative)' : umCount() + ' of 13 answered · about 2 min') + '</span></span>' + ring(Math.round(umCount() / 13 * 100), 46, 'var(--sea-d)') + '</button>' +
-      [['money','💶','My money','Your 6 finance sections and documents'],['details','🙋','My details','Name and household'],['privacy','🔐','Privacy & sharing','Consents, what advisers see, delete my data']].map(x => '<button class="goal" data-a="me" data-p="' + x[0] + '"><span class="ic" aria-hidden="true">' + x[1] + '</span><span style="flex:1"><b>' + x[2] + '</b><br><span class="small">' + x[3] + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') + '<p class="disc">Understand me is optional. It helps your adviser know you, so you won\'t repeat yourself.</p>'};
+  /* Me hub = the customer's profile hub (Pooja Q5) */
+  const P = personality(), full = umCount() === 13, r = riskRead(full), b = S.about, nm = S.acct.name || S.fin.name || 'You';
+  const seg = (a, opts, on) => '<div class="seg" role="group" style="margin:6px 0 0">' + opts.map(([v, l]) => '<button class="' + (on(v) ? 'on' : '') + '" aria-pressed="' + on(v) + '" data-a="' + a + '" data-p="' + v + '">' + l + '</button>').join('') + '</div>';
+  return {id:'ME-01', note:'Me = profile hub: name, partner (invite or add myself), dependants · money personality + indicative risk profile · re-check of first answers · deeper questions (feed My Plan). Not a gate.', head:appHead('Me', 'Your profile. It shapes your plan and helps your adviser.'),
+    html:(S.book.done && needsProfile() ? nudge('🧭', 'Check your profile before your adviser meeting', 'Check now', 'toprofile') : '') +
+      '<div class="card"><div class="adv"><span class="face" style="width:48px;height:48px;border-radius:16px;font-size:20px" aria-hidden="true">' + esc(nm[0]) + '</span><div style="flex:1"><b style="font-size:17px">' + esc(nm) + '</b><div class="small">Age ' + b.age + ' · retiring at ' + S.retireAge + '</div></div><button class="link" data-a="me" data-p="details">Edit</button></div>' +
+        '<div class="field" style="margin:16px 0 0"><span class="flabel">Planning with a partner?</span>' + seg('partner', [['Yes','Yes'],['No','No']], v => (v === 'Yes' && b.partner === true) || (v === 'No' && b.partner === false)) + (b.partner ? partnerBlock() : '') + '</div>' +
+        '<div class="field" style="margin:16px 0 0"><span class="flabel">Children or others who rely on you</span>' + seg('deps', [[0,'0'],[1,'1'],[2,'2'],[3,'3+']], v => b.deps === v) + '</div></div>' +
+      '<div class="card"><div class="eyebrow">Your profile</div><div class="row" style="margin-top:6px"><span style="font-size:34px" aria-hidden="true">' + P.e + '</span><div style="flex:1"><b style="font-family:var(--fh);font-size:20px">' + P.name + '</b><div class="small">' + P.strap + '</div></div></div>' +
+        '<div class="mini" style="margin-top:8px"><span>Indicative risk profile</span><b>' + r.label + '</b></div><span class="pill ' + (full ? 'ok' : 'sunny') + '">' + (full ? '✓ From all 13 answers' : 'First read · 7 of 13 answers') + '</span>' +
+        '<div><button class="link" data-a="me" data-p="' + (full ? 'umr' : 'um') + '">' + (full ? 'See my full profile' : 'Answer 6 more to confirm it') + '</button></div></div>' +
+      '<div style="margin-top:12px">' + rowBtn('me', 'recheck', '✅', 'Your first answers', S.um.rechecked ? 'Checked ✓ · 7 answers from when you started' : '7 answers, pre-filled · check they still fit') +
+        rowBtn('me', 'um', '🧭', 'Deeper questions', 'Your risk · Your capacity · Your investor behaviour · ' + umNewCount() + ' of 6 answered', ring(Math.round(umCount() / 13 * 100), 46, 'var(--sea-d)')) +
+        rowBtn('me', 'money', '💶', 'My money', 'Your 6 finance sections and documents') + rowBtn('me', 'privacy', '🔐', 'Privacy & sharing', 'Consents, what advisers see, delete my data') + '</div>' +
+      '<p class="disc">None of this is required. It sharpens your plan and means your adviser won\'t ask you again.</p>'};
 };
+function partnerLine(){ if (!S.about.partner) return 'No'; const pt = S.partner; return pt.mode === 'invite' ? (pt.sent ? 'Invited · ' + pt.email : 'Invite not sent yet') : pt.mode === 'manual' ? [pt.name || 'Added by you', S.fin.pAge ? 'age ' + S.fin.pAge : ''].filter(Boolean).join(', ') : 'Yes'; }
+/* ================= HOME (light dashboard, Pooja Q1) ================= */
+function nextStep(){ const P = project(), gs = S.goals.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id] || a.age - b.age), w = gs[0];
+  const looks = checkItems().filter(x => x.st === 'look' && !S.ack[x.k]).length;
+  if (looks) return {e:'⚠️', t:looks === 1 ? 'One detail needs a look' : looks + ' details need a look', d:'So your plan stays accurate. It takes a minute.', a:'me', p:'money', b:'Check it'};
+  if (S.book.done && needsProfile()) return {e:'🧭', t:'Check your profile before your adviser meeting', d:esc(S.book.slot) + '. About 2 minutes.', a:'toprofile', b:'Check my profile'};
+  if (w && P.pct[w.id] < 95 && !S.pref) return {e:'🔮', t:'Try a what-if for ' + esc(w.name.toLowerCase()), d:esc(w.name) + ' is ' + P.pct[w.id] + '% covered. See what a small change would do.', a:'gowi', p:w.id, b:'Try it'};
+  if (umCount() < 13) return {e:'🧭', t:'Finish your profile', d:'6 quick questions on risk, capacity and how you invest.', a:'toprofile', b:'Start'};
+  if (!S.book.done) return {e:'📅', t:'Talk it through with an adviser', d:'Free, no obligation.', a:'book', b:'Book a meeting'};
+  return {e:'✅', t:"You're all set", d:'Your meeting: ' + esc(S.book.slot) + '.', a:'tab', p:'exp', b:'See my meeting'}; }
+V.HOME = () => { const P = project(), gs = S.goals.slice().sort((a, b) => a.age - b.age), avg = gs.length ? Math.round(gs.reduce((t, g) => t + P.pct[g.id], 0) / gs.length) : 0, ok = gs.filter(g => P.pct[g.id] >= 95).length, bd = band(avg), n = nextStep();
+  return {id:'HOME', note:'Home: light dashboard. Overall readiness, next best step, goals at a glance, shortcuts. Links into My Plan / Me / Experts; no full screens duplicated.', head:appHead('Hi ' + esc(S.acct.name || 'there'), 'Here\'s where you stand today.'),
+    html:'<div class="card row" style="gap:14px">' + ring(avg, 84, 'var(--' + bd + ')') + '<div style="flex:1"><div class="eyebrow">Overall readiness</div><b style="font-size:17px">' + ok + ' of ' + gs.length + ' goals on track</b><div class="small">How much of your goals your money can cover, on average.</div></div></div>' +
+      '<div class="card" style="background:linear-gradient(150deg,var(--sun-l),#fff)"><div class="eyebrow" style="color:var(--acc-d)">Your next best step</div><div class="row" style="margin-top:6px;align-items:flex-start"><span style="font-size:28px" aria-hidden="true">' + n.e + '</span><div style="flex:1"><b style="font-size:16px">' + n.t + '</b><div class="small" style="color:var(--ink)">' + n.d + '</div></div></div><button class="btn sm" style="width:100%;margin-top:10px" data-a="' + n.a + '"' + (n.p != null ? ' data-p="' + n.p + '"' : '') + '>' + n.b + '</button></div>' +
+      '<div class="sec"><h3>Your goals at a glance</h3><button class="link" data-a="seg" data-p="results">See results</button></div><div class="card" style="padding:6px 14px">' + gs.map(g => { const p = P.pct[g.id], b = band(p); return '<div class="mini" style="align-items:center"><span><span aria-hidden="true">' + g.e + '</span> <b>' + esc(g.name) + '</b> <span class="small">· ' + yearsTxt(g) + '</span></span><span class="pill" style="background:var(--' + b + '-l);color:var(--' + b + '-t)">' + p + '%</span></div>'; }).join('') + '</div>' +
+      '<div class="sec"><h3>Shortcuts</h3></div><div class="shortcuts">' + [['seg','timeline','🗓️','My timeline'],['gowi','','🔮','Try a what-if'],['upl','smart','📥','Add a document'],['report','','⬇️','Download my plan']].map(([a, p, e, t]) => '<button class="tile" data-a="' + a + '"' + (p ? ' data-p="' + p + '"' : '') + '><span class="e" aria-hidden="true">' + e + '</span>' + t + '</button>').join('') + '</div>' +
+      '<p class="disc">Guidance, not advice. Figures are illustrative and based on your details and our assumptions.</p>'}; };
+function planProfileBanner(){ const full = umCount() === 13, r = riskRead(full); return '<div class="banner" id="r-prof"><span aria-hidden="true">🧭</span><span><b>Risk profile: ' + r.label + '</b> <span class="small">· ' + (full ? 'from your profile in Me' : 'first read from 7 answers') + '</span></span><button class="link" data-a="toprofile">' + (full ? 'View' : 'Finish in Me') + '</button></div>'; }
 function specialist(){ const P = project(), w = S.goals.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id])[0]; return {type:EXPERT_FOR[w ? w.spec : 'planner'], goal:w}; }
 V.EXP = () => { const b = S.book, st = S.exp, A = ADVISERS[b.adv], sp = specialist();
   const advCard = '<div class="card"><div class="adv"><span class="face" aria-hidden="true">' + A.ini + '</span><div><b style="font-size:17px">' + A.n + '</b><div class="small">' + sp.type + ' · ' + A.q + '</div><div class="small">🗣️ ' + A.lang + ' · 📍 ' + A.loc + ' · ' + A.mode + '</div></div></div><p class="small" style="margin:10px 0 0">Matched because <b>' + esc(sp.goal ? sp.goal.name.toLowerCase() : 'your plan') + '</b> is where you could gain most. <span class="pill grey">Sample adviser</span></p></div>';
   if (st === 'c0') return {id:'C0', note:'Optional: Help your adviser know you → Understand Me with 7 answers pre-filled. Skippable.', head:appHead('Help your adviser know you', '', 'exp|home'), html:'<div class="card" style="text-align:center"><div style="font-size:46px" aria-hidden="true">🧭</div><b style="font-size:17px">6 quick questions, about 2 min</b><p class="small">Your adviser sees this, so you won\'t repeat yourself. 7 of your answers are already filled in.</p></div>', foot:'<button class="btn" data-a="c0go">Answer the questions</button><button class="btn ghost" data-a="exp" data-p="c1">Skip for now</button>'};
-  if (st === 'c1') return {id:'C1', note:'Your match: specialist type from Step 5 mapping (weakest goal).', head:appHead('Your match', 'A ' + sp.type.toLowerCase() + ' who fits your plan.', 'exp|home'), html:advCard + '<button class="link" data-a="advnext">See another match</button> · <button class="link" data-a="toast" data-p="' + A.n.split(' ')[0] + ' will call you within 1 working day">Request a call back</button>', foot:'<button class="btn" data-a="exp" data-p="c2">Choose ' + A.n.split(' ')[0] + '</button>'};
+  if (st === 'c1') return {id:'C1', note:'Your match: specialist type from Step 5 mapping (weakest goal).', head:appHead('Your match', 'A ' + sp.type.toLowerCase() + ' who fits your plan.', 'exp|home'), html:(needsProfile() ? nudge('🧭', 'Check your profile before your adviser meeting', 'Check now', 'toprofile') : '') + advCard + '<button class="link" data-a="advnext">See another match</button> · <button class="link" data-a="toast" data-p="' + A.n.split(' ')[0] + ' will call you within 1 working day">Request a call back</button>', foot:'<button class="btn" data-a="exp" data-p="c2">Choose ' + A.n.split(' ')[0] + '</button>'};
   if (st === 'c2'){ const any = Object.values(b.share).some(Boolean); return {id:'C2', note:'Share your plan: explicit consent per item, all unticked. Referral / conflicts disclosed.', head:appHead('Share your plan', 'Choose what ' + A.n.split(' ')[0] + ' can see before you meet.', 'exp|c1'),
     html:'<div class="card">' + [['report','Your plan report','Goals, results and what-ifs'],['fin','Your finances','The figures in your 6 sections'],['docs','Your documents','Statements you uploaded'],['um','Your Understand Me profile','Personality and indicative risk profile']].map(([k, l, d]) => '<label class="check"><input type="checkbox" data-share="' + k + '"' + (b.share[k] ? ' checked' : '') + '><span><b>' + l + '</b><br><span class="small">' + d + '</span></span></label>').join('') + '</div>' +
       '<div class="card"><label class="check"><input type="checkbox" data-agree="1"' + (b.agree ? ' checked' : '') + '><span>I agree to share the items I\'ve ticked with ' + A.n + '. I can withdraw this at any time.</span></label><p class="small" style="margin:6px 0 0">LifeGoals may be paid a fee by the adviser\'s firm if you go ahead. This never changes what you pay. <button class="link" style="padding:0;font-size:12.5px" data-a="sheet" data-p="money">How LifeGoals makes money</button></p></div>',
@@ -829,15 +916,63 @@ V.EXP = () => { const b = S.book, st = S.exp, A = ADVISERS[b.adv], sp = speciali
   if (st === 'c3') return {id:'C3', note:'Pick a time: video or in person; request another slot.', head:appHead('Pick a time', '45 minutes · free · no obligation', 'exp|c2'),
     html:'<div class="seg" role="group" aria-label="Meeting type">' + ['Video','In person'].map(x => '<button class="' + (b.mode === x ? 'on' : '') + '" aria-pressed="' + (b.mode === x) + '" data-a="bmode" data-p="' + x + '">' + x + '</button>').join('') + '</div><div class="slots">' + SLOTS.map(s => '<button class="slot' + (b.slot === s ? ' sel' : '') + '" aria-pressed="' + (b.slot === s) + '" data-a="slot" data-p="' + s + '">' + s.replace(' · ', '<br>') + '</button>').join('') + '</div><button class="link" data-a="toast" data-p="We\'ve asked ' + A.n.split(' ')[0] + ' for more times">Request another slot</button>',
     foot:'<button class="btn" data-a="confirmbook"' + (b.slot ? '' : ' disabled') + '>Confirm booking</button>'};
-  if (st === 'c4') return {id:'C4', note:'Booked: email + SMS + calendar file; what happens next.', head:appHead("You're booked ✓", '', ''), html:bookedCard() + nextSteps(), foot:'<button class="btn" data-a="tab" data-p="plan">Back to my plan</button>'};
-  if (b.done) return {id:'EXP-01', note:'Experts tab after booking: meeting details and secure document requests.', head:appHead('Experts', 'Your adviser and meeting.'), html:bookedCard() + '<div class="card"><b>Documents your adviser asked for</b>' + ['Latest pension statement','Mortgage statement (last 12 months)'].map(d => '<div class="mini"><span>📄 ' + d + '</span><button class="link" data-a="toast" data-p="Sent securely to ' + A.n.split(' ')[0] + '">Upload</button></div>').join('') + '</div>' + nextSteps()};
-  return {id:'EXP-00', note:'Experts tab: match preview and booking start.', head:appHead('Experts', 'Real advisers, when you want them. Free, no obligation.'), html:advCard, foot:'<button class="btn sun" data-a="book">📅 Book my adviser meeting</button>'};
+  if (st === 'c4') return {id:'C4', note:'Booked: email + SMS + calendar file; what happens next.', head:appHead("You're booked ✓", '', ''), html:bookedCard() + (needsProfile() ? nudge('🧭', 'Check your profile before your adviser meeting', 'Check now', 'toprofile') : '') + nextSteps(), foot:'<button class="btn" data-a="tab" data-p="plan">Back to my plan</button>'};
+  if (b.done) return {id:'EXP-01', note:'Experts tab after booking: meeting details and secure document requests.', head:appHead('Experts', 'Your adviser and meeting.'), html:(needsProfile() ? nudge('🧭', 'Check your profile before your adviser meeting', 'Check now', 'toprofile') : '') + bookedCard() + '<div class="card"><b>Documents your adviser asked for</b>' + ['Latest pension statement','Mortgage statement (last 12 months)'].map(d => '<div class="mini"><span>📄 ' + d + '</span><button class="link" data-a="toast" data-p="Sent securely to ' + A.n.split(' ')[0] + '">Upload</button></div>').join('') + '</div>' + nextSteps()};
+  return {id:'EXP-00', note:'Experts tab: match preview and booking start.', head:appHead('Experts', 'Real advisers, when you want them. Free, no obligation.'), html:(needsProfile() ? nudge('🧭', 'Check your profile before your adviser meeting', 'Check now', 'toprofile') : '') + advCard, foot:'<button class="btn sun" data-a="book">📅 Book my adviser meeting</button>'};
 };
 function bookedCard(){ const b = S.book, A = ADVISERS[b.adv]; return '<div class="card" style="background:var(--ok-l)"><div style="font-size:36px" aria-hidden="true">✅</div><b style="font-size:17px">' + esc(b.slot) + '</b><div class="small" style="color:var(--ink)">' + b.mode + ' with ' + A.n + '</div><p class="small" style="color:var(--ink)">Confirmation sent by email and SMS.</p><button class="btn sm ghost" data-a="ics">📆 Add to my calendar</button></div>'; }
 function nextSteps(){ return '<div class="card"><b>What happens next</b><ol class="small" style="padding-left:18px;margin:8px 0 0;color:var(--ink)"><li>Your adviser reviews your plan.</li><li>A verification call: you confirm details and add any missing documents through the secure portal.</li><li>Your adviser prepares your personal plan and you agree it together.</li><li>You take action.</li><li>LifeGoals keeps tracking and reminds you about reviews.</li></ol></div>'; }
 
+/* ================= ASK (help only: plain-English explanations, never advice) ================= */
+const ASK_GEN = [
+  ['advice', 'Is this financial advice?', 'No. LifeGoals gives guidance: it explains your situation and shows what could happen. Only an authorised adviser who knows your full situation can give advice.'],
+  ['covered', 'What does "% covered" mean?', 'It is how much of a goal\'s cost your future income and savings are expected to cover when the goal comes up. 100% means fully covered. 70% means about 30% is a gap to plan for.'],
+  ['today', 'What is "today\'s money"?', 'Prices rise over time. We show amounts as they would feel today, so €10,000 means what €10,000 buys now, not in 20 years.'],
+  ['risk', 'What is a risk profile?', 'A short summary of how much ups and downs suit you. It combines how much risk you <b>want</b> to take, how much you <b>can</b> afford to take, and <b>how long</b> you can wait. It is indicative: your adviser confirms it with you.'],
+  ['capacity', 'What does "capacity" mean?', 'Your capacity for loss is how big a fall in value you could live with without it hurting everyday life. For example, could you still pay your bills if your investments dropped for a while?'],
+  ['behaviour', 'What is "investor behaviour"?', 'How you tend to act with money, for example whether you research, ask an expert or act fast. It helps your adviser explain things in a way that suits you.'],
+  ['estimate', 'What happens if I estimate a figure?', 'We fill in a typical figure so you can see results straight away. It is marked "≈ Estimated". Swap in your real figure any time to sharpen your plan.'],
+  ['data', 'Is my data safe?', 'Your data is stored in the EU and never sold. Nothing is shared with an adviser unless you tick what to share. You can delete everything in Me › Privacy & sharing.'],
+  ['partner', 'Can my partner join?', 'Yes. In Me you can invite your partner to add their own details, or add their name, age and income yourself.'],
+  ['free', 'Does it cost anything?', 'LifeGoals is free for you. If you work with an adviser, their firm may pay us a fee. This never changes what you pay.']
+];
+function askCtx(id){ id = id || '';
+  if (/^D/.test(id)) return ['ctx', 'Why do you ask these questions?', 'They help us understand how you feel about money, so the goals and results we show fit you. There are no right or wrong answers, and nothing is saved unless you choose.'];
+  if (id === 'F1' || id === 'PLAN-ADD') return ['ctx', 'How do I choose goals?', 'Tap any that matter to you. Pick as many as you like; you can add or remove them later. Retirement is always included so we can check your later years.'];
+  if (id === 'F2' || id === 'PLAN-TL') return ['ctx', 'How does the timeline work?', 'Each goal sits at the age you would like it to happen. Drag it left for sooner or right for later, or use the − and + buttons underneath. Rough is fine; you can change it any time.'];
+  if (id === 'F4') return ['ctx', 'What is my LifeMap?', 'It is your list of goals with when and how much. Next, we add your money so we can check how far it goes.'];
+  if (/^P1/.test(id)) return ['ctx', 'Why do I need an account?', 'So your money details are stored safely and only you can see them. We check your email and mobile to keep your account secure.'];
+  if (/^P[234]|^PU/.test(id)) return ['ctx', 'Why do you need my figures?', 'Your income, savings, debts and pension let us work out how far your money can go. Rough figures are fine. "Estimate for me" fills in a typical figure you can change later. We don\'t connect to your bank.'];
+  if (/^ME/.test(id)) return ['ctx', 'Why does my profile matter?', 'Your answers set the indicative risk profile shown on My Plan and in your report. Your adviser sees it only if you choose to share it, so you won\'t have to repeat yourself.'];
+  if (/^C|^EXP/.test(id)) return ['ctx', 'What happens at the adviser meeting?', 'It is free, about 45 minutes, and there is no obligation. The adviser goes through your plan with you and answers your questions. Only they can give you advice.'];
+  return null; }
+const RISK_EXPLAIN = {'Cautious':'You prefer steady values, even if growth is slower.', 'Cautious–balanced':'Mostly steady, with a little room for ups and downs.', 'Balanced':'A mix of steadiness and growth, accepting some ups and downs.', 'Balanced–growth':'More focus on growth, accepting bigger ups and downs.', 'Growth':'Growth first, comfortable with large ups and downs over the long term.'};
+function askPlan(){ if (!S.app || !S.goals.length) return [];
+  const P = project(), F = findings(P), out = [], w = F.worst, pw = P.pct[w.id], rg = retireGoal(), full = umCount() === 13, r = riskRead(full);
+  if (pw < 95) out.push(['pgap', 'Why is ' + esc(w.name.toLowerCase()) + ' ' + pw + '% covered?', 'When ' + esc(w.name.toLowerCase()) + ' comes up (age ' + w.age + '), your income and savings are expected to cover about ' + pw + '% of the ' + eur(w.amount) + (w.kind === 'retire' ? ' a year' : '') + ' you set, in today\'s money. The rest is the gap. In <b>What if</b> you can see how saving more, adding a lump sum or moving the date changes it.']);
+  else out.push(['pok', 'What does "on track" mean for me?', 'All your goals are at least 95% covered with your figures and our assumptions. It is not a guarantee: prices, pay and markets change, so a yearly check keeps it on track.']);
+  if (rg){ const bad = P.rows.find(x => x.a >= rg.age && isShort(x)); out.push(['pret', 'What happens when I retire at ' + rg.age + '?', 'From ' + rg.age + ', your pension and savings pay for the ' + eur(rg.amount) + ' a year you set. The State Pension (about €15,044 a year) starts at 66. ' + (bad ? 'Around age <b>' + bad.a + '</b> the money runs short in this plan, which is why retirement shows ' + P.pct[rg.id] + '%.' : 'In this plan your money lasts to age 90.')]); }
+  out.push(['prisk', 'What does my risk profile mean?', 'Your indicative risk profile is <b>' + r.label + '</b>' + (full ? '' : ' (a first read from 7 answers; answer 6 more in Me to confirm it)') + '. ' + RISK_EXPLAIN[r.label] + ' It is not advice: your adviser confirms it with you.']);
+  out.push(['pbest', 'What is my main strength?', esc(F.sT) + '. Of all your goals, this one is best covered by your future income, savings and pension.']);
+  return out; }
+const ASK_GUARD = 'I can\'t tell you what to do with your money: that would be advice. I can explain what your results mean. For a personal recommendation, a free adviser meeting is the right place.';
+function askMatch(q){ const t = q.toLowerCase(), plan = askPlan(), all = plan.concat(ASK_GEN), by = k => (all.find(x => x[0] === k) || [])[2];
+  if (/\b(should i|shall i|which (fund|product|pension|provider|bank)|recommend|best (fund|investment|pension|mortgage|option)|buy|sell|invest in|worth it|tell me what to do)\b/.test(t)) return ASK_GUARD;
+  const rules = [[/advice|advise/, 'advice'], [/%|percent|covered|on track/, plan.length ? (by('pgap') ? 'pgap' : 'pok') : 'covered'], [/today|inflation|prices/, 'today'], [/capacity|afford|loss/, 'capacity'], [/behaviou?r/, 'behaviour'], [/risk|profile/, plan.length ? 'prisk' : 'risk'],
+    [/retire|pension/, plan.length ? 'pret' : 'covered'], [/gap|short/, plan.length && by('pgap') ? 'pgap' : 'covered'], [/strength|best/, plan.length ? 'pbest' : 'covered'], [/estimat/, 'estimate'], [/data|safe|privacy|share|delete/, 'data'], [/partner|wife|husband|spouse/, 'partner'], [/cost|free|fee|charge|money do you make/, 'free']];
+  for (const [re, k] of rules) if (re.test(t) && by(k)) return by(k);
+  return 'I can explain how LifeGoals works and what your results mean. Try one of the questions above' + (S.app ? ', or book a free adviser meeting for personal advice' : '') + '.'; }
+function askHTML(sid){ const c = askCtx(sid), plan = askPlan(), o = S.ask.open;
+  const item = ([k, q, a]) => '<button class="askq" data-a="askq" data-p="' + k + '" aria-expanded="' + (o === k) + '"><span>' + q + '</span><span class="chev" aria-hidden="true">' + (o === k ? '−' : '+') + '</span></button>' + (o === k ? '<div class="aska">' + a + '</div>' : '');
+  return '<h2 class="t" tabindex="-1">Ask LifeGoals</h2><p class="sub" style="margin:0">Plain-English answers about how LifeGoals works and what your results mean.</p><p class="pill grey" style="margin:8px 0 0">Explanations only. Never advice.</p>' +
+    (c ? '<div class="askh">About this screen</div>' + item(c) : '') + (plan.length ? '<div class="askh">About your plan</div>' + plan.map(item).join('') : '') + '<div class="askh">Common questions</div>' + ASK_GEN.map(item).join('') +
+    '<div class="field" style="margin:16px 0 0"><label for="ask-in">Or type your question</label><div class="row"><input class="in" id="ask-in" autocomplete="off" placeholder="e.g. What does capacity mean?" value="' + esc(S.ask.q) + '"><button class="btn sm" data-a="askgo">Ask</button></div></div>' +
+    (S.ask.a ? '<div class="aska" id="ask-out" tabindex="-1" aria-live="polite"><div class="small" style="font-weight:800;margin-bottom:4px">You asked: ' + esc(S.ask.q) + '</div>' + S.ask.a + '</div>' : '') +
+    '<p class="disc">Answers explain your figures and our assumptions. They are not financial advice.</p>'; }
+
 /* ================= SHEETS ================= */
-function sheetHTML(){ const s = S.sheet; if (!s) return ''; let h = '';
+function sheetHTML(sid){ const s = S.sheet; if (!s) return ''; let h = '';
+  if (s === 'ask') h = askHTML(sid);
   const [t, p] = s.split('|');
   if (t === 'invite') h = '<h2 class="t">Enter your invite code</h2><p class="sub">From your adviser or employer.</p><div class="field"><label for="inv">Code</label><input class="in" id="inv" placeholder="e.g. ABC123"></div><button class="btn" data-a="invite">Continue</button>';
   if (t === 'whyask') h = '<h2 class="t">Why we ask</h2><p class="sub">Your answers help us show goals and results that fit you. We don\'t save anything unless you choose to, and nothing is shared with an adviser without your say. This is guidance, not advice.</p><button class="btn" data-a="closesheet">Got it</button>';
@@ -867,7 +1002,7 @@ function openReport(){
     '<section><h2>3. Year-by-year cashflow</h2>' + chartSVG(P0.rows, 720) + '<table><thead><tr><th>Age (year)</th><th>Income</th><th>Needs</th><th>From savings</th><th>Shortfall</th><th>Savings left</th></tr></thead><tbody>' + rows + '</tbody></table></section>' +
     '<section><h2>4. Your detailed plan, in plain words</h2>' + detail + '</section>' +
     '<section><h2>5. What-if you saved</h2>' + (wiP ? '<p>' + (wiP.m ? (wiP.m > 0 ? 'Saving ' + eur(wiP.m) + ' more a month' : 'Saving ' + eur(-wiP.m) + ' less a month') : '') + (wiP.m && wiP.l ? ' and ' : '') + (wiP.l ? 'adding ' + eur(wiP.l) + ' once' : '') + (gById(wiP.g) ? ' towards ' + esc(gById(wiP.g).name.toLowerCase()) : '') + ':</p><p>' + wiText(P0, P) + '</p>' : '<p>You haven\'t tried a what-if yet.</p>') + '</section>' +
-    '<section><h2>6. Your money snapshot</h2><table><tbody>' + FSEC.map(s => s.f.filter(fieldVisible).map(k => '<tr><td>' + s.t + ' · ' + esc(FF[k].l) + '</td><td>' + fmtField(k) + '</td><td>' + tagFor(k) + '</td></tr>').join('')).join('') + '</tbody></table>' + (flags.length ? '<p>' + flags.length + ' item(s) are estimated, missing or need a look.</p>' : '') + '</section>' +
+    '<section><h2>6. Your money snapshot</h2>' + (S.about.partner ? '<p>Partner: ' + esc(partnerLine()) + '</p>' : '') + '<table><tbody>' + FSEC.map(s => s.f.filter(fieldVisible).map(k => '<tr><td>' + s.t + ' · ' + esc(FF[k].l) + '</td><td>' + fmtField(k) + '</td><td>' + tagFor(k) + '</td></tr>').join('')).join('') + '</tbody></table>' + (flags.length ? '<p>' + flags.length + ' item(s) are estimated, missing or need a look.</p>' : '') + '</section>' +
     '<section><h2>7. Your money personality' + (um ? ' and indicative risk profile' : '') + '</h2><p><b>' + per.e + ' ' + per.name + '</b>: ' + per.strap + '</p>' + (um ? '<p>Indicative risk profile: <b>' + rp.label + '</b>. ' + (rp.mis ? esc(rp.mis) : '') + ' Your adviser confirms your risk profile with you.</p>' : '<p>Complete <i>Understand me</i> to add your indicative risk profile.</p>') + '</section>' +
     '<section><h2>8. Your questions for an adviser</h2>' + (S.advQs.length ? '<ul>' + S.advQs.map(q => '<li>' + esc(q) + '</li>').join('') + '</ul>' : '<p>None yet.</p>') + '</section>' +
     '<section><h2>9. Assumptions</h2><p>Inflation 2% · pay rises 2.5% · cash 1% · investments and pensions 4.5% · State Pension €15,044 a year from 66 · retirement at ' + S.retireAge + ' · plan to age 90 · simple Irish tax estimate. All projections are illustrative and not guaranteed. This is preliminary guidance, not financial advice. Only an authorised adviser can give advice. ' + DISC_FORMAL + '</p></section></article>';
@@ -876,7 +1011,7 @@ function openReport(){
 }
 /* ================= RENDER ================= */
 function current(){
-  if (S.app){ if (S.tab === 'plan') return S.planSeg === 'add' ? V.GOALS() : V.PLAN(); if (S.tab === 'me') return S.me === 'fin' ? finScreen() : V.ME(); return S.exp === 'fin' ? finScreen() : V.EXP(); }
+  if (S.app){ if (S.tab === 'home') return V.HOME(); if (S.tab === 'plan') return S.planSeg === 'add' ? V.GOALS() : V.PLAN(); if (S.tab === 'me') return S.me === 'fin' ? finScreen() : V.ME(); return S.exp === 'fin' ? finScreen() : V.EXP(); }
   if (/^D[2-8]$/.test(S.scr)) return V.DQ();
   if (S.scr === 'P3') return V.P3(); if (S.scr === 'PU') return V.PU();
   return (V[S.scr] || V.D0)();
@@ -889,14 +1024,16 @@ function render(){
   let html;
   if (s.kind === 'quiz') html = '<div class="quiz">' + s.html + '</div>';
   else html = '<div class="app"><header class="sky">' + (s.head || '') + '</header><div class="scroll" id="main">' + s.html + '</div>' + (s.foot ? '<div class="foot">' + s.foot + '</div>' : '') +
-    (S.app ? '<nav class="tabs" aria-label="Main">' + [['me','Me'],['plan','My Plan'],['exp','Experts']].map(([k, l]) => k === 'plan' ? '<button class="center' + (S.tab === k ? ' on' : '') + '" data-a="tab" data-p="plan" aria-current="' + (S.tab === k ? 'page' : 'false') + '"><span class="fab">' + ICON.plan + '</span>' + l + '</button>' : '<button class="' + (S.tab === k ? 'on' : '') + '" data-a="tab" data-p="' + k + '" aria-current="' + (S.tab === k ? 'page' : 'false') + '">' + ICON[k] + l + '<span class="dot"></span></button>').join('') + '</nav>' : '') + '</div>';
-  html += sheetHTML();
+    (S.app ? '<nav class="tabs" aria-label="Main">' + [['home','Home'],['plan','My Plan'],['me','Me'],['exp','Experts']].map(([k, l]) => '<button class="' + (S.tab === k ? 'on' : '') + '" data-a="tab" data-p="' + k + '" aria-current="' + (S.tab === k ? 'page' : 'false') + '">' + ICON[k] + l + '<span class="dot"></span></button>').join('') + '</nav>' : '') + '</div>';
+  html += '<button class="askfab" data-a="ask" aria-label="Ask: help and plain-English explanations"><span aria-hidden="true">💬</span>Ask</button>';
+  html += sheetHTML(s.id);
   scr.innerHTML = html;
   const sc = scr.querySelector('.scroll,.qbody'); if (sc && same) sc.scrollTop = top0;
   lastId = s.id;
   bind();
-  if (S.sheet){ const f = scr.querySelector('.sheet input:not([type=checkbox]),.sheet .btn'); if (f) f.focus(); }
-  else if (focusKey){ const el = scr.querySelector(focusKey); if (el) el.focus({preventScroll:true}); }
+  const fk = focusKey && scr.querySelector(focusKey);
+  if (fk) fk.focus({preventScroll:!S.sheet});
+  else if (S.sheet){ const f = S.sheet === 'ask' ? scr.querySelector('.sheet h2') : scr.querySelector('.sheet input:not([type=checkbox]),.sheet .btn'); if (f) f.focus(); }
   else if (!same && !(document.activeElement && document.activeElement.matches('#screen input'))){ const h = scr.querySelector('h2[tabindex]'); if (h) h.focus({preventScroll:true}); }
   focusKey = null;
   document.getElementById('curid').textContent = s.id + ' · ' + s.note;
@@ -952,9 +1089,10 @@ const ACT = {
   addgoal:() => { S.planSeg = 'add'; render(); },
   me:p => { S.tab = 'me'; S.me = p; S.sheet = null; render(); }, exp:p => { S.tab = 'exp'; S.exp = p; render(); },
   umsec:p => { S.um.sec = +p; S.me = 'ums'; render(); },
-  umpick:p => { const [key, k] = p.split('|'); if (key[0] === 'd') S.ans[key.slice(1)] = +k; else S.um.a[key] = +k; focusKey = '[data-a="umpick"][data-p="' + p + '"]'; render(); },
+  umpick:p => { const [key, k] = p.split('|'); if (key[0] === 'd'){ S.ans[key.slice(1)] = +k; delete S.meEdit[key]; focusKey = '[data-a="umedit"][data-p="' + key + '"]'; } else { S.um.a[key] = +k; focusKey = '[data-a="umpick"][data-p="' + p + '"]'; } render(); },
   umchip:p => { const i = S.um.chips.indexOf(p); if (i >= 0) S.um.chips.splice(i, 1); else S.um.chips.push(p); focusKey = '[data-a="umchip"][data-p="' + p + '"]'; render(); },
-  umsave:() => { const s = UM.find(x => x.n === S.um.sec); if (s.n === 2 && typeof S.um.a.u9 !== 'number') S.um.a.u9 = suggestU9(); S.um.done[s.n] = true; S.me = 'um'; toast('Section ' + s.n + ' saved'); render(); },
+  umsave:() => { const s = UM.find(x => x.n === S.um.sec); if (s.qs.some(q => q.u === 'u9') && typeof S.um.a.u9 !== 'number') S.um.a.u9 = suggestU9(); S.um.done[s.n] = true; S.meEdit = {}; if (UM.every(x => S.um.done[x.n])) S.um.rechecked = true; S.me = 'um';
+    toast(umCount() === 13 ? 'Saved. Your plan\'s risk profile is now ' + riskRead(true).label : s.t + ' saved'); render(); },
   view:p => { S.view = p; focusKey = '[data-a="view"][data-p="' + p + '"]'; const e = document.getElementById('r-glance'); if (e){ e.innerHTML = glanceHTML(project(S.wi)); bindLite(); const b = e.querySelector(focusKey); if (b) b.focus(); focusKey = null; } else render(); },
   chap:p => { S.chapOpen = S.chapOpen === +p ? null : +p; const e = document.getElementById('r-glance'); if (e){ e.innerHTML = glanceHTML(project(S.wi)); const b = e.querySelector('[data-a="chap"][data-p="' + p + '"]'); if (b) b.focus({preventScroll:true}); } else render(); },
   understood:() => { S.understood = true; version('Results understood'); focusKey = '#r-found .chip'; render(); },
@@ -974,6 +1112,18 @@ const ACT = {
   ics:() => { const b = S.book, A = ADVISERS[b.adv], ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LifeGoals//Prototype//EN\r\nBEGIN:VEVENT\r\nUID:lg-' + Date.now() + '\r\nDTSTAMP:20260929T090000Z\r\nDTSTART:20261001T090000Z\r\nDURATION:PT45M\r\nSUMMARY:LifeGoals meeting with ' + A.n + '\r\nDESCRIPTION:' + b.mode + ' · ' + b.slot + '\r\nEND:VEVENT\r\nEND:VCALENDAR';
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ics], {type:'text/calendar'})); a.download = 'lifegoals-meeting.ics'; document.body.appendChild(a); a.click(); a.remove(); toast('Calendar file downloaded'); },
   adjust:() => { S.planSeg = 'timeline'; S.tab = 'plan'; lastId = null; render(); },
+  ask:() => { S.sheet = 'ask'; S.ask.a = null; S.ask.q = ''; render(); },
+  askq:p => { S.ask.open = S.ask.open === p ? null : p; focusKey = '[data-a="askq"][data-p="' + p + '"]'; render(); },
+  askgo:() => { const v = ((document.getElementById('ask-in') || {}).value || '').trim(); if (!v) { toast('Type a question first'); return; } S.ask.q = v.slice(0, 140); S.ask.a = askMatch(S.ask.q); focusKey = '#ask-out'; render(); },
+  pmode:p => { S.partner.mode = p; focusKey = '[data-a="pmode"][data-p="' + p + '"]'; render(); },
+  pinvite:() => { const e = ((document.getElementById('p-email') || {}).value || '').trim(); if (!/.+@.+\..+/.test(e)) { document.getElementById('perr').textContent = 'Please enter a valid email.'; return; } S.partner.email = e; S.partner.sent = true; focusKey = '[data-a="presend"]'; render(); toast('Invite sent to ' + e); },
+  presend:() => toast('Invite sent again to ' + S.partner.email),
+  pcancel:() => { S.partner.sent = false; focusKey = '#p-email'; render(); toast('Invite cancelled'); },
+  umedit:p => { S.meEdit[p] = true; focusKey = '[data-a="umpick"][data-p^="' + p + '|"]'; render(); },
+  recheckok:() => { S.um.rechecked = true; S.meEdit = {}; S.me = 'home'; render(); toast('Thanks. Your first answers are confirmed'); },
+  toprofile:() => { S.um.ret = S.tab === 'exp' ? (S.book.done ? 'exp' : 'c1') : S.tab === 'me' ? S.um.ret : 'plan'; S.tab = 'me'; S.me = umCount() === 13 ? (S.um.rechecked ? 'umr' : 'recheck') : 'um'; S.sheet = null; lastId = null; render(); },
+  umback:p => { S.um.ret = null; S.tab = p; if (p === 'exp') S.exp = 'home'; else S.planSeg = 'results'; lastId = null; render(); },
+  gowi:p => { S.tab = 'plan'; S.planSeg = 'results'; if (p) S.wi.g = +p; lastId = null; render(); const w = document.getElementById('r-wi'); if (w) w.scrollIntoView({block:'start'}); },
   dodelete:() => { const n = S; S = fresh(); render(); toast('All your data was deleted'); }
 };
 function dnext(){ if (S.di >= DQ.length - 1){ go('D9'); return; } S.di++; go('D' + (S.di + 2)); }
@@ -982,7 +1132,7 @@ function defaultWiGoal(){ const P = project(); const w = S.goals.slice().sort((a
 function afterPlanEdit(quiet){ if (!quiet) version('Goals changed'); }
 function moveGoal(g, age){ const a0 = S.about.age; age = g.kind === 'retire' ? clamp(age, Math.max(55, a0 + 1), 75) : clamp(age, a0 + 1, 90); g.age = age; if (g.kind === 'retire') setRetireAge(age); }
 function startUpload(sec, files){ const fail = files.some(f => /fail/i.test(f)); S.upl = {sec, stage:'scan', files, edit:{}}; S.sheet = null;
-  if (!S.app) S.scr = 'PU'; else { if (S.tab === 'plan') S.tab = 'me'; if (S.tab === 'me') S.me = 'fin'; else S.exp = 'fin'; }
+  if (!S.app) S.scr = 'PU'; else { if (S.tab === 'plan' || S.tab === 'home') S.tab = 'me'; if (S.tab === 'me') S.me = 'fin'; else S.exp = 'fin'; }
   render(); setTimeout(() => { if (!S.upl) return; S.upl.stage = fail ? 'fail' : 'confirm'; render(); }, RM() ? 200 : 1500); }
 function confirmUpload(){ const u = S.upl, secs = u.sec === 'smart' ? ['income','assets','liab','pension'] : [u.sec];
   secs.forEach(sid => { const U = UPL[sid]; Object.entries(U.v).forEach(([k, [v, c]]) => { let nv = u.edit[k] != null ? +u.edit[k] : v; const prev = S.fin[k];
@@ -1019,6 +1169,8 @@ function bind(){
   ph.querySelectorAll('[data-agree]').forEach(i => i.addEventListener('change', () => { S.book.agree = i.checked; shareBtn(); }));
   ph.querySelectorAll('input[data-wi]').forEach(r => r.addEventListener('input', () => { if (S.wi.g == null) S.wi.g = defaultWiGoal(); S.wi[r.dataset.wi] = +r.value; r.setAttribute('aria-valuetext', eur(+r.value)); liveUpdate(); }));
   if (ph.querySelector('#wi-out')) { if (S.wi.g == null) S.wi.g = defaultWiGoal(); liveUpdate(); const c = ph.querySelector('[data-a="wig"][data-p="' + S.wi.g + '"]'); if (c) { c.classList.add('sel'); c.setAttribute('aria-pressed', 'true'); } }
+  ph.querySelectorAll('[data-partner]').forEach(i => i.addEventListener('input', () => { S.partner[i.dataset.partner] = i.value.slice(0, 60); }));
+  const ai = ph.querySelector('#ask-in'); if (ai) ai.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ACT.askgo(); } });
   if (ph.querySelector('#tl')) { layoutTL(); bindTL(); }
 }
 function shareBtn(){ const b = document.getElementById('sharego'); if (b) b.disabled = !(S.book.agree && Object.values(S.book.share).some(Boolean)); }
@@ -1092,6 +1244,7 @@ function loadSample(){
   put('mortBal', 212000, 'doc', 96); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('debt', 2800, 'doc', 85); put('debtPayM', 140, 'doc', 78);
   put('life', 'Yes', 'doc', 95); put('ip', 'No', 'typed'); put('ci', 'Not sure', 'typed'); put('workCover', 'Yes', 'doc', 90); put('health', 'Yes', 'typed');
   put('pension', 72000, 'doc', 95); put('pensionM', 520, 'doc', 91); put('sp', 'Expect full', 'typed'); S.look.pension = 'Statement is over 12 months old';
+  S.partner = {mode:'manual', email:'', sent:false, name:'Cian'};
   S.checked = true; S.app = true; S.tab = 'plan'; S.planSeg = 'results'; S.versions = [{note:'LifeMap confirmed', date:'29 Sep 2026'}, {note:'First results', date:'29 Sep 2026'}];
 }
 function J(fn){ return () => { fn(); lastId = null; render(); }; }
@@ -1100,7 +1253,7 @@ const JUMPS = [
   ['Discover', [['D0','Welcome', () => { S = fresh(); }], ['D1','What brought you here?', () => { S = fresh(); S.scr = 'D1'; }], ['D2','Question 1 of 7', () => { S = fresh(); S.scr = 'D2'; S.di = 0; }], ['D6','Question 5 (forecast)', () => { S = fresh(); S.scr = 'D6'; S.di = 4; }], ['D7','Question 6 (scenario)', () => { S = fresh(); S.scr = 'D7'; S.di = 5; }], ['D9','A bit about you', () => { S = fresh(); S.scr = 'D9'; S.di = 6; }], ['D10','Money-story glimpse', () => { loadSample(); S.app = false; S.scr = 'D10'; }]]],
   ['Define', [['F1','Pick your goals', () => { loadSample(); S.app = false; S.scr = 'F1'; }], ['F2','Your timeline (drag)', () => { loadSample(); S.app = false; S.scr = 'F2'; }], ['F4','Confirm my LifeMap', () => { loadSample(); S.app = false; S.scr = 'F4'; }]]],
   ['Prepare', [['P1','Create your account', () => { loadSample(); S.app = false; S.acct.c1 = false; S.scr = 'P1'; }], ['P1E','Email code', () => { loadSample(); S.app = false; S.scr = 'P1E'; }], ['P2','Your finances hub', () => { loadSample(); S.app = false; S.scr = 'P2'; }], ['P3-2','Income (type it)', () => { loadSample(); S.app = false; S.scr = 'P3'; S.fsec = 1; }], ['P3-6','Pension (upload)', () => { loadSample(); S.app = false; S.scr = 'P3'; S.fsec = 5; S.fmode.pension = 'upload'; }], ['P4','Check your details', () => { loadSample(); S.app = false; S.checked = false; S.scr = 'P4'; }]]],
-  ['Results & app', [['U2','Your results', () => { loadSample(); }], ['PLAN-TL','My Plan · timeline', () => { loadSample(); S.planSeg = 'timeline'; }], ['ME-01','Me', () => { loadSample(); S.tab = 'me'; }], ['ME-UM','Understand me', () => { loadSample(); S.tab = 'me'; S.me = 'um'; }], ['ME-UM2','Understand me · risk', () => { loadSample(); S.tab = 'me'; S.me = 'ums'; S.um.sec = 2; }], ['ME-R','Profile result', () => { loadSample(); Object.assign(S.um.a, {u4:1, u9:3, u10:1, u11:1, u12:2, u13:1}); S.um.done = {1:true, 2:true, 3:true}; S.tab = 'me'; S.me = 'umr'; }], ['ME-MONEY','My money', () => { loadSample(); S.tab = 'me'; S.me = 'money'; }]]],
+  ['Results & app', [['HOME','Home dashboard', () => { loadSample(); S.tab = 'home'; }], ['ASK','Ask (help sheet)', () => { loadSample(); S.tab = 'home'; S.sheet = 'ask'; S.ask.open = 'pgap'; }], ['U2','Your results', () => { loadSample(); }], ['PLAN-TL','My Plan · timeline', () => { loadSample(); S.planSeg = 'timeline'; }], ['ME-01','Me', () => { loadSample(); S.tab = 'me'; }], ['ME-UM','Understand me', () => { loadSample(); S.tab = 'me'; S.me = 'um'; }], ['ME-CHK','Your first answers (re-check)', () => { loadSample(); S.tab = 'me'; S.me = 'recheck'; }], ['ME-UM2','Understand me · capacity', () => { loadSample(); S.tab = 'me'; S.me = 'ums'; S.um.sec = 2; }], ['ME-R','Profile result', () => { loadSample(); Object.assign(S.um.a, {u4:1, u9:3, u10:1, u11:1, u12:2, u13:1}); S.um.done = {1:true, 2:true, 3:true}; S.tab = 'me'; S.me = 'umr'; }], ['ME-MONEY','My money', () => { loadSample(); S.tab = 'me'; S.me = 'money'; }]]],
   ['Connect', [['C0','Help your adviser know you', () => { loadSample(); S.tab = 'exp'; S.exp = 'c0'; }], ['C1','Your match', () => { loadSample(); S.tab = 'exp'; S.exp = 'c1'; }], ['C2','Share your plan', () => { loadSample(); S.tab = 'exp'; S.exp = 'c2'; }], ['C3','Pick a time', () => { loadSample(); S.tab = 'exp'; S.exp = 'c3'; }], ['C4',"You're booked", () => { loadSample(); S.tab = 'exp'; S.exp = 'c4'; S.book.done = true; S.book.slot = SLOTS[1]; }]]]
 ];
 function side(){
