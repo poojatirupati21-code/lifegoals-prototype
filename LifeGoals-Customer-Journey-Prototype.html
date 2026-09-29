@@ -19,6 +19,7 @@ body{font-family:var(--fb);color:var(--ink);background:#E4ECE8;display:flex;min-
 button,input,select,textarea{font-family:inherit;color:inherit}
 h1,h2,h3,.disp{font-family:var(--fh);letter-spacing:-.01em}
 :focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+[tabindex="-1"]:focus,[tabindex="-1"]:focus-visible{outline:none}
 .opt:focus-visible,.chip:focus-visible,.btn:focus-visible,.wbtn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 /* side panel */
@@ -252,8 +253,11 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 /* report */
 #report{display:none;position:fixed;inset:0;z-index:100;background:#E4ECE8;overflow:auto}
 #report.on{display:block}
-.rep-bar{position:sticky;top:0;background:var(--ink);color:#fff;display:flex;gap:10px;align-items:center;padding:10px 16px;z-index:2}
-.rep-bar b{flex:1;font-family:var(--fh)}
+.rep-bar{position:sticky;top:0;background:var(--ink);color:#fff;display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;padding:10px 16px;z-index:2}
+.rep-bar b{flex:1 1 140px;min-width:0;font-family:var(--fh);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tscroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+.tscroll table{min-width:520px}
+@media (max-width:600px){.rep{margin:0;padding:20px 16px;border-radius:0}.rep h1{font-size:24px}.rep-bar button{padding:0 12px}}
 .rep-bar button{min-height:40px;border-radius:20px;border:0;padding:0 16px;font-weight:800;cursor:pointer}
 .rep{max-width:820px;margin:18px auto 40px;background:#fff;padding:32px 36px;border-radius:12px;line-height:1.5;font-size:14px}
 .rep h1{font-size:30px;margin:0 0 4px}.rep h2{font-size:20px;margin:28px 0 8px;border-bottom:2px solid var(--line);padding-bottom:4px}
@@ -269,7 +273,7 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 <button class="big alt" id="startsample">⚡ Load sample customer → Results</button>
 <h4>Current screen</h4><div id="curid" aria-live="polite"></div>
 <h4>Jump to any screen</h4><div id="jumps"></div>
-<p style="margin-top:16px">Guidance, not advice. Projections are illustrative and use simple assumptions. Demo codes: <b>123456</b>.</p>
+<p style="margin-top:16px"><b>Reviewer notes:</b> the revenue model in "How LifeGoals makes money" is to be confirmed; the assumptions and risk scoring are to be confirmed by the Financial Planner.</p><p>Guidance, not advice. Projections are illustrative and use simple assumptions. Demo codes: <b>123456</b>.</p>
 </aside>
 <main class="stage"><div id="wrap"><div class="phone" id="phone"><div id="screen"></div><div id="toast" role="status" aria-live="polite"></div></div></div></main>
 <div id="report" role="dialog" aria-modal="true" aria-label="Your LifeGoals plan report"></div>
@@ -341,7 +345,7 @@ const UM = [
 const FSEC = [
   {id:'about', t:'About you', e:'🙋', docs:[], f:['name','age','retireAge','pAge']},
   {id:'income', t:'Income and expenses', e:'💶', docs:[['🧾','Payslips (last 3)'],['🏛️','Employment Detail Summary'],['🏦','Current-account statements'],['📑','Form 11 / Notice of Assessment']], f:['work','income','pIncome','otherM','costsM','oneOffY']},
-  {id:'assets', t:'Assets', e:'🏠', docs:[['🐷','Savings or credit-union statement'],['📈','Investment statement'],['🪙','Share scheme or crypto statement'],['🏡','Property valuation or LPT record']], f:['home','homeValue','cash','invest','saveM','propValue','rentM']},
+  {id:'assets', t:'Assets', e:'🏠', docs:[['🐷','Savings or credit-union statement'],['📈','Investment statement'],['🪙','Share scheme or crypto statement'],['🏡','Property valuation or LPT record']], f:['home','homeValue','cash','invest','propValue','rentM']},
   {id:'liab', t:'Liabilities', e:'💳', docs:[['🏠','Mortgage statement'],['📄','Loan statement'],['💳','Credit-card statement'],['🗂️','Central Credit Register report']], f:['mortBal','mortPayM','mortYears','debt','debtPayM']},
   {id:'prot', t:'Protection', e:'🛡️', docs:[['📜','Life or income protection policy'],['🏢','Employer benefits statement'],['🩺','Health or home insurance policy']], f:['life','ip','ci','workCover','health']},
   {id:'pension', t:'Pension', e:'🌅', docs:[['📊','Pension statement'],['🏢','Employer scheme details'],['🏛️','State Pension record (MyWelfare)']], f:['pension','pensionM','sp']}
@@ -362,7 +366,6 @@ const FF = {
   homeValue:{l:'Home value', type:'eur', est:380000, show:own},
   cash:{l:'Cash savings', type:'eur', est:8000, hint:'Incl. credit union and State Savings'},
   invest:{l:'Investments', type:'eur', est:0, hint:'Shares, funds, share schemes, crypto: one total'},
-  saveM:{l:'Saving each month now', type:'eur', est:200},
   propValue:{l:'Other property: value', type:'eur', est:0, opt:1, hint:'Optional'},
   rentM:{l:'Other property: rent received a month', type:'eur', est:0, opt:1, hint:'Optional'},
   mortBal:{l:'Mortgage left', type:'eur', est:200000, show:mort},
@@ -378,7 +381,7 @@ const FF = {
 /* mocked document reader output */
 const UPL = {
   income:{v:{work:['Employed',99], income:[58000,98], costsM:[3100,74], oneOffY:[1800,81]}, docs:['Payslip · Aug 2026','Current-account statement · Jun–Aug 2026']},
-  assets:{v:{cash:[14500,97], invest:[6200,88], saveM:[350,71]}, docs:['Savings statement · Sep 2026','Investment statement · Jun 2026']},
+  assets:{v:{cash:[14500,97], invest:[6200,88]}, docs:['Savings statement · Sep 2026','Investment statement · Jun 2026']},
   liab:{v:{home:['Own with mortgage',99], mortBal:[212000,96], mortPayM:[1180,93], mortYears:[21,90], debt:[2800,85], debtPayM:[140,78]}, docs:['Mortgage statement · Aug 2026','Credit-card statement · Sep 2026']},
   prot:{v:{life:['Yes',95], ip:['No',82], workCover:['Yes',90], health:['Yes',97]}, docs:['Life cover policy · 2021','Employer benefits statement · 2026']},
   pension:{v:{pension:[72000,95], pensionM:[520,91]}, docs:['Pension statement · Jul 2025'], old:{pension:'Statement is over 12 months old'}}
@@ -394,7 +397,7 @@ const ADV_QS = ['Can I retire earlier?','Am I saving enough?','How do I protect 
 /* ================= STATE ================= */
 let S = null;
 function fresh(){
-  return {scr:'D0', app:false, tab:'plan', planSeg:'results', me:'home', exp:'home', entry:'direct',
+  return {scr:'D0', app:false, tab:'plan', planSeg:'main', planGo:null, planEdit:false, me:'home', exp:'home', entry:'direct',
     why:[], di:0, ans:{}, about:{age:38, partner:null, deps:null}, goals:[], gid:1, retireAge:66,
     save:{email:'', comms:false, done:false, asked:false}, tlOpen:{}, tlHl:null,
     acct:{name:'', email:'', mobile:'', c1:false, c2:false, ev:false, sv:false, pk:false},
@@ -436,15 +439,17 @@ function riskRead(full){
   const tk = typeof S.um.a.u9 === 'number' ? S.um.a.u9 : suggestU9(), time = tk + 1;
   let score = Math.min(want, can); if (time === 1) score = Math.min(score, 1.5); if (time === 2) score = Math.min(score, 2.4);
   const label = score <= 1.5 ? 'Cautious' : score <= 2.1 ? 'Cautious–balanced' : score <= 2.7 ? 'Balanced' : score <= 3.3 ? 'Balanced–growth' : 'Growth';
-  const capHi = full ? can >= 3.25 : (q7 === 4 && q6 >= 3), capLo = full ? can < 2.25 : (q7 <= 2 || q6 <= 1);
+  const capHi = full ? can >= 3.25 : (q7 === 4 && q6 >= 3), capLo = full ? can < 2.25 : (q7 <= 2 || q6 <= 1), thin = q7 <= 2;
   let mis = null;
   if (want >= 3 && comp >= 3 && capHi) mis = "You're willing, able and calm under pressure — ready for a growth conversation.";
   else if (want <= 2 && comp <= 2 && capLo) mis = 'Safety first: an emergency fund and protection come before investing.';
-  else if (want >= 3 && capLo) mis = "You're keen on growth, but your cushion is thin — build the safety net first.";
+  else if (want >= 3 && capLo) mis = thin ? "You're keen on growth, but your cushion is thin — build the safety net first." : "You're keen on growth, but there's little room to take a loss right now — build the safety net first.";
   else if (want >= 3 && comp <= 2) mis = 'You like the idea of growth, but drops may unsettle you. A calmer plan could suit you better.';
   else if (want <= 2 && capHi) mis = "You could afford a little more risk, but you'd rather not. That's fine — it's worth seeing what playing safe costs over time.";
-  return {want, can, time, label, mis, comfort:['Careful','Cautious','Balanced','Adventurous'][want - 1], cushion: q7 >= 4 ? 'Strong' : q7 >= 2 ? 'Some' : 'Thin'};
+  return {want, can, time, label, mis, comfort:['Careful','Cautious','Balanced–growth','Adventurous'][want - 1], cushion: thin ? 'Thin' : 'Strong'};
 }
+const discCount = () => DQ.filter(q => typeof S.ans[q.id] === 'number').length;
+const discEnough = () => discCount() >= 5;
 function umCount(){ let n = 0; UM.forEach(s => s.qs.forEach(q => { if (q.d ? typeof S.ans[q.d] === 'number' : typeof S.um.a[q.u] === 'number') n++; })); return n; }
 
 /* ================= GOALS ================= */
@@ -466,10 +471,11 @@ function setRetireAge(a){ S.retireAge = a; const r = retireGoal(); if (r) r.age 
 const AS = {infl:0.02, wage:0.025, cash:0.01, inv:0.045, pen:0.045, sp:15044, spAge:66, end:90, mortRate:0.038, debtRate:0.09};
 function netPay(g){ if (g <= 0) return 0; const it = Math.max(0, 0.2 * Math.min(g, 44000) + 0.4 * Math.max(0, g - 44000) - 4000); return g - it - 0.04 * g - (g > 18304 ? 0.042 * g : 0); }
 function finNums(){
-  const f = S.fin, n = k => { const v = f[k]; if (v != null && v !== '' && !isNaN(+v)) return +v; return FF[k] && !FF[k].opt && FF[k].est != null && !S.src[k] ? +val(FF[k].est) : 0; };
+  // Skipped figures count as €0 and show as ❓ Missing. Only "Estimate for me" adds a (labelled) typical figure. (spec §11)
+  const f = S.fin, n = k => { const v = f[k]; return v != null && v !== '' && !isNaN(+v) ? +v : 0; };
   const mortOn = f.home === 'Own with mortgage';
   return {age:S.about.age, R:S.retireAge, partner:!!S.about.partner, pAge:n('pAge') || S.about.age, income:f.work === 'Not working' ? 0 : n('income'), pIncome:S.about.partner ? n('pIncome') : 0,
-    otherM:n('otherM'), costsM:n('costsM') || val(FF.costsM.est), oneOffY:n('oneOffY'), cash:n('cash'), invest:n('invest'), rentM:n('rentM'),
+    otherM:n('otherM'), costsM:n('costsM'), oneOffY:n('oneOffY'), cash:n('cash'), invest:n('invest'), rentM:n('rentM'),
     mortBal:mortOn ? n('mortBal') : 0, mortPayM:mortOn ? n('mortPayM') : 0, mortYears:mortOn ? n('mortYears') : 0, debt:n('debt'), debtPayM:n('debtPayM'),
     pension:n('pension'), pensionM:n('pensionM'), sp:f.sp === 'Expect full' ? 1 : f.sp === 'Partly' ? 0.6 : 0.8};
 }
@@ -590,7 +596,11 @@ V.D9 = () => { const b = S.about;
   '<div class="field" style="margin:0"><span class="flabel">Children or others who rely on you</span><div class="seg" role="group" aria-label="Dependants">' + ['0','1','2','3+'].map((x, k) => '<button class="' + (b.deps === k ? 'on' : '') + '" aria-pressed="' + (b.deps === k) + '" data-a="deps" data-p="' + k + '">' + x + '</button>').join('') + '</div></div></div></div>' +
   '<div class="qfoot"><button class="qback" data-a="dprev">← Back</button><button class="wbtn" data-a="go" data-p="D10"' + (b.partner == null || b.deps == null ? ' disabled' : '') + '>See my money story</button></div>'};
 };
-V.D10 = () => { const P = personality(), r = riskRead(false);
+V.D10 = () => { if (!discEnough()){ const first = DQ.findIndex(q => typeof S.ans[q.id] !== 'number');
+    return {id:'D10', note:'Money story needs at least 5 of 7 Discover answers (CJ E10: no result from no answers).', kind:'quiz', html:
+    '<div class="qtop"><div class="brand"><span class="mark"></span>Your money story</div></div><div class="qbody"><div class="medal" aria-hidden="true">🧩</div><h2 tabindex="-1">Answer a few more to see your money story</h2><p class="qsub">You answered ' + discCount() + ' of 7. We need at least 5 to show your money personality. It takes under a minute.</p></div>' +
+    '<div class="qfoot" style="flex-direction:column;align-items:stretch;gap:6px"><button class="wbtn" data-a="dgoto" data-p="' + first + '">Answer a few more</button><button class="qback" data-a="go" data-p="F1">Skip for now and build my LifeMap</button></div>'}; }
+  const P = personality(), r = riskRead(false);
   return {id:'D10', note:'Money-story glimpse: personality + risk comfort + cushion + at most one mismatch hint (S1 K13–K17).', kind:'quiz', html:
   '<div class="qtop"><div class="brand"><span class="mark"></span>Your money story</div></div><div class="qbody">' +
   '<div class="panel" style="background:linear-gradient(150deg,var(--sun-l),#fff)"><div class="qeye">Your money personality</div><h2 tabindex="-1" style="font-size:36px;margin:6px 0">' + P.e + ' ' + P.name + '</h2><p class="qsub" style="margin:0;color:var(--ink)">' + P.strap + '</p></div>' +
@@ -624,14 +634,14 @@ function tlBoard(){
 function chipInner(g){ const n = g.age - S.about.age, nm = g.name.length > 13 ? g.name.slice(0, 12) + '…' : g.name;
   return g.kind === 'retire' ? '<span aria-hidden="true">🏁</span>Retire <span class="yr">' + g.age + '</span>' : '<span aria-hidden="true">' + g.e + '</span>' + esc(nm) + ' <span class="yr">in ' + n + ' yr' + (n === 1 ? '' : 's') + '</span>'; }
 function whenTxt(g){ const n = g.age - S.about.age; return (g.kind === 'retire' ? 'Age ' + g.age : 'in ' + n + ' yr' + (n === 1 ? '' : 's') + ' · age ' + g.age) + ' · ' + (YEAR0 + n); }
-function gRows(){
-  return S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const ret = g.kind === 'retire', open = S.tlOpen[g.id];
+function gRows(only){
+  return (only || S.goals).slice().sort((a, b) => a.age - b.age).map(g => { const ret = g.kind === 'retire', open = S.tlOpen[g.id];
     return '<div class="grow' + (S.tlHl === g.id ? ' hl' : '') + '" id="row-' + g.id + '"><div class="hd"><span class="e" aria-hidden="true">' + g.e + '</span><input value="' + esc(g.name) + '" data-gname="' + g.id + '" aria-label="Goal name"' + (ret ? ' readonly' : '') + '>' + (ret ? '' : '<button class="link" style="font-size:12.5px" data-a="gdel" data-p="' + g.id + '" aria-label="Remove ' + esc(g.name) + '">Remove</button>') + '</div>' +
       '<div class="flds"><div class="full"><span class="fl">' + (ret ? 'Retire at' : 'When') + '</span>' + stepper('gyr', g.id, '<span id="when-' + g.id + '">' + whenTxt(g) + '</span>', 'When') + '</div>' +
       '<label><span class="fl">' + (ret ? 'Income a year €' : g.kind === 'mfree' ? 'Mortgage left €' : 'Amount €') + '</span><input class="in" inputmode="numeric" value="' + Math.round(g.amount) + '" data-gamt="' + g.id + '"></label>' +
       (ret ? '<div><span class="fl">Pension</span><span class="small">From Your finances</span></div>' : '<label><span class="fl">Saved so far €</span><input class="in" inputmode="numeric" value="' + Math.round(g.saved || 0) + '" data-gsaved="' + g.id + '"></label>') + '</div>' +
       '<div class="small" style="margin-top:4px">Today\'s money' + (g.kind === 'mfree' && S.fin.mortBal ? ' · from your Liabilities' : '') + '</div>' +
-      (ret ? '' : '<button class="link" data-a="gmore" data-p="' + g.id + '" aria-expanded="' + !!open + '">' + (open ? '▲ Fewer details' : '▼ More details (optional)') + '</button>' + (open ? '<div class="more">' + [['who','For whom',['Me','Partner','Child','Family']],['prio','Priority',['Must have','Nice to have']],['flex','Flexible on timing?',['Can move','Fixed date']]].map(([k, l, os]) => '<div class="fl" style="margin-top:6px">' + l + '</div><div class="chips">' + os.map(o => '<button class="chip sm' + (g[k] === o ? ' sel' : '') + '" aria-pressed="' + (g[k] === o) + '" data-a="gset" data-p="' + g.id + '|' + k + '|' + o + '">' + o + '</button>').join('') + '</div>').join('') + '</div>' : '')) + '</div>'; }).join('');
+      (ret ? '' : '<button class="link" data-a="gmore" data-p="' + g.id + '" aria-expanded="' + !!open + '">' + (open ? '▲ Fewer details' : '▼ More details (optional)') + '</button>' + (open ? '<div class="more">' + [['who','For whom',['Me','Partner','Child','Family']],['flex','Flexible on timing?',['Can move','Fixed date']]].map(([k, l, os]) => '<div class="fl" style="margin-top:6px">' + l + '</div><div class="chips">' + os.map(o => '<button class="chip sm' + (g[k] === o ? ' sel' : '') + '" aria-pressed="' + (g[k] === o) + '" data-a="gset" data-p="' + g.id + '|' + k + '|' + o + '">' + o + '</button>').join('') + '</div>').join('') + '</div>' : '')) + '</div>'; }).join('');
 }
 V.F2 = () => ({id:'F2', note:'Timeline: drag chips (touch, mouse, keyboard), snap to years, lanes never overlap. Retirement flag = retirement age everywhere. Rows below are optional edits.', head:flowHead(2, 'Step 2 · Define', 'Your timeline', "Drag each goal to when you'd like it. Don't worry about being exact. You can change anything later.", 'go|F1'),
   html:saveBanner() + tlBoard() + '<div class="sec"><h3>Your goals</h3><button class="link" data-a="go" data-p="F1">＋ Add a goal</button></div>' + gRows(),
@@ -693,8 +703,10 @@ function partnerBlock(){ const pt = S.partner, m = pt.mode;
   return h; }
 V.P3 = () => { const sec = FSEC[S.fsec], mode = sec.docs.length ? (S.fmode[sec.id] || 'type') : 'type';
   const body = mode === 'upload' ? uploadPick(sec) : '<div class="card">' + sec.f.filter(fieldVisible).filter(k => !(sec.id === 'about' && k === 'pAge')).map(fieldHTML).join('') +
-    (sec.id === 'income' && S.about.partner && S.partner.mode === 'invite' ? '<p class="note">💌 Your partner adds their own income' + (S.partner.sent ? ' (invite sent to ' + esc(S.partner.email) + ')' : '') + '. Until then we use an estimate.</p>' : '') + '</div>' +
-    (sec.id === 'about' && S.about.partner ? '<div class="card"><b>Your partner</b>' + partnerBlock() + '</div>' : '');
+    (sec.id === 'income' && S.about.partner && S.partner.mode === 'invite' ? '<p class="note">💌 Your partner adds their own income' + (S.partner.sent ? ' (invite sent to ' + esc(S.partner.email) + ')' : '') + '. Until then it counts as €0 in your plan.</p>' : '') + '</div>' +
+    (sec.id === 'about' ? '<div class="card"><div class="field"><span class="flabel">Planning with a partner? <span class="tag pre">From your answers</span></span><div class="seg" role="group" style="margin:0" aria-label="Planning with a partner">' + ['Yes','No'].map(x => { const on = (x === 'Yes') === !!S.about.partner; return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-a="partner" data-p="' + x + '">' + x + '</button>'; }).join('') + '</div></div>' +
+      '<div class="field" style="margin:0"><span class="flabel">Children or others who rely on you <span class="tag pre">From your answers</span></span><div class="seg" role="group" style="margin:0" aria-label="Dependants">' + ['0','1','2','3+'].map((x, k) => '<button class="' + (S.about.deps === k ? 'on' : '') + '" aria-pressed="' + (S.about.deps === k) + '" data-a="deps" data-p="' + k + '">' + x + '</button>').join('') + '</div></div>' +
+      (S.about.partner ? '<div style="border-top:1px dashed var(--line);margin-top:14px;padding-top:12px"><b>Your partner</b>' + partnerBlock() + '</div>' : '') + '</div>' : '');
   return {id:'P3-' + (S.fsec + 1), note:'Section ' + (S.fsec + 1) + ' of 6 · ' + sec.t + '. Upload vs Type it; every field has Estimate for me / I don\'t have this.', head:flowHead(3, 'Your finances · ' + (S.fsec + 1) + ' of 6', sec.e + ' ' + sec.t, sec.id === 'about' ? 'Mostly filled in from your answers. Just check it.' : 'Upload a document or type it in. Round figures are fine.', 'fback'),
   html:(sec.docs.length ? '<div class="seg" role="group" aria-label="How to add">' + [['upload','📄 Upload'],['type','⌨️ Type it']].map(([m, l]) => '<button class="' + (mode === m ? 'on' : '') + '" aria-pressed="' + (mode === m) + '" data-a="fmode" data-p="' + m + '">' + l + '</button>').join('') + '</div>' : '<p class="small">No documents needed here. ID and proof of address are handled by your adviser later.</p>') + body,
   foot:'<button class="btn" data-a="fsave">Save this section</button>'};
@@ -717,8 +729,14 @@ function checkItems(){ const out = []; FSEC.forEach(s => s.f.filter(fieldVisible
   const st = look ? 'look' : src === 'est' ? 'est' : !src ? (FF[k].opt ? null : 'miss') : src === 'doc' ? 'ok' : 'typed'; if (st) out.push({k, s, st}); })); return out; }
 V.P4 = () => { const it = checkItems(), flag = it.filter(x => ['look','est','miss'].includes(x.st)), good = it.filter(x => !['look','est','miss'].includes(x.st));
   const ic = {look:'⚠️', est:'≈', miss:'❓'}, lb = {look:'Needs a look', est:'Estimated for you', miss:'Missing'};
-  return {id:'P4', note:'Data-gap review: only ≈ / ❓ / ⚠️ expanded. Required accuracy tick starts unticked.', head:flowHead(3, 'Step 3 · Prepare', 'Check your details', flag.length ? 'Only the items worth a second look are shown.' : 'Everything looks complete.', 'go|P2'),
-  html:(flag.length ? '<div class="card">' + flag.map(x => '<div class="ck"><span class="i" aria-hidden="true">' + ic[x.st] + '</span><div style="flex:1"><b>' + esc(FF[x.k].l) + '</b> <span class="small">· ' + x.s.t + '</span><div class="small">' + lb[x.st] + (x.st === 'look' ? ': ' + esc(S.look[x.k]) : x.st === 'est' ? ' (' + fmtField(x.k) + ')' : '') + (S.ack[x.k] ? ' · <b>Left for my adviser</b>' : '') + '</div>' +
+  // #21: a skipped section (nothing entered at all) is one row, not one row per field
+  const skipped = FSEC.filter(sec => { const fs = sec.f.filter(fieldVisible); return fs.length && fs.every(k => !S.src[k] && !S.look[k]); });
+  const one = flag.filter(x => !skipped.includes(x.s));
+  const secRow = sec => { const ks = sec.f.filter(fieldVisible).filter(k => !FF[k].opt), left = ks.every(k => S.ack[k]);
+    return '<div class="ck"><span class="i" aria-hidden="true">❓</span><div style="flex:1"><b>' + sec.e + ' ' + sec.t + '</b> <span class="small">· skipped</span><div class="small">' + (sec.id === 'prot' ? 'Not added yet' : 'Not added yet, so it counts as €0 for now') + (left ? ' · <b>Left for my adviser</b>' : '') + '</div>' +
+      '<div class="a"><button class="link" data-a="fix" data-p="' + FSEC.indexOf(sec) + '">Add now</button>' + (left ? '' : '<button class="link" data-a="acksec" data-p="' + sec.id + '">Leave for my adviser</button>') + '</div></div></div>'; };
+  return {id:'P4', note:'Data-gap review: one row per skipped section; single rows only for ≈ / ❓ / ⚠️ items in partly filled sections. Required accuracy tick starts unticked.', head:flowHead(3, 'Step 3 · Prepare', 'Check your details', flag.length ? 'Only the items worth a second look are shown.' : 'Everything looks complete.', 'go|P2'),
+  html:(flag.length ? '<div class="card">' + skipped.map(secRow).join('') + one.map(x => '<div class="ck"><span class="i" aria-hidden="true">' + ic[x.st] + '</span><div style="flex:1"><b>' + esc(FF[x.k].l) + '</b> <span class="small">· ' + x.s.t + '</span><div class="small">' + lb[x.st] + (x.st === 'look' ? ': ' + esc(S.look[x.k]) : x.st === 'est' ? ' (' + fmtField(x.k) + ')' : '') + (S.ack[x.k] ? ' · <b>Left for my adviser</b>' : '') + '</div>' +
       '<div class="a"><button class="link" data-a="fix" data-p="' + FSEC.indexOf(x.s) + '">Fix now</button>' + (S.ack[x.k] ? '' : '<button class="link" data-a="ack" data-p="' + x.k + '">Leave for my adviser</button>') + '</div></div></div>').join('') + '</div>' : '') +
     '<details class="card" style="margin-top:12px"><summary style="cursor:pointer;font-weight:800;min-height:32px">✅ ' + good.length + ' details look good</summary>' + good.map(x => '<div class="mini"><span>' + esc(FF[x.k].l) + '</span><span>' + fmtField(x.k) + ' ' + tagFor(x.k) + '</span></div>').join('') + '</details>' +
     '<div class="card"><label class="check"><input type="checkbox" data-chk="1"' + (S.checked ? ' checked' : '') + '><span><b>These details are right, as far as I know</b></span></label></div>',
@@ -744,8 +762,8 @@ function glanceHTML(P){ const v = S.view;
   const tabs = '<div class="vt" role="tablist" aria-label="Your future views">' + [['journey','🛤️ Journey'],['chapters','📖 Life chapters'],['detail','📊 Detail']].map(([k, l]) => '<button role="tab" aria-selected="' + (v === k) + '" class="' + (v === k ? 'on' : '') + '" data-a="view" data-p="' + k + '">' + l + '</button>').join('') + '</div>';
   let body = '';
   if (v === 'journey') body = '<p class="small">Your life as one road, from today to age 90. The milestones are the goals you chose.</p>' + journeySVG(P, 322) + journeyNote(P);
-  else if (v === 'chapters') body = '<p class="small">Your future as chapters of your life. ☀️ comfortable · 🌦️ using savings · ⛈️ a gap to plan for. Tap a chapter to see its years.</p>' + chaptersHTML(P);
-  else body = '<p class="small">Each bar is one year of your life; the dashed line is your income.</p>' + chartSVG(P.rows, 322) + '<div class="legend"><span><i class="sw" style="background:var(--ok)"></i>Needs fully covered</span><span><i class="sw" style="background:var(--dip)"></i>Dipping into savings</span><span><i class="sw" style="background:var(--gap)"></i>Shortfall, not covered</span><span><i class="sw" style="background:var(--ink)"></i>▼ Retirement begins</span></div>' + chartNote(P);
+  else if (v === 'chapters') body = '<p class="small">Your future as chapters of your life. ☀️ comfortable · 🌤️ some years use savings · 🌦️ often using savings · ⛈️ a gap to plan for. Tap a chapter to see its years.</p>' + chaptersHTML(P);
+  else body = '<p class="small">Each bar is one year of your life; the dashed line is your income.</p>' + chartSVG(P.rows, 322) + '<div class="legend"><span><i class="sw" style="background:var(--ok)"></i>Needs fully covered</span><span><i class="sw" style="background:var(--dip)"></i>Dipping into savings</span><span><i class="sw" style="background:var(--gap)"></i>Shortfall, not covered</span><span><i class="sw" style="background:var(--ink)"></i>▼ Retirement begins</span><span><i class="sw" style="background:none;border-top:2px dashed var(--ink);height:0;border-radius:0"></i>Your income each year</span></div>' + chartNote(P);
   return tabs + '<div role="tabpanel">' + body + '</div>'; }
 function journeyNote(P){ const bad = P.rows.find(isShort); return '<p class="pnote"><b>Reading your road:</b> green means your income covers life; amber means you\'re drawing on savings, which is what they\'re for. ' + (bad ? 'The road turns red around <b>age ' + bad.a + '</b>: money runs short there unless the plan changes.' : 'There\'s no red on your road: you don\'t run out of money before 90.') + '</p>'; }
 function chartNote(P){ const n = P.rows.filter(isShort).length; return '<p class="pnote"><b>In plain English:</b> ' + (n ? 'in ' + n + ' year' + (n > 1 ? 's' : '') + ' of your plan, your income and savings don\'t fully cover what you\'ll need (the red bars). These are the gaps to close, by saving more, changing timing, or rethinking a goal.' : 'every year of your plan is covered by your income and savings. No red bars. That\'s what "on track" looks like.') + '</p>'; }
@@ -776,7 +794,7 @@ function journeySVG(P, W){
 function chapters(P){ const ch = []; P.rows.forEach(r => { let d = Math.floor(r.a / 10) * 10; if (d === 90 && ch.length) d = 80; let c = ch[ch.length - 1]; if (!c || c.dec !== d){ c = {dec:d, from:r.a, to:r.a, rows:[]}; ch.push(c); } c.to = r.a; c.rows.push(r); }); return ch; }
 function chaptersHTML(P){ const a0 = P.rows[0].a;
   return '<div class="chapgrid">' + chapters(P).map((c, ci) => { const sh = c.rows.filter(isShort), dip = c.rows.filter(r => r.used > 1 && !isShort(r)), allRet = c.rows.every(r => r.retired);
-    const wx = sh.length ? '⛈️' : dip.length > c.rows.length / 3 ? '🌦️' : '☀️', cls = sh.length ? 'bad' : dip.length > c.rows.length / 3 ? 'warn' : 'ok';
+    const wx = sh.length ? '⛈️' : dip.length > c.rows.length / 3 ? '🌦️' : dip.length ? '🌤️' : '☀️', cls = sh.length ? 'bad' : dip.length > c.rows.length / 3 ? 'warn' : 'ok';
     const story = sh.length ? 'Short by about <b>' + eur(sh.reduce((s, r) => s + r.short, 0) / sh.length) + ' a year</b> in ' + sh.length + ' of these years.' : allRet ? 'Living on your pensions and savings, and they hold up.' : dip.length ? 'Some years dip into savings. That\'s what they\'re for.' : 'Income comfortably covers life.';
     const ev = []; if (c.rows.some(r => r.rmark)) ev.push('🏁 <b>You retire</b>');
     S.goals.filter(g => g.kind !== 'retire' && g.age >= c.from && g.age <= c.to).forEach(g => ev.push(g.e + ' ' + esc(g.name) + ' <b style="color:var(--' + band(P.pct[g.id]) + '-t)">' + P.pct[g.id] + '%</b>'));
@@ -790,7 +808,7 @@ function chartSVG(rows, W){
     if (r.rmark) mk += '<path d="M' + (x + bw / 2 - 6) + ' 6 h12 l-6 10 z" fill="var(--ink)"/><text x="' + (x + bw / 2) + '" y="27" font-size="10" font-weight="700" fill="var(--ink)" text-anchor="middle">retire</text>';
     if (r.a % 10 === 0) bars += '<text x="' + (x + bw / 2) + '" y="' + (H - 6) + '" font-size="10" fill="#51627A" text-anchor="middle">' + r.a + '</text>';
     line += (i ? 'L' : 'M') + (x + bw / 2).toFixed(1) + ' ' + sy(r.inflow).toFixed(1) + ' '; });
-  return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Yearly cashflow chart, age ' + rows[0].a + ' to 90" style="display:block;margin-top:8px">' + bars + '<path d="' + line + '" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-dasharray="5 3"/>' + mk + '<text x="8" y="12" font-size="10.5" font-weight="700" fill="var(--ink)">– – your income each year</text></svg>';
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Yearly cashflow chart, age ' + rows[0].a + ' to 90" style="display:block;margin-top:8px">' + bars + '<path d="' + line + '" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-dasharray="5 3"/>' + mk + '</svg>';
 }
 function wiCard(){ const w = S.wi, gs = S.goals.slice().sort((a, b) => a.age - b.age), g = gById(w.g);
   return '<div class="card" id="r-wi"><h3 class="h">What if…?</h3><p class="small" style="margin:0 0 10px">Try saving a bit more or less, or adding a one-off amount, and see what changes.</p>' +
@@ -817,17 +835,19 @@ function liveUpdate(){ const P0 = project(), P = project(S.wi);
   set('wim-v', (S.wi.m > 0 ? '+' : '') + eur(S.wi.m)); set('wil-v', eur(S.wi.l));
   const g = gById(S.wi.g); set('wim-h', S.wi.m < 0 ? 'Saving less each month (affects your whole plan)' : S.wi.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (into your pension)' : ' until it happens') : '−€500 to +€1,000 a month');
 }
-function tlStrip(){ const P = project(), n = S.goals.filter(g => P.pct[g.id] >= 95).length; return '<div class="card row" id="tl-strip" style="background:var(--sea-l)"><div style="flex:1"><b>' + n + ' of ' + S.goals.length + ' goals on track</b><div class="small" style="color:var(--ink)">Updates as you move things.</div></div><button class="btn sm" data-a="seg" data-p="results">See results</button></div>'; }
+function tlStrip(){ const P = project(), n = S.goals.filter(g => P.pct[g.id] >= 95).length; return '<div class="card row" id="tl-strip" style="background:var(--sea-l)"><div style="flex:1"><b>' + n + ' of ' + S.goals.length + ' goals on track</b><div class="small" style="color:var(--ink)">Updates as you move things.</div></div><button class="btn sm" data-a="seg" data-p="results">See results ↓</button></div>'; }
 
 /* ================= APP SHELL ================= */
 const ICON = {home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>', plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 18c3-6 6 2 9-4s4-6 7-6"/><circle cx="20" cy="8" r="1.6" fill="currentColor"/></svg>',
   me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
   exp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.7A8 8 0 1 1 21 12Z"/></svg>'};
 function appHead(title, sub, back){ return brandBar(back, '<button class="tb-btn" data-a="sheet" data-p="profile" aria-label="Profile and privacy">' + esc((S.acct.name || 'A')[0]) + '</button>') + '<h2 class="t" tabindex="-1" style="margin-top:10px">' + title + '</h2>' + (sub ? '<p class="sub" style="margin:0">' + sub + '</p>' : ''); }
-V.PLAN = () => { const seg = S.planSeg;
-  const segs = '<div class="seg" role="tablist" aria-label="My Plan">' + [['results','Results'],['timeline','Timeline']].map(([k, l]) => '<button role="tab" aria-selected="' + (seg === k) + '" class="' + (seg === k ? 'on' : '') + '" data-a="seg" data-p="' + k + '">' + l + '</button>').join('') + '</div>';
-  if (seg === 'timeline') return {id:'PLAN-TL', note:'My Plan · Timeline (centre of My Plan). Drag to adjust; results recalculate.', head:appHead('My Plan', 'Drag your goals; results update.'), html:segs + tlBoard() + tlStrip() + '<div class="sec"><h3>Your goals</h3><button class="link" data-a="addgoal">＋ Add a goal</button></div>' + gRows()};
-  return {id:'U2', note:'Results in the spec order: goals % → what we found → what if → your future at a glance → 3 end actions.', head:appHead('Your results', 'Here\'s how your plan looks.'), html:segs + resultsHTML()};
+V.PLAN = () => { const hl = S.tlHl != null && gById(S.tlHl), all = S.planEdit;
+  const edit = all ? '<div class="sec"><h3>Your goals</h3><button class="link" data-a="planedit">Done</button></div>' + gRows()
+    : hl ? '<div id="tl-edit">' + gRows([hl]) + '<button class="link" data-a="tlclose">Done</button></div>' : '';
+  return {id:'PLAN', note:'My Plan: timeline at the top (the centre), then goals-on-track strip, then results in spec order: goals % → what we found → what if → at a glance → 3 end actions. Tap a goal to edit it.', head:appHead('My Plan', 'Drag your goals. Your results update below.'),
+    html:tlBoard() + edit + '<div class="row" style="justify-content:space-between;margin:2px 2px 0"><button class="link" data-a="addgoal">＋ Add a goal</button>' + (all ? '' : '<button class="link" data-a="planedit">✏️ Edit goal details</button>') + '</div>' + tlStrip() +
+      '<div id="r-res" style="scroll-margin-top:8px"><div class="sec" style="margin-top:18px"><h3 style="font-size:21px">Your results</h3></div>' + resultsHTML() + '</div>'};
 };
 V.GOALS = () => ({id:'PLAN-ADD', note:'Add a goal from My Plan (same goal tiles).', head:appHead('Add a goal', 'Tap to add or remove.', 'seg|timeline'), html:'<div class="gtiles" role="group" aria-label="Goals">' + GOALCAT.filter(c => c.k !== 'retire').map(c => goalTile(c.k)).join('') + '</div>' + S.goals.filter(g => g.k === 'other').map(g => '<div class="pill mint" style="margin-top:10px">' + g.e + ' ' + esc(g.name) + '</div> ').join(''), foot:'<button class="btn" data-a="seg" data-p="timeline">Back to my timeline</button>'});
 const UM_NEW = ['u4','u9','u10','u11','u12','u13'];
@@ -837,16 +857,21 @@ function needsProfile(){ return umCount() < 13 || !S.um.rechecked; }
 function retBtn(){ const r = S.um.ret; return r === 'c1' ? '<button class="btn ' + (umCount() === 13 ? 'ghost' : 'sun') + '" style="margin-top:10px" data-a="book2">Continue to my adviser match</button>' : r === 'plan' ? '<button class="btn ghost" style="margin-top:10px" data-a="umback" data-p="plan">Back to my plan</button>' : r === 'exp' ? '<button class="btn ghost" style="margin-top:10px" data-a="umback" data-p="exp">Back to my meeting</button>' : ''; }
 /* One Understand Me question. Pre-filled Discover answers show as a selected answer with "Change". */
 function umQCard(q, label){ const d = q.d ? DQ_BY(q.d) : q, key = q.d ? 'd' + q.d : q.u, sug = suggestU9(); let sel = q.d ? S.ans[q.d] : S.um.a[q.u]; const sugg = q.u === 'u9' && typeof sel !== 'number'; if (sugg) sel = sug;
-  const pre = q.d && typeof S.ans[q.d] === 'number', compact = pre && !S.meEdit[key];
+  const pre = false, compact = false;
   return '<div class="card"><div class="small" style="font-weight:800">' + label + '</div><h3 class="h" style="font-size:17px;margin:4px 0 6px">' + esc(d.q) + '</h3>' + (q.help ? '<p class="small" style="margin:0 0 8px">' + esc(q.help) + '</p>' : '') +
     (pre ? '<span class="pill mint" style="margin-bottom:8px">✓ From your first answers — change if you like</span>' : '') + (sugg ? '<span class="pill sunny" style="margin-bottom:8px">Suggested from your timeline — confirm or change</span>' : '') +
     (compact ? '<div class="opt row1 sel" style="cursor:default"><span class="em" style="background:var(--sand)" aria-hidden="true">' + d.o[sel].e + '</span><span class="tx">' + esc(d.o[sel].t) + '</span></div><button class="link" data-a="umedit" data-p="' + key + '" aria-label="Change your answer to: ' + esc(d.q) + '">Change</button>'
       : '<div class="opts" role="group" aria-label="' + esc(d.q) + '">' + d.o.map((o, k) => '<button class="opt row1' + (sel === k ? ' sel' : '') + '" aria-pressed="' + (sel === k) + '" data-a="umpick" data-p="' + key + '|' + k + '"><span class="em" style="background:var(--sand)" aria-hidden="true">' + o.e + '</span><span class="tx">' + esc(o.t) + '</span></button>').join('') + '</div>') +
     (q.chips ? '<div class="small" style="font-weight:800;margin:12px 0 6px">Which have you had? (optional)</div><div class="chips">' + q.chips.map(c => '<button class="chip sm' + (S.um.chips.includes(c) ? ' sel' : '') + '" aria-pressed="' + S.um.chips.includes(c) + '" data-a="umchip" data-p="' + c + '">' + c + '</button>').join('') + '</div>' : '') + '</div>'; }
+function umSummary(qs){ const pre = qs.filter(q => q.d && typeof S.ans[q.d] === 'number');
+  if (!pre.length) return '';
+  return '<div class="card"><div class="row" style="justify-content:space-between;flex-wrap:wrap"><b>Your first answers</b><span class="pill mint">✓ Pre-filled — change if you like</span></div>' + pre.map(q => { const d = DQ_BY(q.d), key = 'd' + q.d, sel = S.ans[q.d];
+    if (S.meEdit[key]) return '<div class="pq"><div class="small" style="font-weight:800;margin-bottom:6px">' + esc(d.q) + '</div><div class="opts" role="group" aria-label="' + esc(d.q) + '">' + d.o.map((o, k) => '<button class="opt row1' + (sel === k ? ' sel' : '') + '" aria-pressed="' + (sel === k) + '" data-a="umpick" data-p="' + key + '|' + k + '"><span class="em" style="background:var(--sand)" aria-hidden="true">' + o.e + '</span><span class="tx">' + esc(o.t) + '</span></button>').join('') + '</div></div>';
+    return '<div class="pq"><div class="small">' + esc(d.q) + '</div><div class="row" style="margin-top:2px"><span aria-hidden="true" style="font-size:20px">' + d.o[sel].e + '</span><b style="flex:1;font-size:14.5px">' + esc(d.o[sel].t) + '</b><button class="link" data-a="umedit" data-p="' + key + '" aria-label="Change your answer to: ' + esc(d.q) + '">Change</button></div></div>'; }).join('') + '</div>'; }
 function rowBtn(a, p, e, t, d, right){ return '<button class="goal" data-a="' + a + '" data-p="' + p + '"><span class="ic" aria-hidden="true">' + e + '</span><span style="flex:1;min-width:0"><b>' + t + '</b><br><span class="small">' + d + '</span></span>' + (right || '<span class="chev" aria-hidden="true">›</span>') + '</button>'; }
 V.ME = () => { const m = S.me;
   if (m === 'recheck') return {id:'ME-CHK', note:'Re-check of the 7 Discover answers, pre-filled. Confirm or change (Pooja Q5).', head:appHead('Your first answers', 'From when you started. Do they still fit you?', 'meback'),
-    html:DQ.map((q, i) => umQCard({d:q.id}, (i + 1) + ' of 7')).join(''), foot:'<button class="btn" data-a="recheckok">These still look right</button>'};
+    html:umSummary(DQ.map(q => ({d:q.id}))) + DQ.filter(q => typeof S.ans[q.id] !== 'number').map(q => umQCard({d:q.id}, 'Not answered yet')).join(''), foot:'<button class="btn" data-a="recheckok">These still look right</button>'};
   if (m === 'um') return {id:'ME-UM', note:'Understand Me: 13 questions in 3 sections labelled Risk · Capacity · Investor behaviour (MASTER B7). 7 pre-filled from Discover.', head:appHead('Understand me', 'Risk · Capacity · Investor behaviour. About 2 minutes: only 6 questions are new.', 'meback'),
       html:'<div class="card row">' + ring(Math.round(umCount() / 13 * 100), 64, 'var(--sea-d)') + '<div><b>' + umCount() + ' of 13 answered</b><div class="small">7 came from your first answers</div></div></div>' +
         '<p class="small" style="margin:12px 2px 0">Three things make up your risk profile: how much risk you <b>want</b> to take, how much you <b>can</b> afford to take, and <b>how long</b> you can wait.</p>' +
@@ -855,7 +880,7 @@ V.ME = () => { const m = S.me;
         (umCount() === 13 ? '<button class="btn" data-a="me" data-p="umr" style="margin-top:6px">See my profile</button>' : '') + retBtn()};
   if (m === 'ums') { const s = UM.find(x => x.n === S.um.sec), off = UM.slice(0, s.n - 1).reduce((a, x) => a + x.qs.length, 0);
     return {id:'ME-UM' + s.n, note:'Understand Me section ' + s.n + ' · ' + s.t + '. Pre-filled answers shown selected, with Change.', head:appHead(s.e + ' ' + s.t, s.intro, 'me|um'),
-      html:s.qs.map((q, qi) => umQCard(q, (off + qi + 1) + ' of 13')).join(''), foot:'<button class="btn" data-a="umsave">Save this section</button>'}; }
+      html:umSummary(s.qs) + s.qs.map((q, qi) => q.d && typeof S.ans[q.d] === 'number' ? '' : umQCard(q, (off + qi + 1) + ' of 13')).join(''), foot:'<button class="btn" data-a="umsave">Save this section</button>'}; }
   if (m === 'umr') { const P = personality(), r = riskRead(true), bar = (l, v) => '<div class="row" style="margin-top:8px;font-size:13px;font-weight:700"><span style="width:150px">' + l + '</span><span class="pbar" style="flex:1"><i style="width:' + Math.round(v / 4 * 100) + '%"></i></span></div>';
     return {id:'ME-R', note:'Understand Me result: money personality + indicative risk profile (5 labels, capped by lower of want and can-afford). Feeds My Plan. Adviser confirms.', head:appHead('Your profile', '', 'me|um'),
       html:'<div class="card" style="background:linear-gradient(150deg,var(--sun-l),#fff)"><div class="eyebrow" style="color:var(--acc-d)">Your money personality</div><div style="font-family:var(--fh);font-size:30px;font-weight:800;margin:4px 0">' + P.e + ' ' + P.name + '</div><p style="margin:0 0 8px">' + P.strap + '</p><b>Strengths</b><div class="chips" style="margin:6px 0 10px">' + P.str.map(x => '<span class="pill ok">' + x + '</span>').join('') + '</div><b>One thing to watch</b><p style="margin:4px 0 0" class="small">' + P.watch + '</p></div>' +
@@ -878,9 +903,10 @@ V.ME = () => { const m = S.me;
       '<div class="card"><div class="adv"><span class="face" style="width:48px;height:48px;border-radius:16px;font-size:20px" aria-hidden="true">' + esc(nm[0]) + '</span><div style="flex:1"><b style="font-size:17px">' + esc(nm) + '</b><div class="small">Age ' + b.age + ' · retiring at ' + S.retireAge + '</div></div><button class="link" data-a="me" data-p="details">Edit</button></div>' +
         '<div class="field" style="margin:16px 0 0"><span class="flabel">Planning with a partner?</span>' + seg('partner', [['Yes','Yes'],['No','No']], v => (v === 'Yes' && b.partner === true) || (v === 'No' && b.partner === false)) + (b.partner ? partnerBlock() : '') + '</div>' +
         '<div class="field" style="margin:16px 0 0"><span class="flabel">Children or others who rely on you</span>' + seg('deps', [[0,'0'],[1,'1'],[2,'2'],[3,'3+']], v => b.deps === v) + '</div></div>' +
+      (!discEnough() ? '<div class="card"><div class="eyebrow">Your profile</div><p class="small" style="color:var(--ink);margin:6px 0 0">Answer a few more of your first questions to see your money personality and indicative risk profile.</p><button class="link" data-a="me" data-p="recheck">Answer a few more</button></div>' :
       '<div class="card"><div class="eyebrow">Your profile</div><div class="row" style="margin-top:6px"><span style="font-size:34px" aria-hidden="true">' + P.e + '</span><div style="flex:1"><b style="font-family:var(--fh);font-size:20px">' + P.name + '</b><div class="small">' + P.strap + '</div></div></div>' +
         '<div class="mini" style="margin-top:8px"><span>Indicative risk profile</span><b>' + r.label + '</b></div><span class="pill ' + (full ? 'ok' : 'sunny') + '">' + (full ? '✓ From all 13 answers' : 'First read · 7 of 13 answers') + '</span>' +
-        '<div><button class="link" data-a="me" data-p="' + (full ? 'umr' : 'um') + '">' + (full ? 'See my full profile' : 'Answer 6 more to confirm it') + '</button></div></div>' +
+        '<div><button class="link" data-a="me" data-p="' + (full ? 'umr' : 'um') + '">' + (full ? 'See my full profile' : 'Answer 6 more to confirm it') + '</button></div></div>') +
       '<div style="margin-top:12px">' + rowBtn('me', 'recheck', '✅', 'Your first answers', S.um.rechecked ? 'Checked ✓ · 7 answers from when you started' : '7 answers, pre-filled · check they still fit') +
         rowBtn('me', 'um', '🧭', 'Deeper questions', 'Your risk · Your capacity · Your investor behaviour · ' + umNewCount() + ' of 6 answered', ring(Math.round(umCount() / 13 * 100), 46, 'var(--sea-d)')) +
         rowBtn('me', 'money', '💶', 'My money', 'Your 6 finance sections and documents') + rowBtn('me', 'privacy', '🔐', 'Privacy & sharing', 'Consents, what advisers see, delete my data') + '</div>' +
@@ -903,11 +929,13 @@ V.HOME = () => { const P = project(), gs = S.goals.slice().sort((a, b) => a.age 
       '<div class="sec"><h3>Your goals at a glance</h3><button class="link" data-a="seg" data-p="results">See results</button></div><div class="card" style="padding:6px 14px">' + gs.map(g => { const p = P.pct[g.id], b = band(p); return '<div class="mini" style="align-items:center"><span><span aria-hidden="true">' + g.e + '</span> <b>' + esc(g.name) + '</b> <span class="small">· ' + yearsTxt(g) + '</span></span><span class="pill" style="background:var(--' + b + '-l);color:var(--' + b + '-t)">' + p + '%</span></div>'; }).join('') + '</div>' +
       '<div class="sec"><h3>Shortcuts</h3></div><div class="shortcuts">' + [['seg','timeline','🗓️','My timeline'],['gowi','','🔮','Try a what-if'],['upl','smart','📥','Add a document'],['report','','⬇️','Download my plan']].map(([a, p, e, t]) => '<button class="tile" data-a="' + a + '"' + (p ? ' data-p="' + p + '"' : '') + '><span class="e" aria-hidden="true">' + e + '</span>' + t + '</button>').join('') + '</div>' +
       '<p class="disc">Guidance, not advice. Figures are illustrative and based on your details and our assumptions.</p>'}; };
-function planProfileBanner(){ const full = umCount() === 13, r = riskRead(full); return '<div class="banner" id="r-prof"><span aria-hidden="true">🧭</span><span><b>Risk profile: ' + r.label + '</b> <span class="small">· ' + (full ? 'from your profile in Me' : 'first read from 7 answers') + '</span></span><button class="link" data-a="toprofile">' + (full ? 'View' : 'Finish in Me') + '</button></div>'; }
+function planProfileBanner(){ const full = umCount() === 13, r = riskRead(full);
+  if (!discEnough()) return '<div class="banner" id="r-prof"><span aria-hidden="true">🧭</span><span><b>Risk profile: not enough answers yet</b></span><button class="link" data-a="me" data-p="recheck">Answer in Me</button></div>';
+  return '<div class="banner" id="r-prof"><span aria-hidden="true">🧭</span><span><b>Risk profile: ' + r.label + '</b> <span class="small">· ' + (full ? 'from your profile in Me' : 'first read from 7 answers') + '</span></span><button class="link" data-a="toprofile">' + (full ? 'View' : 'Finish in Me') + '</button></div>'; }
 function specialist(){ const P = project(), w = S.goals.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id])[0]; return {type:EXPERT_FOR[w ? w.spec : 'planner'], goal:w}; }
 V.EXP = () => { const b = S.book, st = S.exp, A = ADVISERS[b.adv], sp = specialist();
   const advCard = '<div class="card"><div class="adv"><span class="face" aria-hidden="true">' + A.ini + '</span><div><b style="font-size:17px">' + A.n + '</b><div class="small">' + sp.type + ' · ' + A.q + '</div><div class="small">🗣️ ' + A.lang + ' · 📍 ' + A.loc + ' · ' + A.mode + '</div></div></div><p class="small" style="margin:10px 0 0">Matched because <b>' + esc(sp.goal ? sp.goal.name.toLowerCase() : 'your plan') + '</b> is where you could gain most. <span class="pill grey">Sample adviser</span></p></div>';
-  if (st === 'c0') return {id:'C0', note:'Optional: Help your adviser know you → Understand Me with 7 answers pre-filled. Skippable.', head:appHead('Help your adviser know you', '', 'exp|home'), html:'<div class="card" style="text-align:center"><div style="font-size:46px" aria-hidden="true">🧭</div><b style="font-size:17px">6 quick questions, about 2 min</b><p class="small">Your adviser sees this, so you won\'t repeat yourself. 7 of your answers are already filled in.</p></div>', foot:'<button class="btn" data-a="c0go">Answer the questions</button><button class="btn ghost" data-a="exp" data-p="c1">Skip for now</button>'};
+  if (st === 'c0') return {id:'C0', note:'Optional: Help your adviser know you → Understand Me with 7 answers pre-filled. Skippable.', head:appHead('Help your adviser know you', '', 'exp|home'), html:'<div class="card" style="text-align:center"><div style="font-size:46px" aria-hidden="true">🧭</div><b style="font-size:17px">6 quick questions, about 2 min</b><p class="small">You can choose to share this with your adviser, so you won\'t repeat yourself. 7 of your answers are already filled in.</p></div>', foot:'<button class="btn" data-a="c0go">Answer the questions</button><button class="btn ghost" data-a="exp" data-p="c1">Skip for now</button>'};
   if (st === 'c1') return {id:'C1', note:'Your match: specialist type from Step 5 mapping (weakest goal).', head:appHead('Your match', 'A ' + sp.type.toLowerCase() + ' who fits your plan.', 'exp|home'), html:(needsProfile() ? nudge('🧭', 'Check your profile before your adviser meeting', 'Check now', 'toprofile') : '') + advCard + '<button class="link" data-a="advnext">See another match</button> · <button class="link" data-a="toast" data-p="' + A.n.split(' ')[0] + ' will call you within 1 working day">Request a call back</button>', foot:'<button class="btn" data-a="exp" data-p="c2">Choose ' + A.n.split(' ')[0] + '</button>'};
   if (st === 'c2'){ const any = Object.values(b.share).some(Boolean); return {id:'C2', note:'Share your plan: explicit consent per item, all unticked. Referral / conflicts disclosed.', head:appHead('Share your plan', 'Choose what ' + A.n.split(' ')[0] + ' can see before you meet.', 'exp|c1'),
     html:'<div class="card">' + [['report','Your plan report','Goals, results and what-ifs'],['fin','Your finances','The figures in your 6 sections'],['docs','Your documents','Statements you uploaded'],['um','Your Understand Me profile','Personality and indicative risk profile']].map(([k, l, d]) => '<label class="check"><input type="checkbox" data-share="' + k + '"' + (b.share[k] ? ' checked' : '') + '><span><b>' + l + '</b><br><span class="small">' + d + '</span></span></label>').join('') + '</div>' +
@@ -939,10 +967,11 @@ const ASK_GEN = [
 function askCtx(id){ id = id || '';
   if (/^D/.test(id)) return ['ctx', 'Why do you ask these questions?', 'They help us understand how you feel about money, so the goals and results we show fit you. There are no right or wrong answers, and nothing is saved unless you choose.'];
   if (id === 'F1' || id === 'PLAN-ADD') return ['ctx', 'How do I choose goals?', 'Tap any that matter to you. Pick as many as you like; you can add or remove them later. Retirement is always included so we can check your later years.'];
-  if (id === 'F2' || id === 'PLAN-TL') return ['ctx', 'How does the timeline work?', 'Each goal sits at the age you would like it to happen. Drag it left for sooner or right for later, or use the − and + buttons underneath. Rough is fine; you can change it any time.'];
+  if (id === 'F2' || id === 'PLAN') return ['ctx', 'How does the timeline work?', 'Each goal sits at the age you would like it to happen. Drag it left for sooner or right for later, or use the − and + buttons underneath. Rough is fine; you can change it any time.'];
   if (id === 'F4') return ['ctx', 'What is my LifeMap?', 'It is your list of goals with when and how much. Next, we add your money so we can check how far it goes.'];
   if (/^P1/.test(id)) return ['ctx', 'Why do I need an account?', 'So your money details are stored safely and only you can see them. We check your email and mobile to keep your account secure.'];
   if (/^P[234]|^PU/.test(id)) return ['ctx', 'Why do you need my figures?', 'Your income, savings, debts and pension let us work out how far your money can go. Rough figures are fine. "Estimate for me" fills in a typical figure you can change later. We don\'t connect to your bank.'];
+  if (id === 'HOME') return ['ctx', 'What is "overall readiness"?', 'It is the average of how much each of your goals is covered. 100% means your income and savings are expected to cover every goal. It is a quick summary; My Plan shows the detail.'];
   if (/^ME/.test(id)) return ['ctx', 'Why does my profile matter?', 'Your answers set the indicative risk profile shown on My Plan and in your report. Your adviser sees it only if you choose to share it, so you won\'t have to repeat yourself.'];
   if (/^C|^EXP/.test(id)) return ['ctx', 'What happens at the adviser meeting?', 'It is free, about 45 minutes, and there is no obligation. The adviser goes through your plan with you and answers your questions. Only they can give you advice.'];
   return null; }
@@ -952,7 +981,7 @@ function askPlan(){ if (!S.app || !S.goals.length) return [];
   if (pw < 95) out.push(['pgap', 'Why is ' + esc(w.name.toLowerCase()) + ' ' + pw + '% covered?', 'When ' + esc(w.name.toLowerCase()) + ' comes up (age ' + w.age + '), your income and savings are expected to cover about ' + pw + '% of the ' + eur(w.amount) + (w.kind === 'retire' ? ' a year' : '') + ' you set, in today\'s money. The rest is the gap. In <b>What if</b> you can see how saving more, adding a lump sum or moving the date changes it.']);
   else out.push(['pok', 'What does "on track" mean for me?', 'All your goals are at least 95% covered with your figures and our assumptions. It is not a guarantee: prices, pay and markets change, so a yearly check keeps it on track.']);
   if (rg){ const bad = P.rows.find(x => x.a >= rg.age && isShort(x)); out.push(['pret', 'What happens when I retire at ' + rg.age + '?', 'From ' + rg.age + ', your pension and savings pay for the ' + eur(rg.amount) + ' a year you set. The State Pension (about €15,044 a year) starts at 66. ' + (bad ? 'Around age <b>' + bad.a + '</b> the money runs short in this plan, which is why retirement shows ' + P.pct[rg.id] + '%.' : 'In this plan your money lasts to age 90.')]); }
-  out.push(['prisk', 'What does my risk profile mean?', 'Your indicative risk profile is <b>' + r.label + '</b>' + (full ? '' : ' (a first read from 7 answers; answer 6 more in Me to confirm it)') + '. ' + RISK_EXPLAIN[r.label] + ' It is not advice: your adviser confirms it with you.']);
+  if (discEnough()) out.push(['prisk', 'What does my risk profile mean?', 'Your indicative risk profile is <b>' + r.label + '</b>' + (full ? '' : ' (a first read from 7 answers; answer 6 more in Me to confirm it)') + '. ' + RISK_EXPLAIN[r.label] + ' It is not advice: your adviser confirms it with you.']);
   out.push(['pbest', 'What is my main strength?', esc(F.sT) + '. Of all your goals, this one is best covered by your future income, savings and pension.']);
   return out; }
 const ASK_GUARD = 'I can\'t tell you what to do with your money: that would be advice. I can explain what your results mean. For a personal recommendation, a free adviser meeting is the right place.';
@@ -978,8 +1007,8 @@ function sheetHTML(sid){ const s = S.sheet; if (!s) return ''; let h = '';
   if (t === 'whyask') h = '<h2 class="t">Why we ask</h2><p class="sub">Your answers help us show goals and results that fit you. We don\'t save anything unless you choose to, and nothing is shared with an adviser without your say. This is guidance, not advice.</p><button class="btn" data-a="closesheet">Got it</button>';
   if (t === 'save') h = '<h2 class="t">Save and come back later</h2><p class="sub">We\'ll email you a secure link. No password, and no money details yet.</p><div class="field"><label for="sv-email">Email</label><input class="in" id="sv-email" type="email" autocomplete="email" value="' + esc(S.save.email) + '"></div><label class="check"><input type="checkbox" id="sv-comms"' + (S.save.comms ? ' checked' : '') + '><span>Optional: send me tips and updates</span></label><p id="sverr" class="small" style="color:var(--gap-t)" role="alert"></p><button class="btn" data-a="dosave">Email me a link</button>';
   if (t === 'saveprompt') h = '<h2 class="t">Save your progress?</h2><p class="sub">Get a link by email so you can finish later. Optional.</p><button class="btn" data-a="sheet" data-p="save">Save my progress</button><button class="btn ghost" style="margin-top:10px" data-a="go" data-p="F4">Continue without saving</button>';
-  if (t === 'money') h = '<h2 class="t">How LifeGoals makes money</h2><p class="sub">LifeGoals is free for you. If you choose to work with an adviser, their firm may pay us a fee [confirm the actual model]. Advisers never pay to see your data, and you decide what they can see.</p><button class="btn" data-a="closesheet">Got it</button>';
-  if (t === 'assume') h = '<h2 class="t">Our assumptions</h2><div class="card" style="box-shadow:none;background:var(--mist)">' + [['Prices rise (inflation)','2% a year'],['Pay rises','2.5% a year'],['Cash savings grow','1% a year'],['Investments and pensions grow','4.5% a year'],['State Pension','€15,044 a year from 66 (' + (S.fin.sp || 'Not sure') + ')'],['Retirement age','' + S.retireAge],['Tax','Simple Irish estimate (income tax, USC, PRSI)'],['Plan ends','Age 90']].map(x => '<div class="mini"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('') + '</div><p class="disc">Figures are in today\'s money unless noted. Illustrative only; not a guarantee. The Financial Planner will confirm these.</p><button class="btn" data-a="closesheet">Close</button>';
+  if (t === 'money') h = '<h2 class="t">How LifeGoals makes money</h2><p class="sub">LifeGoals is free for you. If you choose to work with an adviser, their firm may pay us a fee. This never changes what you pay. Advisers never pay to see your data, and you decide what they can see.</p><button class="btn" data-a="closesheet">Got it</button>';
+  if (t === 'assume') h = '<h2 class="t">Our assumptions</h2><div class="card" style="box-shadow:none;background:var(--mist)">' + [['Prices rise (inflation)','2% a year'],['Pay rises','2.5% a year'],['Cash savings grow','1% a year'],['Investments and pensions grow','4.5% a year'],['State Pension','€15,044 a year from 66 (' + (S.fin.sp || 'Not sure') + ')'],['Retirement age','' + S.retireAge],['Tax','Simple Irish estimate (income tax, USC, PRSI)'],['Plan ends','Age 90']].map(x => '<div class="mini"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('') + '</div><p class="disc">Figures are in today\'s money unless noted. Illustrative only; not a guarantee.</p><button class="btn" data-a="closesheet">Close</button>';
   if (t === 'explain'){ const F = findings(project()); h = p === 'str' ? '<h2 class="t">Your main strength</h2><p class="sub">' + esc(F.sT) + '. Of all your goals, this one is the best covered by your future income, savings and pension.</p>' : p === 'gap' ? '<h2 class="t">Your main gap</h2><p class="sub">' + esc(F.gT) + '. When that goal comes up, your income and savings won\'t fully cover the cost with today\'s plan.</p>' : '<h2 class="t">Your biggest decision</h2><p class="sub">' + esc(F.dT) + '. Try it in <b>What if</b> below to see the effect. This is guidance, not advice.</p>'; h += '<button class="btn" data-a="closesheet">Got it</button>'; }
   if (t === 'other') h = '<h2 class="t">Something else</h2><p class="sub">Pick one, or name your own.</p><div class="chips">' + OTHER_LIST.map((o, k) => '<button class="chip" data-a="addother" data-p="' + k + '">' + o[0] + ' ' + o[1] + '</button>').join('') + '</div><div class="field" style="margin-top:14px"><label for="oth">Name it yourself</label><input class="in" id="oth" maxlength="30" placeholder="e.g. Kitchen renovation"></div><button class="btn" data-a="addother" data-p="own">Add my goal</button>';
   if (t === 'history') h = '<h2 class="t">Plan history</h2>' + S.versions.map((v, k) => '<div class="mini"><span><b>Version ' + (k + 1) + '</b> · ' + esc(v.note) + '</span><span class="small">' + v.date + '</span></div>').join('') + '<button class="btn" style="margin-top:12px" data-a="closesheet">Close</button>';
@@ -995,15 +1024,15 @@ function openReport(){
   const rows = P0.rows.map(r => '<tr><td>' + r.a + ' (' + r.yr + ')</td><td>' + eur(r.inflow) + '</td><td>' + eur(r.needs) + '</td><td>' + eur(r.used) + '</td><td style="color:' + (isShort(r) ? 'var(--gap-t)' : 'inherit') + '">' + (r.short > 1 ? eur(r.short) : '—') + '</td><td>' + eur(r.liquid) + '</td></tr>').join('');
   const detail = S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const p = P0.pct[g.id], ex = p < 95 ? extraFor(g) : 0;
     return '<p><b>' + g.e + ' ' + esc(g.name) + '</b> · ' + (g.kind === 'retire' ? 'from age ' + g.age + ', ' + eur(g.amount) + ' a year' : 'age ' + g.age + ' (' + (YEAR0 + g.age - S.about.age) + '), ' + eur(g.amount)) + ' in today\'s money · ' + g.prio + '.<br>What is on track: <b>' + p + '%</b> covered (' + BANDW[band(p)] + '). ' + (p >= 95 ? 'Your income and savings cover it.' : ex ? 'What would close the gap: saving about <b>' + eur(ex) + ' a month</b> towards it' + (g.kind === 'retire' ? ' into your pension' : '') + ', or moving it later.' : 'What would close the gap: moving it later, a smaller amount, or a bigger change to saving.') + '</p>'; }).join('');
-  const h = '<div class="rep-bar"><b>Your LifeGoals plan</b><button data-r="print" style="background:var(--sun);color:var(--ink)">🖨 Print / save as PDF</button><button data-r="close" style="background:#fff;color:var(--ink)">Close</button></div><article class="rep">' +
+  const h = '<div class="rep-bar"><b>Your plan</b><button data-r="print" style="background:var(--sun);color:var(--ink)">🖨 Print / save as PDF</button><button data-r="close" style="background:#fff;color:var(--ink)">Close</button></div><article class="rep">' +
     '<h1>' + esc(S.acct.name || 'Your') + '\'s LifeGoals plan</h1><p class="small">Created 29 Sep 2026 · version ' + Math.max(1, S.versions.length) + ' · <b>Preliminary guidance, not financial advice</b></p>' +
     '<section><h2>1. Summary</h2><p>' + esc(F.sT) + '. ' + esc(F.gT) + '. ' + esc(F.dT) + '.</p><div>' + goalsBox(P0) + '</div></section>' +
     '<section><h2>2. Your roadmap</h2>' + journeySVG(P0, 720) + journeyNote(P0) + '<div style="margin-top:12px">' + chaptersHTML(P0).replace(/<button/g, '<div').replace(/<\/button>/g, '</div>') + '</div></section>' +
-    '<section><h2>3. Year-by-year cashflow</h2>' + chartSVG(P0.rows, 720) + '<table><thead><tr><th>Age (year)</th><th>Income</th><th>Needs</th><th>From savings</th><th>Shortfall</th><th>Savings left</th></tr></thead><tbody>' + rows + '</tbody></table></section>' +
+    '<section><h2>3. Year-by-year cashflow</h2>' + chartSVG(P0.rows, 720) + '<div class="tscroll" tabindex="0" role="region" aria-label="Year-by-year table, scrolls sideways"><table><thead><tr><th>Age (year)</th><th>Income</th><th>Needs</th><th>From savings</th><th>Shortfall</th><th>Savings left</th></tr></thead><tbody>' + rows + '</tbody></table></div></section>' +
     '<section><h2>4. Your detailed plan, in plain words</h2>' + detail + '</section>' +
     '<section><h2>5. What-if you saved</h2>' + (wiP ? '<p>' + (wiP.m ? (wiP.m > 0 ? 'Saving ' + eur(wiP.m) + ' more a month' : 'Saving ' + eur(-wiP.m) + ' less a month') : '') + (wiP.m && wiP.l ? ' and ' : '') + (wiP.l ? 'adding ' + eur(wiP.l) + ' once' : '') + (gById(wiP.g) ? ' towards ' + esc(gById(wiP.g).name.toLowerCase()) : '') + ':</p><p>' + wiText(P0, P) + '</p>' : '<p>You haven\'t tried a what-if yet.</p>') + '</section>' +
-    '<section><h2>6. Your money snapshot</h2>' + (S.about.partner ? '<p>Partner: ' + esc(partnerLine()) + '</p>' : '') + '<table><tbody>' + FSEC.map(s => s.f.filter(fieldVisible).map(k => '<tr><td>' + s.t + ' · ' + esc(FF[k].l) + '</td><td>' + fmtField(k) + '</td><td>' + tagFor(k) + '</td></tr>').join('')).join('') + '</tbody></table>' + (flags.length ? '<p>' + flags.length + ' item(s) are estimated, missing or need a look.</p>' : '') + '</section>' +
-    '<section><h2>7. Your money personality' + (um ? ' and indicative risk profile' : '') + '</h2><p><b>' + per.e + ' ' + per.name + '</b>: ' + per.strap + '</p>' + (um ? '<p>Indicative risk profile: <b>' + rp.label + '</b>. ' + (rp.mis ? esc(rp.mis) : '') + ' Your adviser confirms your risk profile with you.</p>' : '<p>Complete <i>Understand me</i> to add your indicative risk profile.</p>') + '</section>' +
+    '<section><h2>6. Your money snapshot</h2>' + (S.about.partner ? '<p>Partner: ' + esc(partnerLine()) + '</p>' : '') + '<div class="tscroll"><table><tbody>' + FSEC.map(s => s.f.filter(fieldVisible).map(k => '<tr><td>' + s.t + ' · ' + esc(FF[k].l) + '</td><td>' + fmtField(k) + '</td><td>' + tagFor(k) + '</td></tr>').join('')).join('') + '</tbody></table></div>' + (flags.length ? '<p>' + flags.length + ' item(s) are estimated, missing or need a look.</p>' : '') + '</section>' +
+    '<section><h2>7. Your money personality' + (um ? ' and indicative risk profile' : '') + '</h2>' + (discEnough() ? '<p><b>' + per.e + ' ' + per.name + '</b>: ' + per.strap + '</p>' : '<p>Not enough answers yet to show a money personality.</p>') + (um ? '<p>Indicative risk profile: <b>' + rp.label + '</b>. ' + (rp.mis ? esc(rp.mis) : '') + ' Your adviser confirms your risk profile with you.</p>' : '<p>Complete <i>Understand me</i> to add your indicative risk profile.</p>') + '</section>' +
     '<section><h2>8. Your questions for an adviser</h2>' + (S.advQs.length ? '<ul>' + S.advQs.map(q => '<li>' + esc(q) + '</li>').join('') + '</ul>' : '<p>None yet.</p>') + '</section>' +
     '<section><h2>9. Assumptions</h2><p>Inflation 2% · pay rises 2.5% · cash 1% · investments and pensions 4.5% · State Pension €15,044 a year from 66 · retirement at ' + S.retireAge + ' · plan to age 90 · simple Irish tax estimate. All projections are illustrative and not guaranteed. This is preliminary guidance, not financial advice. Only an authorised adviser can give advice. ' + DISC_FORMAL + '</p></section></article>';
   const R = document.getElementById('report'); R.innerHTML = h; R.classList.add('on'); R.scrollTop = 0; R.querySelector('[data-r="print"]').focus();
@@ -1036,6 +1065,8 @@ function render(){
   else if (S.sheet){ const f = S.sheet === 'ask' ? scr.querySelector('.sheet h2') : scr.querySelector('.sheet input:not([type=checkbox]),.sheet .btn'); if (f) f.focus(); }
   else if (!same && !(document.activeElement && document.activeElement.matches('#screen input'))){ const h = scr.querySelector('h2[tabindex]'); if (h) h.focus({preventScroll:true}); }
   focusKey = null;
+  if (S.planGo && S.app && S.tab === 'plan'){ const t = {results:'r-res', wi:'r-wi'}[S.planGo], m = document.getElementById('main'); if (t && document.getElementById(t)) document.getElementById(t).scrollIntoView({block:'start', behavior:'instant'}); else if (m) m.scrollTo({top:0, behavior:'instant'}); }
+  S.planGo = null;
   document.getElementById('curid').textContent = s.id + ' · ' + s.note;
   document.querySelectorAll('#jumps button').forEach(b => b.classList.toggle('on', b.dataset.id === s.id));
 }
@@ -1043,7 +1074,7 @@ function go(id){ S.scr = id; S.sheet = null; render(); }
 let toastT = null;
 function toast(msg){ const t = document.getElementById('toast'); t.innerHTML = '<div class="t"><span aria-hidden="true">✨</span>' + esc(msg) + '</div>'; clearTimeout(toastT); toastT = setTimeout(() => { t.innerHTML = ''; }, 2800); }
 function version(note){ S.versions.push({note, date:'29 Sep 2026'}); }
-function toResults(){ S.scr = 'U1'; render(); setTimeout(() => { S.app = true; S.tab = 'plan'; S.planSeg = 'results'; if (!S.versions.some(v => /results/.test(v.note))) version('First results'); render(); }, RM() ? 300 : 1400); }
+function toResults(){ S.scr = 'U1'; render(); setTimeout(() => { S.app = true; S.tab = 'plan'; S.planSeg = 'main'; S.planGo = 'results'; if (!S.versions.some(v => /results/.test(v.note))) version('First results'); render(); }, RM() ? 300 : 1400); }
 function finBack(){ if (S.from === 'check'){ S.from = null; S.fsec = null; if (S.app) { render(); } else go('P4'); return; } S.fsec = null; if (S.app){ if (S.tab === 'me'){ S.me = 'money'; } } else S.scr = 'P2'; render(); }
 function openSec(i){ S.fsec = +i; S.upl = null; if (S.app){ if (S.tab !== 'exp'){ S.tab = 'me'; S.me = 'fin'; } } else S.scr = 'P3'; S.sheet = null; render(); }
 
@@ -1054,7 +1085,7 @@ const ACT = {
   why:p => { const k = +p, i = S.why.indexOf(k); if (i >= 0) S.why.splice(i, 1); else S.why.push(k); focusKey = '[data-a="why"][data-p="' + k + '"]'; render(); },
   dstart:() => { S.di = 0; go('D2'); },
   dpick:p => { const q = DQ[S.di]; S.ans[q.id] = +p; render(); const i = S.di; setTimeout(() => { if (S.scr === 'D' + (i + 2) && DQ[S.di] === q) dnext(); }, RM() ? 0 : 280); },
-  dnext:() => dnext(), dprev:() => { if (S.scr === 'D9'){ S.di = 6; go('D8'); return; } if (S.di <= 0) go('D1'); else { S.di--; go('D' + (S.di + 2)); } },
+  dnext:() => dnext(), dgoto:p => { S.di = +p; go('D' + (S.di + 2)); }, dprev:() => { if (S.scr === 'D9'){ S.di = 6; go('D8'); return; } if (S.di <= 0) go('D1'); else { S.di--; go('D' + (S.di + 2)); } },
   age:p => { const d = +p.split('|')[1]; S.about.age = clamp(S.about.age + d, 18, 80); focusKey = '[data-a="age"][data-p="x|' + d + '"]'; render(); },
   partner:p => { S.about.partner = p === 'Yes'; focusKey = '[data-a="partner"][data-p="' + p + '"]'; render(); },
   deps:p => { S.about.deps = +p; focusKey = '[data-a="deps"][data-p="' + p + '"]'; render(); },
@@ -1082,10 +1113,12 @@ const ACT = {
   fest:p => { const d = FF[p]; S.fin[p] = val(d.est); S.src[p] = 'est'; delete S.look[p]; focusKey = '[data-a="fest"][data-p="' + p + '"]'; render(); },
   fnone:p => { S.fin[p] = 0; S.src[p] = 'none'; delete S.look[p]; focusKey = '[data-a="fnone"][data-p="' + p + '"]'; render(); },
   fix:p => { if (!S.app) S.from = 'check'; openSec(p); }, ack:p => { S.ack[p] = true; render(); },
+  acksec:p => { FSEC.find(x => x.id === p).f.filter(fieldVisible).forEach(k => { if (!FF[k].opt) S.ack[k] = true; }); focusKey = null; render(); },
   toresults:() => { if (!S.checked) return; toResults(); },
   meback:() => { S.me = 'home'; S.fsec = null; S.upl = null; if (S.tab === 'exp') S.exp = 'home'; render(); },
-  tab:p => { S.tab = p; S.sheet = null; S.fsec = null; S.upl = null; if (p === 'me') S.me = 'home'; if (p === 'exp' && !['c1','c2','c3'].includes(S.exp)) S.exp = 'home'; if (p === 'plan' && S.planSeg === 'add') S.planSeg = 'timeline'; lastId = null; render(); },
-  seg:p => { S.planSeg = p; S.tab = 'plan'; S.sheet = null; lastId = null; render(); },
+  tab:p => { S.tab = p; S.sheet = null; S.fsec = null; S.upl = null; if (p === 'me') S.me = 'home'; if (p === 'exp' && !['c1','c2','c3'].includes(S.exp)) S.exp = 'home'; if (p === 'plan'){ S.planSeg = 'main'; S.planGo = 'timeline'; } lastId = null; render(); },
+  seg:p => { S.tab = 'plan'; S.planSeg = 'main'; S.planGo = p; S.sheet = null; lastId = null; render(); },
+  planedit:() => { S.planEdit = !S.planEdit; S.tlHl = null; render(); }, tlclose:() => { S.tlHl = null; render(); },
   addgoal:() => { S.planSeg = 'add'; render(); },
   me:p => { S.tab = 'me'; S.me = p; S.sheet = null; render(); }, exp:p => { S.tab = 'exp'; S.exp = p; render(); },
   umsec:p => { S.um.sec = +p; S.me = 'ums'; render(); },
@@ -1111,8 +1144,8 @@ const ACT = {
   confirmbook:() => { S.book.done = true; S.exp = 'c4'; version('Adviser meeting booked'); render(); toast('Booked. Confirmation sent by email and SMS'); },
   ics:() => { const b = S.book, A = ADVISERS[b.adv], ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LifeGoals//Prototype//EN\r\nBEGIN:VEVENT\r\nUID:lg-' + Date.now() + '\r\nDTSTAMP:20260929T090000Z\r\nDTSTART:20261001T090000Z\r\nDURATION:PT45M\r\nSUMMARY:LifeGoals meeting with ' + A.n + '\r\nDESCRIPTION:' + b.mode + ' · ' + b.slot + '\r\nEND:VEVENT\r\nEND:VCALENDAR';
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ics], {type:'text/calendar'})); a.download = 'lifegoals-meeting.ics'; document.body.appendChild(a); a.click(); a.remove(); toast('Calendar file downloaded'); },
-  adjust:() => { S.planSeg = 'timeline'; S.tab = 'plan'; lastId = null; render(); },
-  ask:() => { S.sheet = 'ask'; S.ask.a = null; S.ask.q = ''; render(); },
+  adjust:() => { S.planSeg = 'main'; S.planGo = 'timeline'; S.tab = 'plan'; lastId = null; render(); },
+  ask:() => { S.sheet = 'ask'; S.ask = {open:null, q:'', a:null}; render(); },
   askq:p => { S.ask.open = S.ask.open === p ? null : p; focusKey = '[data-a="askq"][data-p="' + p + '"]'; render(); },
   askgo:() => { const v = ((document.getElementById('ask-in') || {}).value || '').trim(); if (!v) { toast('Type a question first'); return; } S.ask.q = v.slice(0, 140); S.ask.a = askMatch(S.ask.q); focusKey = '#ask-out'; render(); },
   pmode:p => { S.partner.mode = p; focusKey = '[data-a="pmode"][data-p="' + p + '"]'; render(); },
@@ -1122,8 +1155,8 @@ const ACT = {
   umedit:p => { S.meEdit[p] = true; focusKey = '[data-a="umpick"][data-p^="' + p + '|"]'; render(); },
   recheckok:() => { S.um.rechecked = true; S.meEdit = {}; S.me = 'home'; render(); toast('Thanks. Your first answers are confirmed'); },
   toprofile:() => { S.um.ret = S.tab === 'exp' ? (S.book.done ? 'exp' : 'c1') : S.tab === 'me' ? S.um.ret : 'plan'; S.tab = 'me'; S.me = umCount() === 13 ? (S.um.rechecked ? 'umr' : 'recheck') : 'um'; S.sheet = null; lastId = null; render(); },
-  umback:p => { S.um.ret = null; S.tab = p; if (p === 'exp') S.exp = 'home'; else S.planSeg = 'results'; lastId = null; render(); },
-  gowi:p => { S.tab = 'plan'; S.planSeg = 'results'; if (p) S.wi.g = +p; lastId = null; render(); const w = document.getElementById('r-wi'); if (w) w.scrollIntoView({block:'start'}); },
+  umback:p => { S.um.ret = null; S.tab = p; if (p === 'exp') S.exp = 'home'; else { S.planSeg = 'main'; S.planGo = 'results'; } lastId = null; render(); },
+  gowi:p => { S.tab = 'plan'; S.planSeg = 'main'; S.planGo = 'wi'; if (p) S.wi.g = +p; lastId = null; render(); },
   dodelete:() => { const n = S; S = fresh(); render(); toast('All your data was deleted'); }
 };
 function dnext(){ if (S.di >= DQ.length - 1){ go('D9'); return; } S.di++; go('D' + (S.di + 2)); }
@@ -1186,8 +1219,8 @@ function layoutTL(){
   const L = Math.max(1, lanes.length), axisY = 10 + L * LANE_H + 12;
   tr.querySelectorAll('.tl-stem,.tl-axis,.tl-tick,.tl-tm,.tl-now').forEach(e => e.remove());
   let deco = '<div class="tl-axis" style="top:' + axisY + 'px"></div><div class="tl-now" style="left:0;top:' + (axisY + 2) + 'px" aria-hidden="true"></div>';
-  for (let a = Math.ceil(a0 / 5) * 5; a <= 90; a += 5){ const x = tlX(a, W); deco += '<div class="tl-tm" style="left:' + x + 'px;top:' + (axisY + 6) + 'px"></div>' + (a % 10 === 0 && x > 22 ? '<div class="tl-tick" style="left:' + x + 'px;top:' + (axisY + 16) + 'px">' + a + '</div>' : ''); }
-  deco += '<div class="tl-tick" style="left:14px;top:' + (axisY + 16) + 'px">Now</div><div class="tl-tick" style="left:' + (W - 8) + 'px;top:' + (axisY + 32) + 'px;font-size:10px">age</div>';
+  for (let a = Math.ceil(a0 / 5) * 5; a <= 90; a += 5){ const x = tlX(a, W); deco += '<div class="tl-tm" style="left:' + x + 'px;top:' + (axisY + 6) + 'px"></div>' + (a % 10 === 0 && x > 34 && x < W - 18 ? '<div class="tl-tick" style="left:' + x + 'px;top:' + (axisY + 16) + 'px">age ' + a + '</div>' : ''); }
+  deco += '<div class="tl-tick" style="left:14px;top:' + (axisY + 16) + 'px">Now</div>';
   chips.forEach(c => { const top = 10 + (L - 1 - c.lane) * LANE_H; c.el.style.left = c.left + 'px'; c.el.style.top = top + 'px'; deco += '<div class="tl-stem" style="left:' + c.x + 'px;top:' + (top + 36) + 'px;height:' + (axisY - top - 36) + 'px"></div>'; });
   tr.insertAdjacentHTML('afterbegin', deco);
   tr.style.height = (axisY + 46) + 'px';
@@ -1240,12 +1273,12 @@ function loadSample(){
   const put = (k, v, src, c) => { S.fin[k] = v; S.src[k] = src; if (c) S.conf[k] = c; };
   put('name', 'Aoife', 'pre'); put('age', 38, 'pre'); put('retireAge', 63, 'pre'); put('pAge', 37, 'typed');
   put('work', 'Employed', 'doc', 99); put('income', 58000, 'doc', 98); put('pIncome', 22000, 'typed'); put('otherM', 0, 'none'); put('costsM', 3600, 'est'); put('oneOffY', 1800, 'doc', 81);
-  put('home', 'Own with mortgage', 'doc', 99); put('homeValue', 420000, 'typed'); put('cash', 9000, 'doc', 97); put('invest', 6200, 'doc', 88); put('saveM', 350, 'doc', 71);
+  put('home', 'Own with mortgage', 'doc', 99); put('homeValue', 420000, 'typed'); put('cash', 9000, 'doc', 97); put('invest', 6200, 'doc', 88);
   put('mortBal', 212000, 'doc', 96); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('debt', 2800, 'doc', 85); put('debtPayM', 140, 'doc', 78);
   put('life', 'Yes', 'doc', 95); put('ip', 'No', 'typed'); put('ci', 'Not sure', 'typed'); put('workCover', 'Yes', 'doc', 90); put('health', 'Yes', 'typed');
   put('pension', 72000, 'doc', 95); put('pensionM', 520, 'doc', 91); put('sp', 'Expect full', 'typed'); S.look.pension = 'Statement is over 12 months old';
   S.partner = {mode:'manual', email:'', sent:false, name:'Cian'};
-  S.checked = true; S.app = true; S.tab = 'plan'; S.planSeg = 'results'; S.versions = [{note:'LifeMap confirmed', date:'29 Sep 2026'}, {note:'First results', date:'29 Sep 2026'}];
+  S.checked = true; S.app = true; S.tab = 'plan'; S.planSeg = 'main'; S.versions = [{note:'LifeMap confirmed', date:'29 Sep 2026'}, {note:'First results', date:'29 Sep 2026'}];
 }
 function J(fn){ return () => { fn(); lastId = null; render(); }; }
 const withS = f => () => { if (!S.app) loadSample(); f(); };
@@ -1253,7 +1286,7 @@ const JUMPS = [
   ['Discover', [['D0','Welcome', () => { S = fresh(); }], ['D1','What brought you here?', () => { S = fresh(); S.scr = 'D1'; }], ['D2','Question 1 of 7', () => { S = fresh(); S.scr = 'D2'; S.di = 0; }], ['D6','Question 5 (forecast)', () => { S = fresh(); S.scr = 'D6'; S.di = 4; }], ['D7','Question 6 (scenario)', () => { S = fresh(); S.scr = 'D7'; S.di = 5; }], ['D9','A bit about you', () => { S = fresh(); S.scr = 'D9'; S.di = 6; }], ['D10','Money-story glimpse', () => { loadSample(); S.app = false; S.scr = 'D10'; }]]],
   ['Define', [['F1','Pick your goals', () => { loadSample(); S.app = false; S.scr = 'F1'; }], ['F2','Your timeline (drag)', () => { loadSample(); S.app = false; S.scr = 'F2'; }], ['F4','Confirm my LifeMap', () => { loadSample(); S.app = false; S.scr = 'F4'; }]]],
   ['Prepare', [['P1','Create your account', () => { loadSample(); S.app = false; S.acct.c1 = false; S.scr = 'P1'; }], ['P1E','Email code', () => { loadSample(); S.app = false; S.scr = 'P1E'; }], ['P2','Your finances hub', () => { loadSample(); S.app = false; S.scr = 'P2'; }], ['P3-2','Income (type it)', () => { loadSample(); S.app = false; S.scr = 'P3'; S.fsec = 1; }], ['P3-6','Pension (upload)', () => { loadSample(); S.app = false; S.scr = 'P3'; S.fsec = 5; S.fmode.pension = 'upload'; }], ['P4','Check your details', () => { loadSample(); S.app = false; S.checked = false; S.scr = 'P4'; }]]],
-  ['Results & app', [['HOME','Home dashboard', () => { loadSample(); S.tab = 'home'; }], ['ASK','Ask (help sheet)', () => { loadSample(); S.tab = 'home'; S.sheet = 'ask'; S.ask.open = 'pgap'; }], ['U2','Your results', () => { loadSample(); }], ['PLAN-TL','My Plan · timeline', () => { loadSample(); S.planSeg = 'timeline'; }], ['ME-01','Me', () => { loadSample(); S.tab = 'me'; }], ['ME-UM','Understand me', () => { loadSample(); S.tab = 'me'; S.me = 'um'; }], ['ME-CHK','Your first answers (re-check)', () => { loadSample(); S.tab = 'me'; S.me = 'recheck'; }], ['ME-UM2','Understand me · capacity', () => { loadSample(); S.tab = 'me'; S.me = 'ums'; S.um.sec = 2; }], ['ME-R','Profile result', () => { loadSample(); Object.assign(S.um.a, {u4:1, u9:3, u10:1, u11:1, u12:2, u13:1}); S.um.done = {1:true, 2:true, 3:true}; S.tab = 'me'; S.me = 'umr'; }], ['ME-MONEY','My money', () => { loadSample(); S.tab = 'me'; S.me = 'money'; }]]],
+  ['Results & app', [['HOME','Home dashboard', () => { loadSample(); S.tab = 'home'; }], ['ASK','Ask (help sheet)', () => { loadSample(); S.tab = 'home'; S.sheet = 'ask'; S.ask.open = 'pgap'; }], ['PLAN','My Plan (timeline + results)', () => { loadSample(); }], ['ME-01','Me', () => { loadSample(); S.tab = 'me'; }], ['ME-UM','Understand me', () => { loadSample(); S.tab = 'me'; S.me = 'um'; }], ['ME-CHK','Your first answers (re-check)', () => { loadSample(); S.tab = 'me'; S.me = 'recheck'; }], ['ME-UM2','Understand me · capacity', () => { loadSample(); S.tab = 'me'; S.me = 'ums'; S.um.sec = 2; }], ['ME-R','Profile result', () => { loadSample(); Object.assign(S.um.a, {u4:1, u9:3, u10:1, u11:1, u12:2, u13:1}); S.um.done = {1:true, 2:true, 3:true}; S.tab = 'me'; S.me = 'umr'; }], ['ME-MONEY','My money', () => { loadSample(); S.tab = 'me'; S.me = 'money'; }]]],
   ['Connect', [['C0','Help your adviser know you', () => { loadSample(); S.tab = 'exp'; S.exp = 'c0'; }], ['C1','Your match', () => { loadSample(); S.tab = 'exp'; S.exp = 'c1'; }], ['C2','Share your plan', () => { loadSample(); S.tab = 'exp'; S.exp = 'c2'; }], ['C3','Pick a time', () => { loadSample(); S.tab = 'exp'; S.exp = 'c3'; }], ['C4',"You're booked", () => { loadSample(); S.tab = 'exp'; S.exp = 'c4'; S.book.done = true; S.book.slot = SLOTS[1]; }]]]
 ];
 function side(){
