@@ -37,7 +37,11 @@ h1,h2,h3,.disp{font-family:var(--fh);letter-spacing:-.01em}
 .stage{flex-grow:1;display:flex;align-items:center;justify-content:center;padding:14px;overflow:hidden}
 #wrap{width:390px;height:844px;flex-shrink:0;transform-origin:center}
 .phone{width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:var(--mist);box-shadow:0 0 0 10px #0B1F22,0 30px 70px rgba(11,31,34,.35)}
-@media (max-width:800px){body{display:block}.side{display:none}.stage{padding:0;height:100vh;height:100dvh}.phone{border-radius:0;box-shadow:none}}
+@media (max-width:800px),(max-height:500px) and (orientation:landscape){body{display:block}.side{display:none}.stage{padding:0;height:100vh;height:100dvh}.phone{border-radius:0;box-shadow:none}}
+/* rotate-phone hint for the Journey road: portrait phones only */
+.rotnote{display:none;align-items:center;gap:10px;background:var(--sky-l);color:var(--ink);border-radius:14px;padding:8px 12px;margin:8px 0 0;font-size:13px;font-weight:700;line-height:1.35}
+.rotnote svg{flex-shrink:0}
+@media (max-width:800px) and (orientation:portrait){.rotnote{display:flex}}
 /* shell */
 #screen{position:absolute;inset:0}
 .app{position:absolute;inset:0;display:flex;flex-direction:column}
@@ -143,9 +147,10 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 .tl-tick{position:absolute;font-size:11px;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
 .tl-tm{position:absolute;width:2px;height:8px;background:#B9C9D6;transform:translateX(-50%)}
 .tl-now{position:absolute;width:14px;height:14px;border-radius:7px;background:var(--ink);border:3px solid #fff;transform:translate(-50%,-50%);box-shadow:0 0 0 1px var(--ink)}
-.tl-chip{position:absolute;left:0;top:0;display:flex;align-items:center;gap:5px;height:36px;padding:0 10px 0 8px;border-radius:18px;background:#fff;border:2px solid var(--sea);font-size:12.5px;font-weight:800;white-space:nowrap;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 3px 8px rgba(14,42,71,.15)}
+.tl-chip{position:absolute;left:0;top:0;display:flex;align-items:center;gap:5px;min-height:36px;padding:3px 12px 3px 8px;line-height:1.15;border-radius:18px;background:#fff;border:2px solid var(--sea);font-size:12.5px;font-weight:800;white-space:nowrap;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 3px 8px rgba(14,42,71,.15)}
 .tl-track.live .tl-chip{transition:top .18s ease,left .05s linear}
-.tl-chip .yr{color:var(--sea-d);font-weight:800}
+.tl-chip .yr{color:var(--sea-d);font-weight:800;white-space:nowrap;flex-shrink:0}
+.tl-chip .nm{white-space:normal;max-width:104px;flex-shrink:0;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .tl-chip.ret{background:var(--ink);color:#fff;border-color:var(--ink)}.tl-chip.ret .yr{color:var(--sun)}
 .tl-chip.drag{cursor:grabbing;border-color:var(--sun);z-index:5;box-shadow:0 10px 20px rgba(14,42,71,.28);transition:none}
 .tl-chip.hl{border-color:var(--sun)}
@@ -183,10 +188,11 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 .vt button.on{background:var(--ink);color:#fff}
 .chapgrid{display:grid;grid-template-columns:1fr;gap:10px}
 .rep .chapgrid{grid-template-columns:1fr 1fr}
-.chap{border:1.5px solid var(--line);border-radius:18px;padding:12px;background:#fff;cursor:pointer;text-align:left;display:block;width:100%;font-size:inherit}
+.chap{border:1.5px solid var(--line);border-radius:20px;padding:14px;background:#fff;cursor:pointer;text-align:left;display:flex;gap:12px;align-items:flex-start;width:100%;font-size:inherit}
+.chap .cb{flex:1;min-width:0}
 .chap.ok{border-color:#BFE3CD;background:#F6FBF8}.chap.warn{border-color:#F3DDB5;background:#FDFAF2}.chap.bad{border-color:#EFC7C7;background:#FDF5F5}
 .chap.open{grid-column:1/-1}
-.chap .w{font-size:26px}.chap .tt{font-family:var(--fh);font-weight:800;font-size:16px;margin-top:4px}.chap .ag{font-size:11.5px;color:var(--muted);margin-bottom:6px}
+.chap .w{font-size:34px;line-height:1;flex-shrink:0;width:40px;text-align:center}.chap .tt{font-family:var(--fh);font-weight:800;font-size:16px}.chap .ag{font-size:11.5px;color:var(--muted);margin-bottom:6px}
 .chap .st{font-size:12.5px;line-height:1.45}.chap .ev{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;font-size:12.5px;display:grid;gap:3px}
 .chap .mo{margin-top:8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .cy{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:2px 0}.cy .d{width:10px;height:10px;border-radius:5px;flex-shrink:0}
@@ -637,11 +643,9 @@ function tlBoard(){
     gs.map(g => { const ret = g.kind === 'retire'; return '<div class="tl-chip' + (ret ? ' ret' : '') + (S.tlHl === g.id ? ' hl' : '') + '" data-g="' + g.id + '" title="' + esc(g.name) + '" tabindex="0" role="slider" aria-label="' + esc(g.name) + '" aria-valuemin="' + (ret ? 55 : a0 + 1) + '" aria-valuemax="' + (ret ? 75 : 90) + '" aria-valuenow="' + g.age + '" aria-valuetext="' + esc(g.name) + ', age ' + g.age + ', ' + (YEAR0 + g.age - a0) + '">' + chipInner(g) + '</div>'; }).join('') +
     '</div><div class="tl-hint">↔ Drag a goal (or use the arrow keys) to change when it happens</div></div>';
 }
-/* Short chip labels so names never truncate on the timeline; the full name stays in the row below, the aria-label and the drag tip */
-const SHORT = {home:'Home', family:'Family', edu:'Education', travel:'Travel', business:'Business', mfree:'Mortgage-free', safety:'Safety net', wealth:'Wealth', helpfam:'Help family', legacy:'Legacy', wedding:'Wedding', car:'Car', health:'Health'};
-function shortName(g){ const c = GC(g.k); if (c && g.name === c.t && SHORT[g.k]) return SHORT[g.k]; if (g.name.length <= 14) return g.name; const w = g.name.split(' ').filter(x => x.length > 2)[0] || g.name; return w.length <= 14 ? w : w.slice(0, 13) + '…'; }
-function chipInner(g){ const n = g.age - S.about.age, nm = shortName(g);
-  return g.kind === 'retire' ? '<span aria-hidden="true">🏁</span>Retire <span class="yr">' + g.age + '</span>' : '<span aria-hidden="true">' + g.e + '</span>' + esc(nm) + ' <span class="yr">in ' + n + ' yr' + (n === 1 ? '' : 's') + '</span>'; }
+/* Full goal name, wrapping to at most 2 lines (no truncation) */
+function chipInner(g){ const n = g.age - S.about.age, nm = g.name;
+  return g.kind === 'retire' ? '<span aria-hidden="true">🏁</span>Retire <span class="yr">' + g.age + '</span>' : '<span aria-hidden="true">' + g.e + '</span><span class="nm">' + esc(nm) + '</span><span class="yr">in ' + n + ' yr' + (n === 1 ? '' : 's') + '</span>'; }
 function whenTxt(g){ const n = g.age - S.about.age; return (g.kind === 'retire' ? 'Age ' + g.age : 'in ' + n + ' yr' + (n === 1 ? '' : 's') + ' · age ' + g.age) + ' · ' + (YEAR0 + n); }
 function gRows(only){
   return (only || S.goals).slice().sort((a, b) => a.age - b.age).map(g => { const ret = g.kind === 'retire', open = S.tlOpen[g.id];
@@ -770,14 +774,17 @@ function wiText(P0, P1){ const ch = S.goals.map(g => ({g, a:P0.pct[g.id], b:P1.p
 function glanceHTML(P){ const v = S.view;
   const tabs = '<div class="vt" role="tablist" aria-label="Your future views">' + [['journey','🛤️ Journey'],['chapters','📖 Life chapters'],['detail','📊 Detail']].map(([k, l]) => '<button role="tab" aria-selected="' + (v === k) + '" class="' + (v === k ? 'on' : '') + '" data-a="view" data-p="' + k + '">' + l + '</button>').join('') + '</div>';
   let body = '';
-  if (v === 'journey') body = '<p class="small">Your life as one road, from today to age 90. The milestones are the goals you chose.</p>' + journeySVG(P, 322) + journeyNote(P);
+  const land = phoneLandscape();
+  if (v === 'journey') body = '<p class="small">Your life as one road, from today to age 90. The milestones are the goals you chose.</p>' +
+    (land ? '' : '<div class="rotnote"><svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="10" y="3" width="12" height="20" rx="2.5"/><path d="M15 19.5h2"/><path d="M5 22a11 11 0 0 0 17 7"/><path d="M22 25.5v3.8h-3.8"/></svg><span>Turn your phone sideways to see your road on a bigger screen</span></div>') +
+    journeySVG(P, land ? Math.max(322, Math.min(780, innerWidth - 72)) : 322) + journeyNote(P);
   else if (v === 'chapters') body = '<p class="small">Your future as chapters of your life. ☀️ comfortable · 🌤️ some years use savings · 🌦️ often using savings · ⛈️ a gap to plan for. Tap a chapter to see its years.</p>' + chaptersHTML(P);
   else body = '<p class="small">Each bar is one year of your life; the dashed line is your income.</p>' + chartSVG(P.rows, 322) + '<div class="legend"><span><i class="sw" style="background:var(--ok)"></i>Needs fully covered</span><span><i class="sw" style="background:var(--dip)"></i>Dipping into savings</span><span><i class="sw" style="background:var(--gap)"></i>Shortfall, not covered</span><span><i class="sw" style="background:var(--ink)"></i>▼ Retirement begins</span><span><i class="sw" style="background:none;border-top:2px dashed var(--ink);height:0;border-radius:0"></i>Your income each year</span></div>' + chartNote(P);
   return tabs + '<div role="tabpanel">' + body + '</div>'; }
 function journeyNote(P){ const bad = P.rows.find(isShort); return '<p class="pnote"><b>Reading your road:</b> green means your income covers life; amber means you\'re drawing on savings, which is what they\'re for. ' + (bad ? 'The road turns red around <b>age ' + bad.a + '</b>: money runs short there unless the plan changes.' : 'There\'s no red on your road: you don\'t run out of money before 90.') + '</p>'; }
 function chartNote(P){ const n = P.rows.filter(isShort).length; return '<p class="pnote"><b>In plain English:</b> ' + (n ? 'in ' + n + ' year' + (n > 1 ? 's' : '') + ' of your plan, your income and savings don\'t fully cover what you\'ll need (the red bars). These are the gaps to close, by saving more, changing timing, or rethinking a goal.' : 'every year of your plan is covered by your income and savings. No red bars. That\'s what "on track" looks like.') + '</p>'; }
 function journeySVG(P, W){
-  const rows = P.rows, n = rows.length, wide = W > 500, H = wide ? 280 : 236, pad = 18, mid = wide ? 140 : 118;
+  const rows = P.rows, n = rows.length, wide = W > 500, H = wide ? 360 : 236, pad = 18, mid = wide ? 184 : 118;
   const X = i => pad + i / (n - 1) * (W - 2 * pad), Y = i => mid + (wide ? 34 : 24) * Math.sin(i / (n - 1) * Math.PI * 2.4) - i / (n - 1) * 8;
   let base = '', road = '', ticks = '';
   for (let i = 0; i < n - 1; i++){ base += '<line x1="' + X(i) + '" y1="' + Y(i) + '" x2="' + X(i + 1) + '" y2="' + Y(i + 1) + '" stroke="#DCE4EC" stroke-width="' + (wide ? 16 : 13) + '" stroke-linecap="round"/>'; road += '<line x1="' + X(i) + '" y1="' + Y(i) + '" x2="' + X(i + 1) + '" y2="' + Y(i + 1) + '" stroke="' + rowCol(rows[i]) + '" stroke-width="' + (wide ? 9 : 7) + '" stroke-linecap="round"/>'; }
@@ -787,23 +794,17 @@ function journeySVG(P, W){
   const fx = ri >= 0 ? X(ri) : null;
   if (ri >= 0) marks += '<line x1="' + fx + '" y1="' + Y(ri) + '" x2="' + fx + '" y2="' + (Y(ri) - 44) + '" stroke="var(--ink)" stroke-width="2.5"/><path d="M' + fx + ' ' + (Y(ri) - 44) + ' l24 7 l-24 7 z" fill="#E4518A"/><text x="' + (fx + (fx > W - 90 ? -6 : 4)) + '" y="' + (Y(ri) - 50) + '" font-size="11" font-weight="800" fill="var(--ink)" text-anchor="' + (fx > W - 90 ? 'end' : 'start') + '">Retire ' + rows[ri].a + '</text>';
   marks += '<text x="' + (X(n - 1) - 8) + '" y="' + (Y(n - 1) - 12) + '" font-size="18" aria-hidden="true">🌅</text>';
-  // milestones: goals close together merge into one marker with a count badge (tap lists them); markers keep clear of labels
-  const gs = S.goals.filter(g => g.kind !== 'retire').slice().sort((a, b) => a.age - b.age), R = wide ? 18 : 13, merge = wide ? 64 : 34;
-  const cl = []; gs.forEach(g => { const i = clamp(g.age - a0, 0, n - 1), x = X(i), c = cl[cl.length - 1]; if (c && x - c.x < merge) c.gs.push(g); else cl.push({i, x, gs:[g]}); });
-  const slots = wide ? [-56, 58, -100, 100] : [-40, 42, -76, 76], need = wide ? 100 : 2 * R + 4, last = slots.map(() => -1e9); let ms = '';
-  cl.forEach((c, ci) => { const cx = c.x, cy = Y(c.i), worst = Math.min(...c.gs.map(g => P.pct[g.id])), col = 'var(--' + band(worst) + ')', multi = c.gs.length > 1;
-    const nearFlag = fx != null && cx > fx - R - 16 && cx < fx + (fx > W - 90 ? R + 16 : 62 + R), nearStart = cx < X(0) + 70 + R, nearEnd = cx > X(n - 1) - 30 - R;
-    const ok = d => !((d < 0 && (nearFlag || nearEnd)) || (d > 0 && nearStart));
-    let si = slots.findIndex((d, k) => ok(d) && cx - last[k] >= need); if (si < 0) si = slots.findIndex(ok); if (si < 0) si = 0;
-    last[si] = cx; const ly = clamp(cy + slots[si], R + 4, H - 30 - R), open = S.jcl === ci;
-    const names = c.gs.map(g => g.name + ' ' + P.pct[g.id] + '%').join(', ');
-    ms += '<g' + (multi ? ' data-a="jcl" data-p="' + ci + '" style="cursor:pointer"' : '') + '><line x1="' + cx + '" y1="' + cy + '" x2="' + cx + '" y2="' + ly + '" stroke="#B9C9D6" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="' + cx + '" cy="' + ly + '" r="' + R + '" fill="' + (open ? 'var(--sea-l)' : '#fff') + '" stroke="' + col + '" stroke-width="3"/>' +
-      (multi ? '<text x="' + cx + '" y="' + (ly + (wide ? 6 : 5)) + '" font-size="' + (wide ? 16 : 14) + '" font-weight="800" fill="var(--ink)" text-anchor="middle">' + c.gs.length + '</text>' : '<text x="' + cx + '" y="' + (ly + (wide ? 6 : 4.5)) + '" font-size="' + (wide ? 16 : 12.5) + '" text-anchor="middle">' + c.gs[0].e + '</text>') +
-      (wide ? '<text x="' + cx + '" y="' + (ly + (slots[si] < 0 ? -25 : 34)) + '" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="middle">' + (multi ? c.gs.map(g => g.e).join('') + ' ' + c.gs.length + ' goals' : esc(c.gs[0].name.length > 16 ? c.gs[0].name.slice(0, 15) + '…' : c.gs[0].name)) + '</text>' : '') + '<title>' + esc(names) + (multi ? ' (tap to list)' : '') + '</title></g>'; });
-  const jc = S.jcl != null && cl[S.jcl] && cl[S.jcl].gs.length > 1 ? cl[S.jcl] : null;
+  // milestones: slot-based placement so rings and labels never collide
+  const gs = S.goals.filter(g => g.kind !== 'retire').slice().sort((a, b) => a.age - b.age), gap = wide ? 96 : 30;
+  const slots = wide ? [-56, 58, -124, 124] : [-40, 42, -74, 74], last = slots.map(() => -1e9); last[1] = X(0) + (wide ? 40 : 34); let ms = '';
+  gs.forEach(g => { const i = clamp(g.age - a0, 0, n - 1), cx = X(i), cy = Y(i), p = P.pct[g.id], col = 'var(--' + band(p) + ')';
+    let s = slots.findIndex((d, k) => cx - last[k] >= gap && !(d < 0 && fx != null && Math.abs(cx - fx) < (wide ? 60 : 24) && Math.abs(d) < 60));
+    if (s < 0) s = last.indexOf(Math.min(...last));
+    last[s] = cx; const ly = clamp(cy + slots[s], 16, H - 34);
+    ms += '<g><line x1="' + cx + '" y1="' + cy + '" x2="' + cx + '" y2="' + ly + '" stroke="#B9C9D6" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="' + cx + '" cy="' + ly + '" r="' + (wide ? 18 : 13) + '" fill="#fff" stroke="' + col + '" stroke-width="3"/><text x="' + cx + '" y="' + (ly + (wide ? 6 : 4.5)) + '" font-size="' + (wide ? 16 : 12.5) + '" text-anchor="middle">' + g.e + '</text>' +
+      (wide ? '<text x="' + (Math.abs(slots[s]) > 100 ? cx + 23 : clamp(cx, 4 + Math.min(16, g.name.length) * 3.2, W - 4 - Math.min(16, g.name.length) * 3.2)) + '" y="' + (Math.abs(slots[s]) > 100 ? ly + 4 : ly + (slots[s] < 0 ? -25 : 34)) + '" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="' + (Math.abs(slots[s]) > 100 ? 'start' : 'middle') + '">' + esc(g.name.length > 16 ? g.name.slice(0, 15) + '…' : g.name) + '</text>' : '') + '<title>' + esc(g.name) + ': ' + p + '% covered</title></g>'; });
   const desc = 'Road from age ' + a0 + ' to 90. ' + (rows.some(isShort) ? 'Some red shortfall years.' : 'No shortfall years.');
   return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + desc + '" style="display:block;margin-top:6px">' + base + road + ms + marks + ticks + '</svg>' +
-    (jc ? '<p class="note" id="jcl-list" style="margin-top:8px">Ages ' + jc.gs[0].age + '–' + jc.gs[jc.gs.length - 1].age + ': ' + jc.gs.map(g => g.e + ' ' + esc(g.name) + ' <b>' + P.pct[g.id] + '%</b>').join(' · ') + '</p>' : '') +
     (wide ? '' : '<div class="mlist">' + gs.map(g => { const p = P.pct[g.id]; return '<div><span class="sw" style="border-radius:6px;background:var(--' + band(p) + ')"></span><span aria-hidden="true">' + g.e + '</span> ' + esc(g.name) + ' <span class="small">· age ' + g.age + ' · <b style="color:var(--' + band(p) + '-t)">' + p + '%</b></span></div>'; }).join('') + '</div>');
 }
 function chapters(P){ const ch = []; P.rows.forEach(r => { let d = Math.floor(r.a / 10) * 10; if (d === 90 && ch.length) d = 80; let c = ch[ch.length - 1]; if (!c || c.dec !== d){ c = {dec:d, from:r.a, to:r.a, rows:[]}; ch.push(c); } c.to = r.a; c.rows.push(r); }); return ch; }
@@ -814,8 +815,8 @@ function chaptersHTML(P){ const a0 = P.rows[0].a;
     const ev = []; if (c.rows.some(r => r.rmark)) ev.push('🏁 <b>You retire</b>');
     S.goals.filter(g => g.kind !== 'retire' && g.age >= c.from && g.age <= c.to).forEach(g => ev.push(g.e + ' ' + esc(g.name) + ' <b style="color:var(--' + band(P.pct[g.id]) + '-t)">' + P.pct[g.id] + '%</b>'));
     const open = S.chapOpen === ci;
-    return '<button class="chap ' + cls + (open ? ' open' : '') + '" data-a="chap" data-p="' + ci + '" aria-expanded="' + open + '"><div class="w" aria-hidden="true">' + wx + '</div><div class="tt">Your ' + c.dec + 's</div><div class="ag">age ' + c.from + '–' + c.to + (allRet ? ' · retired' : '') + '</div><div class="st">' + story + '</div>' + (ev.length ? '<div class="ev">' + ev.map(e => '<div>' + e + '</div>').join('') + '</div>' : '') +
-      '<div class="mo">' + (open ? '▲ Hide the years' : '▼ See it year by year') + '</div>' + (open ? '<div class="ev">' + c.rows.map(r => { const m = isShort(r), d = r.used > 1 && !m; return '<div class="cy"><b style="width:26px">' + r.a + '</b><span class="d" style="background:' + (m ? 'var(--gap)' : d ? 'var(--dip)' : 'var(--ok)') + '"></span>' + (m ? '<b>Gap to plan for</b>: short ' + eur(r.short) : d ? 'Using savings' : 'Comfortable') + '</div>'; }).join('') + '</div>' : '') + '</button>'; }).join('') + '</div>'; }
+    return '<button class="chap ' + cls + (open ? ' open' : '') + '" data-a="chap" data-p="' + ci + '" aria-expanded="' + open + '"><div class="w" aria-hidden="true">' + wx + '</div><div class="cb"><div class="tt">Your ' + c.dec + 's</div><div class="ag">age ' + c.from + '–' + c.to + (allRet ? ' · retired' : '') + '</div><div class="st">' + story + '</div>' + (ev.length ? '<div class="ev">' + ev.map(e => '<div>' + e + '</div>').join('') + '</div>' : '') +
+      '<div class="mo">' + (open ? '▲ Hide the years' : '▼ See it year by year') + '</div>' + (open ? '<div class="ev">' + c.rows.map(r => { const m = isShort(r), d = r.used > 1 && !m; return '<div class="cy"><b style="width:26px">' + r.a + '</b><span class="d" style="background:' + (m ? 'var(--gap)' : d ? 'var(--dip)' : 'var(--ok)') + '"></span>' + (m ? '<b>Gap to plan for</b>: short ' + eur(r.short) : d ? 'Using savings' : 'Comfortable') + '</div>'; }).join('') + '</div>' : '') + '</div></button>'; }).join('') + '</div>'; }
 function chartSVG(rows, W){
   const H = W > 500 ? 240 : 200, top = 30, bot = 22, n = rows.length, bw = (W - 16) / n, maxV = Math.max(...rows.map(r => Math.max(r.inflow, r.needs)), 1), sy = v => H - bot - v / maxV * (H - top - bot);
   let bars = '', mk = '', line = '';
@@ -1142,7 +1143,6 @@ const ACT = {
   umsave:() => { const s = UM.find(x => x.n === S.um.sec); if (s.qs.some(q => q.u === 'u9') && typeof S.um.a.u9 !== 'number') S.um.a.u9 = suggestU9(); S.um.done[s.n] = true; S.meEdit = {}; if (UM.every(x => S.um.done[x.n])) S.um.rechecked = true; S.me = 'um';
     toast(umCount() === 13 ? 'Saved. Your plan\'s risk profile is now ' + riskRead(true).label : s.t + ' saved'); render(); },
   view:p => { S.view = p; focusKey = '[data-a="view"][data-p="' + p + '"]'; const e = document.getElementById('r-glance'); if (e){ e.innerHTML = glanceHTML(project(S.wi)); bindLite(); const b = e.querySelector(focusKey); if (b) b.focus(); focusKey = null; } else render(); },
-  jcl:p => { S.jcl = S.jcl === +p ? null : +p; const e = document.getElementById('r-glance'); if (e) e.innerHTML = glanceHTML(project(S.wi)); else render(); },
   chap:p => { S.chapOpen = S.chapOpen === +p ? null : +p; const e = document.getElementById('r-glance'); if (e){ e.innerHTML = glanceHTML(project(S.wi)); const b = e.querySelector('[data-a="chap"][data-p="' + p + '"]'); if (b) b.focus({preventScroll:true}); } else render(); },
   understood:() => { S.understood = true; version('Results understood'); focusKey = '#r-found .chip'; render(); },
   advq:p => { const i = S.advQs.indexOf(p); if (i >= 0) S.advQs.splice(i, 1); else S.advQs.push(p); focusKey = '[data-a="advq"][data-p="' + CSS.escape(p) + '"]'; render(); },
@@ -1225,7 +1225,7 @@ function bind(){
 function shareBtn(){ const b = document.getElementById('sharego'); if (b) b.disabled = !(S.book.agree && Object.values(S.book.share).some(Boolean)); }
 
 /* ================= TIMELINE: layout in lanes + drag ================= */
-const LANE_H = 44;
+const LANE_H = 50;
 function tlX(age, W){ const a0 = S.about.age; return (age - a0) / (90 - a0) * W; }
 function layoutTL(){
   const tr = document.getElementById('tl'); if (!tr) return; const W = tr.clientWidth, a0 = S.about.age;
@@ -1237,7 +1237,7 @@ function layoutTL(){
   let deco = '<div class="tl-axis" style="top:' + axisY + 'px"></div><div class="tl-now" style="left:0;top:' + (axisY + 2) + 'px" aria-hidden="true"></div>';
   for (let a = Math.ceil(a0 / 5) * 5; a <= 90; a += 5){ const x = tlX(a, W); deco += '<div class="tl-tm" style="left:' + x + 'px;top:' + (axisY + 6) + 'px"></div>' + (a % 10 === 0 && x > 34 && x < W - 18 ? '<div class="tl-tick" style="left:' + x + 'px;top:' + (axisY + 16) + 'px">age ' + a + '</div>' : ''); }
   deco += '<div class="tl-tick" style="left:14px;top:' + (axisY + 16) + 'px">Now</div>';
-  chips.forEach(c => { const top = 10 + (L - 1 - c.lane) * LANE_H; c.el.style.left = c.left + 'px'; c.el.style.top = top + 'px'; deco += '<div class="tl-stem" style="left:' + c.x + 'px;top:' + (top + 36) + 'px;height:' + (axisY - top - 36) + 'px"></div>'; });
+  chips.forEach(c => { const top = 10 + (L - 1 - c.lane) * LANE_H; c.el.style.left = c.left + 'px'; c.el.style.top = top + 'px'; const h = c.el.offsetHeight; deco += '<div class="tl-stem" style="left:' + c.x + 'px;top:' + (top + h) + 'px;height:' + Math.max(0, axisY - top - h) + 'px"></div>'; });
   tr.insertAdjacentHTML('afterbegin', deco);
   tr.style.height = (axisY + 46) + 'px';
 }
@@ -1290,7 +1290,7 @@ function loadSample(){
   put('name', 'Aoife', 'pre'); put('age', 38, 'pre'); put('retireAge', 63, 'pre'); put('pAge', 37, 'typed');
   put('work', 'Employed', 'doc', 99); put('income', 58000, 'doc', 98); put('pIncome', 22000, 'typed'); put('otherM', 0, 'none'); put('costsM', 3600, 'est'); put('oneOffY', 1800, 'doc', 81);
   put('home', 'Own with mortgage', 'doc', 99); put('homeValue', 420000, 'typed'); put('cash', 9000, 'doc', 97); put('invest', 6200, 'doc', 88);
-  put('mortBal', 208000, 'doc', 96); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('debt', 2800, 'doc', 85); put('debtPayM', 140, 'doc', 78);
+  put('mortBal', 212000, 'doc', 96); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('debt', 2800, 'doc', 85); put('debtPayM', 140, 'doc', 78);
   put('life', 'Yes', 'doc', 95); put('ip', 'No', 'typed'); put('ci', 'Not sure', 'typed'); put('workCover', 'Yes', 'doc', 90); put('health', 'Yes', 'typed');
   put('pension', 72000, 'doc', 95); put('pensionM', 520, 'doc', 91); put('sp', 'Expect full', 'typed'); S.look.pension = 'Statement is over 12 months old';
   S.partner = {mode:'manual', email:'', sent:false, name:'Cian'};
@@ -1313,9 +1313,11 @@ function side(){
     if (b.id === 'startsample') { loadSample(); lastId = null; render(); return; }
     if (b.dataset.jump) { const [gi, k] = b.dataset.jump.split('.').map(Number); JUMPS[gi][1][k][2](); lastId = null; render(); } });
 }
-function fit(){ const w = document.getElementById('wrap'), small = innerWidth <= 800; if (small){ w.style.transform = 'none'; w.style.width = '100%'; w.style.height = '100%'; document.getElementById('phone').style.width = '100%'; document.getElementById('phone').style.height = '100%'; return; }
+const phoneLandscape = () => innerHeight <= 500 && innerWidth > innerHeight;
+function fit(){ const w = document.getElementById('wrap'), small = innerWidth <= 800 || phoneLandscape(); if (small){ w.style.transform = 'none'; w.style.width = '100%'; w.style.height = '100%'; document.getElementById('phone').style.width = '100%'; document.getElementById('phone').style.height = '100%'; return; }
   w.style.width = ''; w.style.height = ''; document.getElementById('phone').style.width = ''; document.getElementById('phone').style.height = '';
   const s = Math.min(1, (innerHeight - 30) / 844, (innerWidth - 330) / 420); w.style.transform = 'scale(' + Math.max(.4, s) + ')'; }
-addEventListener('resize', () => { fit(); if (document.getElementById('tl')) layoutTL(); });
+let wasLand = null;
+addEventListener('resize', () => { fit(); const l = phoneLandscape(); if (wasLand !== null && l !== wasLand && S && S.app) render(); else if (document.getElementById('tl')) layoutTL(); wasLand = l; });
 S = fresh(); side(); fit(); render();
 </script></body></html>
