@@ -383,3 +383,8 @@ There are **no repeated questions** anywhere.
 6. **Capacity-for-loss wording.** Take the framing from the MASTER JOURNEY (B7: "Discover – 1) Risk, 2) Capacity and 3) Investor behaviour") and CUSTOMER JOURNEY (B6: "risk, capacity and investor-behaviour questions") sheets. Label the Understand Me sections in that language and keep the question plain and short.
 7. **"What brought you here?" chips**: the proposed options were shown to Pooja for confirmation; keep them until she replies.
 8. **Goal tiles: keep separate Health, Wedding and Car tiles.** Use the LifeGoals 2.0 tile style (`reference/LifeGoals-2.0-Plan-Prototype-decoded.html` lines 165–171 CSS, GOAL_TYPES ~592): white card, 2px border, big emoji on top, name below, teal border + light-teal fill + tick when selected, restyled in the navy tokens. Tiles: 💍 Wedding, 🚗 Change the car, 🩺 Health & care (none in 2.0; added).
+
+## 11. Amendments after PM review round 1 (see docs/pm-review-round1.md)
+- §5 Assets: drop "Saving each month now". Monthly saving capacity is already captured by Discover Q6, and income − expenses gives the real surplus.
+- §4 F2: "More details" keeps only *For whom* and *Flexible on timing?*. Priority is asked once, in F4.
+- §5 Minimum-data rule: skipped figures count as €0 in the engine and are shown as ❓ Missing. Nothing is silently estimated. "Estimate for me" is the only way a typical figure enters, and it is labelled "Estimated".
