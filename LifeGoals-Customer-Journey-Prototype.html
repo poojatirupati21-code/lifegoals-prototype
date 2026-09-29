@@ -1,0 +1,1119 @@
+<!doctype html><html lang="en-IE"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LifeGoals Prototype</title>
+<meta name="description" content="Clickable customer-journey prototype for LifeGoals: Discover, Define, Prepare, Understand, Connect.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0B2545;--ink2:#13315C;--muted:#51627A;--line:#DCE4EC;--mist:#F3F7F9;--card:#FFFFFF;
+  --sea:#0F9D8F;--sea-d:#0B7A70;--sea-l:#D9F2EE;--sun:#F2B134;--sun-l:#FDF0D2;--acc-d:#7A5200;--sand:#F8F5EE;
+  --sky:#4E9BD8;--sky-l:#E1EFFA;--storm:#5E548E;--storm-l:#E7E3F4;--coral:#E8674A;
+  --plain1:#CDEBE7;--plain2:#EAF5F4;--mark1:#6BE3D3;--mark2:#0F9D8F;--mark3:#0B2545;--r:22px;
+  --ok:#2E9E6A;--ok-t:#1A7F4B;--ok-l:#E3F4EA;--dip:#F2B134;--dip-t:#8A5A00;--dip-l:#FDF0D2;--gap:#D9534F;--gap-t:#B42318;--gap-l:#FBE7E6;
+  --fh:'Bricolage Grotesque','Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --fb:'Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--fb);color:var(--ink);background:#E4ECE8;display:flex;min-height:100vh}
+button,input,select,textarea{font-family:inherit;color:inherit}
+h1,h2,h3,.disp{font-family:var(--fh);letter-spacing:-.01em}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.opt:focus-visible,.chip:focus-visible,.btn:focus-visible,.wbtn:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+/* side panel */
+.side{width:300px;flex-shrink:0;background:#fff;border-right:1px solid var(--line);padding:22px 18px;overflow-y:auto;max-height:100vh}
+.side h1{margin:0;font-size:24px;display:flex;align-items:center;gap:10px}
+.side p{font-size:13px;color:var(--muted);line-height:1.5;margin:6px 0 12px}
+.side h4{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+.side button{display:block;width:100%;text-align:left;border:0;background:none;padding:6px 10px;border-radius:10px;font-size:13px;cursor:pointer;min-height:32px}
+.side button:hover{background:var(--mist)}.side button.on{background:var(--ink);color:#fff}
+.side .big{background:var(--ink);color:#fff;text-align:center;font-weight:700;margin-bottom:6px;min-height:40px}.side .big:hover{background:var(--ink2)}
+.side .big.alt{background:var(--sun);color:var(--ink)}.side .big.alt:hover{background:#E5A320}
+.side .grp{font-size:11px;font-weight:800;color:var(--sea-d);margin:10px 10px 2px}
+.side .jid{font-size:10.5px;opacity:.7;display:inline-block;width:52px;font-weight:700}
+#curid{font-size:12px;line-height:1.45;background:var(--sun-l);color:var(--acc-d);border-radius:10px;padding:8px 10px;margin:6px 0 10px;min-height:36px}
+.stage{flex-grow:1;display:flex;align-items:center;justify-content:center;padding:14px;overflow:hidden}
+#wrap{width:390px;height:844px;flex-shrink:0;transform-origin:center}
+.phone{width:390px;height:844px;border-radius:48px;overflow:hidden;position:relative;background:var(--mist);box-shadow:0 0 0 10px #0B1F22,0 30px 70px rgba(11,31,34,.35)}
+@media (max-width:800px){body{display:block}.side{display:none}.stage{padding:0;height:100vh;height:100dvh}.phone{border-radius:0;box-shadow:none}}
+/* shell */
+#screen{position:absolute;inset:0}
+.app{position:absolute;inset:0;display:flex;flex-direction:column}
+.sky{flex-shrink:0;padding:46px 18px 12px;position:relative;background:linear-gradient(180deg,var(--plain1) 0%,var(--plain2) 70%,var(--mist) 100%)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:40px}
+.brand{display:flex;align-items:center;gap:8px;font-family:var(--fh);font-weight:800;font-size:19px}
+.mark{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 35% 35%,var(--mark1),var(--mark2) 55%,var(--mark3));box-shadow:0 0 0 3px rgba(255,255,255,.7);flex-shrink:0}
+.tb-btn{height:38px;min-width:38px;padding:0 12px;border-radius:19px;border:0;background:rgba(255,255,255,.8);font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.backb{border:0;background:rgba(255,255,255,.8);height:38px;padding:0 14px 0 10px;border-radius:19px;font-weight:800;font-size:14px;cursor:pointer}
+.scroll{flex-grow:1;overflow-y:auto;overflow-x:hidden;padding:6px 18px 24px;scroll-behavior:smooth}
+.foot{flex-shrink:0;padding:10px 18px 26px;background:linear-gradient(180deg,rgba(243,247,249,0),var(--mist) 30%);display:grid;gap:8px}
+.tabs{flex-shrink:0;height:80px;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);align-items:start;padding-top:8px}
+.tabs button{border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;color:#5C7477;cursor:pointer;min-height:50px}
+.tabs button.on{color:var(--ink)}.tabs svg{width:24px;height:24px}
+.tabs .center{margin-top:-28px}
+.tabs .center .fab{width:60px;height:60px;border-radius:30px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px rgba(14,47,51,.35);border:4px solid #fff}
+.tabs .center.on .fab{background:var(--sea-d)}
+.tabs .dot{width:5px;height:5px;border-radius:3px;background:var(--sun);opacity:0}.tabs button.on .dot{opacity:1}
+.phasebar{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:10px 0 2px}.phasebar i{height:5px;border-radius:3px;background:rgba(11,37,69,.12)}.phasebar i.on{background:var(--sea-d)}
+/* type & blocks */
+.eyebrow{font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--sea-d)}
+h2.t{font-size:27px;line-height:1.1;margin:6px 0 6px}
+h3.h{font-size:19px;margin:0 0 4px;line-height:1.2}
+.sub{font-size:15px;color:var(--muted);line-height:1.5;margin:0 0 14px}
+.small{font-size:13px;color:var(--muted);line-height:1.45}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:22px 0 10px}.sec h3{margin:0;font-size:18px}
+.link{border:0;background:none;color:var(--sea-d);font-weight:800;font-size:13.5px;cursor:pointer;padding:8px 0;text-align:left;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+.card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:0 1px 0 rgba(14,47,51,.04),0 6px 18px rgba(14,47,51,.06)}
+.card+.card{margin-top:12px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;border-radius:27px;border:0;background:var(--ink);color:#fff;font-weight:800;font-size:16px;cursor:pointer;text-align:center;padding:0 18px}
+.btn:hover{background:var(--ink2)}
+.btn.sun{background:var(--sun);color:var(--ink)}.btn.sun:hover{background:#E5A320}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}.btn.ghost:hover{border-color:var(--ink)}
+.btn.sm{min-height:44px;font-size:14px;width:auto;padding:0 18px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;align-items:center}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.pill{display:inline-flex;align-items:center;gap:5px;min-height:24px;padding:2px 10px;border-radius:13px;font-size:12px;font-weight:800;line-height:1.3}
+.pill.mint{background:var(--sea-l);color:var(--sea-d)}.pill.grey{background:#EEF2F0;color:var(--muted)}.pill.sunny{background:var(--sun-l);color:var(--acc-d)}.pill.red{background:var(--gap-l);color:var(--gap-t)}.pill.ok{background:var(--ok-l);color:var(--ok-t)}
+.disc{font-size:12px;color:var(--muted);line-height:1.5;margin-top:14px}
+.goal{display:flex;gap:12px;align-items:center;padding:14px;border-radius:20px;background:#fff;box-shadow:0 6px 18px rgba(14,47,51,.06);cursor:pointer;border:0;width:100%;text-align:left;margin-bottom:10px;min-height:64px}
+.goal .ic{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:23px;flex-shrink:0;background:var(--sand)}
+.goal b{font-size:15.5px}.goal .chev{font-size:20px;color:var(--muted)}
+.stat{width:28px;height:28px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;flex-shrink:0;border:2px solid var(--line);color:var(--muted)}
+.stat.done{background:var(--sea-d);border-color:var(--sea-d);color:#fff}.stat.look{background:var(--sun-l);border-color:var(--sun);color:var(--acc-d)}
+.ring{position:relative;flex-shrink:0}.ring svg{transform:rotate(-90deg)}.ring b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-weight:800}
+/* question screens */
+.quiz{position:absolute;inset:0;display:flex;flex-direction:column;background:linear-gradient(180deg,var(--plain1) 0%,var(--mist) 55%,var(--sand) 100%);color:var(--ink)}
+.qtop{padding:50px 18px 6px;display:flex;align-items:center;gap:10px}
+.chaps{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.chaps i{height:6px;border-radius:3px;background:rgba(11,37,69,.1);overflow:hidden;position:relative}.chaps i b{position:absolute;inset:0;width:0;background:var(--sea-d);transition:width .3s}
+.qx{width:44px;height:44px;border-radius:22px;border:0;background:rgba(11,37,69,.07);font-size:17px;cursor:pointer;flex-shrink:0}
+.qbody{flex-grow:1;overflow-y:auto;padding:12px 18px 18px}
+.qeye{font-size:11.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--acc-d)}
+.qbody h2{font-size:27px;line-height:1.12;margin:8px 0 6px}
+.qsub{color:var(--muted);font-size:14.5px;margin:0 0 16px;line-height:1.45;min-height:4px}
+.opts{display:grid;gap:10px}.opts.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opt{position:relative;border:1px solid var(--line);border-radius:20px;padding:14px;min-height:74px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:10px;align-items:flex-start;background:#fff;color:var(--ink);box-shadow:0 6px 18px rgba(20,30,50,.08);transition:transform .15s,box-shadow .15s}
+.opt:hover{transform:translateY(-2px)}.opts.two .opt{min-height:132px}
+.opt .em{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:25px;flex-shrink:0}
+.opt .tx{font-size:16px;font-weight:800;line-height:1.25}
+.opt.sel{box-shadow:0 0 0 3px var(--sea-d),0 8px 20px rgba(20,30,50,.12)}
+.opt.sel::after{content:'✓';position:absolute;top:10px;right:10px;width:24px;height:24px;border-radius:12px;background:var(--sea-d);color:#fff;font-size:13px;font-weight:900;display:flex;align-items:center;justify-content:center}
+.opt.row1{flex-direction:row;align-items:center;min-height:62px;padding:10px 40px 10px 12px}
+.opt.row1 .em{width:40px;height:40px;font-size:21px}.opt.row1 .tx{font-size:15px}
+.opt svg{display:block}
+.chip{border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:23px;min-height:46px;padding:0 14px;font-weight:700;font-size:14.5px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;text-align:left}
+.chip.sel{background:var(--sea-d);color:#fff;border-color:var(--sea-d)}
+.chip.sm{min-height:40px;font-size:13.5px;padding:0 12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.qfoot{padding:8px 18px 28px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.qback{border:0;background:none;color:var(--muted);font-weight:700;font-size:14.5px;cursor:pointer;min-height:44px;padding:0 6px}
+.wbtn{min-height:54px;border-radius:27px;border:0;background:var(--ink);color:#fff;font-weight:800;font-size:16px;padding:0 26px;cursor:pointer}
+.wbtn[disabled]{opacity:.4;cursor:default}
+.panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 6px 18px rgba(20,30,50,.06)}
+.scn{display:flex;justify-content:space-between}.scn b{display:block;font-family:var(--fh);font-size:30px}
+.medal{width:104px;height:104px;border-radius:32px;display:flex;align-items:center;justify-content:center;font-size:54px;background:linear-gradient(135deg,var(--mark1),var(--mark2) 60%,var(--sea));box-shadow:0 14px 30px rgba(20,30,50,.15);margin:14px 0 16px}
+/* forms */
+.field{display:grid;gap:6px;margin-bottom:16px}
+.field>label,.flabel{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-weight:800;font-size:14.5px}
+.in{width:100%;min-height:50px;border-radius:14px;border:1.5px solid var(--line);padding:0 14px;font-size:16px;background:#fff}
+.in:focus{border-color:var(--sea-d);outline:none;box-shadow:0 0 0 3px var(--sea-l)}
+.inw{position:relative}.inw .cur{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:700;color:var(--muted);pointer-events:none}.inw .in.eur{padding-left:30px}
+.fhelp{display:flex;gap:14px;flex-wrap:wrap}.fhelp .link{font-size:12.5px;padding:4px 0;min-height:32px}
+.tag{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.tag.doc{background:var(--ok-l);color:var(--ok-t)}.tag.typed{background:#EEF2F0;color:var(--muted)}.tag.est{background:var(--sun-l);color:var(--acc-d)}.tag.none{background:#EEF2F0;color:var(--muted)}.tag.look{background:var(--gap-l);color:var(--gap-t)}.tag.pre{background:var(--sea-l);color:var(--sea-d)}
+input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
+.seg{display:flex;gap:4px;background:#E6EEEA;border-radius:14px;padding:4px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:none;border-radius:11px;min-height:40px;font-weight:800;font-size:13.5px;cursor:pointer;color:var(--muted)}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.check{display:flex;gap:12px;align-items:flex-start;padding:12px 0;font-size:14.5px;line-height:1.45;cursor:pointer}
+.check input{width:22px;height:22px;accent-color:var(--sea-d);margin:1px 0 0;flex-shrink:0}
+.stepper{display:flex;align-items:center;border:1.5px solid var(--line);border-radius:14px;background:#fff;min-height:50px;overflow:hidden}
+.stepper button{width:48px;min-height:48px;border:0;background:var(--mist);font-size:20px;font-weight:800;cursor:pointer}
+.stepper output{flex:1;text-align:center;font-weight:800;font-size:15px}
+.codebox{display:flex;gap:8px;justify-content:space-between;margin:10px 0}
+.codebox input{width:44px;height:54px;text-align:center;font-size:22px;font-weight:800;border-radius:12px;border:1.5px solid var(--line);background:#fff}
+.codebox input:focus{border-color:var(--sea-d);outline:none;box-shadow:0 0 0 3px var(--sea-l)}
+.note{background:var(--sun-l);color:var(--acc-d);border-radius:12px;padding:8px 12px;font-size:13px;font-weight:600}
+/* timeline */
+.tl-board{background:linear-gradient(180deg,#fff,#F3F8FB);border:1px solid var(--line);border-radius:20px;padding:14px 12px 6px;position:relative;box-shadow:0 6px 18px rgba(14,47,51,.05)}
+.tl-track{position:relative;margin:0 4px;touch-action:pan-y}
+.tl-axis{position:absolute;left:0;right:0;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--sea),var(--ink))}
+.tl-tick{position:absolute;font-size:11px;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.tl-tm{position:absolute;width:2px;height:8px;background:#B9C9D6;transform:translateX(-50%)}
+.tl-now{position:absolute;width:14px;height:14px;border-radius:7px;background:var(--ink);border:3px solid #fff;transform:translate(-50%,-50%);box-shadow:0 0 0 1px var(--ink)}
+.tl-chip{position:absolute;left:0;top:0;display:flex;align-items:center;gap:5px;height:36px;padding:0 10px 0 8px;border-radius:18px;background:#fff;border:2px solid var(--sea);font-size:12.5px;font-weight:800;white-space:nowrap;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;box-shadow:0 3px 8px rgba(14,42,71,.15)}
+.tl-track.live .tl-chip{transition:top .18s ease,left .05s linear}
+.tl-chip .yr{color:var(--sea-d);font-weight:800}
+.tl-chip.ret{background:var(--ink);color:#fff;border-color:var(--ink)}.tl-chip.ret .yr{color:var(--sun)}
+.tl-chip.drag{cursor:grabbing;border-color:var(--sun);z-index:5;box-shadow:0 10px 20px rgba(14,42,71,.28);transition:none}
+.tl-chip.hl{border-color:var(--sun)}
+.tl-stem{position:absolute;width:0;border-left:1.5px dashed #B9C9D6;pointer-events:none}
+.tl-tip{position:absolute;transform:translate(-50%,-100%);background:var(--ink);color:#fff;font-size:12px;font-weight:700;padding:5px 9px;border-radius:9px;white-space:nowrap;pointer-events:none;z-index:6}
+.tl-hint{text-align:center;font-size:12.5px;color:var(--muted);padding:6px 0 6px}
+.grow{background:#fff;border-radius:18px;padding:12px;margin-top:10px;box-shadow:0 4px 14px rgba(14,47,51,.05);border:1.5px solid transparent}
+.grow.hl{border-color:var(--sun)}
+.grow .hd{display:flex;align-items:center;gap:10px}
+.grow .hd .e{font-size:24px;width:32px;text-align:center}
+.grow .hd input{border:0;border-bottom:1.5px dashed var(--line);font-weight:800;font-size:15.5px;min-height:34px;flex:1;min-width:0;background:none}
+.grow .hd input:focus{outline:none;border-bottom-color:var(--sea-d)}
+.grow .flds{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.grow .flds .full{grid-column:1/-1}
+.grow .fl{font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;display:block}
+.grow .in{min-height:44px;font-size:15px}.grow .stepper{min-height:44px}.grow .stepper button{min-height:42px;width:42px}
+.more{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+/* results */
+.prelim{display:flex;gap:8px;align-items:flex-start;background:var(--sea-l);color:var(--sea-d);border-radius:14px;padding:10px 12px;font-size:12.5px;font-weight:700;line-height:1.4;margin-bottom:12px}
+.gs{display:flex;gap:12px;align-items:center;padding:9px 0}
+.gs .e{font-size:24px;width:32px;text-align:center;flex-shrink:0}
+.gs .m{flex:1;min-width:0}.gs .nm{font-size:15px;font-weight:800}.gs .nm span{font-weight:500;color:var(--muted)}
+.gs .bar{height:9px;border-radius:5px;background:#E8EEF4;overflow:hidden;margin-top:6px}.gs .bar i{display:block;height:100%;border-radius:5px;transition:width .35s}
+.gs .p{text-align:right;min-width:76px;font-weight:800;font-size:16px;line-height:1.15}.gs .p small{display:block;font-size:11.5px;font-weight:700}
+.found{display:grid;gap:10px}
+.fcard{border-radius:18px;padding:14px;border:1.5px solid var(--line);background:#fff}
+.fcard .k{font-size:11.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.fcard b{display:block;font-size:15.5px;margin:4px 0 2px;line-height:1.35}
+.wi-row{display:flex;align-items:center;gap:10px}
+.wi-row .rb{width:46px;height:46px;border-radius:23px;border:1.5px solid var(--line);background:#fff;font-size:22px;font-weight:800;cursor:pointer;flex-shrink:0}
+.wi-val{font-family:var(--fh);font-weight:800;font-size:22px;text-align:center;flex:1}
+.wi-out{background:var(--mist);border-radius:14px;padding:12px;font-size:14px;line-height:1.5;margin-top:12px}
+.vt{display:flex;gap:4px;background:#E6EEEA;border-radius:14px;padding:4px;margin:12px 0}
+.vt button{flex:1;border:0;background:none;border-radius:11px;min-height:44px;font-weight:800;font-size:13px;cursor:pointer;color:var(--muted);padding:0 4px}
+.vt button.on{background:var(--ink);color:#fff}
+.chapgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.chap{border:1.5px solid var(--line);border-radius:18px;padding:12px;background:#fff;cursor:pointer;text-align:left;display:block;width:100%;font-size:inherit}
+.chap.ok{border-color:#BFE3CD;background:#F6FBF8}.chap.warn{border-color:#F3DDB5;background:#FDFAF2}.chap.bad{border-color:#EFC7C7;background:#FDF5F5}
+.chap.open{grid-column:1/-1}
+.chap .w{font-size:26px}.chap .tt{font-family:var(--fh);font-weight:800;font-size:16px;margin-top:4px}.chap .ag{font-size:11.5px;color:var(--muted);margin-bottom:6px}
+.chap .st{font-size:12.5px;line-height:1.45}.chap .ev{margin-top:8px;border-top:1px dashed var(--line);padding-top:6px;font-size:12.5px;display:grid;gap:3px}
+.chap .mo{margin-top:8px;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cy{display:flex;gap:8px;align-items:center;font-size:12.5px;padding:2px 0}.cy .d{width:10px;height:10px;border-radius:5px;flex-shrink:0}
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:12px;color:var(--muted);margin-top:8px}.legend span{display:flex;align-items:center;gap:6px}.sw{width:12px;height:12px;border-radius:3px;display:inline-block;flex-shrink:0}
+.mlist{display:grid;gap:4px;margin-top:8px;font-size:13px}.mlist div{display:flex;gap:8px;align-items:center}
+.pnote{font-size:13px;color:var(--muted);line-height:1.5;margin-top:10px}.pnote b{color:var(--ink)}
+.ends{display:grid;gap:10px;margin-top:6px}
+/* badges list for check */
+.ck{display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.ck .i{font-size:18px;width:26px;text-align:center;flex-shrink:0}
+.ck .a{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.adv{display:flex;gap:12px;align-items:center}
+.face{width:64px;height:64px;border-radius:22px;background:linear-gradient(135deg,var(--sea),var(--sky));display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--fh);font-weight:800;font-size:24px;flex-shrink:0}
+.slots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.slot{border:1.5px solid var(--line);border-radius:14px;padding:10px;min-height:62px;background:#fff;cursor:pointer;font-weight:700;font-size:14px;text-align:center}
+.slot.sel{background:var(--ink);color:#fff;border-color:var(--ink)}
+.scan{height:170px;border-radius:20px;background:repeating-linear-gradient(0deg,#F7FAF8,#F7FAF8 18px,#EEF3F0 18px,#EEF3F0 20px);position:relative;overflow:hidden;border:2px dashed #BBD0C8;display:flex;align-items:center;justify-content:center;font-size:44px}
+.scan::after{content:'';position:absolute;left:0;right:0;height:4px;background:var(--sun);box-shadow:0 0 16px var(--sun);animation:scan 1.4s ease-in-out infinite}
+@keyframes scan{0%{top:0}50%{top:calc(100% - 4px)}100%{top:0}}
+.pbar{height:8px;border-radius:4px;background:#E8EEF4;overflow:hidden}.pbar i{display:block;height:100%;background:var(--sea-d);border-radius:4px}
+.spin{width:54px;height:54px;border-radius:50%;border:5px solid var(--sea-l);border-top-color:var(--sea-d);animation:spin 1s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.banner{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px dashed var(--line);border-radius:16px;padding:8px 12px;margin:0 0 12px;font-size:13px}
+.banner .link{margin-left:auto;padding:4px 0}
+.mini{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.mini:last-child{border:0}
+.upl{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{border:1.5px solid var(--line);border-radius:18px;padding:12px;min-height:86px;background:#fff;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;text-align:left;font-weight:800;font-size:13.5px;line-height:1.3}
+.tile .e{font-size:24px}
+/* sheets & toast */
+.sheet-bg{position:absolute;inset:0;background:rgba(11,31,34,.45);display:flex;align-items:flex-end;z-index:20}
+.sheet{position:relative;background:#fff;color:var(--ink);width:100%;max-height:88%;overflow-y:auto;border-radius:28px 28px 0 0;padding:10px 18px 28px;animation:up .3s ease}
+.grab{width:44px;height:5px;border-radius:3px;background:#D3DDD8;margin:4px auto 14px}
+.sx{position:absolute;right:14px;top:14px;width:40px;height:40px;border-radius:20px;border:0;background:var(--mist);font-size:15px;cursor:pointer}
+#toast{position:absolute;left:16px;right:16px;bottom:96px;z-index:30;pointer-events:none}
+#toast .t{background:var(--ink);color:#fff;border-radius:16px;padding:12px 14px;font-size:14px;display:flex;gap:10px;align-items:center;animation:up .35s ease;box-shadow:0 10px 24px rgba(0,0,0,.2)}
+@keyframes up{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+/* report */
+#report{display:none;position:fixed;inset:0;z-index:100;background:#E4ECE8;overflow:auto}
+#report.on{display:block}
+.rep-bar{position:sticky;top:0;background:var(--ink);color:#fff;display:flex;gap:10px;align-items:center;padding:10px 16px;z-index:2}
+.rep-bar b{flex:1;font-family:var(--fh)}
+.rep-bar button{min-height:40px;border-radius:20px;border:0;padding:0 16px;font-weight:800;cursor:pointer}
+.rep{max-width:820px;margin:18px auto 40px;background:#fff;padding:32px 36px;border-radius:12px;line-height:1.5;font-size:14px}
+.rep h1{font-size:30px;margin:0 0 4px}.rep h2{font-size:20px;margin:28px 0 8px;border-bottom:2px solid var(--line);padding-bottom:4px}
+.rep table{width:100%;border-collapse:collapse;font-size:12px}.rep th,.rep td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:right}.rep th:first-child,.rep td:first-child{text-align:left}
+.rep .gs .p{min-width:110px}
+@media print{body{display:block;background:#fff}.side,.stage{display:none!important}#report{position:static;display:block!important;background:#fff;overflow:visible}.rep-bar{display:none}.rep{margin:0;max-width:none;padding:0;border-radius:0}.rep h2{break-after:avoid}.rep section{break-inside:avoid}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style></head><body>
+<aside class="side" aria-label="Prototype controls">
+<h1><span class="mark"></span>LifeGoals</h1>
+<p><b>Clickable customer-journey prototype.</b> Follows <i>docs/journey-spec.md</i>. Everything is simulated; no data leaves this page.</p>
+<button class="big" id="startnew">▶ Start as a new customer</button>
+<button class="big alt" id="startsample">⚡ Load sample customer → Results</button>
+<h4>Current screen</h4><div id="curid" aria-live="polite"></div>
+<h4>Jump to any screen</h4><div id="jumps"></div>
+<p style="margin-top:16px">Guidance, not advice. Projections are illustrative and use simple assumptions. Demo codes: <b>123456</b>.</p>
+</aside>
+<main class="stage"><div id="wrap"><div class="phone" id="phone"><div id="screen"></div><div id="toast" role="status" aria-live="polite"></div></div></div></main>
+<div id="report" role="dialog" aria-modal="true" aria-label="Your LifeGoals plan report"></div>
+<script>
+'use strict';
+/* ================= DATA (Discover wording verbatim from Lifecast DISC) ================= */
+const CHAPTERS = {1:'Your money mindset', 2:'How you decide', 3:'Your investment capacity', 4:'Your risk appetite', 5:'Your next chapter'};
+const DQ = [
+  {id:'2', act:1, q:"Your friends would say you're always…", sub:'', type:'cards', o:[
+    {e:'📊', t:'Sticking to a budget', w:{A:2}}, {e:'🔍', t:'Checking your balance', w:{B:2}}, {e:'📱', t:'Trying something new', w:{E:2}}, {e:'🧘', t:'Relaxed about money', w:{C:2}}]},
+  {id:'4', act:2, q:"A friend's investment doubled in a month. What do you do?", sub:'', type:'cards', o:[
+    {e:'🏃', t:'Buy in quickly, before I miss out', w:{E:1}}, {e:'🔎', t:'Research it before I decide', w:{A:1}}, {e:'🧑‍💼', t:'Ask an expert first', w:{B:1}}, {e:'🙅', t:'Stay away. Sounds too risky', w:{B:1, C:1}}]},
+  {id:'6', act:3, q:'How much could you comfortably invest each month?', sub:'Without cutting back on everyday life.', type:'cards', o:[
+    {e:'🪙', t:'Under €100', s:1}, {e:'💶', t:'€100 to €300', s:2}, {e:'💰', t:'€300 to €750', s:3}, {e:'🏦', t:'Over €750', s:4}, {e:'🎢', t:'It changes month to month', s:2}]},
+  {id:'7', act:3, q:'A €1,000 bill arrives tomorrow. How do you pay it?', sub:'', type:'cards', o:[
+    {e:'✅', t:'From my emergency savings', s:4}, {e:'🐷', t:'From money saved for something else', s:2}, {e:'💳', t:'Credit card or a loan', s:1}, {e:'😬', t:"I'm not sure", s:1}]},
+  {id:'8', act:4, q:'Pick a forecast for your long-term money.', sub:'Sunny means steady growth. Stormy means bigger ups and downs, with more growth potential.', type:'ride', o:[
+    {e:'☀️', t:'Calm and steady', s:1, path:'M0 40 L140 28'}, {e:'🌤️', t:'Mostly sunny', s:2, path:'M0 42 L20 36 L40 40 L60 30 L80 34 L100 26 L120 28 L140 20'},
+    {e:'🌦️', t:'Sunshine and showers', s:3, path:'M0 44 L20 26 L40 44 L60 18 L80 36 L100 12 L120 28 L140 8'}, {e:'⛈️', t:'Stormy, but exciting', s:4, path:'M0 46 L20 20 L40 48 L60 10 L80 42 L100 4 L120 30 L140 2'}]},
+  {id:'9', act:4, q:'Your €10,000 investment drops to €8,500. What do you do?', sub:'', type:'scenario', from:10000, to:8500, o:[
+    {e:'😱', t:'Sell before it drops more', s:1}, {e:'😬', t:"Wait until it's back to €10,000, then sell", s:2}, {e:'😌', t:'Stay calm and hold on', s:3}, {e:'🛒', t:"Buy more while it's cheaper", s:4}]},
+  {id:'12', act:5, q:'How do you feel about your financial future?', sub:'Every answer is normal.', type:'cards', o:[
+    {e:'😟', t:'Worried', s:1}, {e:'🤞', t:'Hopeful', s:2}, {e:'😌', t:'Confident', s:4}, {e:'🙈', t:'I avoid thinking about it', s:1}]}
+];
+const DQ_BY = id => DQ.find(q => q.id === id);
+const TYPES = {A:{name:'Achiever', e:'🎯', strap:'In control, goal-driven, disciplined with money.', str:['Clear about what you want','You stick to a plan'], watch:'Being too hard on yourself when life changes the plan.'},
+  B:{name:'Balancer', e:'⚖️', strap:'Value-seeking, vigilant, careful with risk.', str:['Careful with money','You weigh things up'], watch:'Playing so safe that cash quietly loses value to rising prices.'},
+  E:{name:'Explorer', e:'🧭', strap:'Curious, open to new ideas, comfortable with risk.', str:['Open to new ideas','Comfortable with change'], watch:'Jumping in before your safety net is in place.'},
+  C:{name:'Contented', e:'🛋️', strap:'Comfortable, steady, low-maintenance with money.', str:['Calm about money','Not easily rattled'], watch:'Putting off decisions, such as pension top-ups.'}};
+const WHY = ['Am I on track?', 'A big life change', 'Thinking about retirement', 'My adviser or employer sent me', 'Just curious'];
+const DISC_FORMAL = 'This tool is designed to help you explore your preferences. It does not replace a formal suitability or risk assessment where financial advice is provided.';
+
+/* Goal tiles: DISC Q11 order, word for word */
+const GOALCAT = [
+  {k:'home', t:'Buy a home', e:'🏡', amt:40000, yrs:4, kind:'spend', spec:'mortgage', unit:'Deposit'},
+  {k:'retire', t:'Retire comfortably', e:'🌅', amt:40000, kind:'retire', spec:'pension', unit:'Yearly income'},
+  {k:'family', t:'Grow my family', e:'👶', amt:15000, yrs:3, kind:'spend', spec:'protection', unit:'One-off'},
+  {k:'edu', t:"Kids' education", e:'🎓', amt:30000, yrs:10, kind:'spend', spec:'planner', unit:'Per child'},
+  {k:'travel', t:'Travel', e:'✈️', amt:8000, yrs:2, kind:'spend', spec:'planner', unit:'One-off'},
+  {k:'business', t:'Start a business', e:'💼', amt:25000, yrs:5, kind:'spend', spec:'planner', unit:'One-off'},
+  {k:'mfree', t:'Be mortgage-free', e:'🏦', amt:150000, yrs:15, kind:'mfree', spec:'mortgage', unit:'Mortgage balance'},
+  {k:'safety', t:'Build a safety net', e:'🪂', amt:15000, yrs:2, kind:'pot', spec:'planner', unit:'Months of costs'},
+  {k:'wealth', t:'Grow my wealth', e:'📈', amt:50000, yrs:10, kind:'pot', spec:'investment', unit:'Target pot'},
+  {k:'helpfam', t:'Help my family', e:'🤝', amt:20000, yrs:8, kind:'spend', spec:'planner', unit:'One-off'},
+  {k:'legacy', t:'Leave a legacy', e:'🎁', amt:100000, age:85, kind:'legacy', spec:'planner', unit:'Amount'},
+  {k:'other', t:'Something else', e:'⭐', amt:10000, yrs:4, kind:'spend', spec:'planner', unit:'Custom'}
+];
+const GC = k => GOALCAT.find(g => g.k === k);
+const OTHER_LIST = [['🩺','Health (medical reserve)',5000,3],['💍','Wedding',25000,2],['🚗','Buying a car',25000,3],['🧳','Career break',15000,5],['🌍','Moving abroad',20000,4],['🏥','Long-term care',60000,40],['📚','Fund a course',8000,2]];
+const SUGGEST = age => age < 35 ? ['safety','home','wealth'] : age < 45 ? ['family','edu','home'] : age < 55 ? ['retire','mfree'] : ['legacy','helpfam','retire'];
+
+/* Understand Me: 13 questions (7 from Discover + 6 new) */
+const UM = [
+  {n:1, t:'About you & money', e:'🧭', intro:'', qs:[{d:'2'}, {d:'12'}, {d:'4'},
+    {u:'u4', q:'When making an important financial decision, do you prefer to…', o:[{e:'🔬',t:'Research everything myself'},{e:'🧑‍🏫',t:'Understand the basics, then speak to an expert'},{e:'📞',t:'Speak to an expert first'},{e:'✨',t:'Keep things as simple as possible'}]}]},
+  {n:2, t:'Your risk profile', e:'🌦️', intro:'Three things make up your risk profile: how much risk you <b>want</b> to take, how much you <b>can</b> afford to take, and <b>how long</b> you can wait.', qs:[{d:'8'}, {d:'9'}, {d:'6'}, {d:'7'},
+    {u:'u9', q:'When will you need this money?', help:"Think of money you'd set aside to grow, not everyday savings.", o:[{e:'⏱️',t:'Within 2 years',s:1},{e:'📆',t:'In 2 to 5 years',s:2},{e:'🗓️',t:'In 5 to 10 years',s:3},{e:'🌳',t:'In 10+ years',s:4}]},
+    {u:'u10', q:'If your investments fell by a fifth, what would it mean for you?', o:[{e:'😟',t:"I'd have to cut back on essentials",s:1},{e:'🔁',t:"I'd change some plans",s:2},{e:'😌',t:"I'd be fine — it's long-term money",s:4},{e:'🤔',t:"I'm not sure",s:2}]}]},
+  {n:3, t:'Experience & values', e:'🌱', intro:'', qs:[
+    {u:'u11', q:'How much experience do you have with investing?', o:[{e:'🌱',t:'None at all'},{e:'📘',t:'I know the basics'},{e:'👍',t:'I am fairly comfortable'},{e:'🏆',t:'I am very experienced'}], chips:['Savings account','Pension','Shares or funds','Crypto','None']},
+    {u:'u12', q:'How stable is your income?', o:[{e:'🌪️',t:'Uncertain right now',s:1},{e:'🌦️',t:'It varies month to month',s:2},{e:'⛅',t:'Fairly stable',s:3},{e:'☀️',t:'Very stable',s:4}]},
+    {u:'u13', q:'Would you like your plan to include ethical or sustainable options?', o:[{e:'🌍',t:'Yes, this matters to me'},{e:'🌿',t:'A little'},{e:'⚖️',t:'No strong preference'},{e:'🤔',t:'Not sure'}]}]}
+];
+
+/* Your finances: 6 sections */
+const FSEC = [
+  {id:'about', t:'About you', e:'🙋', docs:[], f:['name','age','retireAge','pAge']},
+  {id:'income', t:'Income and expenses', e:'💶', docs:[['🧾','Payslips (last 3)'],['🏛️','Employment Detail Summary'],['🏦','Current-account statements'],['📑','Form 11 / Notice of Assessment']], f:['work','income','pIncome','otherM','costsM','oneOffY']},
+  {id:'assets', t:'Assets', e:'🏠', docs:[['🐷','Savings or credit-union statement'],['📈','Investment statement'],['🪙','Share scheme or crypto statement'],['🏡','Property valuation or LPT record']], f:['home','homeValue','cash','invest','saveM','propValue','rentM']},
+  {id:'liab', t:'Liabilities', e:'💳', docs:[['🏠','Mortgage statement'],['📄','Loan statement'],['💳','Credit-card statement'],['🗂️','Central Credit Register report']], f:['mortBal','mortPayM','mortYears','debt','debtPayM']},
+  {id:'prot', t:'Protection', e:'🛡️', docs:[['📜','Life or income protection policy'],['🏢','Employer benefits statement'],['🩺','Health or home insurance policy']], f:['life','ip','ci','workCover','health']},
+  {id:'pension', t:'Pension', e:'🌅', docs:[['📊','Pension statement'],['🏢','Employer scheme details'],['🏛️','State Pension record (MyWelfare)']], f:['pension','pensionM','sp']}
+];
+const own = () => /^Own/.test(S.fin.home || ''), mort = () => S.fin.home === 'Own with mortgage';
+const FF = {
+  name:{l:'First name', type:'text', pre:1},
+  age:{l:'Your age', type:'num', min:18, max:80, pre:1},
+  retireAge:{l:'Retirement age', type:'num', min:50, max:75, pre:1, hint:'From your timeline flag'},
+  pAge:{l:"Partner's age", type:'num', min:18, max:85, est:() => S.about.age, show:() => S.about.partner},
+  work:{l:'Your work', type:'choice', o:['Employed','Self-employed','Not working'], est:'Employed'},
+  income:{l:'Your gross yearly income', type:'eur', est:45000, hint:'Before tax'},
+  pIncome:{l:"Partner's gross yearly income", type:'eur', est:38000, show:() => S.about.partner},
+  otherM:{l:'Other income a month', type:'eur', est:0, opt:1, hint:'Optional'},
+  costsM:{l:'Monthly living costs', type:'eur', est:() => 2000 + (S.about.partner ? 800 : 0) + 450 * (S.about.deps || 0), hint:'Rent, bills, food and extras. Leave out mortgage and loan repayments.'},
+  oneOffY:{l:'Yearly one-off costs', type:'eur', est:1500, opt:1, hint:'Optional. Car tax, insurance, holidays'},
+  home:{l:'Your home', type:'choice', o:['Own outright','Own with mortgage','Rent','Live with family'], est:'Rent'},
+  homeValue:{l:'Home value', type:'eur', est:380000, show:own},
+  cash:{l:'Cash savings', type:'eur', est:8000, hint:'Incl. credit union and State Savings'},
+  invest:{l:'Investments', type:'eur', est:0, hint:'Shares, funds, share schemes, crypto: one total'},
+  saveM:{l:'Saving each month now', type:'eur', est:200},
+  propValue:{l:'Other property: value', type:'eur', est:0, opt:1, hint:'Optional'},
+  rentM:{l:'Other property: rent received a month', type:'eur', est:0, opt:1, hint:'Optional'},
+  mortBal:{l:'Mortgage left', type:'eur', est:200000, show:mort},
+  mortPayM:{l:'Monthly repayment', type:'eur', est:1100, show:mort},
+  mortYears:{l:'Years left', type:'num', min:1, max:40, est:20, show:mort},
+  debt:{l:'Other loans and cards: total owed', type:'eur', est:0},
+  debtPayM:{l:'Their monthly repayments', type:'eur', est:0},
+  life:{l:'Life cover', type:'ynn'}, ip:{l:'Income protection', type:'ynn'}, ci:{l:'Serious illness cover', type:'ynn'}, workCover:{l:'Cover through work', type:'ynn'}, health:{l:'Health insurance', type:'ynn'},
+  pension:{l:'Pension value today', type:'eur', est:() => Math.max(0, S.about.age - 25) * 3500, hint:'All pots together'},
+  pensionM:{l:'Paid in each month', type:'eur', est:() => Math.round((S.fin.income || 45000) * 0.1 / 12 / 10) * 10, hint:'Including your employer'},
+  sp:{l:'State Pension', type:'choice', o:['Expect full','Partly','Not sure'], est:'Not sure'}
+};
+/* mocked document reader output */
+const UPL = {
+  income:{v:{work:['Employed',99], income:[58000,98], costsM:[3100,74], oneOffY:[1800,81]}, docs:['Payslip · Aug 2026','Current-account statement · Jun–Aug 2026']},
+  assets:{v:{cash:[14500,97], invest:[6200,88], saveM:[350,71]}, docs:['Savings statement · Sep 2026','Investment statement · Jun 2026']},
+  liab:{v:{home:['Own with mortgage',99], mortBal:[212000,96], mortPayM:[1180,93], mortYears:[21,90], debt:[2800,85], debtPayM:[140,78]}, docs:['Mortgage statement · Aug 2026','Credit-card statement · Sep 2026']},
+  prot:{v:{life:['Yes',95], ip:['No',82], workCover:['Yes',90], health:['Yes',97]}, docs:['Life cover policy · 2021','Employer benefits statement · 2026']},
+  pension:{v:{pension:[72000,95], pensionM:[520,91]}, docs:['Pension statement · Jul 2025'], old:{pension:'Statement is over 12 months old'}}
+};
+const ADVISERS = [
+  {n:'Niamh Byrne', ini:'NB', q:'QFA, CFP®', lang:'English, Irish', loc:'Dublin 2', mode:'Video or in person'},
+  {n:'Ciarán Walsh', ini:'CW', q:'QFA, APA', lang:'English', loc:'Cork', mode:'Video'},
+  {n:'Aisling Murphy', ini:'AM', q:'CFP®, QFA', lang:'English, Polish', loc:'Galway', mode:'Video or in person'}];
+const EXPERT_FOR = {mortgage:'Mortgage expert', pension:'Pension & retirement expert', protection:'Protection expert', investment:'Investment expert', planner:'Financial planner'};
+const SLOTS = ['Thu 1 Oct · 10:00','Thu 1 Oct · 18:00','Fri 2 Oct · 13:30','Mon 5 Oct · 09:00','Tue 6 Oct · 17:30','Wed 7 Oct · 12:00'];
+const ADV_QS = ['Can I retire earlier?','Am I saving enough?','How do I protect my family?','Should I clear my mortgage early?','What about my pension?'];
+
+/* ================= STATE ================= */
+let S = null;
+function fresh(){
+  return {scr:'D0', app:false, tab:'plan', planSeg:'results', me:'home', exp:'home', entry:'direct',
+    why:[], di:0, ans:{}, about:{age:38, partner:null, deps:null}, goals:[], gid:1, retireAge:66,
+    save:{email:'', comms:false, done:false, asked:false}, tlOpen:{}, tlHl:null,
+    acct:{name:'', email:'', mobile:'', c1:false, c2:false, ev:false, sv:false, pk:false},
+    fin:{}, src:{}, conf:{}, look:{}, ack:{}, fsec:null, fmode:{}, upl:null, checked:false, from:null,
+    um:{a:{}, chips:[], done:{}, sec:null}, wi:{g:null, m:0, l:0}, pref:null, versions:[], understood:false, advQs:[],
+    view:'journey', chapOpen:null,
+    book:{stage:null, adv:0, share:{report:false, fin:false, docs:false, um:false}, agree:false, mode:'Video', slot:null, done:false, from:'plan'},
+    sheet:null, toast:null};
+}
+
+/* ================= HELPERS ================= */
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const eur = n => (n < 0 ? '−€' : '€') + Math.round(Math.abs(n)).toLocaleString('en-IE');
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const YEAR0 = 2026;
+const RM = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } };
+const val = f => typeof f === 'function' ? f() : f;
+function dsc(id){ const k = S.ans[id]; return typeof k === 'number' ? DQ_BY(id).o[k].s : null; }
+
+/* ================= PROFILE / SCORING ================= */
+function personality(){
+  const t = {A:0, B:0, E:0, C:0};
+  ['2','4'].forEach(id => { const k = S.ans[id]; if (typeof k === 'number') Object.entries(DQ_BY(id).o[k].w).forEach(([x, n]) => t[x] += n); });
+  const first = typeof S.ans['2'] === 'number' ? Object.keys(DQ_BY('2').o[S.ans['2']].w)[0] : 'B';
+  const rank = Object.keys(t).sort((a, b) => (t[b] - t[a]) || (b === first) - (a === first));
+  return TYPES[t[rank[0]] ? rank[0] : 'B'];
+}
+function umS(u){ const q = UM.flatMap(s => s.qs).find(x => x.u === u), k = S.um.a[u]; return typeof k === 'number' && q.o[k].s != null ? q.o[k].s : null; }
+function suggestU9(){
+  const a0 = S.about.age, g = S.goals.filter(x => x.kind !== 'retire' && x.age - a0 > 2 && !(x.saved > 0)).sort((a, b) => a.age - b.age)[0];
+  const y = g ? g.age - a0 : (S.retireAge - a0);
+  return y <= 2 ? 0 : y <= 5 ? 1 : y <= 10 ? 2 : 3;
+}
+function riskRead(full){
+  const want = dsc('8') || 2, comp = dsc('9') || 2, q6 = dsc('6') || 2, q7 = dsc('7') || 2;
+  const parts = [q6, q7]; if (full) { const a = umS('u10'), b = umS('u12'); if (a) parts.push(a); if (b) parts.push(b); }
+  const can = parts.reduce((x, y) => x + y, 0) / parts.length;
+  const tk = typeof S.um.a.u9 === 'number' ? S.um.a.u9 : suggestU9(), time = tk + 1;
+  let score = Math.min(want, can); if (time === 1) score = Math.min(score, 1.5); if (time === 2) score = Math.min(score, 2.4);
+  const label = score <= 1.5 ? 'Cautious' : score <= 2.1 ? 'Cautious–balanced' : score <= 2.7 ? 'Balanced' : score <= 3.3 ? 'Balanced–growth' : 'Growth';
+  const capHi = full ? can >= 3.25 : (q7 === 4 && q6 >= 3), capLo = full ? can < 2.25 : (q7 <= 2 || q6 <= 1);
+  let mis = null;
+  if (want >= 3 && comp >= 3 && capHi) mis = "You're willing, able and calm under pressure — ready for a growth conversation.";
+  else if (want <= 2 && comp <= 2 && capLo) mis = 'Safety first: an emergency fund and protection come before investing.';
+  else if (want >= 3 && capLo) mis = "You're keen on growth, but your cushion is thin — build the safety net first.";
+  else if (want >= 3 && comp <= 2) mis = 'You like the idea of growth, but drops may unsettle you. A calmer plan could suit you better.';
+  else if (want <= 2 && capHi) mis = "You could afford a little more risk, but you'd rather not. That's fine — it's worth seeing what playing safe costs over time.";
+  return {want, can, time, label, mis, comfort:['Careful','Cautious','Balanced','Adventurous'][want - 1], cushion: q7 >= 4 ? 'Strong' : q7 >= 2 ? 'Some' : 'Thin'};
+}
+function umCount(){ let n = 0; UM.forEach(s => s.qs.forEach(q => { if (q.d ? typeof S.ans[q.d] === 'number' : typeof S.um.a[q.u] === 'number') n++; })); return n; }
+
+/* ================= GOALS ================= */
+function mkGoal(k, custom){
+  const c = GC(k), a0 = S.about.age;
+  const g = {id:S.gid++, k, name:custom ? custom[1] : c.t, e:custom ? custom[0] : c.e, kind:c.kind, spec:c.spec, amount:custom ? custom[2] : c.amt, saved:0, who:'Me', prio:'Must have', flex:'Can move'};
+  if (c.kind === 'retire') g.age = S.retireAge;
+  else if (c.kind === 'legacy') g.age = Math.max(a0 + 5, 85);
+  else g.age = Math.min(89, a0 + (custom ? custom[3] : c.yrs));
+  if (k === 'edu' && S.about.deps > 1) g.amount = c.amt * Math.min(3, S.about.deps);
+  if (k === 'safety') g.amount = Math.round(val(FF.costsM.est) * 4 / 1000) * 1000;
+  return g;
+}
+function ensureRetire(){ if (!S.goals.some(g => g.kind === 'retire')) S.goals.push(mkGoal('retire')); }
+const retireGoal = () => S.goals.find(g => g.kind === 'retire');
+function setRetireAge(a){ S.retireAge = a; const r = retireGoal(); if (r) r.age = a; S.fin.retireAge = a; S.src.retireAge = S.src.retireAge || 'pre'; }
+
+/* ================= CASHFLOW ENGINE (adapted from LifeGoals 2.0 project(), with fixes) ================= */
+const AS = {infl:0.02, wage:0.025, cash:0.01, inv:0.045, pen:0.045, sp:15044, spAge:66, end:90, mortRate:0.038, debtRate:0.09};
+function netPay(g){ if (g <= 0) return 0; const it = Math.max(0, 0.2 * Math.min(g, 44000) + 0.4 * Math.max(0, g - 44000) - 4000); return g - it - 0.04 * g - (g > 18304 ? 0.042 * g : 0); }
+function finNums(){
+  const f = S.fin, n = k => { const v = f[k]; if (v != null && v !== '' && !isNaN(+v)) return +v; return FF[k] && !FF[k].opt && FF[k].est != null && !S.src[k] ? +val(FF[k].est) : 0; };
+  const mortOn = f.home === 'Own with mortgage';
+  return {age:S.about.age, R:S.retireAge, partner:!!S.about.partner, pAge:n('pAge') || S.about.age, income:f.work === 'Not working' ? 0 : n('income'), pIncome:S.about.partner ? n('pIncome') : 0,
+    otherM:n('otherM'), costsM:n('costsM') || val(FF.costsM.est), oneOffY:n('oneOffY'), cash:n('cash'), invest:n('invest'), rentM:n('rentM'),
+    mortBal:mortOn ? n('mortBal') : 0, mortPayM:mortOn ? n('mortPayM') : 0, mortYears:mortOn ? n('mortYears') : 0, debt:n('debt'), debtPayM:n('debtPayM'),
+    pension:n('pension'), pensionM:n('pensionM'), sp:f.sp === 'Expect full' ? 1 : f.sp === 'Partly' ? 0.6 : 0.8};
+}
+function project(wi){
+  const f = finNums(), goals = S.goals, a0 = f.age, R = f.R, N = AS.end - a0;
+  wi = wi || {}; const wg = wi.g != null ? goals.find(g => g.id === wi.g) : null, wm = +wi.m || 0, wl = +wi.l || 0;
+  let cash = f.cash, inv = f.invest, pen = f.pension, ear = 0, mBal = f.mortBal, dBal = f.debt, mfreeDone = false;
+  if (wg && wg.kind === 'retire') pen += wl; else if (wg) ear = wl;
+  const res = {}; goals.forEach(g => { const s = Math.min(g.saved || 0, cash); res[g.id] = s; cash -= s; });
+  const gf = {}; goals.forEach(g => gf[g.id] = {cost:0, cov:0});
+  const rows = []; const rg = goals.find(g => g.kind === 'retire');
+  for (let t = 0; t <= N; t++){
+    const a = a0 + t, infl = Math.pow(1 + AS.infl, t), wgw = Math.pow(1 + AS.wage, t), working = a < R;
+    let inflow = 0;
+    if (working){ inflow += netPay(f.income * wgw) - 0.3 * f.pensionM * 12 * wgw;
+      let contrib = f.pensionM * 12 * wgw; if (wg && wg.kind === 'retire') contrib = Math.max(0, contrib + wm * 12);
+      pen = pen * (1 + AS.pen) + contrib;
+    } else { const draw = pen / Math.max(1, AS.end - a + 1); pen = (pen - draw) * (1 + AS.pen * 0.7); inflow += draw * 0.9; }
+    if (a >= AS.spAge) inflow += AS.sp * f.sp * infl;
+    if (f.partner){ const pa = f.pAge + t; if (pa < 66) inflow += netPay(f.pIncome * wgw); else inflow += AS.sp * f.sp * infl; }
+    inflow += (f.otherM + f.rentM) * 12 * infl;
+    let living = working ? f.costsM * 12 * infl : (rg ? rg.amount * infl : f.costsM * 12 * infl * 0.8);
+    living += f.oneOffY * infl;
+    let fixed = 0;
+    if (mBal > 1 && !mfreeDone){ const pay = Math.min(f.mortPayM * 12, mBal * (1 + AS.mortRate)); fixed += pay; mBal = mBal * (1 + AS.mortRate) - pay; }
+    if (dBal > 1){ const pay = Math.min(Math.max(f.debtPayM * 12, dBal * 0.1), dBal * (1 + AS.debtRate)); fixed += pay; dBal = dBal * (1 + AS.debtRate) - pay; }
+    if (!(wg && wg.kind === 'retire') && wm < 0 && working) fixed += -wm * 12; // saving less each month
+    // earmarked what-if money grows until its goal
+    if (wg && wg.kind !== 'retire' && wm > 0 && a < wg.age) ear = ear * (1 + 0.02) + wm * 12; else if (wg && wg.kind !== 'retire') ear *= 1.02;
+    Object.keys(res).forEach(id => res[id] *= 1 + AS.cash);
+    // goal costs this year
+    const active = [];
+    goals.forEach(g => {
+      if (g.age !== a || (g.kind !== 'spend' && g.kind !== 'mfree')) return;
+      let c = g.kind === 'mfree' ? (f.mortBal > 0 ? Math.max(0, mBal) : g.amount * infl) : g.amount * infl;
+      const cost = c; let paid = Math.min(c, res[g.id] || 0); res[g.id] -= paid; c -= paid;
+      if (wg && wg.id === g.id){ const p2 = Math.min(c, ear); ear -= p2; c -= p2; paid += p2; cash += ear; ear = 0; }
+      cash += res[g.id] || 0; res[g.id] = 0;
+      if (g.kind === 'mfree'){ mfreeDone = true; mBal = 0; }
+      gf[g.id].cost += cost; gf[g.id].cov += paid; active.push({g, c});
+    });
+    const goalCost = active.reduce((s, x) => s + x.c, 0);
+    const needs = living + fixed + goalCost;
+    const net = inflow - needs; let used = 0, short = 0;
+    if (net >= 0){ cash += net * 0.6; inv += net * 0.4; }
+    else { let gap = -net; const a1 = Math.min(gap, cash); cash -= a1; gap -= a1; used += a1; const a2 = Math.min(gap, inv); inv -= a2; gap -= a2; used += a2; short = gap; }
+    cash *= 1 + AS.cash; inv *= 1 + AS.inv;
+    let unf = short;
+    for (const {g, c} of active.slice().reverse()){ const hit = Math.min(unf, c); unf -= hit; gf[g.id].cov += c - hit; }
+    if (rg && !working){ const hit = Math.min(unf, living); gf[rg.id].cost += living; gf[rg.id].cov += living - hit; unf -= hit; }
+    const liquid = cash + inv + Object.values(res).reduce((s, x) => s + x, 0) + ear;
+    goals.forEach(g => {
+      if (g.kind === 'pot' && g.age === a){ const tgt = g.amount * infl, have = liquid; gf[g.id].cost = tgt; gf[g.id].cov = Math.min(tgt, have); if (res[g.id]){ cash += res[g.id]; res[g.id] = 0; } if (wg && wg.id === g.id){ cash += ear; ear = 0; } }
+      if (g.kind === 'legacy' && t === N){ const tgt = g.amount * infl; gf[g.id].cost = tgt; gf[g.id].cov = Math.min(tgt, liquid); }
+    });
+    rows.push({t, a, yr:YEAR0 + t, inflow, needs, short, used, liquid, pen, retired:!working, rmark:a === R});
+  }
+  const pct = {}; goals.forEach(g => { const x = gf[g.id]; pct[g.id] = x.cost > 0 ? clamp(Math.round(x.cov / x.cost * 100), 0, 100) : 100; });
+  return {rows, pct};
+}
+const band = p => p >= 95 ? 'ok' : p >= 70 ? 'dip' : 'gap';
+const BANDW = {ok:'On track', dip:'Nearly there', gap:'Needs a plan'};
+const isShort = r => r.short > Math.max(500, r.needs * 0.02);
+const rowCol = r => isShort(r) ? 'var(--gap)' : r.used > 1 ? 'var(--dip)' : 'var(--ok)';
+function extraFor(g){ for (const m of [25,50,75,100,150,200,250,300,400,500,600,750,1000,1250,1500,2000]){ if (project({g:g.id, m, l:0}).pct[g.id] >= 95) return m; } return null; }
+function yearsTxt(g){ const n = g.age - S.about.age; return g.kind === 'retire' ? 'at ' + g.age : 'in ' + n + ' year' + (n === 1 ? '' : 's'); }
+function qualityCount(){ let n = 0; FSEC.forEach(s => s.f.forEach(k => { if (fieldVisible(k) && !FF[k].opt && (S.src[k] === 'est' || !S.src[k])) n++; })); return n; }
+function fieldVisible(k){ const d = FF[k]; return !d.show || d.show(); }
+function secStatus(sec){
+  const fs = sec.f.filter(fieldVisible), req = fs.filter(k => !FF[k].opt);
+  if (fs.some(k => S.look[k] && !S.ack[k])) return 'look';
+  const got = req.filter(k => S.src[k]).length;
+  return got === req.length ? 'done' : (fs.some(k => S.src[k] && S.src[k] !== 'pre') ? 'part' : 'none');
+}
+const secDone = id => ['done','look'].includes(secStatus(FSEC.find(s => s.id === id)));
+const minOK = () => secDone('about') && secDone('income') && (secDone('assets') || secDone('pension'));
+/* ================= SMALL UI PIECES ================= */
+function ring(p, size, col){ const r = (size - 10) / 2, c = 2 * Math.PI * r; return '<div class="ring" style="width:' + size + 'px;height:' + size + 'px" aria-hidden="true"><svg width="' + size + '" height="' + size + '"><circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="rgba(11,37,69,.1)" stroke-width="8"/><circle cx="' + size / 2 + '" cy="' + size / 2 + '" r="' + r + '" fill="none" stroke="' + col + '" stroke-width="8" stroke-linecap="round" stroke-dasharray="' + c + '" stroke-dashoffset="' + c * (1 - p / 100) + '"/></svg><b style="font-size:' + (size > 70 ? 20 : 14) + 'px">' + p + '%</b></div>'; }
+const PHASES = ['Discover','Define','Prepare','Understand'];
+function phaseBar(n){ return '<div class="phasebar" aria-label="Step ' + n + ' of 4: ' + PHASES[n - 1] + '">' + PHASES.map((_, k) => '<i class="' + (k < n ? 'on' : '') + '"></i>').join('') + '</div>'; }
+function brandBar(back, right){ return '<div class="topbar">' + (back ? '<button class="backb" data-a="' + back + '">‹ Back</button>' : '<div class="brand"><span class="mark"></span>LifeGoals</div>') + (right || '') + '</div>'; }
+function tagFor(k){ const s = S.src[k]; if (S.look[k] && !S.ack[k]) return '<span class="tag look">⚠️ Needs a look</span>';
+  return s === 'doc' ? '<span class="tag doc">✅ From document' + (S.conf[k] ? ' · ' + S.conf[k] + '%' : '') + '</span>' : s === 'typed' ? '<span class="tag typed">✏️ Your figure</span>' : s === 'est' ? '<span class="tag est">≈ Estimated</span>' : s === 'none' ? '<span class="tag none">Confirmed none</span>' : s === 'pre' ? '<span class="tag pre">From your answers</span>' : '<span class="tag none">❓ Missing</span>'; }
+function fmtField(k){ const v = S.fin[k], d = FF[k]; if (v == null || v === '') return '—'; return d.type === 'eur' ? eur(+v) : String(v); }
+const gById = id => S.goals.find(g => g.id === +id);
+function statusWord(st){ return st === 'done' ? 'Done' : st === 'look' ? 'Needs a look' : st === 'part' ? 'In progress' : 'Not started'; }
+function statIcon(st){ return '<span class="stat ' + (st === 'done' ? 'done' : st === 'look' ? 'look' : '') + '" aria-hidden="true">' + (st === 'done' ? '✓' : st === 'look' ? '!' : st === 'part' ? '…' : '') + '</span>'; }
+function secSummary(sec){ const fs = sec.f.filter(fieldVisible).filter(k => S.src[k]); if (!fs.length) return sec.docs.length ? 'Upload or type it · about 1 min' : 'Name, age, retirement age'; return fs.slice(0, 3).map(k => FF[k].l.replace(/^Your /, '') + ': ' + fmtField(k)).join(' · '); }
+
+/* ================= DISCOVER (quiz style) ================= */
+const V = {};
+V.D0 = () => ({id:'D0', note:'Welcome. Value promise + trust line. No sign-up. Entry source captured silently.', kind:'quiz', html:
+  '<div class="qtop"><div class="brand"><span class="mark"></span>LifeGoals</div><span style="flex:1"></span><button class="qback" data-a="sheet" data-p="invite">I have an invite</button></div>' +
+  '<div class="qbody" style="display:flex;flex-direction:column;justify-content:center"><div class="medal" aria-hidden="true">🗺️</div><h2 tabindex="-1" style="font-size:34px">Your life. Your plan.</h2><p class="qsub" style="font-size:17px">See how your money can carry you towards the things you want, from today to later life.</p>' +
+  '<div class="panel" style="font-size:14px;line-height:1.5"><b>Free · No obligation · Nothing saved or shared without your say</b><br><span class="small">We only use your answers to show your results. Nothing is saved unless you choose.</span> <button class="link" data-a="sheet" data-p="whyask">Why we ask</button></div></div>' +
+  '<div class="qfoot" style="flex-direction:column;align-items:stretch;gap:8px"><button class="wbtn" data-a="go" data-p="D1">Start · about 2 min</button><p class="small" style="text-align:center;margin:2px 0 0">Guidance, not advice.</p></div>'});
+V.D1 = () => ({id:'D1', note:'Optional motivation chips (MASTER B5). Tags only.', kind:'quiz', html:
+  '<div class="qtop"><button class="qx" data-a="go" data-p="D0" aria-label="Back">‹</button><span style="flex:1"></span></div><div class="qbody"><div class="qeye">Before we start</div><h2 tabindex="-1">What brought you here?</h2><p class="qsub">Pick any that fit. Or skip.</p><div class="chips" role="group" aria-label="What brought you here">' +
+  WHY.map((w, k) => '<button class="chip' + (S.why.includes(k) ? ' sel' : '') + '" aria-pressed="' + S.why.includes(k) + '" data-a="why" data-p="' + k + '">' + esc(w) + '</button>').join('') + '</div></div>' +
+  '<div class="qfoot"><button class="qback" data-a="dstart">Skip</button><button class="wbtn" data-a="dstart"' + (S.why.length ? '' : ' disabled') + '>Next</button></div>'});
+function chapBar(){ return '<div class="chaps" aria-hidden="true">' + [1,2,3,4,5].map(c => { const qs = DQ.filter(q => q.act === c), d = qs.filter(q => S.ans[q.id] != null).length; return '<i><b style="width:' + d / qs.length * 100 + '%"></b></i>'; }).join('') + '</div>'; }
+V.DQ = () => { const q = DQ[S.di], v = S.ans[q.id];
+  let body = '';
+  if (q.type === 'scenario') body += '<div class="panel"><div class="scn"><div><small>You put in</small><b>' + eur(q.from) + '</b></div><div style="text-align:right"><small>A month later</small><b style="color:var(--gap-t)">' + eur(q.to) + '</b></div></div><div class="pbar" style="margin-top:10px"><i style="width:85%;background:var(--sun)"></i></div></div>';
+  const long = q.o.some(o => o.t.length > 30) || q.o.length === 5;
+  body += '<div class="opts' + (long ? '' : ' two') + '" role="group" aria-label="Answers">' + q.o.map((o, k) => '<button class="opt' + (long ? ' row1' : '') + (v === k ? ' sel' : '') + '" aria-pressed="' + (v === k) + '" data-a="dpick" data-p="' + k + '"><span class="em" style="background:' + ['var(--sun-l)','var(--sky-l)','var(--sea-l)','var(--storm-l)','#FDE3DC'][k % 5] + '" aria-hidden="true">' + o.e + '</span><span class="tx">' + esc(o.t) + '</span>' +
+    (q.type === 'ride' ? '<svg width="100%" height="30" viewBox="0 0 140 50" preserveAspectRatio="none" aria-hidden="true"><path d="' + o.path + '" fill="none" stroke="var(--sea-d)" stroke-width="3" stroke-linecap="round"/></svg>' : '') + '</button>').join('') + '</div>';
+  return {id:'D' + (S.di + 2), note:'Discover question ' + (S.di + 1) + ' of 7 (DISC Q' + q.id + ', verbatim). One tap advances. Jargon tags hidden.', kind:'quiz', html:
+    '<div class="qtop">' + chapBar() + '<button class="qx" data-a="go" data-p="D0" aria-label="Close and go to start">✕</button></div><div class="qbody"><div class="qeye">Chapter ' + q.act + ' · ' + CHAPTERS[q.act] + ' · ' + (S.di + 1) + ' of 7</div><h2 tabindex="-1">' + esc(q.q) + '</h2><p class="qsub">' + esc(q.sub) + '</p>' + body + '</div>' +
+    '<div class="qfoot"><button class="qback" data-a="dprev">← Back</button><button class="qback" data-a="dnext">Skip</button></div>'};
+};
+function stepper(a, p, value, label){ return '<div class="stepper" role="group" aria-label="' + esc(label) + '"><button data-a="' + a + '" data-p="' + p + '|-1" aria-label="Less">−</button><output aria-live="polite">' + value + '</output><button data-a="' + a + '" data-p="' + p + '|1" aria-label="More">+</button></div>'; }
+V.D9 = () => { const b = S.about;
+  return {id:'D9', note:'Basic details about self and dependants (MASTER B7). Name comes later at account creation.', kind:'quiz', html:
+  '<div class="qtop">' + chapBar() + '<button class="qx" data-a="go" data-p="D0" aria-label="Close">✕</button></div><div class="qbody"><div class="qeye">Almost done</div><h2 tabindex="-1">A bit about you</h2><p class="qsub">So we can suggest the goals that fit your life stage.</p>' +
+  '<div class="panel"><div class="field"><span class="flabel" id="lab-age">Your age</span>' + stepper('age', 'x', b.age, 'Your age') + '<input type="range" min="18" max="80" value="' + b.age + '" data-in="age" aria-labelledby="lab-age"></div>' +
+  '<div class="field"><span class="flabel">Planning with a partner?</span><div class="seg" role="group" aria-label="Planning with a partner">' + ['Yes','No'].map(x => '<button class="' + ((b.partner === true && x === 'Yes') || (b.partner === false && x === 'No') ? 'on' : '') + '" aria-pressed="' + ((b.partner === true && x === 'Yes') || (b.partner === false && x === 'No')) + '" data-a="partner" data-p="' + x + '">' + x + '</button>').join('') + '</div></div>' +
+  '<div class="field" style="margin:0"><span class="flabel">Children or others who rely on you</span><div class="seg" role="group" aria-label="Dependants">' + ['0','1','2','3+'].map((x, k) => '<button class="' + (b.deps === k ? 'on' : '') + '" aria-pressed="' + (b.deps === k) + '" data-a="deps" data-p="' + k + '">' + x + '</button>').join('') + '</div></div></div></div>' +
+  '<div class="qfoot"><button class="qback" data-a="dprev">← Back</button><button class="wbtn" data-a="go" data-p="D10"' + (b.partner == null || b.deps == null ? ' disabled' : '') + '>See my money story</button></div>'};
+};
+V.D10 = () => { const P = personality(), r = riskRead(false);
+  return {id:'D10', note:'Money-story glimpse: personality + risk comfort + cushion + at most one mismatch hint (S1 K13–K17).', kind:'quiz', html:
+  '<div class="qtop"><div class="brand"><span class="mark"></span>Your money story</div></div><div class="qbody">' +
+  '<div class="panel" style="background:linear-gradient(150deg,var(--sun-l),#fff)"><div class="qeye">Your money personality</div><h2 tabindex="-1" style="font-size:36px;margin:6px 0">' + P.e + ' ' + P.name + '</h2><p class="qsub" style="margin:0;color:var(--ink)">' + P.strap + '</p></div>' +
+  '<div class="grid2"><div class="panel" style="margin:0"><span class="small">Risk comfort</span><b style="display:block;font-size:19px">' + r.comfort + '</b></div><div class="panel" style="margin:0"><span class="small">Cushion</span><b style="display:block;font-size:19px">' + r.cushion + '</b></div></div>' +
+  (r.mis ? '<div class="panel" style="margin-top:12px"><div class="qeye" style="color:var(--sea-d)">You might notice…</div><p style="margin:6px 0 0;font-size:15px;line-height:1.5">' + esc(r.mis) + '</p></div>' : '') +
+  '<p class="disc">A first read, not advice. You can go deeper later in <b>Me</b>. ' + DISC_FORMAL + '</p></div>' +
+  '<div class="qfoot" style="flex-direction:column;align-items:stretch;gap:6px"><button class="wbtn" data-a="go" data-p="F1">Build my LifeMap</button><button class="qback" data-a="sheet" data-p="save">Save my answers</button></div>'};
+};
+
+/* ================= DEFINE ================= */
+function flowHead(n, eye, title, sub, back){ return brandBar(back) + phaseBar(n) + '<div class="eyebrow" style="margin-top:8px">' + eye + '</div><h2 class="t" tabindex="-1">' + title + '</h2>' + (sub ? '<p class="sub" style="margin:0">' + sub + '</p>' : ''); }
+function saveBanner(){ return S.save.done ? '<div class="banner">✅ <span>Progress saved to ' + esc(S.save.email) + '</span></div>' : '<div class="banner">💾 <span>Want a break?</span><button class="link" data-a="sheet" data-p="save">Save and come back later</button></div>'; }
+V.F1 = () => { ensureRetire(); const sug = SUGGEST(S.about.age).slice(); if (S.why.includes(2) && !sug.includes('retire')) sug.unshift('retire');
+  const order = sug.concat(GOALCAT.map(g => g.k).filter(k => !sug.includes(k))), have = k => S.goals.some(g => g.k === k);
+  const n = S.goals.filter(g => g.kind !== 'retire').length;
+  return {id:'F1', note:'Goal picker = DISC Q11 word for word, ordered by life stage from age. No limit. Retirement is always on the timeline.', head:flowHead(2, 'Step 2 · Define', "What's next in your life story?", "Pick any. You'll place them on your timeline next.", 'backd'),
+  html:saveBanner() + '<div class="eyebrow" style="margin:4px 0 8px">Suggested for you</div><div class="chips" role="group" aria-label="Suggested goals">' + order.slice(0, sug.length).map(chipG).join('') + '</div><div class="eyebrow" style="margin:16px 0 8px">More goals</div><div class="chips" role="group" aria-label="More goals">' + order.slice(sug.length).map(chipG).join('') + '</div>' +
+    S.goals.filter(g => g.k === 'other').map(g => '<div class="pill mint" style="margin-top:10px">' + g.e + ' ' + esc(g.name) + '</div> ').join('') +
+    (n > 6 ? '<p class="note" style="margin-top:12px">Lots of plans! You can add more later too.</p>' : '') + '<p class="small" style="margin-top:14px">🌅 Retirement is always on your timeline, so we can check your later years.</p>',
+  foot:'<button class="btn" data-a="go" data-p="F2">Place them on my timeline</button>'};
+  function chipG(k){ const c = GC(k), on = k === 'retire' || have(k); return '<button class="chip' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" data-a="gpick" data-p="' + k + '"' + (k === 'retire' ? ' aria-disabled="true" title="Always on your timeline"' : '') + '>' + c.e + ' ' + esc(c.t) + (k === 'retire' ? ' 🔒' : '') + '</button>'; }
+};
+function tlBoard(){
+  const a0 = S.about.age, gs = S.goals;
+  return '<div class="tl-board"><div class="tl-track" id="tl" data-a0="' + a0 + '">' +
+    gs.map(g => { const ret = g.kind === 'retire'; return '<div class="tl-chip' + (ret ? ' ret' : '') + (S.tlHl === g.id ? ' hl' : '') + '" data-g="' + g.id + '" tabindex="0" role="slider" aria-label="' + esc(g.name) + '" aria-valuemin="' + (ret ? 55 : a0 + 1) + '" aria-valuemax="' + (ret ? 75 : 90) + '" aria-valuenow="' + g.age + '" aria-valuetext="' + esc(g.name) + ', age ' + g.age + ', ' + (YEAR0 + g.age - a0) + '">' + chipInner(g) + '</div>'; }).join('') +
+    '</div><div class="tl-hint">↔ Drag a goal (or use the arrow keys) to change when it happens</div></div>';
+}
+function chipInner(g){ const n = g.age - S.about.age, nm = g.name.length > 13 ? g.name.slice(0, 12) + '…' : g.name;
+  return g.kind === 'retire' ? '<span aria-hidden="true">🏁</span>Retire <span class="yr">' + g.age + '</span>' : '<span aria-hidden="true">' + g.e + '</span>' + esc(nm) + ' <span class="yr">in ' + n + ' yr' + (n === 1 ? '' : 's') + '</span>'; }
+function whenTxt(g){ const n = g.age - S.about.age; return (g.kind === 'retire' ? 'Age ' + g.age : 'in ' + n + ' yr' + (n === 1 ? '' : 's') + ' · age ' + g.age) + ' · ' + (YEAR0 + n); }
+function gRows(){
+  return S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const ret = g.kind === 'retire', open = S.tlOpen[g.id];
+    return '<div class="grow' + (S.tlHl === g.id ? ' hl' : '') + '" id="row-' + g.id + '"><div class="hd"><span class="e" aria-hidden="true">' + g.e + '</span><input value="' + esc(g.name) + '" data-gname="' + g.id + '" aria-label="Goal name"' + (ret ? ' readonly' : '') + '>' + (ret ? '' : '<button class="link" style="font-size:12.5px" data-a="gdel" data-p="' + g.id + '" aria-label="Remove ' + esc(g.name) + '">Remove</button>') + '</div>' +
+      '<div class="flds"><div class="full"><span class="fl">' + (ret ? 'Retire at' : 'When') + '</span>' + stepper('gyr', g.id, '<span id="when-' + g.id + '">' + whenTxt(g) + '</span>', 'When') + '</div>' +
+      '<label><span class="fl">' + (ret ? 'Income a year €' : g.kind === 'mfree' ? 'Mortgage left €' : 'Amount €') + '</span><input class="in" inputmode="numeric" value="' + Math.round(g.amount) + '" data-gamt="' + g.id + '"></label>' +
+      (ret ? '<div><span class="fl">Pension</span><span class="small">From Your finances</span></div>' : '<label><span class="fl">Saved so far €</span><input class="in" inputmode="numeric" value="' + Math.round(g.saved || 0) + '" data-gsaved="' + g.id + '"></label>') + '</div>' +
+      '<div class="small" style="margin-top:4px">Today\'s money' + (g.kind === 'mfree' && S.fin.mortBal ? ' · from your Liabilities' : '') + '</div>' +
+      (ret ? '' : '<button class="link" data-a="gmore" data-p="' + g.id + '" aria-expanded="' + !!open + '">' + (open ? '▲ Fewer details' : '▼ More details (optional)') + '</button>' + (open ? '<div class="more">' + [['who','For whom',['Me','Partner','Child','Family']],['prio','Priority',['Must have','Nice to have']],['flex','Flexible on timing?',['Can move','Fixed date']]].map(([k, l, os]) => '<div class="fl" style="margin-top:6px">' + l + '</div><div class="chips">' + os.map(o => '<button class="chip sm' + (g[k] === o ? ' sel' : '') + '" aria-pressed="' + (g[k] === o) + '" data-a="gset" data-p="' + g.id + '|' + k + '|' + o + '">' + o + '</button>').join('') + '</div>').join('') + '</div>' : '')) + '</div>'; }).join('');
+}
+V.F2 = () => ({id:'F2', note:'Timeline: drag chips (touch, mouse, keyboard), snap to years, lanes never overlap. Retirement flag = retirement age everywhere. Rows below are optional edits.', head:flowHead(2, 'Step 2 · Define', 'Your timeline', "Drag each goal to when you'd like it. Don't worry about being exact. You can change anything later.", 'go|F1'),
+  html:saveBanner() + tlBoard() + '<div class="sec"><h3>Your goals</h3><button class="link" data-a="go" data-p="F1">＋ Add a goal</button></div>' + gRows(),
+  foot:'<button class="btn" data-a="f2next">Next</button>'});
+V.F4 = () => { const ok = S.goals.some(g => g.age && g.amount > 0);
+  return {id:'F4', note:'Confirm my LifeMap: recap, priority chips (default Must have). Needs ≥1 goal with a when and an amount.', head:flowHead(2, 'Step 2 · Define', 'Your LifeMap', 'A quick check before we add your money.', 'go|F2'),
+  html:'<div class="card">' + S.goals.slice().sort((a, b) => a.age - b.age).map(g => '<div class="mini" style="flex-wrap:wrap"><span><span aria-hidden="true">' + g.e + '</span> <b>' + esc(g.name) + '</b><br><span class="small">' + whenTxt(g) + ' · ' + eur(g.amount) + (g.kind === 'retire' ? ' a year' : '') + '</span></span>' + (g.kind === 'retire' ? '' : '<span class="chips">' + ['Must have','Nice to have'].map(o => '<button class="chip sm' + (g.prio === o ? ' sel' : '') + '" aria-pressed="' + (g.prio === o) + '" data-a="gset" data-p="' + g.id + '|prio|' + o + '">' + o + '</button>').join('') + '</span>') + '</div>').join('') + '</div>' +
+    (ok ? '' : '<p class="note" style="margin-top:12px">Add an amount to at least one goal.</p>') + '<p class="disc">Next, you\'ll create your account so you can add your money safely.</p>',
+  foot:'<button class="btn" data-a="f4ok"' + (ok ? '' : ' disabled') + '>This looks right</button>'};
+};
+
+/* ================= PREPARE: account ================= */
+V.P1 = () => { const a = S.acct, okMail = /.+@.+\..+/.test(a.email), okMob = a.mobile.replace(/\D/g, '').length >= 9, can = a.name.trim() && okMail && okMob && a.c1;
+  return {id:'P1', note:'Account creation once, before Your finances. Consents start UNTICKED (CBI 2025).', head:flowHead(3, 'Step 3 · Prepare', "To add your money safely, let's set up your account.", '', 'go|F4'),
+  html:'<div class="card"><div class="field"><label for="a-name">First name</label><input class="in" id="a-name" data-acct="name" autocomplete="given-name" value="' + esc(a.name) + '"></div>' +
+    '<div class="field"><label for="a-email">Email</label><input class="in" id="a-email" type="email" data-acct="email" autocomplete="email" value="' + esc(a.email) + '">' + (a.email && !okMail ? '<span class="small" style="color:var(--gap-t)">Check your email address</span>' : '') + '</div>' +
+    '<div class="field" style="margin:0"><label for="a-mob">Mobile</label><input class="in" id="a-mob" type="tel" data-acct="mobile" autocomplete="tel" placeholder="08x xxx xxxx" value="' + esc(a.mobile) + '"></div></div>' +
+    '<div class="card"><label class="check"><input type="checkbox" data-acct="c1"' + (a.c1 ? ' checked' : '') + '><span><b>Required:</b> Use my details to build my plan</span></label><label class="check"><input type="checkbox" data-acct="c2"' + (a.c2 ? ' checked' : '') + '><span>Optional: Send me reminders and updates</span></label>' +
+    '<p class="small" style="margin:6px 0 0">Stored in the EU · never sold · nothing shared with an adviser unless you choose · delete everything any time.</p><button class="link" data-a="sheet" data-p="money">How LifeGoals makes money</button></div>',
+  foot:'<button class="btn" data-a="go" data-p="P1E" id="acctgo"' + (can ? '' : ' disabled') + '>Send my email code</button>'};
+};
+function codeScreen(id, what, to, nextA){ return {id, note:'Mock verification. Demo code 123456.', head:flowHead(3, 'Step 3 · Prepare', 'Check your ' + what, 'We sent a 6-digit code to <b>' + esc(to) + '</b>.', 'go|' + (id === 'P1E' ? 'P1' : 'P1E')),
+  html:'<div class="card"><div class="codebox" role="group" aria-label="6-digit code">' + [0,1,2,3,4,5].map(i => '<input inputmode="numeric" maxlength="1" data-code="' + i + '" aria-label="Digit ' + (i + 1) + '">').join('') + '</div><p class="note">Demo code: <b>123456</b></p><p id="codeerr" class="small" style="color:var(--gap-t);min-height:18px" role="alert"></p><button class="link" data-a="toast" data-p="New code sent">Send a new code</button></div>',
+  foot:'<button class="btn" data-a="' + nextA + '">Verify</button>'}; }
+V.P1E = () => codeScreen('P1E', 'email', S.acct.email || 'your email', 'vemail');
+V.P1S = () => codeScreen('P1S', 'phone', S.acct.mobile || 'your mobile', 'vsms');
+V.P1K = () => ({id:'P1K', note:'Passkey / Face ID offered as an extra after verification.', head:flowHead(3, 'Step 3 · Prepare', "You're verified ✓", 'Want a faster, safer way to sign in next time?', ''),
+  html:'<div class="card" style="text-align:center"><div style="font-size:52px" aria-hidden="true">🔐</div><b style="font-size:17px">Use Face ID or a passkey</b><p class="small">No password to remember. You can still use email codes.</p></div>',
+  foot:'<button class="btn" data-a="passkey" data-p="1">Add Face ID / passkey</button><button class="btn ghost" data-a="passkey" data-p="0">Not now</button>'});
+
+/* ================= PREPARE: finances ================= */
+V.P2 = () => { const done = FSEC.filter(s => secStatus(s) === 'done').length;
+  return {id:'P2', note:'Your finances hub: 6 sections, each Upload or Type it. One smart upload at the top. Minimum = About you + Income + Assets or Pension.', head:flowHead(3, 'Step 3 · Prepare', 'Your finances', 'Add your money once. Rough figures are fine.', S.app ? 'meback' : ''),
+  html:'<div class="card row" style="background:var(--sea-l)"><span style="font-size:30px" aria-hidden="true">📥</span><div style="flex:1"><b>Add any documents</b><div class="small" style="color:var(--ink)">We\'ll sort them into the right sections. You check what we read.</div></div><button class="btn sm" data-a="upl" data-p="smart">Upload</button></div>' +
+    '<div class="row" style="margin:16px 0 8px;justify-content:space-between"><b>' + done + ' of 6 done</b><span class="small">Skip any you like</span></div>' +
+    FSEC.map((s, i) => { const st = secStatus(s); return '<button class="goal" data-a="fsec" data-p="' + i + '"><span class="ic" aria-hidden="true">' + s.e + '</span><span style="flex:1;min-width:0"><b>' + s.t + '</b><br><span class="small">' + esc(secSummary(s)) + '</span></span><span class="sr">' + statusWord(st) + '</span>' + statIcon(st) + '</button>'; }).join('') +
+    (S.missingDocs && S.missingDocs.length ? '<p class="note">Still to add: ' + S.missingDocs.map(esc).join(', ') + '</p>' : '') +
+    (minOK() ? '' : '<p class="small" style="margin-top:6px">To see results we need: <b>About you</b>, <b>Income and expenses</b>, and <b>Assets</b> or <b>Pension</b>.</p>'),
+  foot:S.app ? '' : '<button class="btn" data-a="go" data-p="P4"' + (minOK() ? '' : ' disabled') + '>Check my details</button>'};
+};
+function fieldHTML(k){ const d = FF[k], v = S.fin[k];
+  const id = 'f-' + k, lab = '<label for="' + id + '">' + esc(d.l) + ' <span id="tag-' + k + '">' + tagFor(k) + '</span></label>';
+  let inp = '';
+  if (d.type === 'choice' || d.type === 'ynn'){ const os = d.o || ['Yes','No','Not sure'];
+    return '<div class="field"><span class="flabel">' + esc(d.l) + ' <span id="tag-' + k + '">' + tagFor(k) + '</span></span><div class="chips" role="group" aria-label="' + esc(d.l) + '">' + os.map(o => '<button class="chip sm' + (v === o ? ' sel' : '') + '" aria-pressed="' + (v === o) + '" data-a="fchoice" data-p="' + k + '|' + o + '">' + esc(o) + '</button>').join('') + '</div>' + (d.type === 'choice' && d.est ? '<div class="fhelp"><button class="link" data-a="fest" data-p="' + k + '">Not sure? Estimate for me</button></div>' : '') + '</div>'; }
+  if (d.type === 'text') inp = '<input class="in" id="' + id + '" data-fin="' + k + '" value="' + esc(v || '') + '">';
+  else inp = '<div class="inw">' + (d.type === 'eur' ? '<span class="cur" aria-hidden="true">€</span>' : '') + '<input class="in' + (d.type === 'eur' ? ' eur' : '') + '" id="' + id + '" inputmode="numeric" data-fin="' + k + '" value="' + (v == null ? '' : Math.round(+v)) + '"' + (d.hint ? ' aria-describedby="h-' + k + '"' : '') + '></div>';
+  return '<div class="field">' + lab + inp + (d.hint ? '<span class="small" id="h-' + k + '">' + esc(d.hint) + '</span>' : '') + (d.pre || d.type === 'text' ? '' : '<div class="fhelp"><button class="link" data-a="fest" data-p="' + k + '">Not sure? Estimate for me</button><button class="link" data-a="fnone" data-p="' + k + '">I don\'t have this</button></div>') + '</div>';
+}
+V.P3 = () => { const sec = FSEC[S.fsec], mode = sec.docs.length ? (S.fmode[sec.id] || 'type') : 'type';
+  const body = mode === 'upload' ? uploadPick(sec) : '<div class="card">' + sec.f.filter(fieldVisible).map(fieldHTML).join('') + '</div>';
+  return {id:'P3-' + (S.fsec + 1), note:'Section ' + (S.fsec + 1) + ' of 6 · ' + sec.t + '. Upload vs Type it; every field has Estimate for me / I don\'t have this.', head:flowHead(3, 'Your finances · ' + (S.fsec + 1) + ' of 6', sec.e + ' ' + sec.t, sec.id === 'about' ? 'Mostly filled in from your answers. Just check it.' : 'Upload a document or type it in. Round figures are fine.', 'fback'),
+  html:(sec.docs.length ? '<div class="seg" role="group" aria-label="How to add">' + [['upload','📄 Upload'],['type','⌨️ Type it']].map(([m, l]) => '<button class="' + (mode === m ? 'on' : '') + '" aria-pressed="' + (mode === m) + '" data-a="fmode" data-p="' + m + '">' + l + '</button>').join('') + '</div>' : '<p class="small">No documents needed here. ID and proof of address are handled by your adviser later.</p>') + body,
+  foot:'<button class="btn" data-a="fsave">Save this section</button>'};
+};
+function uploadPick(sec){ return '<div class="card"><b>What we can read</b><div class="upl" style="margin-top:10px">' + sec.docs.map(d => '<div class="tile"><span class="e" aria-hidden="true">' + d[0] + '</span>' + esc(d[1]) + '</div>').join('') + '</div>' +
+  '<div style="display:grid;gap:10px;margin-top:14px"><label class="btn ghost" style="cursor:pointer">📄 Choose files<input type="file" multiple class="sr" data-file="' + sec.id + '" accept=".pdf,.jpg,.jpeg,.png,.heic"></label><button class="btn" data-a="upl" data-p="' + sec.id + '">Use a sample document</button></div>' +
+  '<p class="small" style="margin-top:10px">Documents are read automatically and deleted after reading. You see every figure before it\'s used.</p><button class="link" data-a="fmode" data-p="type">Upload not working? Type it instead</button></div>'; }
+V.PU = () => { const u = S.upl, sm = u.sec === 'smart';
+  if (u.stage === 'scan') return {id:'PU-scan', note:'Reading documents (mock IDP).', head:flowHead(3, 'Your finances', 'Reading your documents…', esc(u.files.join(', ')), ''), html:'<div class="scan" aria-hidden="true">📄</div><p class="sub" style="text-align:center;margin-top:14px" role="status">Finding the figures we need</p>'};
+  if (u.stage === 'fail') return {id:'PU-fail', note:'Upload failed → Type it; missing doc stays on the checklist (CJ D10).', head:flowHead(3, 'Your finances', "We couldn't read that one", 'No problem. You can type the figures instead. We\'ll keep the document on your checklist.', 'uplx'),
+    html:'<div class="card" style="text-align:center"><div style="font-size:44px" aria-hidden="true">📄❓</div><p class="small">' + esc(u.files.join(', ')) + '</p></div>', foot:'<button class="btn" data-a="uplfail">Type it instead</button>'};
+  const secs = sm ? ['income','assets','liab','pension'] : [u.sec];
+  return {id:'PU-confirm', note:'"We read these values — please confirm". Under 80% confidence = Check this.', head:flowHead(3, 'Your finances', 'We read these values', 'Please confirm. Change anything that looks wrong.', 'uplx'),
+    html:secs.map(sid => { const U = UPL[sid], sec = FSEC.find(s => s.id === sid); return '<div class="card"><b>' + sec.e + ' ' + sec.t + '</b><div class="small">' + U.docs.map(esc).join(' · ') + '</div>' +
+      Object.entries(U.v).map(([k, [v, c]]) => '<div class="mini" style="align-items:center"><span style="flex:1"><b style="font-size:14px">' + esc(FF[k].l) + '</b><br>' + (c < 80 ? '<span class="tag look">⚠️ Check this · ' + c + '% sure</span>' : '<span class="tag doc">✓ ' + c + '% sure</span>') + (U.old && U.old[k] ? ' <span class="tag est">' + U.old[k] + '</span>' : '') + '</span>' +
+        (typeof v === 'number' ? '<input class="in" style="width:120px;min-height:42px" inputmode="numeric" data-uv="' + k + '" value="' + (u.edit[k] != null ? u.edit[k] : v) + '" aria-label="' + esc(FF[k].l) + '">' : '<b>' + esc(v) + '</b>') + '</div>').join('') + '</div>'; }).join(''),
+    foot:'<button class="btn" data-a="uplok">Looks right, add them</button><button class="btn ghost" data-a="uplx">Cancel</button>'};
+};
+function checkItems(){ const out = []; FSEC.forEach(s => s.f.filter(fieldVisible).forEach(k => { const src = S.src[k], look = S.look[k];
+  const st = look ? 'look' : src === 'est' ? 'est' : !src ? (FF[k].opt ? null : 'miss') : src === 'doc' ? 'ok' : 'typed'; if (st) out.push({k, s, st}); })); return out; }
+V.P4 = () => { const it = checkItems(), flag = it.filter(x => ['look','est','miss'].includes(x.st)), good = it.filter(x => !['look','est','miss'].includes(x.st));
+  const ic = {look:'⚠️', est:'≈', miss:'❓'}, lb = {look:'Needs a look', est:'Estimated for you', miss:'Missing'};
+  return {id:'P4', note:'Data-gap review: only ≈ / ❓ / ⚠️ expanded. Required accuracy tick starts unticked.', head:flowHead(3, 'Step 3 · Prepare', 'Check your details', flag.length ? 'Only the items worth a second look are shown.' : 'Everything looks complete.', 'go|P2'),
+  html:(flag.length ? '<div class="card">' + flag.map(x => '<div class="ck"><span class="i" aria-hidden="true">' + ic[x.st] + '</span><div style="flex:1"><b>' + esc(FF[x.k].l) + '</b> <span class="small">· ' + x.s.t + '</span><div class="small">' + lb[x.st] + (x.st === 'look' ? ': ' + esc(S.look[x.k]) : x.st === 'est' ? ' (' + fmtField(x.k) + ')' : '') + (S.ack[x.k] ? ' · <b>Left for my adviser</b>' : '') + '</div>' +
+      '<div class="a"><button class="link" data-a="fix" data-p="' + FSEC.indexOf(x.s) + '">Fix now</button>' + (S.ack[x.k] ? '' : '<button class="link" data-a="ack" data-p="' + x.k + '">Leave for my adviser</button>') + '</div></div></div>').join('') + '</div>' : '') +
+    '<details class="card" style="margin-top:12px"><summary style="cursor:pointer;font-weight:800;min-height:32px">✅ ' + good.length + ' details look good</summary>' + good.map(x => '<div class="mini"><span>' + esc(FF[x.k].l) + '</span><span>' + fmtField(x.k) + ' ' + tagFor(x.k) + '</span></div>').join('') + '</details>' +
+    '<div class="card"><label class="check"><input type="checkbox" data-chk="1"' + (S.checked ? ' checked' : '') + '><span><b>These details are right, as far as I know</b></span></label></div>',
+  foot:'<button class="btn" data-a="toresults" id="seeres"' + (S.checked ? '' : ' disabled') + '>See my results</button>'};
+};
+V.U1 = () => ({id:'U1', note:'Loader. Never shows a made-up result.', head:flowHead(4, 'Step 4 · Understand', 'Building your plan', '', ''), html:'<div style="padding:60px 0;text-align:center"><div class="spin" aria-hidden="true"></div><p class="sub" style="margin-top:18px" role="status">Running your numbers…</p><p class="small">If this takes a while, we\'ll let you know by email and SMS when it\'s ready.</p></div>'});
+/* ================= RESULTS ================= */
+function goalsBox(P){ return S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const p = P.pct[g.id], b = band(p);
+  return '<div class="gs"><span class="e" aria-hidden="true">' + g.e + '</span><div class="m"><div class="nm">' + esc(g.name) + ' <span>· ' + yearsTxt(g) + '</span></div><div class="bar" role="img" aria-label="' + p + '% covered"><i style="width:' + p + '%;background:var(--' + b + ')"></i></div></div><div class="p" style="color:var(--' + b + '-t)">' + p + '%<small>' + BANDW[b] + '</small></div></div>'; }).join(''); }
+function findings(P){
+  const gs = S.goals.slice(), best = gs.slice().sort((a, b) => P.pct[b.id] - P.pct[a.id] || a.age - b.age)[0], worst = gs.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id] || a.age - b.age)[0];
+  const sT = best.kind === 'retire' && P.pct[best.id] >= 95 ? 'Your pension and savings cover retiring at ' + best.age : best.name + ' is ' + P.pct[best.id] + '% covered';
+  let gT, dT, ex = null;
+  if (P.pct[worst.id] >= 95){ gT = 'No big gaps right now'; const unprot = S.fin.life !== 'Yes' || S.fin.ip !== 'Yes'; dT = unprot ? 'Check your protection, so illness or death can\'t derail the plan' : 'Keep it on track with a yearly review'; }
+  else { gT = worst.name + ' is ' + P.pct[worst.id] + '% covered'; ex = extraFor(worst); dT = ex ? 'Saving ' + eur(ex) + ' more a month towards ' + worst.name.toLowerCase() + ' closes it' : 'Moving ' + worst.name.toLowerCase() + ' later, or changing the amount, would help most'; }
+  return {best, worst, sT, gT, dT, ex};
+}
+function wiText(P0, P1){ const ch = S.goals.map(g => ({g, a:P0.pct[g.id], b:P1.pct[g.id]})).filter(x => x.a !== x.b);
+  if (!S.wi.m && !S.wi.l) return 'Move the sliders to see what changes.';
+  if (!ch.length) return 'No change to your goals. Everything that could be covered already is.';
+  return ch.map(x => '<b>' + esc(x.g.name) + '</b> goes from ' + x.a + '% to <b>' + x.b + '%</b>').join('<br>'); }
+function glanceHTML(P){ const v = S.view;
+  const tabs = '<div class="vt" role="tablist" aria-label="Your future views">' + [['journey','🛤️ Journey'],['chapters','📖 Life chapters'],['detail','📊 Detail']].map(([k, l]) => '<button role="tab" aria-selected="' + (v === k) + '" class="' + (v === k ? 'on' : '') + '" data-a="view" data-p="' + k + '">' + l + '</button>').join('') + '</div>';
+  let body = '';
+  if (v === 'journey') body = '<p class="small">Your life as one road, from today to age 90. The milestones are the goals you chose.</p>' + journeySVG(P, 322) + journeyNote(P);
+  else if (v === 'chapters') body = '<p class="small">Your future as chapters of your life. ☀️ comfortable · 🌦️ using savings · ⛈️ a gap to plan for. Tap a chapter to see its years.</p>' + chaptersHTML(P);
+  else body = '<p class="small">Each bar is one year of your life; the dashed line is your income.</p>' + chartSVG(P.rows, 322) + '<div class="legend"><span><i class="sw" style="background:var(--ok)"></i>Needs fully covered</span><span><i class="sw" style="background:var(--dip)"></i>Dipping into savings</span><span><i class="sw" style="background:var(--gap)"></i>Shortfall, not covered</span><span><i class="sw" style="background:var(--ink)"></i>▼ Retirement begins</span></div>' + chartNote(P);
+  return tabs + '<div role="tabpanel">' + body + '</div>'; }
+function journeyNote(P){ const bad = P.rows.find(isShort); return '<p class="pnote"><b>Reading your road:</b> green means your income covers life; amber means you\'re drawing on savings, which is what they\'re for. ' + (bad ? 'The road turns red around <b>age ' + bad.a + '</b>: money runs short there unless the plan changes.' : 'There\'s no red on your road: you don\'t run out of money before 90.') + '</p>'; }
+function chartNote(P){ const n = P.rows.filter(isShort).length; return '<p class="pnote"><b>In plain English:</b> ' + (n ? 'in ' + n + ' year' + (n > 1 ? 's' : '') + ' of your plan, your income and savings don\'t fully cover what you\'ll need (the red bars). These are the gaps to close, by saving more, changing timing, or rethinking a goal.' : 'every year of your plan is covered by your income and savings. No red bars. That\'s what "on track" looks like.') + '</p>'; }
+function journeySVG(P, W){
+  const rows = P.rows, n = rows.length, wide = W > 500, H = wide ? 280 : 236, pad = 18, mid = wide ? 140 : 118;
+  const X = i => pad + i / (n - 1) * (W - 2 * pad), Y = i => mid + (wide ? 34 : 24) * Math.sin(i / (n - 1) * Math.PI * 2.4) - i / (n - 1) * 8;
+  let base = '', road = '', ticks = '';
+  for (let i = 0; i < n - 1; i++){ base += '<line x1="' + X(i) + '" y1="' + Y(i) + '" x2="' + X(i + 1) + '" y2="' + Y(i + 1) + '" stroke="#DCE4EC" stroke-width="' + (wide ? 16 : 13) + '" stroke-linecap="round"/>'; road += '<line x1="' + X(i) + '" y1="' + Y(i) + '" x2="' + X(i + 1) + '" y2="' + Y(i + 1) + '" stroke="' + rowCol(rows[i]) + '" stroke-width="' + (wide ? 9 : 7) + '" stroke-linecap="round"/>'; }
+  rows.forEach((r, i) => { if (r.a % 10 === 0) ticks += '<text x="' + X(i) + '" y="' + (H - 6) + '" font-size="10.5" fill="#51627A" text-anchor="middle">age ' + r.a + '</text>'; });
+  const a0 = rows[0].a, ri = rows.findIndex(r => r.rmark);
+  let marks = '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="6.5" fill="var(--ink)" stroke="#fff" stroke-width="2"/><text x="' + (X(0) - 6) + '" y="' + (Y(0) + 24) + '" font-size="11" font-weight="800" fill="var(--ink)">You, today</text>';
+  const fx = ri >= 0 ? X(ri) : null;
+  if (ri >= 0) marks += '<line x1="' + fx + '" y1="' + Y(ri) + '" x2="' + fx + '" y2="' + (Y(ri) - 44) + '" stroke="var(--ink)" stroke-width="2.5"/><path d="M' + fx + ' ' + (Y(ri) - 44) + ' l24 7 l-24 7 z" fill="#E4518A"/><text x="' + (fx + (fx > W - 90 ? -6 : 4)) + '" y="' + (Y(ri) - 50) + '" font-size="11" font-weight="800" fill="var(--ink)" text-anchor="' + (fx > W - 90 ? 'end' : 'start') + '">Retire ' + rows[ri].a + '</text>';
+  marks += '<text x="' + (X(n - 1) - 8) + '" y="' + (Y(n - 1) - 12) + '" font-size="18" aria-hidden="true">🌅</text>';
+  // milestones: slot-based placement so rings and labels never collide
+  const gs = S.goals.filter(g => g.kind !== 'retire').slice().sort((a, b) => a.age - b.age), gap = wide ? 96 : 30;
+  const slots = wide ? [-56, 58, -100, 100] : [-40, 42, -74, 74], last = slots.map(() => -1e9); last[1] = X(0) + (wide ? 40 : 34); let ms = '';
+  gs.forEach(g => { const i = clamp(g.age - a0, 0, n - 1), cx = X(i), cy = Y(i), p = P.pct[g.id], col = 'var(--' + band(p) + ')';
+    let s = slots.findIndex((d, k) => cx - last[k] >= gap && !(d < 0 && fx != null && Math.abs(cx - fx) < (wide ? 60 : 24) && Math.abs(d) < 60));
+    if (s < 0) s = last.indexOf(Math.min(...last));
+    last[s] = cx; const ly = clamp(cy + slots[s], 16, H - 34);
+    ms += '<g><line x1="' + cx + '" y1="' + cy + '" x2="' + cx + '" y2="' + ly + '" stroke="#B9C9D6" stroke-width="1.5" stroke-dasharray="3 3"/><circle cx="' + cx + '" cy="' + ly + '" r="' + (wide ? 18 : 13) + '" fill="#fff" stroke="' + col + '" stroke-width="3"/><text x="' + cx + '" y="' + (ly + (wide ? 6 : 4.5)) + '" font-size="' + (wide ? 16 : 12.5) + '" text-anchor="middle">' + g.e + '</text>' +
+      (wide ? '<text x="' + cx + '" y="' + (ly + (slots[s] < 0 ? -25 : 34)) + '" font-size="11" font-weight="700" fill="var(--ink)" text-anchor="middle">' + esc(g.name.length > 16 ? g.name.slice(0, 15) + '…' : g.name) + '</text>' : '') + '<title>' + esc(g.name) + ': ' + p + '% covered</title></g>'; });
+  const desc = 'Road from age ' + a0 + ' to 90. ' + (rows.some(isShort) ? 'Some red shortfall years.' : 'No shortfall years.');
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="' + desc + '" style="display:block;margin-top:6px">' + base + road + ms + marks + ticks + '</svg>' +
+    (wide ? '' : '<div class="mlist">' + gs.map(g => { const p = P.pct[g.id]; return '<div><span class="sw" style="border-radius:6px;background:var(--' + band(p) + ')"></span><span aria-hidden="true">' + g.e + '</span> ' + esc(g.name) + ' <span class="small">· age ' + g.age + ' · <b style="color:var(--' + band(p) + '-t)">' + p + '%</b></span></div>'; }).join('') + '</div>');
+}
+function chapters(P){ const ch = []; P.rows.forEach(r => { let d = Math.floor(r.a / 10) * 10; if (d === 90 && ch.length) d = 80; let c = ch[ch.length - 1]; if (!c || c.dec !== d){ c = {dec:d, from:r.a, to:r.a, rows:[]}; ch.push(c); } c.to = r.a; c.rows.push(r); }); return ch; }
+function chaptersHTML(P){ const a0 = P.rows[0].a;
+  return '<div class="chapgrid">' + chapters(P).map((c, ci) => { const sh = c.rows.filter(isShort), dip = c.rows.filter(r => r.used > 1 && !isShort(r)), allRet = c.rows.every(r => r.retired);
+    const wx = sh.length ? '⛈️' : dip.length > c.rows.length / 3 ? '🌦️' : '☀️', cls = sh.length ? 'bad' : dip.length > c.rows.length / 3 ? 'warn' : 'ok';
+    const story = sh.length ? 'Short by about <b>' + eur(sh.reduce((s, r) => s + r.short, 0) / sh.length) + ' a year</b> in ' + sh.length + ' of these years.' : allRet ? 'Living on your pensions and savings, and they hold up.' : dip.length ? 'Some years dip into savings. That\'s what they\'re for.' : 'Income comfortably covers life.';
+    const ev = []; if (c.rows.some(r => r.rmark)) ev.push('🏁 <b>You retire</b>');
+    S.goals.filter(g => g.kind !== 'retire' && g.age >= c.from && g.age <= c.to).forEach(g => ev.push(g.e + ' ' + esc(g.name) + ' <b style="color:var(--' + band(P.pct[g.id]) + '-t)">' + P.pct[g.id] + '%</b>'));
+    const open = S.chapOpen === ci;
+    return '<button class="chap ' + cls + (open ? ' open' : '') + '" data-a="chap" data-p="' + ci + '" aria-expanded="' + open + '"><div class="w" aria-hidden="true">' + wx + '</div><div class="tt">Your ' + c.dec + 's</div><div class="ag">age ' + c.from + '–' + c.to + (allRet ? ' · retired' : '') + '</div><div class="st">' + story + '</div>' + (ev.length ? '<div class="ev">' + ev.map(e => '<div>' + e + '</div>').join('') + '</div>' : '') +
+      '<div class="mo">' + (open ? '▲ Hide the years' : '▼ See it year by year') + '</div>' + (open ? '<div class="ev">' + c.rows.map(r => { const m = isShort(r), d = r.used > 1 && !m; return '<div class="cy"><b style="width:26px">' + r.a + '</b><span class="d" style="background:' + (m ? 'var(--gap)' : d ? 'var(--dip)' : 'var(--ok)') + '"></span>' + (m ? '<b>Gap to plan for</b>: short ' + eur(r.short) : d ? 'Using savings' : 'Comfortable') + '</div>'; }).join('') + '</div>' : '') + '</button>'; }).join('') + '</div>'; }
+function chartSVG(rows, W){
+  const H = W > 500 ? 240 : 200, top = 30, bot = 22, n = rows.length, bw = (W - 16) / n, maxV = Math.max(...rows.map(r => Math.max(r.inflow, r.needs)), 1), sy = v => H - bot - v / maxV * (H - top - bot);
+  let bars = '', mk = '', line = '';
+  rows.forEach((r, i) => { const x = 8 + i * bw; bars += '<rect x="' + x.toFixed(1) + '" y="' + sy(r.needs).toFixed(1) + '" width="' + Math.max(1, bw - 1.2).toFixed(1) + '" height="' + (H - bot - sy(r.needs)).toFixed(1) + '" fill="' + rowCol(r) + '"><title>Age ' + r.a + ': needs ' + eur(r.needs) + ', income ' + eur(r.inflow) + (r.short > 1 ? ', gap ' + eur(r.short) : '') + '</title></rect>';
+    if (r.rmark) mk += '<path d="M' + (x + bw / 2 - 6) + ' 6 h12 l-6 10 z" fill="var(--ink)"/><text x="' + (x + bw / 2) + '" y="27" font-size="10" font-weight="700" fill="var(--ink)" text-anchor="middle">retire</text>';
+    if (r.a % 10 === 0) bars += '<text x="' + (x + bw / 2) + '" y="' + (H - 6) + '" font-size="10" fill="#51627A" text-anchor="middle">' + r.a + '</text>';
+    line += (i ? 'L' : 'M') + (x + bw / 2).toFixed(1) + ' ' + sy(r.inflow).toFixed(1) + ' '; });
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Yearly cashflow chart, age ' + rows[0].a + ' to 90" style="display:block;margin-top:8px">' + bars + '<path d="' + line + '" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-dasharray="5 3"/>' + mk + '<text x="8" y="12" font-size="10.5" font-weight="700" fill="var(--ink)">– – your income each year</text></svg>';
+}
+function wiCard(){ const w = S.wi, gs = S.goals.slice().sort((a, b) => a.age - b.age), g = gById(w.g);
+  return '<div class="card" id="r-wi"><h3 class="h">What if…?</h3><p class="small" style="margin:0 0 10px">Try saving a bit more or less, or adding a one-off amount, and see what changes.</p>' +
+    '<div class="fl" style="font-size:12px;font-weight:800;margin-bottom:6px">Put it towards</div><div class="chips" role="group" aria-label="Goal for the what-if">' + gs.map(x => '<button class="chip sm' + (w.g === x.id ? ' sel' : '') + '" aria-pressed="' + (w.g === x.id) + '" data-a="wig" data-p="' + x.id + '">' + x.e + ' ' + esc(x.name) + '</button>').join('') + '</div>' +
+    '<div class="field" style="margin:14px 0 6px"><span class="flabel" id="wim-l">Monthly amount</span><div class="wi-row"><button class="rb" data-a="wim" data-p="-25" aria-label="25 euro less">−</button><div class="wi-val" id="wim-v">' + (w.m > 0 ? '+' : '') + eur(w.m) + '</div><button class="rb" data-a="wim" data-p="25" aria-label="25 euro more">+</button></div><input type="range" min="-500" max="1000" step="25" value="' + w.m + '" data-wi="m" aria-labelledby="wim-l" aria-valuetext="' + eur(w.m) + ' a month"><span class="small" id="wim-h">' + (w.m < 0 ? 'Saving less each month (affects your whole plan)' : w.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (into your pension)' : ' until it happens') : '−€500 to +€1,000 a month') + '</span></div>' +
+    '<div class="field" style="margin:10px 0 0"><span class="flabel" id="wil-l">One-off amount <output id="wil-v">' + eur(w.l) + '</output></span><input type="range" min="0" max="50000" step="500" value="' + w.l + '" data-wi="l" aria-labelledby="wil-l"><span class="small">e.g. from savings or a bonus</span></div>' +
+    '<div class="wi-out" id="wi-out" aria-live="polite"></div><div class="grid2" style="margin-top:12px"><button class="btn sm" style="width:100%" data-a="wisave">Save as my preferred plan</button><button class="btn sm ghost" style="width:100%" data-a="wireset">Back to my plan</button></div></div>'; }
+function resultsHTML(){
+  const P0 = project(), P = project(S.wi), F = findings(P0), rough = qualityCount() > 2;
+  return '<div class="prelim"><span aria-hidden="true">ℹ️</span><span>Preliminary guidance · based on your figures and our assumptions · not financial advice. <button class="link" style="padding:0;font-size:12.5px" data-a="sheet" data-p="assume">Assumptions</button></span></div>' +
+    (rough ? '<p class="note" style="margin:0 0 12px">Rough picture: some figures are estimated or missing. Add documents to sharpen it.</p>' : '') +
+    '<div class="card"><h3 class="h">Your goals</h3><p class="small" style="margin:0 0 6px">How much of each goal your future income and savings can cover.</p><div id="r-goals">' + goalsBox(P) + '</div></div>' +
+    '<div class="card" id="r-found"><h3 class="h">What we found</h3><div class="found" style="margin-top:8px">' +
+      [['💪','Your main strength',F.sT,'var(--ok-t)','str'],['🔎','Your main gap',F.gT,'var(--gap-t)','gap'],['🎯','Your biggest decision',F.dT,'var(--acc-d)','dec']].map(c => '<div class="fcard"><div class="k" style="color:' + c[3] + '">' + c[0] + ' ' + c[1] + '</div><b>' + esc(c[2]) + '</b><button class="link" style="font-size:12.5px;padding:2px 0" data-a="sheet" data-p="explain|' + c[4] + '">Explain this</button></div>').join('') + '</div>' +
+      (S.understood ? '<p class="pill ok" style="margin:12px 0 8px">✓ Thanks, noted</p><div class="small" style="font-weight:800;margin-bottom:6px">What would you like to ask an adviser? (optional)</div><div class="chips">' + ADV_QS.map(q => '<button class="chip sm' + (S.advQs.includes(q) ? ' sel' : '') + '" aria-pressed="' + S.advQs.includes(q) + '" data-a="advq" data-p="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div>' : '<button class="btn" style="margin-top:12px" data-a="understood">That makes sense</button>') + '</div>' +
+    wiCard() +
+    '<div class="card" id="r-glancec"><h3 class="h">Your future, at a glance</h3><div id="r-glance">' + glanceHTML(P) + '</div></div>' +
+    '<div class="ends"><button class="btn" data-a="report">⬇ Download my plan</button><button class="btn sun" data-a="book">📅 Book my adviser meeting</button><button class="btn ghost" data-a="adjust">✏️ Adjust my goals</button></div>' +
+    '<p class="disc">Guidance, not advice. Projections are illustrative, use standard assumptions and are not guaranteed. Only an authorised adviser who knows your full situation can give advice. ' + (S.versions.length ? '<button class="link" style="font-size:12px;padding:0" data-a="sheet" data-p="history">Plan history (' + S.versions.length + ')</button>' : '') + '</p>';
+}
+function liveUpdate(){ const P0 = project(), P = project(S.wi);
+  const set = (id, h) => { const e = document.getElementById(id); if (e) e.innerHTML = h; };
+  set('r-goals', goalsBox(P)); set('wi-out', wiText(P0, P)); set('r-glance', glanceHTML(P));
+  set('wim-v', (S.wi.m > 0 ? '+' : '') + eur(S.wi.m)); set('wil-v', eur(S.wi.l));
+  const g = gById(S.wi.g); set('wim-h', S.wi.m < 0 ? 'Saving less each month (affects your whole plan)' : S.wi.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (into your pension)' : ' until it happens') : '−€500 to +€1,000 a month');
+}
+function tlStrip(){ const P = project(), n = S.goals.filter(g => P.pct[g.id] >= 95).length; return '<div class="card row" id="tl-strip" style="background:var(--sea-l)"><div style="flex:1"><b>' + n + ' of ' + S.goals.length + ' goals on track</b><div class="small" style="color:var(--ink)">Updates as you move things.</div></div><button class="btn sm" data-a="seg" data-p="results">See results</button></div>'; }
+
+/* ================= APP SHELL ================= */
+const ICON = {plan:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 18c3-6 6 2 9-4s4-6 7-6"/><circle cx="20" cy="8" r="1.6" fill="currentColor"/></svg>',
+  me:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+  exp:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.7A8 8 0 1 1 21 12Z"/></svg>'};
+function appHead(title, sub, back){ return brandBar(back, '<button class="tb-btn" data-a="sheet" data-p="profile" aria-label="Profile and privacy">' + esc((S.acct.name || 'A')[0]) + '</button>') + '<h2 class="t" tabindex="-1" style="margin-top:10px">' + title + '</h2>' + (sub ? '<p class="sub" style="margin:0">' + sub + '</p>' : ''); }
+V.PLAN = () => { const seg = S.planSeg;
+  const segs = '<div class="seg" role="tablist" aria-label="My Plan">' + [['results','Results'],['timeline','Timeline']].map(([k, l]) => '<button role="tab" aria-selected="' + (seg === k) + '" class="' + (seg === k ? 'on' : '') + '" data-a="seg" data-p="' + k + '">' + l + '</button>').join('') + '</div>';
+  if (seg === 'timeline') return {id:'PLAN-TL', note:'My Plan · Timeline (centre of My Plan). Drag to adjust; results recalculate.', head:appHead('My Plan', 'Drag your goals; results update.'), html:segs + tlBoard() + tlStrip() + '<div class="sec"><h3>Your goals</h3><button class="link" data-a="addgoal">＋ Add a goal</button></div>' + gRows()};
+  return {id:'U2', note:'Results in the spec order: goals % → what we found → what if → your future at a glance → 3 end actions.', head:appHead('Your results', 'Here\'s how your plan looks.'), html:segs + resultsHTML()};
+};
+V.GOALS = () => ({id:'PLAN-ADD', note:'Add a goal from My Plan (same Q11 tiles).', head:appHead('Add a goal', '', 'seg|timeline'), html:'<div class="chips">' + GOALCAT.filter(c => c.k !== 'retire').map(c => { const on = S.goals.some(g => g.k === c.k); return '<button class="chip' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" data-a="gpick" data-p="' + c.k + '">' + c.e + ' ' + esc(c.t) + '</button>'; }).join('') + '</div>', foot:'<button class="btn" data-a="seg" data-p="timeline">Back to my timeline</button>'});
+V.ME = () => { const m = S.me;
+  if (m === 'um') { const ret = S.um.ret; return {id:'ME-UM', note:'Understand Me: 13 questions in 3 sections; 7 pre-filled from Discover.', head:appHead('Understand me', 'About 2 minutes. Only 6 questions are new.', 'meback'),
+    html:'<div class="card row">' + ring(Math.round(umCount() / 13 * 100), 64, 'var(--sea-d)') + '<div><b>' + umCount() + ' of 13 answered</b><div class="small">7 came from your first answers</div></div></div>' +
+      UM.map(s => { const tot = s.qs.length, got = s.qs.filter(q => q.d ? typeof S.ans[q.d] === 'number' : typeof S.um.a[q.u] === 'number').length, st = S.um.done[s.n] ? 'done' : got ? 'part' : 'none';
+        return '<button class="goal" style="margin-top:10px" data-a="umsec" data-p="' + s.n + '"><span class="ic" aria-hidden="true">' + s.e + '</span><span style="flex:1"><b>' + s.n + ' · ' + s.t + '</b><br><span class="small">' + got + ' of ' + tot + ' answered</span></span><span class="sr">' + statusWord(st) + '</span>' + statIcon(st) + '</button>'; }).join('') +
+      (umCount() === 13 ? '<button class="btn" data-a="me" data-p="umr" style="margin-top:6px">See my profile</button>' : '') + (ret ? '<button class="btn ' + (umCount() === 13 ? 'ghost' : 'sun') + '" style="margin-top:10px" data-a="book2">Continue to my adviser match</button>' : '')}; }
+  if (m === 'ums') { const s = UM.find(x => x.n === S.um.sec), sug = suggestU9();
+    return {id:'ME-UM' + s.n, note:'Understand Me section ' + s.n + ': one screen. Pre-filled answers shown selected with a note.', head:appHead(s.e + ' ' + s.t, s.intro, 'me|um'),
+      html:s.qs.map((q, qi) => { const d = q.d ? DQ_BY(q.d) : q, key = q.d ? 'd' + q.d : q.u; let sel = q.d ? S.ans[q.d] : S.um.a[q.u]; const sugg = q.u === 'u9' && typeof sel !== 'number'; if (sugg) sel = sug;
+        return '<div class="card"><div class="small" style="font-weight:800">' + (UM.slice(0, s.n - 1).reduce((a, x) => a + x.qs.length, 0) + qi + 1) + ' of 13</div><h3 class="h" style="font-size:17px;margin:4px 0 6px">' + esc(d.q) + '</h3>' + (q.help ? '<p class="small" style="margin:0 0 8px">' + esc(q.help) + '</p>' : '') +
+          (q.d && typeof S.ans[q.d] === 'number' ? '<span class="pill mint" style="margin-bottom:8px">✓ From your first answers — change if you like</span>' : '') + (sugg ? '<span class="pill sunny" style="margin-bottom:8px">Suggested from your timeline — confirm or change</span>' : '') +
+          '<div class="opts" role="group" aria-label="' + esc(d.q) + '">' + d.o.map((o, k) => '<button class="opt row1' + (sel === k ? ' sel' : '') + '" aria-pressed="' + (sel === k) + '" data-a="umpick" data-p="' + key + '|' + k + '"><span class="em" style="background:var(--sand)" aria-hidden="true">' + o.e + '</span><span class="tx">' + esc(o.t) + '</span></button>').join('') + '</div>' +
+          (q.chips ? '<div class="small" style="font-weight:800;margin:12px 0 6px">Which have you had? (optional)</div><div class="chips">' + q.chips.map(c => '<button class="chip sm' + (S.um.chips.includes(c) ? ' sel' : '') + '" aria-pressed="' + S.um.chips.includes(c) + '" data-a="umchip" data-p="' + c + '">' + c + '</button>').join('') + '</div>' : '') + '</div>'; }).join(''),
+      foot:'<button class="btn" data-a="umsave">Save this section</button>'}; }
+  if (m === 'umr') { const P = personality(), r = riskRead(true), bar = (l, v) => '<div class="row" style="margin-top:8px;font-size:13px;font-weight:700"><span style="width:150px">' + l + '</span><span class="pbar" style="flex:1"><i style="width:' + Math.round(v / 4 * 100) + '%"></i></span></div>';
+    return {id:'ME-R', note:'Understand Me result: money personality + indicative risk profile (5 labels, capped by lower of want and can-afford). Adviser confirms.', head:appHead('Your profile', '', 'me|um'),
+      html:'<div class="card" style="background:linear-gradient(150deg,var(--sun-l),#fff)"><div class="eyebrow" style="color:var(--acc-d)">Your money personality</div><div style="font-family:var(--fh);font-size:30px;font-weight:800;margin:4px 0">' + P.e + ' ' + P.name + '</div><p style="margin:0 0 8px">' + P.strap + '</p><b>Strengths</b><div class="chips" style="margin:6px 0 10px">' + P.str.map(x => '<span class="pill ok">' + x + '</span>').join('') + '</div><b>One thing to watch</b><p style="margin:4px 0 0" class="small">' + P.watch + '</p></div>' +
+        '<div class="card"><div class="eyebrow">Your indicative risk profile</div><div style="font-family:var(--fh);font-size:26px;font-weight:800;margin:4px 0">' + r.label + '</div>' + bar('Want (appetite)', r.want) + bar('Can afford (capacity)', r.can) + bar('Can wait (time)', r.time) + (r.mis ? '<p class="note" style="margin-top:12px">' + esc(r.mis) + '</p>' : '') + '</div>' +
+        '<p class="disc">This is an indicative profile to guide your conversation. It is not advice. Your adviser confirms your risk profile with you. ' + DISC_FORMAL + '</p>'}; }
+  if (m === 'details') return {id:'ME-DET', note:'My details (name, household).', head:appHead('My details', '', 'meback'), html:'<div class="card">' + [['Name', S.acct.name || S.fin.name],['Email', S.acct.email],['Mobile', S.acct.mobile],['Age', S.about.age],['Partner', S.about.partner ? 'Yes' + (S.fin.pAge ? ', age ' + S.fin.pAge : '') : 'No'],['People who rely on you', ['0','1','2','3+'][S.about.deps || 0]],['Retirement age', S.retireAge]].map(x => '<div class="mini"><span>' + x[0] + '</span><b>' + esc(x[1]) + '</b></div>').join('') + '</div><button class="btn ghost" style="margin-top:12px" data-a="fsec" data-p="0">Edit About you</button>'};
+  if (m === 'privacy') return {id:'ME-PRIV', note:'Privacy & sharing: consents, what each adviser can see, delete my data.', head:appHead('Privacy & sharing', '', 'meback'),
+    html:'<div class="card"><label class="check"><input type="checkbox" checked disabled><span>Use my details to build my plan (needed for the service)</span></label><label class="check"><input type="checkbox" data-acct="c2"' + (S.acct.c2 ? ' checked' : '') + '><span>Send me reminders and updates</span></label></div>' +
+      '<div class="card"><b>What your adviser can see</b>' + (S.book.done ? Object.entries({report:'Plan report', fin:'Finances', docs:'Documents', um:'Understand Me profile'}).map(([k, l]) => '<div class="mini"><span>' + l + '</span><b>' + (S.book.share[k] ? 'Shared' : 'Not shared') + '</b></div>').join('') : '<p class="small" style="margin:6px 0 0">Nothing is shared. You choose what to share when you book.</p>') + '</div>' +
+      '<button class="btn ghost" style="margin-top:12px;color:var(--gap-t)" data-a="sheet" data-p="delete">Delete my data</button><button class="link" data-a="sheet" data-p="money">How LifeGoals makes money</button>'};
+  if (m === 'money'){ const flags = checkItems().filter(x => ['look','est','miss'].includes(x.st));
+    return {id:'ME-MONEY', note:'My money: the 6 finance sections, checklist of missing / estimated items, add a document.', head:appHead('My money', 'Keep your figures up to date. Your plan recalculates.', 'meback'),
+      html:'<button class="btn sm" style="width:100%" data-a="upl" data-p="smart">📥 Add a document</button><div style="margin-top:12px">' + FSEC.map((s, i) => { const st = secStatus(s); return '<button class="goal" data-a="fsec" data-p="' + i + '"><span class="ic" aria-hidden="true">' + s.e + '</span><span style="flex:1;min-width:0"><b>' + s.t + '</b><br><span class="small">' + esc(secSummary(s)) + '</span></span><span class="sr">' + statusWord(st) + '</span>' + statIcon(st) + '</button>'; }).join('') + '</div>' +
+        (flags.length ? '<div class="card"><b>To sharpen your plan</b>' + flags.map(x => '<div class="mini"><span>' + ({look:'⚠️', est:'≈', miss:'❓'})[x.st] + ' ' + esc(FF[x.k].l) + '</span><button class="link" data-a="fix" data-p="' + FSEC.indexOf(x.s) + '">Fix</button></div>').join('') + '</div>' : '')}; }
+  const r = umCount() === 13 ? riskRead(true) : null;
+  return {id:'ME-01', note:'Me tab: Understand me · My money · My details · Privacy & sharing.', head:appHead('Me', 'How you think about money, and what we hold about you.'),
+    html:'<button class="goal" data-a="me" data-p="' + (umCount() === 13 ? 'umr' : 'um') + '"><span class="ic" aria-hidden="true">🧭</span><span style="flex:1"><b>Understand me</b><br><span class="small">' + (r ? personality().name + ' · ' + r.label + ' (indicative)' : umCount() + ' of 13 answered · about 2 min') + '</span></span>' + ring(Math.round(umCount() / 13 * 100), 46, 'var(--sea-d)') + '</button>' +
+      [['money','💶','My money','Your 6 finance sections and documents'],['details','🙋','My details','Name and household'],['privacy','🔐','Privacy & sharing','Consents, what advisers see, delete my data']].map(x => '<button class="goal" data-a="me" data-p="' + x[0] + '"><span class="ic" aria-hidden="true">' + x[1] + '</span><span style="flex:1"><b>' + x[2] + '</b><br><span class="small">' + x[3] + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') + '<p class="disc">Understand me is optional. It helps your adviser know you, so you won\'t repeat yourself.</p>'};
+};
+function specialist(){ const P = project(), w = S.goals.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id])[0]; return {type:EXPERT_FOR[w ? w.spec : 'planner'], goal:w}; }
+V.EXP = () => { const b = S.book, st = S.exp, A = ADVISERS[b.adv], sp = specialist();
+  const advCard = '<div class="card"><div class="adv"><span class="face" aria-hidden="true">' + A.ini + '</span><div><b style="font-size:17px">' + A.n + '</b><div class="small">' + sp.type + ' · ' + A.q + '</div><div class="small">🗣️ ' + A.lang + ' · 📍 ' + A.loc + ' · ' + A.mode + '</div></div></div><p class="small" style="margin:10px 0 0">Matched because <b>' + esc(sp.goal ? sp.goal.name.toLowerCase() : 'your plan') + '</b> is where you could gain most. <span class="pill grey">Sample adviser</span></p></div>';
+  if (st === 'c0') return {id:'C0', note:'Optional: Help your adviser know you → Understand Me with 7 answers pre-filled. Skippable.', head:appHead('Help your adviser know you', '', 'exp|home'), html:'<div class="card" style="text-align:center"><div style="font-size:46px" aria-hidden="true">🧭</div><b style="font-size:17px">6 quick questions, about 2 min</b><p class="small">Your adviser sees this, so you won\'t repeat yourself. 7 of your answers are already filled in.</p></div>', foot:'<button class="btn" data-a="c0go">Answer the questions</button><button class="btn ghost" data-a="exp" data-p="c1">Skip for now</button>'};
+  if (st === 'c1') return {id:'C1', note:'Your match: specialist type from Step 5 mapping (weakest goal).', head:appHead('Your match', 'A ' + sp.type.toLowerCase() + ' who fits your plan.', 'exp|home'), html:advCard + '<button class="link" data-a="advnext">See another match</button> · <button class="link" data-a="toast" data-p="' + A.n.split(' ')[0] + ' will call you within 1 working day">Request a call back</button>', foot:'<button class="btn" data-a="exp" data-p="c2">Choose ' + A.n.split(' ')[0] + '</button>'};
+  if (st === 'c2'){ const any = Object.values(b.share).some(Boolean); return {id:'C2', note:'Share your plan: explicit consent per item, all unticked. Referral / conflicts disclosed.', head:appHead('Share your plan', 'Choose what ' + A.n.split(' ')[0] + ' can see before you meet.', 'exp|c1'),
+    html:'<div class="card">' + [['report','Your plan report','Goals, results and what-ifs'],['fin','Your finances','The figures in your 6 sections'],['docs','Your documents','Statements you uploaded'],['um','Your Understand Me profile','Personality and indicative risk profile']].map(([k, l, d]) => '<label class="check"><input type="checkbox" data-share="' + k + '"' + (b.share[k] ? ' checked' : '') + '><span><b>' + l + '</b><br><span class="small">' + d + '</span></span></label>').join('') + '</div>' +
+      '<div class="card"><label class="check"><input type="checkbox" data-agree="1"' + (b.agree ? ' checked' : '') + '><span>I agree to share the items I\'ve ticked with ' + A.n + '. I can withdraw this at any time.</span></label><p class="small" style="margin:6px 0 0">LifeGoals may be paid a fee by the adviser\'s firm if you go ahead. This never changes what you pay. <button class="link" style="padding:0;font-size:12.5px" data-a="sheet" data-p="money">How LifeGoals makes money</button></p></div>',
+    foot:'<button class="btn" data-a="exp" data-p="c3" id="sharego"' + (any && b.agree ? '' : ' disabled') + '>Pick a time</button>'}; }
+  if (st === 'c3') return {id:'C3', note:'Pick a time: video or in person; request another slot.', head:appHead('Pick a time', '45 minutes · free · no obligation', 'exp|c2'),
+    html:'<div class="seg" role="group" aria-label="Meeting type">' + ['Video','In person'].map(x => '<button class="' + (b.mode === x ? 'on' : '') + '" aria-pressed="' + (b.mode === x) + '" data-a="bmode" data-p="' + x + '">' + x + '</button>').join('') + '</div><div class="slots">' + SLOTS.map(s => '<button class="slot' + (b.slot === s ? ' sel' : '') + '" aria-pressed="' + (b.slot === s) + '" data-a="slot" data-p="' + s + '">' + s.replace(' · ', '<br>') + '</button>').join('') + '</div><button class="link" data-a="toast" data-p="We\'ve asked ' + A.n.split(' ')[0] + ' for more times">Request another slot</button>',
+    foot:'<button class="btn" data-a="confirmbook"' + (b.slot ? '' : ' disabled') + '>Confirm booking</button>'};
+  if (st === 'c4') return {id:'C4', note:'Booked: email + SMS + calendar file; what happens next.', head:appHead("You're booked ✓", '', ''), html:bookedCard() + nextSteps(), foot:'<button class="btn" data-a="tab" data-p="plan">Back to my plan</button>'};
+  if (b.done) return {id:'EXP-01', note:'Experts tab after booking: meeting details and secure document requests.', head:appHead('Experts', 'Your adviser and meeting.'), html:bookedCard() + '<div class="card"><b>Documents your adviser asked for</b>' + ['Latest pension statement','Mortgage statement (last 12 months)'].map(d => '<div class="mini"><span>📄 ' + d + '</span><button class="link" data-a="toast" data-p="Sent securely to ' + A.n.split(' ')[0] + '">Upload</button></div>').join('') + '</div>' + nextSteps()};
+  return {id:'EXP-00', note:'Experts tab: match preview and booking start.', head:appHead('Experts', 'Real advisers, when you want them. Free, no obligation.'), html:advCard, foot:'<button class="btn sun" data-a="book">📅 Book my adviser meeting</button>'};
+};
+function bookedCard(){ const b = S.book, A = ADVISERS[b.adv]; return '<div class="card" style="background:var(--ok-l)"><div style="font-size:36px" aria-hidden="true">✅</div><b style="font-size:17px">' + esc(b.slot) + '</b><div class="small" style="color:var(--ink)">' + b.mode + ' with ' + A.n + '</div><p class="small" style="color:var(--ink)">Confirmation sent by email and SMS.</p><button class="btn sm ghost" data-a="ics">📆 Add to my calendar</button></div>'; }
+function nextSteps(){ return '<div class="card"><b>What happens next</b><ol class="small" style="padding-left:18px;margin:8px 0 0;color:var(--ink)"><li>Your adviser reviews your plan.</li><li>A verification call: you confirm details and add any missing documents through the secure portal.</li><li>Your adviser prepares your personal plan and you agree it together.</li><li>You take action.</li><li>LifeGoals keeps tracking and reminds you about reviews.</li></ol></div>'; }
+
+/* ================= SHEETS ================= */
+function sheetHTML(){ const s = S.sheet; if (!s) return ''; let h = '';
+  const [t, p] = s.split('|');
+  if (t === 'invite') h = '<h2 class="t">Enter your invite code</h2><p class="sub">From your adviser or employer.</p><div class="field"><label for="inv">Code</label><input class="in" id="inv" placeholder="e.g. ABC123"></div><button class="btn" data-a="invite">Continue</button>';
+  if (t === 'whyask') h = '<h2 class="t">Why we ask</h2><p class="sub">Your answers help us show goals and results that fit you. We don\'t save anything unless you choose to, and nothing is shared with an adviser without your say. This is guidance, not advice.</p><button class="btn" data-a="closesheet">Got it</button>';
+  if (t === 'save') h = '<h2 class="t">Save and come back later</h2><p class="sub">We\'ll email you a secure link. No password, and no money details yet.</p><div class="field"><label for="sv-email">Email</label><input class="in" id="sv-email" type="email" autocomplete="email" value="' + esc(S.save.email) + '"></div><label class="check"><input type="checkbox" id="sv-comms"' + (S.save.comms ? ' checked' : '') + '><span>Optional: send me tips and updates</span></label><p id="sverr" class="small" style="color:var(--gap-t)" role="alert"></p><button class="btn" data-a="dosave">Email me a link</button>';
+  if (t === 'saveprompt') h = '<h2 class="t">Save your progress?</h2><p class="sub">Get a link by email so you can finish later. Optional.</p><button class="btn" data-a="sheet" data-p="save">Save my progress</button><button class="btn ghost" style="margin-top:10px" data-a="go" data-p="F4">Continue without saving</button>';
+  if (t === 'money') h = '<h2 class="t">How LifeGoals makes money</h2><p class="sub">LifeGoals is free for you. If you choose to work with an adviser, their firm may pay us a fee [confirm the actual model]. Advisers never pay to see your data, and you decide what they can see.</p><button class="btn" data-a="closesheet">Got it</button>';
+  if (t === 'assume') h = '<h2 class="t">Our assumptions</h2><div class="card" style="box-shadow:none;background:var(--mist)">' + [['Prices rise (inflation)','2% a year'],['Pay rises','2.5% a year'],['Cash savings grow','1% a year'],['Investments and pensions grow','4.5% a year'],['State Pension','€15,044 a year from 66 (' + (S.fin.sp || 'Not sure') + ')'],['Retirement age','' + S.retireAge],['Tax','Simple Irish estimate (income tax, USC, PRSI)'],['Plan ends','Age 90']].map(x => '<div class="mini"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('') + '</div><p class="disc">Figures are in today\'s money unless noted. Illustrative only; not a guarantee. The Financial Planner will confirm these.</p><button class="btn" data-a="closesheet">Close</button>';
+  if (t === 'explain'){ const F = findings(project()); h = p === 'str' ? '<h2 class="t">Your main strength</h2><p class="sub">' + esc(F.sT) + '. Of all your goals, this one is the best covered by your future income, savings and pension.</p>' : p === 'gap' ? '<h2 class="t">Your main gap</h2><p class="sub">' + esc(F.gT) + '. When that goal comes up, your income and savings won\'t fully cover the cost with today\'s plan.</p>' : '<h2 class="t">Your biggest decision</h2><p class="sub">' + esc(F.dT) + '. Try it in <b>What if</b> below to see the effect. This is guidance, not advice.</p>'; h += '<button class="btn" data-a="closesheet">Got it</button>'; }
+  if (t === 'other') h = '<h2 class="t">Something else</h2><p class="sub">Pick one, or name your own.</p><div class="chips">' + OTHER_LIST.map((o, k) => '<button class="chip" data-a="addother" data-p="' + k + '">' + o[0] + ' ' + o[1] + '</button>').join('') + '</div><div class="field" style="margin-top:14px"><label for="oth">Name it yourself</label><input class="in" id="oth" maxlength="30" placeholder="e.g. Kitchen renovation"></div><button class="btn" data-a="addother" data-p="own">Add my goal</button>';
+  if (t === 'history') h = '<h2 class="t">Plan history</h2>' + S.versions.map((v, k) => '<div class="mini"><span><b>Version ' + (k + 1) + '</b> · ' + esc(v.note) + '</span><span class="small">' + v.date + '</span></div>').join('') + '<button class="btn" style="margin-top:12px" data-a="closesheet">Close</button>';
+  if (t === 'delete') h = '<h2 class="t">Delete my data?</h2><p class="sub">Your plan, answers, figures and documents will be deleted. This can\'t be undone.</p><button class="btn" style="background:var(--gap-t)" data-a="dodelete">Delete everything</button><button class="btn ghost" style="margin-top:10px" data-a="closesheet">Keep my data</button>';
+  if (t === 'profile') h = '<div class="adv"><span class="face" aria-hidden="true">' + esc((S.acct.name || 'A')[0]) + '</span><div><h2 class="t" style="margin:0">' + esc(S.acct.name || 'You') + '</h2><div class="small">' + (S.acct.pk ? 'Signed in with Face ID' : 'Signed in with email code') + '</div></div></div><button class="goal" style="margin-top:14px" data-a="me" data-p="privacy"><span class="ic">🔐</span><b style="flex:1">Privacy & sharing</b></button><button class="goal" data-a="me" data-p="details"><span class="ic">🙋</span><b style="flex:1">My details</b></button>';
+  return '<div class="sheet-bg" data-a="closesheet"><div class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(t) + '" data-a="noop"><div class="grab"></div><button class="sx" data-a="closesheet" aria-label="Close">✕</button>' + h + '</div></div>';
+}
+
+/* ================= REPORT (printable) ================= */
+function openReport(){
+  const P0 = project(), wiP = S.pref || (S.wi.m || S.wi.l ? S.wi : null), P = wiP ? project(wiP) : P0, F = findings(P0), um = umCount() === 13, rp = um ? riskRead(true) : null, per = personality();
+  const flags = checkItems().filter(x => ['look','est','miss'].includes(x.st));
+  const rows = P0.rows.map(r => '<tr><td>' + r.a + ' (' + r.yr + ')</td><td>' + eur(r.inflow) + '</td><td>' + eur(r.needs) + '</td><td>' + eur(r.used) + '</td><td style="color:' + (isShort(r) ? 'var(--gap-t)' : 'inherit') + '">' + (r.short > 1 ? eur(r.short) : '—') + '</td><td>' + eur(r.liquid) + '</td></tr>').join('');
+  const detail = S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const p = P0.pct[g.id], ex = p < 95 ? extraFor(g) : 0;
+    return '<p><b>' + g.e + ' ' + esc(g.name) + '</b> · ' + (g.kind === 'retire' ? 'from age ' + g.age + ', ' + eur(g.amount) + ' a year' : 'age ' + g.age + ' (' + (YEAR0 + g.age - S.about.age) + '), ' + eur(g.amount)) + ' in today\'s money · ' + g.prio + '.<br>What is on track: <b>' + p + '%</b> covered (' + BANDW[band(p)] + '). ' + (p >= 95 ? 'Your income and savings cover it.' : ex ? 'What would close the gap: saving about <b>' + eur(ex) + ' a month</b> towards it' + (g.kind === 'retire' ? ' into your pension' : '') + ', or moving it later.' : 'What would close the gap: moving it later, a smaller amount, or a bigger change to saving.') + '</p>'; }).join('');
+  const h = '<div class="rep-bar"><b>Your LifeGoals plan</b><button data-r="print" style="background:var(--sun);color:var(--ink)">🖨 Print / save as PDF</button><button data-r="close" style="background:#fff;color:var(--ink)">Close</button></div><article class="rep">' +
+    '<h1>' + esc(S.acct.name || 'Your') + '\'s LifeGoals plan</h1><p class="small">Created 29 Sep 2026 · version ' + Math.max(1, S.versions.length) + ' · <b>Preliminary guidance, not financial advice</b></p>' +
+    '<section><h2>1. Summary</h2><p>' + esc(F.sT) + '. ' + esc(F.gT) + '. ' + esc(F.dT) + '.</p><div>' + goalsBox(P0) + '</div></section>' +
+    '<section><h2>2. Your roadmap</h2>' + journeySVG(P0, 720) + journeyNote(P0) + '<div style="margin-top:12px">' + chaptersHTML(P0).replace(/<button/g, '<div').replace(/<\/button>/g, '</div>') + '</div></section>' +
+    '<section><h2>3. Year-by-year cashflow</h2>' + chartSVG(P0.rows, 720) + '<table><thead><tr><th>Age (year)</th><th>Income</th><th>Needs</th><th>From savings</th><th>Shortfall</th><th>Savings left</th></tr></thead><tbody>' + rows + '</tbody></table></section>' +
+    '<section><h2>4. Your detailed plan, in plain words</h2>' + detail + '</section>' +
+    '<section><h2>5. What-if you saved</h2>' + (wiP ? '<p>' + (wiP.m ? (wiP.m > 0 ? 'Saving ' + eur(wiP.m) + ' more a month' : 'Saving ' + eur(-wiP.m) + ' less a month') : '') + (wiP.m && wiP.l ? ' and ' : '') + (wiP.l ? 'adding ' + eur(wiP.l) + ' once' : '') + (gById(wiP.g) ? ' towards ' + esc(gById(wiP.g).name.toLowerCase()) : '') + ':</p><p>' + wiText(P0, P) + '</p>' : '<p>You haven\'t tried a what-if yet.</p>') + '</section>' +
+    '<section><h2>6. Your money snapshot</h2><table><tbody>' + FSEC.map(s => s.f.filter(fieldVisible).map(k => '<tr><td>' + s.t + ' · ' + esc(FF[k].l) + '</td><td>' + fmtField(k) + '</td><td>' + tagFor(k) + '</td></tr>').join('')).join('') + '</tbody></table>' + (flags.length ? '<p>' + flags.length + ' item(s) are estimated, missing or need a look.</p>' : '') + '</section>' +
+    '<section><h2>7. Your money personality' + (um ? ' and indicative risk profile' : '') + '</h2><p><b>' + per.e + ' ' + per.name + '</b>: ' + per.strap + '</p>' + (um ? '<p>Indicative risk profile: <b>' + rp.label + '</b>. ' + (rp.mis ? esc(rp.mis) : '') + ' Your adviser confirms your risk profile with you.</p>' : '<p>Complete <i>Understand me</i> to add your indicative risk profile.</p>') + '</section>' +
+    '<section><h2>8. Your questions for an adviser</h2>' + (S.advQs.length ? '<ul>' + S.advQs.map(q => '<li>' + esc(q) + '</li>').join('') + '</ul>' : '<p>None yet.</p>') + '</section>' +
+    '<section><h2>9. Assumptions</h2><p>Inflation 2% · pay rises 2.5% · cash 1% · investments and pensions 4.5% · State Pension €15,044 a year from 66 · retirement at ' + S.retireAge + ' · plan to age 90 · simple Irish tax estimate. All projections are illustrative and not guaranteed. This is preliminary guidance, not financial advice. Only an authorised adviser can give advice. ' + DISC_FORMAL + '</p></section></article>';
+  const R = document.getElementById('report'); R.innerHTML = h; R.classList.add('on'); R.scrollTop = 0; R.querySelector('[data-r="print"]').focus();
+  if (!S.versions.some(v => /report/.test(v.note))) S.versions.push({note:'Report downloaded', date:'29 Sep 2026'});
+}
+/* ================= RENDER ================= */
+function current(){
+  if (S.app){ if (S.tab === 'plan') return S.planSeg === 'add' ? V.GOALS() : V.PLAN(); if (S.tab === 'me') return S.me === 'fin' ? finScreen() : V.ME(); return S.exp === 'fin' ? finScreen() : V.EXP(); }
+  if (/^D[2-8]$/.test(S.scr)) return V.DQ();
+  if (S.scr === 'P3') return V.P3(); if (S.scr === 'PU') return V.PU();
+  return (V[S.scr] || V.D0)();
+}
+function finScreen(){ return S.upl ? V.PU() : S.fsec != null ? V.P3() : V.P2(); }
+let lastId = null, focusKey = null;
+function render(){
+  const scr = document.getElementById('screen'), sc0 = scr.querySelector('.scroll,.qbody'), top0 = sc0 ? sc0.scrollTop : 0;
+  const s = current(), same = s.id === lastId;
+  let html;
+  if (s.kind === 'quiz') html = '<div class="quiz">' + s.html + '</div>';
+  else html = '<div class="app"><header class="sky">' + (s.head || '') + '</header><div class="scroll" id="main">' + s.html + '</div>' + (s.foot ? '<div class="foot">' + s.foot + '</div>' : '') +
+    (S.app ? '<nav class="tabs" aria-label="Main">' + [['me','Me'],['plan','My Plan'],['exp','Experts']].map(([k, l]) => k === 'plan' ? '<button class="center' + (S.tab === k ? ' on' : '') + '" data-a="tab" data-p="plan" aria-current="' + (S.tab === k ? 'page' : 'false') + '"><span class="fab">' + ICON.plan + '</span>' + l + '</button>' : '<button class="' + (S.tab === k ? 'on' : '') + '" data-a="tab" data-p="' + k + '" aria-current="' + (S.tab === k ? 'page' : 'false') + '">' + ICON[k] + l + '<span class="dot"></span></button>').join('') + '</nav>' : '') + '</div>';
+  html += sheetHTML();
+  scr.innerHTML = html;
+  const sc = scr.querySelector('.scroll,.qbody'); if (sc && same) sc.scrollTop = top0;
+  lastId = s.id;
+  bind();
+  if (S.sheet){ const f = scr.querySelector('.sheet input:not([type=checkbox]),.sheet .btn'); if (f) f.focus(); }
+  else if (focusKey){ const el = scr.querySelector(focusKey); if (el) el.focus({preventScroll:true}); }
+  else if (!same && !(document.activeElement && document.activeElement.matches('#screen input'))){ const h = scr.querySelector('h2[tabindex]'); if (h) h.focus({preventScroll:true}); }
+  focusKey = null;
+  document.getElementById('curid').textContent = s.id + ' · ' + s.note;
+  document.querySelectorAll('#jumps button').forEach(b => b.classList.toggle('on', b.dataset.id === s.id));
+}
+function go(id){ S.scr = id; S.sheet = null; render(); }
+let toastT = null;
+function toast(msg){ const t = document.getElementById('toast'); t.innerHTML = '<div class="t"><span aria-hidden="true">✨</span>' + esc(msg) + '</div>'; clearTimeout(toastT); toastT = setTimeout(() => { t.innerHTML = ''; }, 2800); }
+function version(note){ S.versions.push({note, date:'29 Sep 2026'}); }
+function toResults(){ S.scr = 'U1'; render(); setTimeout(() => { S.app = true; S.tab = 'plan'; S.planSeg = 'results'; if (!S.versions.some(v => /results/.test(v.note))) version('First results'); render(); }, RM() ? 300 : 1400); }
+function finBack(){ if (S.from === 'check'){ S.from = null; S.fsec = null; if (S.app) { render(); } else go('P4'); return; } S.fsec = null; if (S.app){ if (S.tab === 'me'){ S.me = 'money'; } } else S.scr = 'P2'; render(); }
+function openSec(i){ S.fsec = +i; S.upl = null; if (S.app){ if (S.tab !== 'exp'){ S.tab = 'me'; S.me = 'fin'; } } else S.scr = 'P3'; S.sheet = null; render(); }
+
+/* ================= ACTIONS ================= */
+const ACT = {
+  go:p => go(p), sheet:p => { S.sheet = p; render(); }, closesheet:() => { S.sheet = null; render(); }, noop:() => {}, toast:p => toast(p),
+  invite:() => { const v = (document.getElementById('inv') || {}).value; S.entry = 'adviser invite' + (v ? ' ' + v : ''); S.sheet = null; render(); toast('Invite linked'); },
+  why:p => { const k = +p, i = S.why.indexOf(k); if (i >= 0) S.why.splice(i, 1); else S.why.push(k); focusKey = '[data-a="why"][data-p="' + k + '"]'; render(); },
+  dstart:() => { S.di = 0; go('D2'); },
+  dpick:p => { const q = DQ[S.di]; S.ans[q.id] = +p; render(); const i = S.di; setTimeout(() => { if (S.scr === 'D' + (i + 2) && DQ[S.di] === q) dnext(); }, RM() ? 0 : 280); },
+  dnext:() => dnext(), dprev:() => { if (S.scr === 'D9'){ S.di = 6; go('D8'); return; } if (S.di <= 0) go('D1'); else { S.di--; go('D' + (S.di + 2)); } },
+  age:p => { const d = +p.split('|')[1]; S.about.age = clamp(S.about.age + d, 18, 80); focusKey = '[data-a="age"][data-p="x|' + d + '"]'; render(); },
+  partner:p => { S.about.partner = p === 'Yes'; focusKey = '[data-a="partner"][data-p="' + p + '"]'; render(); },
+  deps:p => { S.about.deps = +p; focusKey = '[data-a="deps"][data-p="' + p + '"]'; render(); },
+  backd:() => go('D10'),
+  gpick:p => { if (p === 'retire'){ toast('Retirement is always on your timeline'); return; } if (p === 'other'){ S.sheet = 'other'; render(); return; }
+    const i = S.goals.findIndex(g => g.k === p); if (i >= 0) S.goals.splice(i, 1); else S.goals.push(mkGoal(p)); ensureRetire(); focusKey = '[data-a="gpick"][data-p="' + p + '"]'; if (S.app) afterPlanEdit(); render(); },
+  addother:p => { let c; if (p === 'own'){ const v = ((document.getElementById('oth') || {}).value || '').trim(); if (!v) { toast('Type a name for your goal'); return; } c = ['⭐', v.slice(0, 30), 10000, 4]; } else c = OTHER_LIST[+p];
+    S.goals.push(mkGoal('other', c)); ensureRetire(); S.sheet = null; if (S.app) afterPlanEdit(); render(); toast(c[1] + ' added'); },
+  f2next:() => { if (!S.save.done && !S.save.asked){ S.save.asked = true; S.sheet = 'saveprompt'; render(); return; } go('F4'); },
+  dosave:() => { const e = document.getElementById('sv-email').value.trim(); if (!/.+@.+\..+/.test(e)){ document.getElementById('sverr').textContent = 'Please enter a valid email.'; return; }
+    S.save = {email:e, comms:document.getElementById('sv-comms').checked, done:true, asked:true}; if (!S.acct.email) S.acct.email = e; S.sheet = null; render(); toast('Saved ✓ Check your inbox for your link'); },
+  gyr:p => { const [id, d] = p.split('|'), g = gById(id); moveGoal(g, g.age + +d); focusKey = '[data-a="gyr"][data-p="' + p + '"]'; render(); },
+  gmore:p => { S.tlOpen[p] = !S.tlOpen[p]; focusKey = '[data-a="gmore"][data-p="' + p + '"]'; render(); },
+  gset:p => { const [id, k, v] = p.split('|'); gById(id)[k] = v; focusKey = '[data-a="gset"][data-p="' + p + '"]'; render(); },
+  gdel:p => { S.goals = S.goals.filter(g => g.id !== +p); if (S.wi.g === +p) S.wi = {g:null, m:0, l:0}; if (S.app) afterPlanEdit(); render(); toast('Goal removed'); },
+  f4ok:() => { if (!S.versions.length) version('LifeMap confirmed'); if (S.acct.email === '' && S.save.email) S.acct.email = S.save.email; go('P1'); },
+  vemail:() => verify('ev', 'P1S'), vsms:() => verify('sv', 'P1K'),
+  passkey:p => { S.acct.pk = p === '1'; S.fin.name = S.acct.name; S.src.name = 'pre'; S.fin.age = S.about.age; S.src.age = 'pre'; S.fin.retireAge = S.retireAge; S.src.retireAge = 'pre'; if (p === '1') toast('Face ID added'); go('P2'); },
+  upl:p => startUpload(p, ['Sample document.pdf']), uplx:() => { S.upl = null; if (!S.app) S.scr = S.fsec != null ? 'P3' : 'P2'; render(); },
+  uplfail:() => { const sec = S.upl.sec; S.missingDocs = (S.missingDocs || []).concat(S.upl.files); S.upl = null; const i = FSEC.findIndex(s => s.id === sec); S.fmode[sec] = 'type'; if (i >= 0) openSec(i); else { if (!S.app) S.scr = 'P2'; render(); } },
+  uplok:() => confirmUpload(),
+  fsec:p => openSec(p), fmode:p => { S.fmode[FSEC[S.fsec].id] = p; render(); },
+  fback:() => finBack(), fsave:() => { const sec = FSEC[S.fsec]; if (sec.id === 'about'){ S.fin.name && (S.acct.name = S.fin.name); } toast(sec.t + ' saved'); if (S.app) afterPlanEdit(true); finBack(); },
+  fchoice:p => { const [k, v] = p.split('|'); S.fin[k] = v; S.src[k] = 'typed'; delete S.look[k]; focusKey = '[data-a="fchoice"][data-p="' + p + '"]'; render(); },
+  fest:p => { const d = FF[p]; S.fin[p] = val(d.est); S.src[p] = 'est'; delete S.look[p]; focusKey = '[data-a="fest"][data-p="' + p + '"]'; render(); },
+  fnone:p => { S.fin[p] = 0; S.src[p] = 'none'; delete S.look[p]; focusKey = '[data-a="fnone"][data-p="' + p + '"]'; render(); },
+  fix:p => { if (!S.app) S.from = 'check'; openSec(p); }, ack:p => { S.ack[p] = true; render(); },
+  toresults:() => { if (!S.checked) return; toResults(); },
+  meback:() => { S.me = 'home'; S.fsec = null; S.upl = null; if (S.tab === 'exp') S.exp = 'home'; render(); },
+  tab:p => { S.tab = p; S.sheet = null; S.fsec = null; S.upl = null; if (p === 'me') S.me = 'home'; if (p === 'exp' && !['c1','c2','c3'].includes(S.exp)) S.exp = 'home'; if (p === 'plan' && S.planSeg === 'add') S.planSeg = 'timeline'; lastId = null; render(); },
+  seg:p => { S.planSeg = p; S.tab = 'plan'; S.sheet = null; lastId = null; render(); },
+  addgoal:() => { S.planSeg = 'add'; render(); },
+  me:p => { S.tab = 'me'; S.me = p; S.sheet = null; render(); }, exp:p => { S.tab = 'exp'; S.exp = p; render(); },
+  umsec:p => { S.um.sec = +p; S.me = 'ums'; render(); },
+  umpick:p => { const [key, k] = p.split('|'); if (key[0] === 'd') S.ans[key.slice(1)] = +k; else S.um.a[key] = +k; focusKey = '[data-a="umpick"][data-p="' + p + '"]'; render(); },
+  umchip:p => { const i = S.um.chips.indexOf(p); if (i >= 0) S.um.chips.splice(i, 1); else S.um.chips.push(p); focusKey = '[data-a="umchip"][data-p="' + p + '"]'; render(); },
+  umsave:() => { const s = UM.find(x => x.n === S.um.sec); if (s.n === 2 && typeof S.um.a.u9 !== 'number') S.um.a.u9 = suggestU9(); S.um.done[s.n] = true; S.me = 'um'; toast('Section ' + s.n + ' saved'); render(); },
+  view:p => { S.view = p; focusKey = '[data-a="view"][data-p="' + p + '"]'; const e = document.getElementById('r-glance'); if (e){ e.innerHTML = glanceHTML(project(S.wi)); bindLite(); const b = e.querySelector(focusKey); if (b) b.focus(); focusKey = null; } else render(); },
+  chap:p => { S.chapOpen = S.chapOpen === +p ? null : +p; const e = document.getElementById('r-glance'); if (e){ e.innerHTML = glanceHTML(project(S.wi)); const b = e.querySelector('[data-a="chap"][data-p="' + p + '"]'); if (b) b.focus({preventScroll:true}); } else render(); },
+  understood:() => { S.understood = true; version('Results understood'); focusKey = '#r-found .chip'; render(); },
+  advq:p => { const i = S.advQs.indexOf(p); if (i >= 0) S.advQs.splice(i, 1); else S.advQs.push(p); focusKey = '[data-a="advq"][data-p="' + CSS.escape(p) + '"]'; render(); },
+  wig:p => { S.wi.g = +p; focusKey = '[data-a="wig"][data-p="' + p + '"]'; render(); },
+  wim:p => { if (S.wi.g == null) S.wi.g = defaultWiGoal(); S.wi.m = clamp(S.wi.m + +p, -500, 1000); const r = document.querySelector('[data-wi="m"]'); if (r) r.value = S.wi.m; liveUpdate(); },
+  wisave:() => { S.pref = Object.assign({}, S.wi); version('Preferred plan: ' + (S.wi.m ? (S.wi.m > 0 ? '+' : '') + eur(S.wi.m) + '/month ' : '') + (S.wi.l ? '+' + eur(S.wi.l) + ' once' : '') + (gById(S.wi.g) ? ' → ' + gById(S.wi.g).name : '')); toast('Saved as your preferred plan (version ' + S.versions.length + ')'); },
+  wireset:() => { S.wi = {g:S.wi.g, m:0, l:0}; render(); toast('Back to your plan'); },
+  report:() => openReport(),
+  book:() => { S.tab = 'exp'; S.exp = umCount() < 13 ? 'c0' : 'c1'; S.book.from = 'plan'; lastId = null; render(); },
+  book2:() => { S.um.ret = null; S.tab = 'exp'; S.exp = 'c1'; render(); },
+  c0go:() => { S.um.ret = 'c1'; S.tab = 'me'; S.me = 'um'; render(); },
+  advnext:() => { S.book.adv = (S.book.adv + 1) % ADVISERS.length; render(); },
+  bmode:p => { S.book.mode = p; focusKey = '[data-a="bmode"][data-p="' + p + '"]'; render(); },
+  slot:p => { S.book.slot = p; focusKey = '[data-a="slot"][data-p="' + p + '"]'; render(); },
+  confirmbook:() => { S.book.done = true; S.exp = 'c4'; version('Adviser meeting booked'); render(); toast('Booked. Confirmation sent by email and SMS'); },
+  ics:() => { const b = S.book, A = ADVISERS[b.adv], ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//LifeGoals//Prototype//EN\r\nBEGIN:VEVENT\r\nUID:lg-' + Date.now() + '\r\nDTSTAMP:20260929T090000Z\r\nDTSTART:20261001T090000Z\r\nDURATION:PT45M\r\nSUMMARY:LifeGoals meeting with ' + A.n + '\r\nDESCRIPTION:' + b.mode + ' · ' + b.slot + '\r\nEND:VEVENT\r\nEND:VCALENDAR';
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ics], {type:'text/calendar'})); a.download = 'lifegoals-meeting.ics'; document.body.appendChild(a); a.click(); a.remove(); toast('Calendar file downloaded'); },
+  adjust:() => { S.planSeg = 'timeline'; S.tab = 'plan'; lastId = null; render(); },
+  dodelete:() => { const n = S; S = fresh(); render(); toast('All your data was deleted'); }
+};
+function dnext(){ if (S.di >= DQ.length - 1){ go('D9'); return; } S.di++; go('D' + (S.di + 2)); }
+function verify(flag, next){ const code = [...document.querySelectorAll('[data-code]')].map(i => i.value).join(''); if (code !== '123456'){ document.getElementById('codeerr').textContent = code.length < 6 ? 'Enter all 6 digits.' : "That code doesn't match. Try 123456."; return; } S.acct[flag] = true; toast(flag === 'ev' ? 'Email verified' : 'Mobile verified'); go(next); }
+function defaultWiGoal(){ const P = project(); const w = S.goals.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id] || a.age - b.age)[0]; return w ? w.id : null; }
+function afterPlanEdit(quiet){ if (!quiet) version('Goals changed'); }
+function moveGoal(g, age){ const a0 = S.about.age; age = g.kind === 'retire' ? clamp(age, Math.max(55, a0 + 1), 75) : clamp(age, a0 + 1, 90); g.age = age; if (g.kind === 'retire') setRetireAge(age); }
+function startUpload(sec, files){ const fail = files.some(f => /fail/i.test(f)); S.upl = {sec, stage:'scan', files, edit:{}}; S.sheet = null;
+  if (!S.app) S.scr = 'PU'; else { if (S.tab === 'plan') S.tab = 'me'; if (S.tab === 'me') S.me = 'fin'; else S.exp = 'fin'; }
+  render(); setTimeout(() => { if (!S.upl) return; S.upl.stage = fail ? 'fail' : 'confirm'; render(); }, RM() ? 200 : 1500); }
+function confirmUpload(){ const u = S.upl, secs = u.sec === 'smart' ? ['income','assets','liab','pension'] : [u.sec];
+  secs.forEach(sid => { const U = UPL[sid]; Object.entries(U.v).forEach(([k, [v, c]]) => { let nv = u.edit[k] != null ? +u.edit[k] : v; const prev = S.fin[k];
+    if (S.src[k] === 'typed' && typeof nv === 'number' && prev && Math.abs(prev - nv) / Math.max(prev, nv) > 0.1) S.look[k] = 'You typed ' + eur(prev) + ', the document says ' + eur(nv);
+    else delete S.look[k];
+    S.fin[k] = nv; S.src[k] = 'doc'; S.conf[k] = c; if (u.edit[k] != null && +u.edit[k] !== v) S.src[k] = 'typed'; });
+    if (U.old) Object.entries(U.old).forEach(([k, why]) => { S.look[k] = why; }); });
+  S.upl = null; toast('Added from your documents'); if (S.app) { S.fsec = null; if (S.tab === 'me') S.me = 'money'; render(); } else { S.fsec = null; go('P2'); } }
+
+/* ================= BIND ================= */
+function bindLite(){}
+function bind(){
+  const ph = document.getElementById('screen');
+  ph.querySelectorAll('input[data-in="age"]').forEach(r => r.addEventListener('input', () => { S.about.age = +r.value; const o = ph.querySelector('.stepper output'); if (o) o.textContent = S.about.age; }));
+  ph.querySelectorAll('[data-gname]').forEach(i => i.addEventListener('input', () => { gById(i.dataset.gname).name = i.value.slice(0, 30) || 'My goal'; }));
+  ph.querySelectorAll('[data-gamt]').forEach(i => i.addEventListener('change', () => { gById(i.dataset.gamt).amount = Math.max(0, parseInt(i.value.replace(/\D/g, '')) || 0); render(); }));
+  ph.querySelectorAll('[data-gsaved]').forEach(i => i.addEventListener('change', () => { gById(i.dataset.gsaved).saved = Math.max(0, parseInt(i.value.replace(/\D/g, '')) || 0); render(); }));
+  ph.querySelectorAll('[data-acct]').forEach(i => i.addEventListener(i.type === 'checkbox' ? 'change' : 'input', () => { S.acct[i.dataset.acct] = i.type === 'checkbox' ? i.checked : i.value; const a = S.acct, b = document.getElementById('acctgo');
+    if (b) b.disabled = !(a.name.trim() && /.+@.+\..+/.test(a.email) && a.mobile.replace(/\D/g, '').length >= 9 && a.c1); }));
+  ph.querySelectorAll('[data-code]').forEach((i, n, all) => { i.addEventListener('input', () => { i.value = i.value.replace(/\D/g, '').slice(-1); if (i.value && all[n + 1]) all[n + 1].focus(); });
+    i.addEventListener('keydown', e => { if (e.key === 'Backspace' && !i.value && all[n - 1]) all[n - 1].focus(); if (e.key === 'Enter') ph.querySelector('.foot .btn').click(); });
+    i.addEventListener('paste', e => { const t = (e.clipboardData.getData('text') || '').replace(/\D/g, ''); if (t.length === 6){ e.preventDefault(); all.forEach((x, k) => x.value = t[k]); all[5].focus(); } }); });
+  if (ph.querySelector('[data-code]')) ph.querySelector('[data-code]').focus();
+  ph.querySelectorAll('[data-fin]').forEach(i => i.addEventListener('input', () => { const k = i.dataset.fin, d = FF[k];
+    if (d.type === 'text') S.fin[k] = i.value; else { const n = parseInt(i.value.replace(/[^\d]/g, '')); if (isNaN(n)) { delete S.fin[k]; delete S.src[k]; } else { S.fin[k] = d.type === 'num' ? clamp(n, 0, 120) : n; } }
+    if (S.fin[k] != null && S.fin[k] !== '') { S.src[k] = 'typed'; delete S.look[k]; }
+    if (k === 'age' && S.fin.age >= 18) { S.about.age = S.fin.age; }
+    if (k === 'retireAge' && S.fin.retireAge >= 50 && S.fin.retireAge <= 75) setRetireAge(S.fin.retireAge);
+    const tg = document.getElementById('tag-' + k); if (tg) tg.innerHTML = tagFor(k); }));
+  ph.querySelectorAll('input[type=file][data-file]').forEach(i => i.addEventListener('change', () => { const fs = [...i.files].map(f => f.name); if (fs.length) startUpload(i.dataset.file, fs); }));
+  ph.querySelectorAll('[data-uv]').forEach(i => i.addEventListener('input', () => { S.upl.edit[i.dataset.uv] = parseInt(i.value.replace(/\D/g, '')) || 0; }));
+  ph.querySelectorAll('[data-chk]').forEach(i => i.addEventListener('change', () => { S.checked = i.checked; document.getElementById('seeres').disabled = !i.checked; }));
+  ph.querySelectorAll('[data-share]').forEach(i => i.addEventListener('change', () => { S.book.share[i.dataset.share] = i.checked; shareBtn(); }));
+  ph.querySelectorAll('[data-agree]').forEach(i => i.addEventListener('change', () => { S.book.agree = i.checked; shareBtn(); }));
+  ph.querySelectorAll('input[data-wi]').forEach(r => r.addEventListener('input', () => { if (S.wi.g == null) S.wi.g = defaultWiGoal(); S.wi[r.dataset.wi] = +r.value; r.setAttribute('aria-valuetext', eur(+r.value)); liveUpdate(); }));
+  if (ph.querySelector('#wi-out')) { if (S.wi.g == null) S.wi.g = defaultWiGoal(); liveUpdate(); const c = ph.querySelector('[data-a="wig"][data-p="' + S.wi.g + '"]'); if (c) { c.classList.add('sel'); c.setAttribute('aria-pressed', 'true'); } }
+  if (ph.querySelector('#tl')) { layoutTL(); bindTL(); }
+}
+function shareBtn(){ const b = document.getElementById('sharego'); if (b) b.disabled = !(S.book.agree && Object.values(S.book.share).some(Boolean)); }
+
+/* ================= TIMELINE: layout in lanes + drag ================= */
+const LANE_H = 44;
+function tlX(age, W){ const a0 = S.about.age; return (age - a0) / (90 - a0) * W; }
+function layoutTL(){
+  const tr = document.getElementById('tl'); if (!tr) return; const W = tr.clientWidth, a0 = S.about.age;
+  const chips = [...tr.querySelectorAll('.tl-chip')].map(el => { const g = gById(el.dataset.g); return {el, g, w:el.offsetWidth, x:tlX(g.age, W)}; }).sort((a, b) => a.x - b.x || a.g.id - b.g.id);
+  const lanes = [];
+  chips.forEach(c => { const cx = clamp(c.x, c.w / 2, W - c.w / 2); c.left = cx - c.w / 2; let l = 0; while (lanes[l] != null && c.left < lanes[l] + 6) l++; lanes[l] = c.left + c.w; c.lane = l; });
+  const L = Math.max(1, lanes.length), axisY = 10 + L * LANE_H + 12;
+  tr.querySelectorAll('.tl-stem,.tl-axis,.tl-tick,.tl-tm,.tl-now').forEach(e => e.remove());
+  let deco = '<div class="tl-axis" style="top:' + axisY + 'px"></div><div class="tl-now" style="left:0;top:' + (axisY + 2) + 'px" aria-hidden="true"></div>';
+  for (let a = Math.ceil(a0 / 5) * 5; a <= 90; a += 5){ const x = tlX(a, W); deco += '<div class="tl-tm" style="left:' + x + 'px;top:' + (axisY + 6) + 'px"></div>' + (a % 10 === 0 && x > 22 ? '<div class="tl-tick" style="left:' + x + 'px;top:' + (axisY + 16) + 'px">' + a + '</div>' : ''); }
+  deco += '<div class="tl-tick" style="left:14px;top:' + (axisY + 16) + 'px">Now</div><div class="tl-tick" style="left:' + (W - 8) + 'px;top:' + (axisY + 32) + 'px;font-size:10px">age</div>';
+  chips.forEach(c => { const top = 10 + (L - 1 - c.lane) * LANE_H; c.el.style.left = c.left + 'px'; c.el.style.top = top + 'px'; deco += '<div class="tl-stem" style="left:' + c.x + 'px;top:' + (top + 36) + 'px;height:' + (axisY - top - 36) + 'px"></div>'; });
+  tr.insertAdjacentHTML('afterbegin', deco);
+  tr.style.height = (axisY + 46) + 'px';
+}
+function bindTL(){
+  const tr = document.getElementById('tl');
+  tr.querySelectorAll('.tl-chip').forEach(ch => {
+    ch.addEventListener('pointerdown', e => {
+      if (e.button > 0) return; e.preventDefault(); const g = gById(ch.dataset.g), sx = e.clientX, sAge = g.age; let moved = false, tip = null;
+      try { ch.setPointerCapture(e.pointerId); } catch (x) {}
+      ch.classList.add('drag'); tr.classList.add('live');
+      const mv = ev => { if (!moved && Math.abs(ev.clientX - sx) < 5) return; moved = true; const r = tr.getBoundingClientRect(), a0 = S.about.age;
+        const age = Math.round(sAge + (ev.clientX - sx) / r.width * (90 - a0)); const before = g.age; moveGoal(g, age);
+        if (g.age !== before || !tip){ ch.innerHTML = chipInner(g); ch.setAttribute('aria-valuenow', g.age); layoutTL();
+          if (!tip){ tip = document.createElement('div'); tip.className = 'tl-tip'; tr.appendChild(tip); }
+          tip.textContent = g.name + ' · age ' + g.age + ' · ' + (YEAR0 + g.age - a0); tip.style.left = clamp(parseFloat(ch.style.left) + ch.offsetWidth / 2, 60, tr.clientWidth - 60) + 'px'; tip.style.top = (parseFloat(ch.style.top) - 6) + 'px';
+          const w = document.getElementById('when-' + g.id); if (w) w.textContent = whenTxt(g); } };
+      const up = () => { ch.removeEventListener('pointermove', mv); ch.removeEventListener('pointerup', up); ch.removeEventListener('pointercancel', up); ch.removeEventListener('lostpointercapture', up); ch.classList.remove('drag'); tr.classList.remove('live'); if (tip) tip.remove();
+        if (!moved){ S.tlHl = g.id; render(); const row = document.getElementById('row-' + g.id); if (row) row.scrollIntoView({block:'nearest', behavior:RM() ? 'auto' : 'smooth'}); return; }
+        if (S.app) version(g.name + ' moved to age ' + g.age); focusKey = '.tl-chip[data-g="' + g.id + '"]'; render(); toast(g.name + ' · age ' + g.age); };
+      ch.addEventListener('pointermove', mv); ch.addEventListener('pointerup', up); ch.addEventListener('pointercancel', up); ch.addEventListener('lostpointercapture', up);
+    });
+    ch.addEventListener('keydown', e => { const g = gById(ch.dataset.g), st = e.shiftKey ? 5 : 1; let a = null;
+      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') a = g.age + st; else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') a = g.age - st; else if (e.key === 'Home') a = 0; else if (e.key === 'End') a = 99;
+      else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); S.tlHl = g.id; render(); document.getElementById('row-' + g.id).scrollIntoView({block:'nearest'}); return; }
+      if (a == null) return; e.preventDefault(); moveGoal(g, a); focusKey = '.tl-chip[data-g="' + g.id + '"]'; render(); });
+  });
+}
+
+/* ================= EVENTS ================= */
+document.addEventListener('click', e => {
+  const r = e.target.closest('#report [data-r]'); if (r){ if (r.dataset.r === 'print') window.print(); else { document.getElementById('report').classList.remove('on'); const b = document.querySelector('[data-a="report"]'); if (b) b.focus(); } return; }
+  const el = e.target.closest('#screen [data-a]'); if (!el || el.disabled) return;
+  let a = el.dataset.a, p = el.dataset.p; if (a.includes('|')) [a, p] = a.split('|');
+  if (a === 'noop') { e.stopPropagation(); return; }
+  if (a === 'closesheet' && el.classList.contains('sheet-bg') && e.target !== el) return;
+  if (el.getAttribute('aria-disabled') === 'true' && a !== 'gpick') return;
+  if (ACT[a]) ACT[a](p);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ if (document.getElementById('report').classList.contains('on')) { document.getElementById('report').classList.remove('on'); return; } if (S.sheet){ S.sheet = null; render(); } } });
+
+/* ================= SAMPLE CUSTOMER + SIDE PANEL ================= */
+function loadSample(){
+  S = fresh();
+  Object.assign(S.ans, {'2':0, '4':1, '6':2, '7':1, '8':2, '9':2, '12':1}); S.why = [0];
+  S.about = {age:38, partner:true, deps:2}; S.retireAge = 63;
+  ['edu','travel','mfree','safety'].forEach(k => S.goals.push(mkGoal(k))); ensureRetire();
+  const G = k => S.goals.find(g => g.k === k); G('edu').age = 48; G('edu').amount = 50000; G('travel').age = 41; G('travel').amount = 12000; G('mfree').age = 55; G('safety').age = 40; G('safety').amount = 15000; G('safety').saved = 5000; retireGoal().amount = 46000;
+  S.acct = {name:'Aoife', email:'aoife@example.ie', mobile:'087 123 4567', c1:true, c2:false, ev:true, sv:true, pk:true};
+  const put = (k, v, src, c) => { S.fin[k] = v; S.src[k] = src; if (c) S.conf[k] = c; };
+  put('name', 'Aoife', 'pre'); put('age', 38, 'pre'); put('retireAge', 63, 'pre'); put('pAge', 37, 'typed');
+  put('work', 'Employed', 'doc', 99); put('income', 58000, 'doc', 98); put('pIncome', 22000, 'typed'); put('otherM', 0, 'none'); put('costsM', 3600, 'est'); put('oneOffY', 1800, 'doc', 81);
+  put('home', 'Own with mortgage', 'doc', 99); put('homeValue', 420000, 'typed'); put('cash', 9000, 'doc', 97); put('invest', 6200, 'doc', 88); put('saveM', 350, 'doc', 71);
+  put('mortBal', 212000, 'doc', 96); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('debt', 2800, 'doc', 85); put('debtPayM', 140, 'doc', 78);
+  put('life', 'Yes', 'doc', 95); put('ip', 'No', 'typed'); put('ci', 'Not sure', 'typed'); put('workCover', 'Yes', 'doc', 90); put('health', 'Yes', 'typed');
+  put('pension', 72000, 'doc', 95); put('pensionM', 520, 'doc', 91); put('sp', 'Expect full', 'typed'); S.look.pension = 'Statement is over 12 months old';
+  S.checked = true; S.app = true; S.tab = 'plan'; S.planSeg = 'results'; S.versions = [{note:'LifeMap confirmed', date:'29 Sep 2026'}, {note:'First results', date:'29 Sep 2026'}];
+}
+function J(fn){ return () => { fn(); lastId = null; render(); }; }
+const withS = f => () => { if (!S.app) loadSample(); f(); };
+const JUMPS = [
+  ['Discover', [['D0','Welcome', () => { S = fresh(); }], ['D1','What brought you here?', () => { S = fresh(); S.scr = 'D1'; }], ['D2','Question 1 of 7', () => { S = fresh(); S.scr = 'D2'; S.di = 0; }], ['D6','Question 5 (forecast)', () => { S = fresh(); S.scr = 'D6'; S.di = 4; }], ['D7','Question 6 (scenario)', () => { S = fresh(); S.scr = 'D7'; S.di = 5; }], ['D9','A bit about you', () => { S = fresh(); S.scr = 'D9'; S.di = 6; }], ['D10','Money-story glimpse', () => { loadSample(); S.app = false; S.scr = 'D10'; }]]],
+  ['Define', [['F1','Pick your goals', () => { loadSample(); S.app = false; S.scr = 'F1'; }], ['F2','Your timeline (drag)', () => { loadSample(); S.app = false; S.scr = 'F2'; }], ['F4','Confirm my LifeMap', () => { loadSample(); S.app = false; S.scr = 'F4'; }]]],
+  ['Prepare', [['P1','Create your account', () => { loadSample(); S.app = false; S.acct.c1 = false; S.scr = 'P1'; }], ['P1E','Email code', () => { loadSample(); S.app = false; S.scr = 'P1E'; }], ['P2','Your finances hub', () => { loadSample(); S.app = false; S.scr = 'P2'; }], ['P3-2','Income (type it)', () => { loadSample(); S.app = false; S.scr = 'P3'; S.fsec = 1; }], ['P3-6','Pension (upload)', () => { loadSample(); S.app = false; S.scr = 'P3'; S.fsec = 5; S.fmode.pension = 'upload'; }], ['P4','Check your details', () => { loadSample(); S.app = false; S.checked = false; S.scr = 'P4'; }]]],
+  ['Results & app', [['U2','Your results', () => { loadSample(); }], ['PLAN-TL','My Plan · timeline', () => { loadSample(); S.planSeg = 'timeline'; }], ['ME-01','Me', () => { loadSample(); S.tab = 'me'; }], ['ME-UM','Understand me', () => { loadSample(); S.tab = 'me'; S.me = 'um'; }], ['ME-UM2','Understand me · risk', () => { loadSample(); S.tab = 'me'; S.me = 'ums'; S.um.sec = 2; }], ['ME-R','Profile result', () => { loadSample(); Object.assign(S.um.a, {u4:1, u9:3, u10:1, u11:1, u12:2, u13:1}); S.um.done = {1:true, 2:true, 3:true}; S.tab = 'me'; S.me = 'umr'; }], ['ME-MONEY','My money', () => { loadSample(); S.tab = 'me'; S.me = 'money'; }]]],
+  ['Connect', [['C0','Help your adviser know you', () => { loadSample(); S.tab = 'exp'; S.exp = 'c0'; }], ['C1','Your match', () => { loadSample(); S.tab = 'exp'; S.exp = 'c1'; }], ['C2','Share your plan', () => { loadSample(); S.tab = 'exp'; S.exp = 'c2'; }], ['C3','Pick a time', () => { loadSample(); S.tab = 'exp'; S.exp = 'c3'; }], ['C4',"You're booked", () => { loadSample(); S.tab = 'exp'; S.exp = 'c4'; S.book.done = true; S.book.slot = SLOTS[1]; }]]]
+];
+function side(){
+  document.getElementById('jumps').innerHTML = JUMPS.map((g, gi) => '<div class="grp">' + g[0] + '</div>' + g[1].map((j, k) => '<button data-jump="' + gi + '.' + k + '" data-id="' + j[0] + '"><span class="jid">' + j[0] + '</span>' + esc(j[1]) + '</button>').join('')).join('');
+  document.querySelector('.side').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+    document.getElementById('report').classList.remove('on');
+    if (b.id === 'startnew') { S = fresh(); lastId = null; render(); return; }
+    if (b.id === 'startsample') { loadSample(); lastId = null; render(); return; }
+    if (b.dataset.jump) { const [gi, k] = b.dataset.jump.split('.').map(Number); JUMPS[gi][1][k][2](); lastId = null; render(); } });
+}
+function fit(){ const w = document.getElementById('wrap'), small = innerWidth <= 800; if (small){ w.style.transform = 'none'; w.style.width = '100%'; w.style.height = '100%'; document.getElementById('phone').style.width = '100%'; document.getElementById('phone').style.height = '100%'; return; }
+  w.style.width = ''; w.style.height = ''; document.getElementById('phone').style.width = ''; document.getElementById('phone').style.height = '';
+  const s = Math.min(1, (innerHeight - 30) / 844, (innerWidth - 330) / 420); w.style.transform = 'scale(' + Math.max(.4, s) + ')'; }
+addEventListener('resize', () => { fit(); if (document.getElementById('tl')) layoutTL(); });
+S = fresh(); side(); fit(); render();
+</script></body></html>
