@@ -300,20 +300,20 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 const CHAPTERS = {1:'Your money mindset', 2:'How you decide', 3:'Your investment capacity', 4:'Your risk appetite', 5:'Your next chapter'};
 const DQ = [
   {id:'2', act:1, q:"Your friends would say you're always…", sub:'', type:'cards', o:[
-    {e:'📊', t:'Sticking to a budget', w:{A:2}}, {e:'🔍', t:'Checking your balance', w:{B:2}}, {e:'📱', t:'Trying something new', w:{E:2}}, {e:'🧘', t:'Relaxed about money', w:{C:2}}]},
+    {e:'📊', tag:'The Budgeter', t:'Sticking to a budget', w:{A:2}}, {e:'🔍', tag:'Money Vigilant', t:'Checking your balance', w:{B:2}}, {e:'📱', tag:'The Opportunist', t:'Trying something new', w:{E:2}}, {e:'🧘', tag:'The Money Monk', t:'Relaxed about money', w:{C:2}}]},
   {id:'4', act:2, q:"A friend's investment doubled in a month. What do you do?", sub:'', type:'cards', o:[
-    {e:'🏃', t:'Buy in quickly, before I miss out', w:{E:1}}, {e:'🔎', t:'Research it before I decide', w:{A:1}}, {e:'🧑‍💼', t:'Ask an expert first', w:{B:1}}, {e:'🙅', t:'Stay away. Sounds too risky', w:{B:1, C:1}}]},
+    {e:'🏃', tag:'FOMO \u00b7 Herd behaviour', t:'Buy in quickly, before I miss out', w:{E:1}}, {e:'🔎', tag:'Due diligence', t:'Research it before I decide', w:{A:1}}, {e:'🧑‍💼', tag:'Advice-seeker', t:'Ask an expert first', w:{B:1}}, {e:'🙅', tag:'Loss aversion', t:'Stay away. Sounds too risky', w:{B:1, C:1}}]},
   {id:'6', act:3, q:'How much could you comfortably invest each month?', sub:'Without cutting back on everyday life.', type:'cards', o:[
-    {e:'🪙', t:'Under €100', s:1}, {e:'💶', t:'€100 to €300', s:2}, {e:'💰', t:'€300 to €750', s:3}, {e:'🏦', t:'Over €750', s:4}, {e:'🎢', t:'It changes month to month', s:2}]},
+    {e:'🪙', tag:'Starter capacity', t:'Under €100', s:1}, {e:'💶', tag:'Moderate capacity', t:'€100 to €300', s:2}, {e:'💰', tag:'Good capacity', t:'€300 to €750', s:3}, {e:'🏦', tag:'High capacity', t:'Over €750', s:4}, {e:'🎢', tag:'Variable income', t:'It changes month to month', s:2}]},
   {id:'7', act:3, q:'A €1,000 bill arrives tomorrow. How do you pay it?', sub:'', type:'cards', o:[
-    {e:'✅', t:'From my emergency savings', s:4}, {e:'🐷', t:'From money saved for something else', s:2}, {e:'💳', t:'Credit card or a loan', s:1}, {e:'😬', t:"I'm not sure", s:1}]},
+    {e:'✅', tag:'Emergency fund', t:'From my emergency savings', s:4}, {e:'🐷', tag:'Thin buffer', t:'From money saved for something else', s:2}, {e:'💳', tag:'Relies on credit', t:'Credit card or a loan', s:1}, {e:'😬', tag:'No safety net', t:"I'm not sure", s:1}]},
   {id:'8', act:4, q:'Pick a forecast for your long-term money.', sub:'Sunny means steady growth. Stormy means bigger ups and downs, with more growth potential.', type:'ride', o:[
-    {e:'☀️', t:'Calm and steady', s:1, path:'M0 40 L140 28'}, {e:'🌤️', t:'Mostly sunny', s:2, path:'M0 42 L20 36 L40 40 L60 30 L80 34 L100 26 L120 28 L140 20'},
-    {e:'🌦️', t:'Sunshine and showers', s:3, path:'M0 44 L20 26 L40 44 L60 18 L80 36 L100 12 L120 28 L140 8'}, {e:'⛈️', t:'Stormy, but exciting', s:4, path:'M0 46 L20 20 L40 48 L60 10 L80 42 L100 4 L120 30 L140 2'}]},
+    {e:'☀️', tag:'Low risk', t:'Calm and steady', s:1, path:'M0 40 L140 28'}, {e:'🌤️', tag:'Cautious', t:'Mostly sunny', s:2, path:'M0 42 L20 36 L40 40 L60 30 L80 34 L100 26 L120 28 L140 20'},
+    {e:'🌦️', tag:'Balanced', t:'Sunshine and showers', s:3, path:'M0 44 L20 26 L40 44 L60 18 L80 36 L100 12 L120 28 L140 8'}, {e:'⛈️', tag:'High risk', t:'Stormy, but exciting', s:4, path:'M0 46 L20 20 L40 48 L60 10 L80 42 L100 4 L120 30 L140 2'}]},
   {id:'9', act:4, q:'Your €10,000 investment drops to €8,500. What do you do?', sub:'', type:'scenario', from:10000, to:8500, o:[
-    {e:'😱', t:'Sell before it drops more', s:1}, {e:'😬', t:"Wait until it's back to €10,000, then sell", s:2}, {e:'😌', t:'Stay calm and hold on', s:3}, {e:'🛒', t:"Buy more while it's cheaper", s:4}]},
+    {e:'😱', tag:'Panic selling', t:'Sell before it drops more', s:1}, {e:'😬', tag:'Anchoring', t:"Wait until it's back to €10,000, then sell", s:2}, {e:'😌', tag:'Long-term investor', t:'Stay calm and hold on', s:3}, {e:'🛒', tag:'Buy the dip', t:"Buy more while it's cheaper", s:4}]},
   {id:'12', act:5, q:'How do you feel about your financial future?', sub:'Every answer is normal.', type:'cards', o:[
-    {e:'😟', t:'Worried', s:1}, {e:'🤞', t:'Hopeful', s:2}, {e:'😌', t:'Confident', s:4}, {e:'🙈', t:'I avoid thinking about it', s:1}]}
+    {e:'😟', tag:'Financial anxiety', t:'Worried', s:1}, {e:'🤞', tag:'Cautious optimism', t:'Hopeful', s:2}, {e:'😌', tag:'Financially confident', t:'Confident', s:4}, {e:'🙈', tag:'Money avoidance', t:'I avoid thinking about it', s:1}]}
 ];
 const DQ_BY = id => DQ.find(q => q.id === id);
 const TYPES = {A:{name:'Achiever', e:'🎯', strap:'In control, goal-driven, disciplined with money.', str:['Clear about what you want','You stick to a plan'], watch:'Being too hard on yourself when life changes the plan.'},
