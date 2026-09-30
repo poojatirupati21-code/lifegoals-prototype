@@ -394,3 +394,35 @@ There are **no repeated questions** anywhere.
 - §5 Assets: drop "Saving each month now". Monthly saving capacity is already captured by Discover Q6, and income − expenses gives the real surplus.
 - §4 F2: "More details" keeps only *For whom* and *Flexible on timing?*. Priority is asked once, in F4.
 - §5 Minimum-data rule: skipped figures count as €0 in the engine and are shown as ❓ Missing. Nothing is silently estimated. "Estimate for me" is the only way a typical figure enters, and it is labelled "Estimated".
+
+## 12. JOURNEY RESTRUCTURE — Pooja, 30 Sep 2026 (binding; overrides §1, §4–§7 and §10 where they conflict)
+
+Pooja's words: "first they get a feeling about how it works… 5–6 questions max and give them a tag like Achiever… then ask them to check a more accurate version and make a plan… then they directly enter the main page… home, explore, my plan etc. Before entering it they will be asked to make an account by entering their email id or just skip it for now. All these questions (goals, timeline, upload docs, more details about you and your family) come when they click Make my plan."
+
+### New order
+1. **Welcome**: value promise, "Start · about 1 min".
+2. **What brought you here?**: optional, one screen (6 chips incl. "Something else" + short text).
+3. **Discover: 6 questions**, verbatim Lifecast wording: Q2, Q4, Q7, Q8, Q9, Q12. **Q6 (monthly investing amount) moves out of Discover** into the plan's money-profile step (it is a capacity question, and the plan is where money is discussed). No age/household screen here.
+4. **Money personality reveal**: the type (🎯 Achiever / ⚖️ Balancer / 🧭 Explorer / 🛋️ Contented) plus the customer's own **financial / behavioural terms** from their answers, each with a one-line layman meaning. Examples: "The Money Monk: money isn't the point for you", "Loss aversion: losses feel bigger than gains", "Herd behaviour · FOMO: you're tempted to follow the crowd". It also shows risk appetite and cushion in both words and terms. CTA: **"Get a more accurate picture: make my plan"**.
+5. **Save your results**: email only, **or "Skip for now"**. No password, no money yet (xlsx MASTER C8: optional email save).
+6. **Main app** (Lifecast shell). Tabs: **Home · Explore · My Plan (centre button) · Me · Experts**. The floating Ask button stays on every screen.
+   - **Home** (before a plan exists): personality card, a big "Make my plan" card, Explore teasers. After the plan: the dashboard as built today.
+   - **Explore**: bring it back from Lifecast. Its tool categories and calculators (CATS/CALCS) and the short videos/live sessions (VIDEOS/LIVE), ported and restyled in the navy theme. Keep Lifecast's structure.
+   - **My Plan (centre)**: with no plan yet, this is an empty state with "Make my plan". Tapping it starts the **plan builder**. Once the plan is built, My Plan = timeline at the top + results (as built today).
+   - **Me**: profile hub (as built today) + a link to the full money profile.
+   - **Experts**: as built today.
+7. **Plan builder** (stepper inside My Plan). Each step saves and can be left and resumed:
+   1. **About you & your family**: first name, age, partner (invite or add myself), children/dependants.
+   2. **Your goals**: tiles.
+   3. **Your timeline**: drag.
+   4. **Your money profile**: the Understand Me questions. The 6 Discover answers are shown pre-filled (confirm/change) + 7 to answer (Q6 moved here + the 6 existing new ones: u9, u10, u12, u4, u11, u13). **Total questions in the whole journey = 13.** The step can be skipped.
+   5. **Secure your account**: *only if not already verified*. Email + mobile code before any upload or money figures (xlsx MASTER D8, CJ D5). If they skipped the email earlier, it is asked here.
+   6. **Your finances**: the 6 sections, upload or type it. About you is pre-filled from step 1 plus retirement age from the timeline.
+   7. **Check your details**
+   8. **Your results**: order as built today: goals % → what we found → what if → your future at a glance → download / book / adjust.
+
+### Terms (Pooja: "use financial terms with the layman term")
+- Show the **Lifecast option tags verbatim** on the Discover answer cards and in results/profile. Examples: The Budgeter, Money Vigilant, The Early Adopter, The Money Monk, FOMO · Herd behaviour, Due diligence, Advice-seeker, Loss aversion, Emergency fund, Thin buffer, Relies on credit, No safety net, Low risk / Cautious / Balanced / High risk, Panic selling, Anchoring, Long-term investor, Buy the dip, Financial anxiety, Cautious optimism, Financially confident, Money avoidance.
+- Exception: Q2 option 3 shows **"The Opportunist"**, the term Pooja asked for (Lifecast calls it "The Early Adopter").
+- Every term carries a plain-English line. Section names pair the term with a plain label: "Risk appetite: how much risk you want", "Risk capacity / capacity for loss: how much you can afford to lose", "Time horizon: how long you can wait", "Investor behaviour: how you tend to act".
+- Scoring stays the Financial Planner's (docs/fp-review-round1.md). With Q6 moved out of Discover, the first read uses Q7 for capacity; Q6 joins at the money-profile step.
