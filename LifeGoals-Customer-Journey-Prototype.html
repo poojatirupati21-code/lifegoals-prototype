@@ -490,7 +490,7 @@ function fresh(){
     acct:{name:'', email:'', mobile:'', c1:false, c2:false, ev:false, sv:false, pk:false},
     fin:{}, src:{}, conf:{}, look:{}, ack:{}, fsec:null, fmode:{}, upl:null, checked:false, from:null,
     um:{a:{}, chips:[], done:{}, sec:null}, wi:{g:null, m:0, l:0}, pref:null, versions:[], understood:false, advQs:[],
-    view:'journey', chapOpen:null, pst:null, pdoc:null, calcSrc:{}, after:null, saveM:null, saveNote:'', shell:false, pb:false, xs:[], calcV:{}, play:false, vf:'all', assume:'standard',
+    view:'journey', chapOpen:null, pst:null, pdocs:{}, calcSrc:{}, after:null, saveM:null, saveNote:'', shell:false, pb:false, xs:[], calcV:{}, play:false, vf:'all', assume:'standard',
     book:{stage:null, adv:0, share:{report:false, fin:false, docs:false, um:false}, agree:false, mode:'Video', slot:null, done:false, from:'plan'},
     partner:{mode:null, email:'', sent:false, name:''}, ask:{open:null, q:'', a:null}, meEdit:{},
     sheet:null, toast:null};
@@ -1341,7 +1341,7 @@ const CALCS = [
     return {lbl:'Homes up to about', val:eur(price), line:'Based on an illustrative 4× income limit, you could borrow around ' + eur(loan) + '. Lending rules and exemptions apply [confirm current Central Bank rules].',
       rows:[['Estimated borrowing', eur(loan)],['Your deposit', eur(dep)],['Monthly repayment (illustrative)', eur(m)]], goal:{name:'Buy a home', em:'🏡', amount:Math.round(price * 0.1), years:3}}; }},
  {id:'repayment', cat:'home', name:'Monthly mortgage repayment', q:'What would my monthly repayment be?', em:'🧾',
-  inputs:[I('loan','Mortgage amount',300000,50000,1000000,5000,'€'),I('rate','Interest rate',4,1,8,0.1,'%'),I('term','Term',30,5,35,1,'y')],
+  inputs:[I('loan','Mortgage amount',300000,50000,1000000,1000,'€'),I('rate','Interest rate',4,1,8,0.05,'%'),I('term','Term',30,5,35,1,'y')],
   wi:[I('dr','If rates changed by',0,-2,3,0.25,'%')],
   run(v){ const r = v.rate + (v.dr || 0), m = pmt(v.loan, r, v.term), tot = m * v.term * 12;
     return {lbl:'Monthly repayment', val:eur(m), line:'Over ' + v.term + ' years at ' + r.toFixed(2) + '%, you would repay about ' + eur(tot) + ' in total.', rows:[['Total interest', eur(tot - v.loan)],['Total repaid', eur(tot)]], goal:{name:'Buy a home', em:'🏡', amount:v.loan, years:3}}; }},
@@ -1351,15 +1351,15 @@ const CALCS = [
   run(v){ const need = v.price * v.pc / 100, left = Math.max(0, need - v.saved), m = left / (v.mo + (v.xmo || 0));
     return {lbl:'Time to your deposit', val: left ? yrs(Math.ceil(m)) : 'You have it', line:'You need ' + eur(need) + ' and have ' + eur(v.saved) + '. Saving ' + eur(v.mo + (v.xmo || 0)) + ' a month closes the gap.', rows:[['Deposit needed', eur(need)],['Still to save', eur(left)]], goal:{name:'Home deposit', em:'🔑', amount:Math.round(need), years:Math.max(1, Math.ceil(m / 12))}}; }},
  {id:'overpay', cat:'home', name:'Mortgage overpayment', q:'What if I paid a little extra each month?', em:'⏩',
-  inputs:[I('bal','Mortgage balance',250000,20000,1000000,5000,'€'),I('rate','Interest rate',4,1,8,0.1,'%'),I('yrs','Years left',25,3,35,1,'y'),I('x','Extra each month',200,0,2000,25,'€')],
+  inputs:[I('bal','Mortgage balance',250000,20000,1000000,1000,'€'),I('rate','Interest rate',4,1,8,0.05,'%'),I('yrs','Years left',25,3,35,1,'y'),I('x','Extra each month',200,0,2000,25,'€')],
   run(v){ const p = pmt(v.bal, v.rate, v.yrs), a = payoff(v.bal, v.rate, p), b = payoff(v.bal, v.rate, p + v.x);
     return {lbl:'Mortgage free sooner by', val:yrs(Math.max(0, a.m - b.m)), line:'Paying ' + eur(v.x) + ' extra a month could save about ' + eur(a.int - b.int) + ' in interest (illustrative; check your lender\'s overpayment terms).', rows:[['New time to mortgage free', yrs(b.m)],['Interest saved', eur(a.int - b.int)]], goal:{name:'Mortgage free', em:'🔑', amount:v.bal, years:Math.ceil(b.m / 12)}}; }},
  {id:'ratechange', cat:'home', name:'Interest-rate impact', q:'What if my mortgage rate changed?', em:'📊',
-  inputs:[I('loan','Mortgage balance',300000,50000,1000000,5000,'€'),I('rate','Current rate',4,1,8,0.1,'%'),I('term','Years left',25,5,35,1,'y'),I('d','Rate change',1,-2,3,0.25,'%')],
+  inputs:[I('loan','Mortgage balance',300000,50000,1000000,1000,'€'),I('rate','Current rate',4,1,8,0.05,'%'),I('term','Years left',25,5,35,1,'y'),I('d','Rate change',1,-2,3,0.25,'%')],
   run(v){ const a = pmt(v.loan, v.rate, v.term), b = pmt(v.loan, v.rate + v.d, v.term);
     return {lbl:'Monthly change', val:(b >= a ? '+' : '') + eur(b - a), line:'A ' + (v.d >= 0 ? 'rise' : 'fall') + ' of ' + Math.abs(v.d) + '% would move your repayment from ' + eur(a) + ' to ' + eur(b) + ' a month.', rows:[['Now', eur(a)],['After change', eur(b)],['Change over a year', eur((b - a) * 12)]]}; }},
  {id:'term', cat:'home', name:'Mortgage term comparison', q:'Shorter or longer term: what is the trade-off?', em:'⚖️',
-  inputs:[I('loan','Mortgage amount',300000,50000,1000000,5000,'€'),I('rate','Interest rate',4,1,8,0.1,'%'),I('a','Term A',25,5,35,1,'y'),I('b','Term B',35,5,35,1,'y')],
+  inputs:[I('loan','Mortgage amount',300000,50000,1000000,1000,'€'),I('rate','Interest rate',4,1,8,0.05,'%'),I('a','Term A',25,5,35,1,'y'),I('b','Term B',35,5,35,1,'y')],
   run(v){ const ma = pmt(v.loan, v.rate, v.a), mb = pmt(v.loan, v.rate, v.b), ia = ma * v.a * 12 - v.loan, ib = mb * v.b * 12 - v.loan;
     return {lbl:'Interest difference', val:eur(Math.abs(ib - ia)), line:'The ' + Math.min(v.a, v.b) + '-year term costs more each month but less interest overall.', rows:[[v.a + '-year monthly', eur(ma)],[v.b + '-year monthly', eur(mb)],[v.a + '-year total interest', eur(ia)],[v.b + '-year total interest', eur(ib)]]}; }},
  {id:'rentbuy', cat:'home', name:'Rent vs buy', q:'How do renting and buying compare over time?', em:'🔄',
@@ -1376,7 +1376,7 @@ const CALCS = [
   run(v){ const f = fvL(v.p, v.r, v.y) + fvA(v.m, v.r, v.y), put = v.p + v.m * 12 * v.y;
     return {lbl:'Could grow to', val:eur(f), line:'You would put in ' + eur(put) + '. Growth could add about ' + eur(f - put) + ' (illustrative, not guaranteed).', rows:[['Paid in', eur(put)],['Illustrative growth', eur(f - put)]], goal:{name:'Build wealth', em:'📈', amount:Math.round(f), years:v.y}}; }},
  {id:'lumpsum', cat:'invest', name:'Lump-sum growth', q:'What could a one-off amount become?', em:'💎',
-  inputs:[I('p','Amount',10000,500,500000,500,'€'),I('r','Growth rate',4,0,8,0.5,'%'),I('y','Years',15,1,40,1,'y')],
+  inputs:[I('p','Amount',10000,500,500000,100,'€'),I('r','Growth rate',4,0,8,0.5,'%'),I('y','Years',15,1,40,1,'y')],
   run(v){ const f = fvL(v.p, v.r, v.y), late = fvL(v.p, v.r, Math.max(0, v.y - 5));
     return {lbl:'Could grow to', val:eur(f), line:'Waiting 5 years before starting could mean about ' + eur(f - late) + ' less, which is the cost of waiting.', rows:[['If you start today', eur(f)],['If you start in 5 years', eur(late)]], goal:{name:'Build wealth', em:'📈', amount:Math.round(f), years:v.y}}; }},
  {id:'inflation', cat:'savings', name:'Future cost after inflation', q:'What will this cost in the future?', em:'🏷️',
@@ -1405,16 +1405,16 @@ const CALCS = [
   inputs:[I('pot','Retirement savings',400000,10000,3000000,10000,'€'),I('w','Yearly withdrawal',20000,1000,200000,1000,'€'),I('i','Inflation',2,0,5,0.5,'%')],
   run(v){ const s = [2,4,6].map(g => lasts(v.pot, v.w, g, v.i)); return {lbl:'Balanced scenario lasts', val:(s[1] >= 60 ? '60+' : s[1]) + ' years', line:'Three illustrative growth scenarios. Real returns vary year to year.', rows:[['Cautious (2%)', s[0] + ' yrs'],['Balanced (4%)', s[1] + ' yrs'],['Growth (6%)', (s[2] >= 60 ? '60+' : s[2]) + ' yrs']]}; }},
  {id:'regularinvest', cat:'invest', name:'Regular investing', q:'What could investing monthly build?', em:'🔁',
-  inputs:[I('m','Monthly amount',300,25,5000,25,'€'),I('y','Years',15,1,40,1,'y'),I('g','Growth assumption',5,0,8,0.5,'%'),I('f','Yearly fees',1,0,3,0.1,'%')],
+  inputs:[I('m','Monthly amount',300,25,5000,25,'€'),I('y','Years',15,1,40,1,'y'),I('g','Growth assumption',5,0,8,0.5,'%'),I('f','Yearly fees',1,0,3,0.05,'%')],
   run(v){ const gross = fvA(v.m, v.g, v.y), net = fvA(v.m, v.g - v.f, v.y); return {lbl:'Could grow to (after fees)', val:eur(net), line:'Fees of ' + v.f + '% a year could cost about ' + eur(gross - net) + ' over ' + v.y + ' years.', rows:[['Paid in', eur(v.m * 12 * v.y)],['Before fees', eur(gross)],['Fees cost', eur(gross - net)]], goal:{name:'Build wealth', em:'📈', amount:Math.round(net), years:v.y}}; }},
  {id:'realreturn', cat:'invest', name:'Inflation-adjusted return', q:"What is my money really worth in future?", em:'🔍',
-  inputs:[I('p','Amount',20000,500,500000,500,'€'),I('r','Return',4,0,8,0.5,'%'),I('i','Inflation',2.5,0,6,0.5,'%'),I('y','Years',15,1,40,1,'y')],
+  inputs:[I('p','Amount',20000,500,500000,100,'€'),I('r','Return',4,0,8,0.5,'%'),I('i','Inflation',2.5,0,6,0.5,'%'),I('y','Years',15,1,40,1,'y')],
   run(v){ const n = fvL(v.p, v.r, v.y), real = fvL(v.p, v.r - v.i, v.y); return {lbl:"In today's money", val:eur(real), line:'It may show ' + eur(n) + ', but after inflation it buys what ' + eur(real) + ' buys today.', rows:[['Face value', eur(n)],["Today's buying power", eur(real)]]}; }},
  {id:'fees', cat:'invest', name:'Fees impact', q:'How much do fees really cost over time?', em:'🧮',
-  inputs:[I('p','Amount invested',50000,1000,1000000,1000,'€'),I('y','Years',20,1,40,1,'y'),I('g','Growth before fees',5,0,8,0.5,'%'),I('a','Fee A',0.5,0,3,0.1,'%'),I('b','Fee B',1.5,0,3,0.1,'%')],
+  inputs:[I('p','Amount invested',50000,1000,1000000,100,'€'),I('y','Years',20,1,40,1,'y'),I('g','Growth before fees',5,0,8,0.5,'%'),I('a','Fee A',0.5,0,3,0.1,'%'),I('b','Fee B',1.5,0,3,0.1,'%')],
   run(v){ const A1 = fvL(v.p, v.g - v.a, v.y), B1 = fvL(v.p, v.g - v.b, v.y); return {lbl:'Difference', val:eur(Math.abs(A1 - B1)), line:'A ' + Math.abs(v.b - v.a).toFixed(1) + '% difference in fees could change the outcome by about ' + eur(Math.abs(A1 - B1)) + '.', rows:[['With ' + v.a + '% fees', eur(A1)],['With ' + v.b + '% fees', eur(B1)]]}; }},
  {id:'riskreturn', cat:'invest', name:'Risk & return simulator', q:'What range of outcomes might each style have?', em:'🎢',
-  inputs:[I('p','Amount',20000,1000,1000000,1000,'€'),I('y','Years',10,1,30,1,'y'),I('s','Style: 1 Cautious · 2 Balanced · 3 Growth',2,1,3,1,'')],
+  inputs:[I('p','Amount',20000,1000,1000000,100,'€'),I('y','Years',10,1,30,1,'y'),I('s','Style: 1 Cautious · 2 Balanced · 3 Growth',2,1,3,1,'')],
   run(v){ const mu = [2,4,6][v.s - 1], vol = [5,10,16][v.s - 1], spread = vol / Math.sqrt(v.y);
     return {lbl:['Cautious','Balanced','Growth'][v.s - 1] + ' · middle outcome', val:eur(fvL(v.p, mu, v.y)), line:'Illustrative only. A difficult single year could see a fall of around ' + Math.round(vol * 1.6) + '%. Longer timeframes narrow the range.', rows:[['Weaker outcome', eur(fvL(v.p, mu - spread, v.y))],['Middle outcome', eur(fvL(v.p, mu, v.y))],['Stronger outcome', eur(fvL(v.p, mu + spread, v.y))]]}; }},
  {id:'lifecover', cat:'protect', name:'Life cover estimator', q:'How much cover might my family need?', em:'🛡️',
@@ -1491,56 +1491,68 @@ V.XPL = () => { const P = S.app ? project() : null, slip = P ? S.goals.filter(g 
    '<div class="sec"><h3>Tools for you</h3></div><div class="hstrip">' + toolsForYou().map(toolTile).join('') + '</div>' + watchHTML() +
    '<div class="sec"><h3>Topics</h3></div>' + TOPICS.map(t => '<button class="goal" data-a="topic" data-p="' + t[1] + '"><span class="ic" aria-hidden="true">' + t[0] + '</span><span style="flex:1"><b>' + t[1] + '</b><br><span class="small">' + t[2] + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
    '<p class="disc">Calculators and videos explain general topics. Figures are illustrative, not a guarantee and not advice.</p>'}; };
-/* ================= PENSION STATEMENT UPLOAD in Explore › Pensions & Retirement (Pooja, 1 Oct) ================= */
-// Mock document reader values: [value, confidence %]. Gate: account + email + mobile verified first (xlsx MASTER D8).
-const PST_DOCS = ['Pension benefit statement', 'Annual pension statement', 'PRSA statement', 'Employer scheme / Occupational pension statement', 'State Pension record (MyWelfare)'];
-const PST_V = {pot:['Current pension value', 72000, 95, '€'], youM:['Your monthly contribution', 260, 93, '€'], empM:['Employer monthly contribution', 260, 91, '€'], nra:['Normal retirement age on the statement', 66, 96, 'age'],
-  proj:['Projected value at retirement', 310000, 84, '€'], chg:['Annual charges', 1.0, 76, '%'], prsi:['State Pension record: PRSI years', 28, 88, 'y']};
-const PST_DATE = 'Jul 2025', PST_OLD = true;   // statement date; older than 12 months → flagged like the existing one
-const PTOOLS = ['retirement', 'contrib', 'avc', 'lastmoney', 'drawdown'];
+/* ================= STATEMENT UPLOADS in Explore (Pensions & Retirement · Home & Mortgage · Investments; Pooja, 1 Oct) =================
+   One pattern: card on the category page → verified-account gate (xlsx MASTER D8) → mock reader → "We read these values" (confidence, editable)
+   → tools pre-filled with "From your statement" → the same values feed Your finances (never asked twice) → "Uploaded · Replace".
+   Fields: [key, label, value, confidence %, unit, optional]. Optional fields (e.g. charges) apply ONLY when shown; a cleared field = not shown. */
 const spFromYears = y => y >= 40 ? 'Expect full' : y >= 10 ? 'Partly' : 'Not sure';
-function pstCard(){ const d = S.pdoc;
-  return '<div class="card pst"><b style="font-size:15px">📄 Have a pension statement? Upload it and we\'ll fill in these tools for you.</b><p class="small" style="margin:6px 0 10px">We can read: ' + PST_DOCS.map(esc).join(' · ') + '.</p>' +
-    (d ? '<div class="mini" style="align-items:center"><span>✅ Uploaded: <b>' + esc(d.name) + ' · ' + esc(d.date) + '</b></span><button class="link" data-a="pstup" data-p="sample">Replace</button></div>' :
-    '<div class="grid2"><label class="btn sm" style="width:100%;cursor:pointer">Upload a statement<input type="file" class="sr" data-pfile="1" accept=".pdf,.jpg,.jpeg,.png,.heic"></label><button class="btn sm ghost" style="width:100%" data-a="pstup" data-p="sample">Use a sample statement</button></div>') +
+const DOCT = {
+  retire:{em:'🌅', what:'pension', title:'Pension benefit statement', date:'Jul 2025', old:true, reads:['Pension benefit statement', 'Annual pension statement', 'PRSA statement', 'Employer scheme / Occupational pension statement', 'State Pension record (MyWelfare)'], open:'retirement',
+    f:[['pot','Current pension value',72000,95,'€'], ['youM','Your monthly contribution',260,93,'€'], ['empM','Employer monthly contribution',260,91,'€'], ['nra','Normal retirement age on the statement',66,96,'age'], ['proj','Projected value at retirement',310000,84,'€',1], ['chg','Annual charges',1.0,76,'%',1]],
+    extra:{t:'🏛️ State Pension record (MyWelfare)', f:[['prsi','State Pension record: PRSI years',28,88,'y']]},
+    feed(v, c, put){ put('pension', v.pot, c.pot); put('pensionM', v.youM + v.empM, c.youM == null || c.empM == null ? null : Math.min(c.youM, c.empM)); put('sp', spFromYears(v.prsi), c.prsi); return 'pension'; },
+    pre(v){ const age = S.about.age, yrs = Math.max(1, v.nra - age), gr = d => v.chg != null ? {g:d - v.chg} : {};   // charges only if the statement shows them
+      return {retirement:Object.assign({pot:v.pot, m:v.youM + v.empM, ra:v.nra, o:Math.round(AS.sp * ({'Expect full':1, Partly:0.6}[spFromYears(v.prsi)] || 0.8) / 500) * 500}, gr(4.5)),
+        contrib:Object.assign({y:yrs}, gr(4.5)), avc:Object.assign({y:yrs}, gr(4.5)), lastmoney:v.proj != null ? {pot:v.proj} : {pot:v.pot}, drawdown:v.proj != null ? {pot:v.proj} : {pot:v.pot}}; }},
+  home:{em:'🏡', what:'mortgage', title:'Mortgage statement', date:'Aug 2026', old:false, reads:['Mortgage statement', 'Annual mortgage statement', 'Mortgage offer letter', 'Property valuation', 'LPT record'], open:'repayment',
+    f:[['bal','Outstanding balance',212000,96,'€'], ['rate','Interest rate',3.85,94,'%'], ['pay','Monthly repayment',1180,93,'€'], ['yrs','Term remaining',21,90,'y'], ['hval','Property value (from the valuation)',420000,82,'€',1]],
+    text:[['Rate type','Fixed until Mar 2028',88], ['Lender','Demo Bank A',97]],
+    feed(v, c, put){ put('home', 'Own with mortgage', 99); put('mortBal', v.bal, c.bal); put('mortPayM', v.pay, c.pay); put('mortYears', v.yrs, c.yrs); if (v.hval != null) put('homeValue', v.hval, c.hval); return 'liabilities and assets'; },
+    pre(v){ return {repayment:{loan:v.bal, rate:v.rate, term:v.yrs}, overpay:{bal:v.bal, rate:v.rate, yrs:v.yrs}, ratechange:{loan:v.bal, rate:v.rate, term:v.yrs}, term:{loan:v.bal, rate:v.rate, a:v.yrs}}; }},
+  invest:{em:'📈', what:'investment', title:'Investment statement', date:'Jun 2026', old:false, reads:['Investment / brokerage statement', 'Fund statement', 'Share scheme / ESPP / RSU statement', 'Crypto holdings statement'], open:'regularinvest',
+    f:[['tot','Total value',18400,93,'€'], ['mon','Monthly amount invested',150,90,'€'], ['sh','Holdings: shares',70,85,'%',1], ['bo','Holdings: bonds',20,85,'%',1], ['ca','Holdings: cash',10,85,'%',1], ['chg','Annual charges',0.6,80,'%',1]],
+    feed(v, c, put){ put('invest', v.tot, c.tot); return 'assets'; },
+    pre(v){ const s = v.sh == null ? null : v.sh >= 70 ? 3 : v.sh >= 40 ? 2 : 1;
+      return {regularinvest:Object.assign({m:v.mon}, v.chg != null ? {f:v.chg} : {f:0, _notag:['f']}), lumpsum:{p:v.tot}, fees:Object.assign({p:v.tot}, v.chg != null ? {a:v.chg} : {a:0, _notag:['a']}), /* no charges on the statement = no default charge */ riskreturn:Object.assign({p:v.tot}, s ? {s} : {}), realreturn:{p:v.tot}}; }}
+};
+function pstCard(cat){ const T = DOCT[cat], d = S.pdocs[cat];
+  return '<div class="card pst"><b style="font-size:15px">📄 Have ' + (/^[aeiou]/.test(T.what) ? 'an ' : 'a ') + T.what + ' statement? Upload it and we\'ll fill in these tools for you.</b><p class="small" style="margin:6px 0 10px">We can read: ' + T.reads.map(esc).join(' · ') + '.</p>' +
+    (d ? '<div class="mini" style="align-items:center"><span>✅ Uploaded: <b>' + esc(d.name) + ' · ' + esc(d.date) + '</b></span><button class="link" data-a="pstup" data-p="' + cat + '">Replace</button></div>' :
+    '<div class="grid2"><label class="btn sm" style="width:100%;cursor:pointer">Upload a statement<input type="file" class="sr" data-pfile="' + cat + '" accept=".pdf,.jpg,.jpeg,.png,.heic"></label><button class="btn sm ghost" style="width:100%" data-a="pstup" data-p="' + cat + '">Use a sample statement</button></div>') +
     (verified() ? '' : '<p class="small" style="margin:8px 0 0">🔐 First we\'ll secure your account (email and mobile code), so your documents stay private.</p>') + '</div>'; }
-function pstStart(files){ if (!verified()){ S.after = {k:'pst', files, scr:S.scr}; S.scr = 'P1'; S.xs.push({v:'ACCT'}); lastId = null; render(); return; }
-  S.pst = {stage:'scan', files, edit:{}}; S.xs = S.xs.filter(x => x.v !== 'ACCT' && x.v !== 'PST'); S.xs.push({v:'PST'}); lastId = null; render();
+function pstStart(cat, files){ files = files || [DOCT[cat].title + ' · ' + DOCT[cat].date + '.pdf'];
+  if (!verified()){ S.after = {k:'pst', cat, files, scr:S.scr}; S.scr = 'P1'; S.xs.push({v:'ACCT'}); lastId = null; render(); return; }
+  S.pst = {cat, stage:'scan', files, edit:{}}; S.xs = S.xs.filter(x => x.v !== 'ACCT' && x.v !== 'PST'); S.xs.push({v:'PST'}); lastId = null; render();
   setTimeout(() => { if (S.pst && S.pst.stage === 'scan'){ S.pst.stage = 'confirm'; render(); } }, RM() ? 200 : 1400); }
 V.ACCT = () => { const v = V[/^P1[EKS]?$/.test(S.scr) ? S.scr : 'P1'](); v.note = 'Upload gate (xlsx MASTER D8): ' + v.note; return v; };
-V.PST = () => { const u = S.pst;
-  if (!u) return V.XCAT('retire');
-  if (u.stage === 'scan') return {id:'PST-scan', note:'Reading your pension statement (mock document reader).', head:appHead('Reading your statement…', esc(u.files.join(', ')), 'xback'), html:'<div class="scan" aria-hidden="true">📄</div><p class="sub" style="text-align:center;margin-top:14px" role="status">Finding your pension figures</p>'};
-  const row = (k, [l, v, c, unit]) => '<div class="mini" style="align-items:center"><span style="flex:1"><b style="font-size:14px">' + esc(l) + '</b><br>' + (c < 80 ? '<span class="tag look">⚠️ Check this · ' + c + '% sure</span>' : '<span class="tag doc">✓ ' + c + '% sure</span>') + '</span><input class="in" style="width:110px;min-height:42px" inputmode="decimal" data-pv="' + k + '" value="' + (u.edit[k] != null ? u.edit[k] : v) + '" aria-label="' + esc(l) + (unit === '%' ? ' (%)' : '') + '"></div>';
-  return {id:'PST-confirm', note:'"We read these values, please confirm": confidence tags, editable values, statement date with the older-than-12-months flag. Feeds the 5 pension tools and Your finances › Pension (no duplication).', head:appHead('We read these values', 'Please confirm. Change anything that looks wrong.', 'xback'),
-    html:'<div class="card"><b>🌅 ' + esc(PST_DOCS[0]) + '</b><div class="small">' + esc(u.files.join(', ')) + '</div>' + ['pot','youM','empM','nra','proj','chg'].map(k => row(k, PST_V[k])).join('') +
-      '<div class="mini"><span><b style="font-size:14px">Statement date</b><br>' + (PST_OLD ? '<span class="tag est">Statement is over 12 months old</span>' : '') + '</span><b>' + PST_DATE + '</b></div></div>' +
-      '<div class="card"><b>🏛️ State Pension record (MyWelfare)</b>' + row('prsi', PST_V.prsi) + '<div class="mini"><span>Expected State Pension</span><b id="pst-sp">' + spFromYears(+(u.edit.prsi != null ? u.edit.prsi : PST_V.prsi[1])) + '</b></div><p class="small" style="margin:4px 0 0">A full State Pension needs about 40 years of PRSI contributions [confirm with MyWelfare].</p></div>' +
-      '<p class="disc">These also go into Your finances › Pension, so we won\'t ask for them again.</p>',
+V.PST = () => { const u = S.pst; if (!u) return V.XPL(); const T = DOCT[u.cat];
+  if (u.stage === 'scan') return {id:'PST-scan', note:'Reading your ' + T.what + ' statement (mock document reader).', head:appHead('Reading your statement…', esc(u.files.join(', ')), 'xback'), html:'<div class="scan" aria-hidden="true">📄</div><p class="sub" style="text-align:center;margin-top:14px" role="status">Finding your ' + T.what + ' figures</p>'};
+  const row = ([k, l, v, c, unit, opt]) => '<div class="mini" style="align-items:center"><span style="flex:1"><b style="font-size:14px">' + esc(l) + (unit === '%' ? ' (%)' : '') + '</b><br>' + (c < 80 ? '<span class="tag look">⚠️ Check this · ' + c + '% sure</span>' : '<span class="tag doc">✓ ' + c + '% sure</span>') + (opt ? ' <span class="small">If shown · clear it if not</span>' : '') + '</span><input class="in" style="width:110px;min-height:42px" inputmode="decimal" data-pv="' + k + '" value="' + (u.edit[k] != null ? u.edit[k] : v) + '" aria-label="' + esc(l) + '"></div>';
+  return {id:'PST-confirm', note:'"We read these values, please confirm" (' + T.what + '): confidence tags, editable values, statement date + old flag. Optional values (charges, projection, holdings, valuation) apply only if shown. Feeds the tools and Your finances.', head:appHead('We read these values', 'Please confirm. Change anything that looks wrong.', 'xback'),
+    html:'<div class="card"><b>' + T.em + ' ' + esc(T.title) + '</b><div class="small">' + esc(u.files.join(', ')) + '</div>' + T.f.map(row).join('') + (T.text || []).map(([l, v, c]) => '<div class="mini"><span><b style="font-size:14px">' + esc(l) + '</b><br><span class="tag doc">✓ ' + c + '% sure</span></span><b>' + esc(v) + '</b></div>').join('') +
+      '<div class="mini"><span><b style="font-size:14px">Statement date</b><br>' + (T.old ? '<span class="tag est">Statement is over 12 months old</span>' : '') + '</span><b>' + T.date + '</b></div></div>' +
+      (T.extra ? '<div class="card"><b>' + T.extra.t + '</b>' + T.extra.f.map(row).join('') + '<div class="mini"><span>Expected State Pension</span><b id="pst-sp">' + spFromYears(+(u.edit.prsi != null ? u.edit.prsi : 28)) + '</b></div><p class="small" style="margin:4px 0 0">A full State Pension needs about 40 years of PRSI contributions [confirm with MyWelfare].</p></div>' : '') +
+      '<p class="disc">These also go into Your finances, so we won\'t ask for them again.</p>',
     foot:'<button class="btn" data-a="pstok">Looks right, fill in my tools</button><button class="btn ghost" data-a="xback">Cancel</button>'}; };
-function pstConfirm(){ const u = S.pst, val = k => { const e = u.edit[k]; return e != null && e !== '' && !isNaN(+e) ? +e : PST_V[k][1]; }, conf = k => u.edit[k] != null && +u.edit[k] !== PST_V[k][1] ? null : PST_V[k][2];
-  const v = {}; Object.keys(PST_V).forEach(k => v[k] = val(k));
-  // Your finances › Pension: same values, source = document (never asked again)
-  const put = (k, x, c) => { S.fin[k] = x; S.src[k] = c == null ? 'typed' : 'doc'; if (c != null) S.conf[k] = c; else delete S.conf[k]; delete S.look[k]; };
-  put('pension', v.pot, conf('pot')); put('pensionM', v.youM + v.empM, conf('youM') == null || conf('empM') == null ? null : Math.min(conf('youM'), conf('empM'))); put('sp', spFromYears(v.prsi), conf('prsi'));
-  if (PST_OLD) S.look.pension = 'Statement is over 12 months old';
-  S.pdoc = {name:PST_DOCS[0], date:PST_DATE, v};
-  // Pre-fill all 5 pension tools; each pre-filled input is tagged "From your statement"
-  const age = S.about.age, yrs = Math.max(1, v.nra - age), g = Math.max(1, 5 - v.chg), pre = {
-    retirement:{pot:v.pot, m:v.youM + v.empM, ra:v.nra, age, o:Math.round(AS.sp * ({'Expect full':1, Partly:0.6}[spFromYears(v.prsi)] || 0.8) / 500) * 500, g},
-    contrib:{y:yrs, g}, avc:{y:yrs, g}, lastmoney:{pot:v.proj}, drawdown:{pot:v.proj}};
-  S.calcSrc = {}; PTOOLS.forEach(id => { const c = C(id), cur = Object.assign({}, calcVals(c)), all = c.inputs.concat(c.wi || []);
-    Object.entries(pre[id]).forEach(([k, x]) => { const i = all.find(y => y.k === k); if (!i) return; cur[k] = clamp(Math.round(x / i.step) * i.step, i.min, i.max); if (k !== 'age') (S.calcSrc[id] = S.calcSrc[id] || []).push(k); }); S.calcV[id] = cur; });
-  S.pst = null; S.xs = [{v:'XCAT', p:'retire'}, {v:'CALC', p:'retirement'}]; lastId = null; render();
-  toast(S.app ? 'Added to your plan too' : 'Saved. Your plan will use it when you make it'); }
+function pstConfirm(){ const u = S.pst, T = DOCT[u.cat], all = T.f.concat(T.extra ? T.extra.f : []), v = {}, c = {};
+  all.forEach(([k, l, d, cf, unit, opt]) => { const e = u.edit[k]; if (e != null && String(e).trim() === ''){ v[k] = opt ? null : d; c[k] = opt ? null : cf; return; }   // cleared optional field = not on the statement
+    const x = e != null && !isNaN(+e) ? +e : d; v[k] = x; c[k] = e != null && +e !== d ? null : cf; });
+  const put = (k, x, cf) => { S.fin[k] = x; S.src[k] = cf == null ? 'typed' : 'doc'; if (cf != null) S.conf[k] = cf; else delete S.conf[k]; delete S.look[k]; };
+  const where = T.feed(v, c, put); if (T.old && u.cat === 'retire') S.look.pension = 'Statement is over 12 months old';
+  S.pdocs[u.cat] = {name:T.title, date:T.date, v};
+  const pre = T.pre(v); S.calcSrc = S.calcSrc || {};
+  Object.entries(pre).forEach(([id, vals]) => { const cc = C(id), cur = Object.assign({}, calcVals(cc)), ins = cc.inputs.concat(cc.wi || []); S.calcSrc[id] = [];
+    Object.entries(vals).forEach(([k, x]) => { const i = ins.find(y => y.k === k); if (!i || x == null) return; cur[k] = +clamp(Math.round(x / i.step) * i.step, i.min, i.max).toFixed(3); if (!(vals._notag || []).includes(k)) S.calcSrc[id].push(k); }); S.calcV[id] = cur; });
+  S.pst = null; S.xs = [{v:'XCAT', p:u.cat}, {v:'CALC', p:T.open}]; lastId = null; render();
+  toast(S.app ? 'Added to your plan too (' + where + ')' : 'Saved. Your plan will use it when you make it'); }
 const aExp = k => { const x = EXPERT_FOR[k].toLowerCase(); return (/^[aeiou]/.test(x) ? 'an ' : 'a ') + x; };
 V.XTOPIC = p => { const t = TOPICS.find(x => x[1] === p);
   return {id:'XPL-TOPIC', note:'Topic page (Lifecast): tools and short videos for one topic. No inline adviser contact: a short link opens the Experts tab with the matching specialist pre-selected.', head:appHead(t[0] + ' ' + t[1], esc(t[2]) + '.', 'xback'),
   html:'<div class="sec" style="margin-top:4px"><h3>Tools</h3></div>' + CALCS.filter(c => c.cat === t[4]).slice(0, 4).map(c => '<button class="goal" data-a="calc" data-p="' + c.id + '"><span class="ic" aria-hidden="true">' + c.em + '</span><span style="flex:1"><b>' + esc(c.name) + '</b><br><span class="small">' + esc(c.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
    (VIDEOS.some(v => v.kind === t[3]) ? '<div class="sec"><h3>Watch</h3></div><div class="hstrip">' + VIDEOS.filter(v => v.kind === t[3]).map(v => vThumb(v)).join('') + '</div>' : '') +
    '<button class="link" style="margin-top:12px;font-size:15px" data-a="expertfor" data-p="' + t[3] + '">Talk to ' + aExp(t[3]) + ' →</button><p class="disc">Topics explain general ideas. They are not advice.</p>'}; };
-V.XCAT = p => { const c = CATS.find(x => x.id === p); return {id:'XPL-CAT', note:'Tools in one life-need group.' + (p === 'retire' ? ' Pensions & Retirement: pension-statement upload card at the top (gated by a verified account).' : ''), head:appHead(c.em + ' ' + esc(c.name), esc(c.blurb), 'xback'),
-  html:(p === 'retire' ? pstCard() : '') +CALCS.filter(x => x.cat === p).map(x => '<button class="goal" data-a="calc" data-p="' + x.id + '"><span class="ic" aria-hidden="true">' + x.em + '</span><span style="flex:1"><b>' + esc(x.name) + '</b><br><span class="small">' + esc(x.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('')}; };
+V.XCAT = p => { const c = CATS.find(x => x.id === p); return {id:'XPL-CAT', note:'Tools in one life-need group.' + (DOCT[p] ? ' Statement upload card at the top (gated by a verified account).' : ''), head:appHead(c.em + ' ' + esc(c.name), esc(c.blurb), 'xback'),
+  html:(DOCT[p] ? pstCard(p) : '') +CALCS.filter(x => x.cat === p).map(x => '<button class="goal" data-a="calc" data-p="' + x.id + '"><span class="ic" aria-hidden="true">' + x.em + '</span><span style="flex:1"><b>' + esc(x.name) + '</b><br><span class="small">' + esc(x.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('')}; };
 V.CALC = p => { const c = C(p), v = calcVals(c);
   return {id:'CALC-' + p, note:'Calculator (Lifecast): pre-filled from what you told us, live result, what-if sliders. "Add to my plan" adds a goal after a confirm step.', head:appHead(c.em + ' ' + esc(c.name), esc(c.q) + (c.tip ? '<span class="note" style="display:block;margin-top:8px">💡 ' + esc(c.tip) + '</span>' : ''), 'xback'),
   html:'<div class="eyebrow" style="margin:2px 0 8px">' + esc(CATS.find(x => x.id === c.cat).name) + '</div><div class="card" style="margin-bottom:12px">' + c.inputs.map(i => fieldR(i, v[i.k], (S.calcSrc || {})[p])).join('') + '</div><div id="cout" aria-live="polite">' + calcOut(c) + '</div>' +
@@ -1786,11 +1798,11 @@ const ACT = {
     if (v > max){ v = max; S.saveNote = 'That\'s all of your spare money each month, so we can\'t count more than this. '; }
     S.saveM = v; focusKey = '[data-a="savem"][data-p="' + p + '"]'; render(); },
   savereset:() => { S.saveM = null; S.saveNote = ''; focusKey = '[data-a="savem"][data-p="25"]'; render(); },
-  pstup:p => pstStart(['Pension benefit statement · ' + PST_DATE + '.pdf']), pstok:() => pstConfirm(),
+  pstup:p => pstStart(DOCT[p] ? p : 'retire'), pstok:() => pstConfirm(),
   calcadd:p => { S.sheet = 'calcadd|' + p; render(); },
   confirmcalcadd:p => { const r = C(p).run(calcVals(C(p))), g = r.goal; if (!g) return; S.goals.push(mkGoal('other', [g.em, g.name, Math.round(g.amount), Math.max(1, g.years)])); S.sheet = null; if (S.app) afterPlanEdit(); render(); toast(S.app ? g.name + ' added to your plan' : g.name + ' added. It will be on your timeline when you make your plan'); },
   vemail:() => verify('ev', 'P1S'), vsms:() => verify('sv', 'P1K'),
-  passkey:p => { S.acct.pk = p === '1'; prefillAbout(); if (p === '1') toast('Face ID added'); if (S.after && S.after.k === 'pst'){ const a = S.after; S.after = null; S.scr = a.scr; pstStart(a.files); return; } go('P2'); },
+  passkey:p => { S.acct.pk = p === '1'; prefillAbout(); if (p === '1') toast('Face ID added'); if (S.after && S.after.k === 'pst'){ const a = S.after; S.after = null; S.scr = a.scr; pstStart(a.cat, a.files); return; } go('P2'); },
   upl:p => startUpload(p, ['Sample document.pdf']), uplx:() => { S.upl = null; if (!S.app) S.scr = S.fsec != null ? 'P3' : 'P2'; render(); },
   uplfail:() => { const sec = S.upl.sec; S.missingDocs = (S.missingDocs || []).concat(S.upl.files); S.upl = null; const i = FSEC.findIndex(s => s.id === sec); S.fmode[sec] = 'type'; if (i >= 0) openSec(i); else { if (!S.app) S.scr = 'P2'; render(); } },
   uplok:() => confirmUpload(),
@@ -1896,7 +1908,7 @@ function bind(){
   if (ph.querySelector('#wi-out')) { if (S.wi.g == null) S.wi.g = defaultWiGoal(); liveUpdate(); const c = ph.querySelector('[data-a="wig"][data-p="' + S.wi.g + '"]'); if (c) { c.classList.add('sel'); c.setAttribute('aria-pressed', 'true'); } }
   ph.querySelectorAll('input[data-ck]').forEach(inp => inp.addEventListener('input', () => { const t = xTop(); if (!t || t.v !== 'CALC') return; const c = C(t.p), v = calcVals(c), k = inp.dataset.ck, i = c.inputs.concat(c.wi || []).find(x => x.k === k); v[k] = +inp.value;
     const o = document.getElementById('co-' + k); if (o) o.textContent = fmtIn(i, v[k]); const out = document.getElementById('cout'); if (out) out.innerHTML = calcOut(c); }));
-  ph.querySelectorAll('input[type=file][data-pfile]').forEach(i => i.addEventListener('change', () => { const fs = [...i.files].map(f => f.name); if (fs.length) pstStart(fs); }));
+  ph.querySelectorAll('input[type=file][data-pfile]').forEach(i => i.addEventListener('change', () => { const fs = [...i.files].map(f => f.name); if (fs.length) pstStart(i.dataset.pfile, fs); }));
   ph.querySelectorAll('[data-pv]').forEach(i => i.addEventListener('input', () => { if (!S.pst) return; S.pst.edit[i.dataset.pv] = i.value; if (i.dataset.pv === 'prsi'){ const e = document.getElementById('pst-sp'); if (e) e.textContent = spFromYears(+i.value || 0); } }));
   ph.querySelectorAll('[data-whynote]').forEach(i => i.addEventListener('input', () => { S.whyNote = i.value.slice(0, 60); }));
   ph.querySelectorAll('[data-partner]').forEach(i => i.addEventListener('input', () => { S.partner[i.dataset.partner] = i.value.slice(0, 60); }));
