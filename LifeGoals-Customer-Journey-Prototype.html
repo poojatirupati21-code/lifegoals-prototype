@@ -302,9 +302,9 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 .fnd .fr.good{border-color:#A9DDD5;background:#F1FAF8}.fnd .fr.good .fb{background:var(--good-l);color:var(--good-t)}
 .fnd .fr.nudge{border-color:#F3D58E;background:#FFF9EC}.fnd .fr.nudge .fb{background:var(--nudge-l);color:var(--nudge-t)}
 .fnd .fr.alert{border-color:#F2B7A6;background:#FEF3EF}.fnd .fr.alert .fb{background:var(--alert-l);color:var(--alert-t)}
-.fnd .fr.na{background:#F6F8FA}.fnd .fr.na .fb{background:#EEF2F0;color:var(--muted)}
+.fnd .fr.held{border-color:#C9DAD6;background:#F4F7F6}.fnd .fr.held .fb{background:#E4ECEA;color:#3F5A56}.fnd .fr.na{background:#F6F8FA}.fnd .fr.na .fb{background:#EEF2F0;color:var(--muted)}
 .fnd.sm .fr{min-height:44px;padding:6px 10px}.fnd.sm .fm{font-size:12.5px}
-.infl .chips{gap:6px}
+.infl .chips{gap:6px}.adjrow{display:flex;align-items:center;gap:10px;margin:0 0 10px}
 .shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pq{border-top:1px solid var(--line);padding:10px 0}.pq:first-child{border-top:0}
 /* sheets & toast */
@@ -446,7 +446,7 @@ const FSEC = [
   {id:'about', t:'About you', e:'🙋', docs:[], f:['name','age','retireAge','pAge']},
   {id:'income', t:'Income and expenses', e:'💶', docs:[['🧾','Payslips (last 3)'],['🏛️','Employment Detail Summary'],['🏦','Current-account statements'],['📑','Form 11 / Notice of Assessment']], f:['work','income','pIncome','otherM','costsM','oneOffY']},
   {id:'assets', t:'Assets', e:'🏠', docs:[['🐷','Savings or credit-union statement'],['📈','Investment statement'],['🪙','Share scheme or crypto statement'],['🏡','Property valuation or LPT record']], f:['home','homeValue','cash','invest','propValue','rentM']},
-  {id:'liab', t:'Liabilities', e:'💳', docs:[['🏠','Mortgage statement'],['📄','Loan statement'],['💳','Credit-card statement'],['🗂️','Central Credit Register report']], f:['mortBal','mortPayM','mortYears','debt','debtPayM']},
+  {id:'liab', t:'Liabilities', e:'💳', docs:[['🏠','Mortgage statement'],['📄','Loan statement'],['💳','Credit-card statement'],['🗂️','Central Credit Register report']], f:['mortBal','mortPayM','mortYears','cardBal','cardPayM','loanBal','loanPayM']},
   {id:'prot', t:'Protection', e:'🛡️', docs:[['📜','Life or income protection policy'],['🏢','Employer benefits statement'],['🩺','Health or home insurance policy']], f:['life','ip','ci','workCover','health']},
   {id:'pension', t:'Pension', e:'🌅', docs:[['📊','Pension statement'],['🏢','Employer scheme details'],['🏛️','State Pension record (MyWelfare)']], f:['pension','pensionM','sp']}
 ];
@@ -471,8 +471,10 @@ const FF = {
   mortBal:{l:'Mortgage left', type:'eur', est:200000, show:mort},
   mortPayM:{l:'Monthly repayment', type:'eur', est:1100, show:mort},
   mortYears:{l:'Years left', type:'num', min:1, max:40, est:20, show:mort},
-  debt:{l:'Other loans and cards: total owed', type:'eur', est:0},
-  debtPayM:{l:'Their monthly repayments', type:'eur', est:0},
+  cardBal:{l:'Credit cards: total owed', type:'eur', est:0},
+  cardPayM:{l:'Credit cards: monthly repayment', type:'eur', est:0},
+  loanBal:{l:'Other loans (car, personal, credit union): total owed', type:'eur', est:0},
+  loanPayM:{l:'Other loans: monthly repayment', type:'eur', est:0},
   life:{l:'Life cover', type:'ynn'}, ip:{l:'Income protection', type:'ynn'}, ci:{l:'Serious illness cover', type:'ynn'}, workCover:{l:'Cover through work', type:'ynn'}, health:{l:'Health insurance', type:'ynn'},
   pension:{l:'Pension value today', type:'eur', est:() => Math.max(0, S.about.age - 25) * 3500, hint:'All pots together'},
   pensionM:{l:'Paid in each month', type:'eur', est:() => Math.round((S.fin.income || 45000) * 0.1 / 12 / 10) * 10, hint:'Including your employer'},
@@ -482,7 +484,7 @@ const FF = {
 const UPL = {
   income:{v:{work:['Employed',99], income:[58000,98], costsM:[3100,74], oneOffY:[1800,81]}, docs:['Payslip · Aug 2026','Current-account statement · Jun–Aug 2026']},
   assets:{v:{cash:[9000,97], invest:[6200,88]}, docs:['Savings statement · Sep 2026','Investment statement · Jun 2026']},
-  liab:{v:{home:['Own with mortgage',99], mortBal:[203700,96], mortPayM:[1180,93], mortYears:[21,90], debt:[2800,85], debtPayM:[140,78]}, hid:{mortRate:[3.85,94]}, docs:['Mortgage statement · Aug 2026','Credit-card statement · Sep 2026']},
+  liab:{v:{home:['Own with mortgage',99], mortBal:[203700,96], mortPayM:[1180,93], mortYears:[21,90], cardBal:[400,86], cardPayM:[40,80], loanBal:[3500,88], loanPayM:[100,84]}, hid:{mortRate:[3.85,94]}, docs:['Mortgage statement · Aug 2026','Credit-card statement · Sep 2026','Car loan statement · Aug 2026']},
   prot:{v:{life:['Yes',95], ip:['No',82], workCover:['Yes',90], health:['Yes',97]}, docs:['Life cover policy · 2021','Employer benefits statement · 2026']},
   pension:{v:{pension:[72000,95], pensionM:[520,91]}, docs:['Pension statement · Jul 2025'], old:{pension:'Statement is over 12 months old'}}
 };
@@ -638,7 +640,7 @@ function setRetireAge(a){ S.retireAge = a; const r = retireGoal(); if (r) r.age 
 
 /* ================= CASHFLOW ENGINE (adapted from LifeGoals 2.0 project(), with fixes) ================= */
 /* Irish 2026 tax + assumptions: FP review round 1 §3 (C1–C9), pasted as tested */
-const AS = {infl:0.025, wage:0.03, cash:0.007, inv:0.03, pen:0.04, penRet:0.028, sp:15564, spAge:66, end:90, mortRate:0.038, debtRate:0.09};
+const AS = {infl:0.025, wage:0.03, cash:0.007, inv:0.03, pen:0.04, penRet:0.028, sp:15564, spAge:66, end:90, mortRate:0.038, debtRate:0.08, cardRate:0.20, loanRate:0.08};   // Pooja, 1 Oct: credit cards ~20% APR, other loans ~8% APR, unless a statement gives the rate
 // Growth assumptions are the customer's choice (Pooja, 30 Sep 2026). Standard = default; Cautious = the Financial Planner's set. AS always holds the active set.
 const AS_SETS = {standard:{wage:0.025, cash:0.01, inv:0.045, pen:0.045, penRet:0.0315}, cautious:{wage:0.03, cash:0.007, inv:0.03, pen:0.04, penRet:0.028}};
 const AS_NAME = {standard:'Standard', cautious:'Cautious'};
@@ -680,6 +682,10 @@ function pensionCost(g, E, age){ const Er = Math.min(E, relLim(age) * Math.min(g
 function jointGain(g1, g2){ g1 = Math.max(0, g1); g2 = Math.max(0, g2); if (!g1 && !g2) return 0; const hi = Math.max(g1, g2), lo = Math.min(g1, g2), band = 53000 + Math.min(lo, 35000), G = g1 + g2;
   const joint = Math.max(0, 0.2 * Math.min(G, band) + 0.4 * Math.max(0, G - band) - (4000 + 2000 * ((g1 > 0) + (g2 > 0)))), sep = incomeTax(g1) + (g2 > 0 ? incomeTax(g2) : 0);
   return Math.max(0, sep - joint); }
+// Debts (Pooja, 1 Oct): credit cards and other loans amortise separately. A stated repayment is used if it more than covers the interest; otherwise a 5-year repayment is estimated.
+function debtNums(n){ const cR = n('cardRate') > 0 ? n('cardRate') / 100 : AS.cardRate, lR = n('loanRate') > 0 ? n('loanRate') / 100 : AS.loanRate, c = n('cardBal'), l = n('loanBal') + n('debt'), lp = n('loanPayM') + n('debtPayM'), cp = n('cardPayM');
+  const pay = (b, p, r) => b > 0 && p > b * r / 12 ? p : mPmt(b, r, 5), cardPayM = c > 0 ? pay(c, cp, cR) : 0, loanPayM = l > 0 ? pay(l, lp, lR) : 0;
+  return {cardBal:c, cardRate:cR, cardPayM, cardPayEst:c > 0 && !(cp > c * cR / 12), loanBal:l, loanRate:lR, loanPayM, loanPayEst:l > 0 && !(lp > l * lR / 12), debt:c + l, debtPayM:cardPayM + loanPayM, debtPayEst:(c > 0 && !(cp > c * cR / 12)) || (l > 0 && !(lp > l * lR / 12))}; }
 function finNums(){
   // Skipped figures count as €0 and show as ❓ Missing. Only "Estimate for me" adds a (labelled) typical figure. (spec §11)
   const f = S.fin, n = k => { const v = f[k]; return v != null && v !== '' && !isNaN(+v) ? +v : 0; };
@@ -687,7 +693,7 @@ function finNums(){
   return {age:S.about.age, R:S.retireAge, work:f.work, married:!!S.about.partner && S.about.married === true, partner:!!S.about.partner, pAge:n('pAge') || S.about.age, income:f.work === 'Not working' ? 0 : n('income'), pIncome:S.about.partner ? n('pIncome') : 0,
     otherM:n('otherM'), costsM:n('costsM'), oneOffY:n('oneOffY'), cash:n('cash'), invest:n('invest'), rentM:n('rentM'),
     mortBal:mortOn ? n('mortBal') : 0, mortRate:mR, mortPayM:mortOn ? (mStated || mPmt(n('mortBal'), mR, n('mortYears') || 25)) : 0, mortPayEst:mortOn && !mStated, mortPayLow:mortOn && mStated > 0 && n('mortBal') > 0 && mStated < mPmt(n('mortBal'), mR, n('mortYears') || 25) - 1, mortYears:mortOn ? n('mortYears') : 0,
-    debt:n('debt'), debtPayM:n('debt') > 0 && n('debtPayM') > n('debt') * AS.debtRate / 12 ? n('debtPayM') : mPmt(n('debt'), AS.debtRate, 5), debtPayEst:!(n('debt') > 0 && n('debtPayM') > n('debt') * AS.debtRate / 12),
+    ...debtNums(n),
     pension:n('pension'), pensionM:f.work !== 'Not working' && n('income') > 0 ? n('pensionM') : 0, penG:penGrowth(), sp:f.sp === 'Expect full' ? 1 : f.sp === 'Partly' ? 0.6 : 0.8};
 }
 // FP round 6: stated figures are used as stated. The mortgage repayment is the one on the statement (or typed); the standard
@@ -738,7 +744,7 @@ function project(wi){
     const cost = g.kind === 'mfree' ? (f.mortBal > 0 ? mPath[Math.min(n + 1, N)] : g.amount * Math.pow(1 + AS.infl, n)) : g.amount * Math.pow(1 + AS.infl, n);
     G[g.id] = {g, n, r, cost, pot:0, paid:0, done:false, c0:0, cSum:0, cYrs:0, need0:0}; });
   // 1. Lump sums. Each goal's own "saved so far" first (taken from cash), then a buffer is held back, then free cash + investments in goal order.
-  let cash = f.cash, inv = f.invest, pen = f.pension, mBal = f.mortBal, dBal = f.debt, mfreeDone = false;
+  let cash = f.cash, inv = f.invest, pen = f.pension, mBal = f.mortBal, cBal = f.cardBal, lBal = f.loanBal, mfreeDone = false;
   fg.forEach(g => { const s = Math.min(g.saved || 0, cash); G[g.id].pot += s; cash -= s; });
   if (wg && !wgR && G[wg.id]) G[wg.id].pot += wl; if (wgR) pen += wl;
   const hasSafety = fg.some(g => g.k === 'safety');
@@ -768,7 +774,8 @@ function project(wi){
     let living = (working ? f.costsM * 12 : (rg ? rg.amount : f.costsM * 12 * 0.8)) * infl + f.oneOffY * infl;
     let fixed = 0;
     if (mBal > 1 && !mfreeDone){ const y = amortYear(mBal, f.mortRate, f.mortPayM); fixed += y.paid; mBal = y.bal; }   // FP round 6: monthly, at the stated repayment
-    if (dBal > 1){ const y = amortYear(dBal, AS.debtRate, f.debtPayM); fixed += y.paid; dBal = y.bal; }
+    if (cBal > 1){ const y = amortYear(cBal, f.cardRate, f.cardPayM); fixed += y.paid; cBal = y.bal; }   // credit cards
+    if (lBal > 1){ const y = amortYear(lBal, f.loanRate, f.loanPayM); fixed += y.paid; lBal = y.bal; }   // other loans
     // 2. Goals due this year are paid from their own pot, then from unallocated money. What can't be paid is a goal gap (shown on the road).
     let goalPaid = 0, goalGap = 0, goalCost = 0; const due = [], dueG = [];
     fg.forEach(g => { const x = G[g.id]; if (x.done || g.age > a) return; x.done = true; due.push(g.name);
@@ -1437,8 +1444,9 @@ const CALCS = [
  {id:'lumpsum', cat:'invest', name:'Lump-sum growth', q:'What could a one-off amount become?', em:'💎',
   inputs:[I('p','Amount',10000,500,500000,100,'€'),I('r','Growth rate',4,0,8,0.5,'%'),I('y','Years',15,1,40,1,'y'),I('f','Yearly fees',0,0,3,0.05,'%')],
   run(v){ const nr = ((1 + v.r / 100) * (1 - (v.f || 0) / 100) - 1) * 100, gross = fvL(v.p, v.r, v.y), f = fvL(v.p, nr, v.y), late = fvL(v.p, nr, Math.max(0, v.y - 5));   // after fees, like Regular investing
-    return {lbl:'Could grow to' + (v.f ? ' (after fees)' : ''), val:eur(f), line:worthTxt(f, v.y) + 'Waiting 5 years before starting could mean about ' + eur(f - late) + ' less, which is the cost of waiting.' + inflLine(),
-      rows:[['If you start today', eur(f)],['If you start in 5 years', eur(late)], inflRow(f, v.y)].concat(v.f ? [['Fees cost', eur(gross - f)]] : []), goal:{name:'Build wealth', em:'📈', amount:Math.round(todayM(f, v.y)), years:v.y}}; }},
+    const adj = adjOn('lumpsum');
+    return {lbl:adj ? "In today's money" + (v.f ? ' (after fees)' : '') : 'Could grow to' + (v.f ? ' (after fees)' : ''), val:eur(adj ? todayM(f, v.y) : f), line:(adj ? realLine(nr, 'growth' + (v.f ? ' after fees' : '')) : adjPick('lumpsum')) + 'Waiting 5 years before starting could mean about ' + eur(adj ? todayM(f - late, v.y) : f - late) + ' less, which is the cost of waiting.',
+      rows:[['If you start today', eur(f)],['If you start in 5 years', eur(late)]].concat(adj ? [inflRow(f, v.y)] : []).concat(v.f ? [['Fees cost', eur(gross - f)]] : []), goal:{name:'Build wealth', em:'📈', amount:Math.round(inflSet() ? todayM(f, v.y) : f), years:v.y}}; }},
  {id:'emergency', cat:'savings', name:'Emergency fund', q:'How strong is my financial cushion?', tip:'Ideal emergency fund: 6 months of your monthly spending.', em:'🪂',
   inputs:[I('e','Essential monthly spending',2500,500,10000,100,'€'),I('mt','Months you want covered',6,1,12,1,'m'),I('s','Easy-access savings',6250,0,100000,250,'€')],
   run(v){ const t = v.e * v.mt, cov = v.s / v.e, gap = Math.max(0, t - v.s);
@@ -1463,9 +1471,15 @@ const CALCS = [
  {id:'drawdown', cat:'retire', name:'Retirement drawdown scenarios', q:'How do different growth rates change things?', em:'🧭',
   inputs:[I('pot','Retirement savings',400000,10000,3000000,10000,'€'),I('w','Yearly withdrawal',20000,1000,200000,1000,'€')],
   run(v){ applyAssume(); const s = [2,4,6].map(g => lasts(v.pot, v.w, g, inflSet() ? AS.infl * 100 : 0)); return {lbl:'Balanced scenario lasts', val:(s[1] >= 60 ? '60+' : s[1]) + ' years', line:'Three illustrative growth scenarios. Real returns vary year to year. ' + (inflSet() ? 'Withdrawals rise with prices (' + inflTxt() + ').' : 'Withdrawals stay flat until you pick an inflation rate.'), rows:[['Cautious (2%)', s[0] + ' yrs'],['Balanced (4%)', s[1] + ' yrs'],['Growth (6%)', (s[2] >= 60 ? '60+' : s[2]) + ' yrs']]}; }},
+ {id:'realreturn', cat:'invest', name:'Inflation-adjusted return', q:"What is my money really worth in future?", em:'🔍',
+  inputs:[I('p','Amount',20000,500,500000,100,'€'),I('r','Nominal return',5,0,10,0.25,'%'),I('y','Years',15,1,40,1,'y')],
+  run(v){ applyAssume(); const n = fvL(v.p, v.r, v.y);
+    if (!inflSet()) return {lbl:'Future value', val:eur(n), line:'Pick an inflation rate to see the real return and what it\'s worth in today\'s money.', rows:[['Future value', eur(n)]]};
+    const i = AS.infl, rr = (1 + v.r / 100) / (1 + i) - 1, real = n / Math.pow(1 + i, v.y);   // exact real return, not g − i
+    return {lbl:"In today's money", val:eur(real), line:'A ' + +v.r.toFixed(2) + '% return with prices rising ' + pc(i) + ' is really about ' + (rr * 100).toFixed(1) + '% a year.', rows:[['Future value', eur(n)],['Real return a year', +(rr * 100).toFixed(2) + '%'],["Value in today's money", eur(real)]]}; }},
  {id:'regularinvest', cat:'invest', name:'Regular investing', q:'What could investing monthly build?', em:'🔁',
   inputs:[I('m','Monthly amount',300,25,5000,25,'€'),I('y','Years',15,1,40,1,'y'),I('g','Growth assumption',5,0,8,0.5,'%'),I('f','Yearly fees',1,0,3,0.05,'%')],
-  run(v){ const gross = fvA(v.m, v.g, v.y), net = fvA(v.m, ((1 + v.g / 100) * (1 - v.f / 100) - 1) * 100, v.y); return {lbl:'Could grow to (after fees)', val:eur(net), line:worthTxt(net, v.y) + 'Fees of ' + v.f + '% a year could cost about ' + eur(gross - net) + ' over ' + v.y + ' years.' + inflLine(), rows:[['Paid in', eur(v.m * 12 * v.y)],['Before fees', eur(gross)],['Fees cost', eur(gross - net)], inflRow(net, v.y)], goal:{name:'Build wealth', em:'📈', amount:Math.round(net), years:v.y}}; }},
+  run(v){ const nr = ((1 + v.g / 100) * (1 - v.f / 100) - 1) * 100, gross = fvA(v.m, v.g, v.y), net = fvA(v.m, nr, v.y), adj = adjOn('regularinvest'); return {lbl:adj ? "In today's money (after fees)" : 'Could grow to (after fees)', val:eur(adj ? todayM(net, v.y) : net), line:(adj ? realLine(nr, 'growth after fees') : adjPick('regularinvest')) + 'Fees of ' + v.f + '% a year could cost about ' + eur(gross - net) + ' over ' + v.y + ' years.', rows:[['Paid in', eur(v.m * 12 * v.y)],['Before fees', eur(gross)],['Fees cost', eur(gross - net)]].concat(adj ? [inflRow(net, v.y)] : []), goal:{name:'Build wealth', em:'📈', amount:Math.round(net), years:v.y}}; }},
  {id:'fees', cat:'invest', name:'Fees impact', q:'How much do fees really cost over time?', em:'🧮',
   inputs:[I('p','Amount invested',50000,1000,1000000,100,'€'),I('y','Years',20,1,40,1,'y'),I('g','Growth before fees',5,0,8,0.5,'%'),I('a','Fee A',0.5,0,3,0.1,'%'),I('b','Fee B',1.5,0,3,0.1,'%')],
   run(v){ const nf = x => v.p * Math.pow((1 + v.g / 100) * (1 - x / 100), v.y), A1 = nf(v.a), B1 = nf(v.b); return {lbl:'Difference', val:eur(Math.abs(A1 - B1)), line:'A ' + Math.abs(v.b - v.a).toFixed(1) + '% difference in yearly fees could change the outcome by about ' + eur(Math.abs(A1 - B1)) + '.', rows:[['With ' + v.a + '% fees', eur(A1)],['With ' + v.b + '% fees', eur(B1)]]}; }},
@@ -1502,9 +1516,13 @@ const CALCS = [
 ];
 const C = id => CALCS.find(c => c.id === (REDIRECT[id] || id));
 // Pooja, 1 Oct: inflation is applied silently from the plan's assumption (no slider); separate inflation tools removed and redirected
-const INFL_TOOLS = ['lumpsum','regularinvest','compound','retirement','avc','contrib','goalplanner','lastmoney','drawdown'];
-const REDIRECT = {realreturn:'lumpsum', inflation:'goalplanner'};
+const INFL_TOOLS = ['realreturn','lumpsum','regularinvest','compound','retirement','avc','contrib','goalplanner','lastmoney','drawdown'];
+const REDIRECT = {inflation:'goalplanner'};
 const todayM = (fv, y) => (applyAssume(), fv / Math.pow(1 + AS.infl, y));
+const ADJ_TOOLS = ['lumpsum', 'regularinvest'];   // Pooja, 1 Oct: optional "Adjust for inflation" switch, default off, remembered per tool for the session
+const adjOn = id => !!(S && S.adjInfl && S.adjInfl[id]) && inflSet();
+const adjPick = id => S && S.adjInfl && S.adjInfl[id] && !inflSet() ? 'Pick an inflation rate to see it in today\'s money. ' : '';
+const realLine = (g, what) => { const rr = (1 + g / 100) / (1 + AS.infl) - 1; return 'Real return about ' + (rr * 100).toFixed(1) + '% a year (' + +(+g).toFixed(2) + '% ' + what + ', prices rising ' + pc(AS.infl) + '). '; };
 const worthTxt = (fv, y) => inflSet() ? 'Worth about ' + eur(todayM(fv, y)) + ' in today\'s money. ' : 'Pick an inflation rate to see what it\'s worth in today\'s money. ';
 const inflRow = (fv, y) => inflSet() ? ['Worth in today\'s money (prices rising ' + pc(AS.infl) + ' a year)', eur(todayM(fv, y))] : null;
 const inflLine = () => inflSet() ? ' Prices rising ' + inflTxt() + ', your choice.' : '';
@@ -1527,12 +1545,12 @@ function calcPre(c){ applyAssume(); const p = {}, f = S.fin, has = k => S.src[k]
     case 'contrib': if (has('income')) { p.sal = F.income; p.tr = F.income > TX.band ? 40 : 20; } p.y = Math.max(1, S.retireAge - S.about.age); p.g = +(penGrowth() * 100).toFixed(2); break;
     case 'avc': if (has('income')) p.tr = F.income > TX.band ? 40 : 20; p.y = Math.max(1, S.retireAge - S.about.age); p.g = +(penGrowth() * 100).toFixed(2); break;
     case 'lastmoney': case 'drawdown': if (has('pension') || has('pensionM')) p.pot = Math.round(pensionAt(Math.max(0, S.retireAge - S.about.age), F.pension, F.pensionM, penGrowth(), AS.wage)); if (c.id === 'lastmoney') p.g = +(AS.penRet * 100).toFixed(2); break;
-    case 'lumpsum': case 'fees': case 'riskreturn': if (has('invest')) p.p = F.invest; break;
-    case 'lifecover': if (has('income')) p.inc = F.income; if (mort) p.mort = F.mortBal; if (has('debt')) p.debt = F.debt; if (has('cash') || has('invest')) p.sav = F.cash + F.invest; break;
-    case 'networth': if (has('cash')) p.sav = F.cash; if (has('invest')) p.inv = F.invest; if (has('pension')) p.pen = F.pension; if (/^Own/.test(f.home || '')) p.prop = (+f.homeValue || 0) + (+f.propValue || 0); if (mort) p.mort = F.mortBal; if (has('debt')) p.loans = F.debt; break;
+    case 'lumpsum': case 'fees': case 'riskreturn': case 'realreturn': if (has('invest')) p.p = F.invest; break;
+    case 'lifecover': if (has('income')) p.inc = F.income; if (mort) p.mort = F.mortBal; if (F.debt > 0) p.debt = F.debt; if (has('cash') || has('invest')) p.sav = F.cash + F.invest; break;
+    case 'networth': if (has('cash')) p.sav = F.cash; if (has('invest')) p.inv = F.invest; if (has('pension')) p.pen = F.pension; if (/^Own/.test(f.home || '')) p.prop = (+f.homeValue || 0) + (+f.propValue || 0); if (mort) p.mort = F.mortBal; if (F.debt > 0) p.loans = F.debt; break;
     case 'surplus': if (has('income')){ p.inc = take(); p.ess = F.costsM + F.oneOffY / 12 + F.mortPayM; p.life = 0; p.debt = F.debt > 0 ? F.debtPayM : 0; } break;   // matches the plan's spare money this year
     case 'budget': if (has('income')) p.inc = take(); break;
-    case 'debtpay': if (F.debt > 0){ p.b = F.debt; p.p = F.debtPayM; p.apr = AS.debtRate * 100; } break;
+    case 'debtpay': if (F.debt > 0){ const cm = F.cardBal > 0 ? payoff(F.cardBal, F.cardRate * 100, F.cardPayM).m : 0, lm = F.loanBal > 0 ? payoff(F.loanBal, F.loanRate * 100, F.loanPayM).m : 0; if (cm >= lm){ p.b = F.cardBal; p.p = F.cardPayM; p.apr = F.cardRate * 100; } else { p.b = F.loanBal; p.p = F.loanPayM; p.apr = F.loanRate * 100; } } break;
   }
   Object.assign(p, (S.calcDoc || {})[c.id] || {}); return p; }
 function calcVals(c){ S.calcV[c.id] = S.calcV[c.id] || {}; S.calcT = S.calcT || {}; const v = S.calcV[c.id], T = S.calcT[c.id] || {}, pre = calcPre(c);
@@ -1631,14 +1649,14 @@ const DOCT = {
     f:[['tot','Total value',6200,93,'€'], ['mon','Monthly amount invested',150,90,'€'], ['sh','Holdings: shares',70,85,'%',1], ['bo','Holdings: bonds',20,85,'%',1], ['ca','Holdings: cash',10,85,'%',1], ['chg','Annual charges',0.6,80,'%',1]],
     feed(v, c, put){ put('invest', v.tot, c.tot); return 'assets'; },
     pre(v){ const s = v.sh == null ? null : v.sh >= 70 ? 3 : v.sh >= 40 ? 2 : 1;
-      return {regularinvest:Object.assign({m:v.mon}, v.chg != null ? {f:v.chg} : {f:0, _notag:['f']}), lumpsum:Object.assign({p:v.tot}, v.chg != null ? {f:v.chg} : {f:0, _notag:['f']}), fees:Object.assign({p:v.tot}, v.chg != null ? {a:v.chg} : {a:0, _notag:['a']}), /* no charges on the statement = no default charge */ riskreturn:Object.assign({p:v.tot}, s ? {s} : {})}; }}
+      return {regularinvest:Object.assign({m:v.mon}, v.chg != null ? {f:v.chg} : {f:0, _notag:['f']}), lumpsum:Object.assign({p:v.tot}, v.chg != null ? {f:v.chg} : {f:0, _notag:['f']}), realreturn:{p:v.tot}, fees:Object.assign({p:v.tot}, v.chg != null ? {a:v.chg} : {a:0, _notag:['a']}), /* no charges on the statement = no default charge */ riskreturn:Object.assign({p:v.tot}, s ? {s} : {})}; }}
 };
 function pstCard(cat){ const T = DOCT[cat], d = S.pdocs[cat];
   return '<div class="card pst"><b style="font-size:15px">📄 Have ' + (/^[aeiou]/.test(T.what) ? 'an ' : 'a ') + T.what + ' statement? Upload it and we\'ll fill in these tools for you.</b><p class="small" style="margin:6px 0 10px">We can read: ' + T.reads.map(esc).join(' · ') + '.</p>' +
     (d ? '<div class="mini" style="align-items:center"><span>✅ Uploaded: <b>' + esc(d.name) + ' · ' + esc(d.date) + '</b></span><span class="row" style="gap:12px"><button class="link" data-a="pstup" data-p="' + cat + '">Replace statement</button><button class="link" data-a="pstrem" data-p="' + cat + '">Remove statement</button></span></div>' :
     '<div class="grid2"><label class="btn sm" style="width:100%;cursor:pointer">Upload a statement<input type="file" class="sr" data-pfile="' + cat + '" accept=".pdf,.jpg,.jpeg,.png,.heic"></label><button class="btn sm ghost" style="width:100%" data-a="pstup" data-p="' + cat + '">Use a sample statement</button></div>') +
     (verified() ? '' : '<p class="small" style="margin:8px 0 0">🔐 First we\'ll secure your account (email and mobile code), so your documents stay private.</p>') + '</div>'; }
-const DOC_HIDDEN = {liab:['mortRate'], pension:['penChg']};   // statement figures with no field of their own in Your finances
+const DOC_HIDDEN = {liab:['mortRate','cardRate','loanRate'], pension:['penChg']};   // statement figures with no field of their own in Your finances
 function pstRemove(cat){ const d = S.pdocs[cat]; if (!d) return; const ids = Object.keys(DOCT[cat].pre(d.v));
   removeDoc(Object.keys(S.docOf || {}).filter(k => S.docOf[k] === 'pst:' + cat)); delete S.pdocs[cat];
   ids.forEach(id => { if (S.calcDoc) delete S.calcDoc[id]; if (S.calcSrc) delete S.calcSrc[id]; if (S.calcT) delete S.calcT[id]; }); }
@@ -1669,7 +1687,7 @@ function pstConfirm(){ const u = S.pst, T = DOCT[u.cat], all = T.f.concat(T.extr
   S.pst = null; S.xs = [{v:'XCAT', p:u.cat}, {v:'CALC', p:T.open}]; lastId = null; render();
   toast(S.app ? 'Added to your plan too (' + where + ')' : 'Saved. Your plan will use it when you make it'); }
 const aExp = k => { const x = EXPERT_FOR[k].toLowerCase(); return (/^[aeiou]/.test(x) ? 'an ' : 'a ') + x; };
-const TOPIC_TOOLS = {Mortgages:['repayment','borrow','overpay','deposit'], Pensions:['retirement','contrib','lastmoney'], Protection:['lifecover','incomegap','mortgageprotect'], Investing:['regularinvest','lumpsum','fees','riskreturn'], Savings:['goalplanner','emergency','compound'], 'Everyday money':['budget','surplus','debtpay']};
+const TOPIC_TOOLS = {Mortgages:['repayment','borrow','overpay','deposit'], Pensions:['retirement','contrib','lastmoney'], Protection:['lifecover','incomegap','mortgageprotect'], Investing:['regularinvest','lumpsum','realreturn','fees'], Savings:['goalplanner','emergency','compound'], 'Everyday money':['budget','surplus','debtpay']};
 V.XTOPIC = p => { const t = TOPICS.find(x => x[1] === p), tools = (TOPIC_TOOLS[p] || []).map(C).filter(Boolean), live = LIVE.filter(x => x[2] === t[3]);
   return {id:'XPL-TOPIC', note:'Topic page (Pooja, 1 Oct): actions first, then videos. (a) Try the calculator (2–4 most relevant), (b) Talk to the matching expert, (c) Upload a statement where it applies, (d) videos and live sessions.', head:appHead(t[0] + ' ' + t[1], esc(t[2]) + '.', 'xback'),
   html:'<div class="sec" style="margin-top:4px"><h3>Try the calculator</h3></div>' + tools.map(c => '<button class="goal" data-a="calc" data-p="' + c.id + '"><span class="ic" aria-hidden="true">' + c.em + '</span><span style="flex:1"><b>' + esc(c.name) + '</b><br><span class="small">' + esc(c.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
@@ -1682,7 +1700,8 @@ V.XCAT = p => { const c = CATS.find(x => x.id === p); return {id:'XPL-CAT', note
   html:(DOCT[p] ? pstCard(p) : '') +CALCS.filter(x => x.cat === p).map(x => '<button class="goal" data-a="calc" data-p="' + x.id + '"><span class="ic" aria-hidden="true">' + x.em + '</span><span style="flex:1"><b>' + esc(x.name) + '</b><br><span class="small">' + esc(x.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('')}; };
 V.CALC = p => { const c = C(p), v = calcVals(c);
   return {id:'CALC-' + p, note:'Calculator (Lifecast): pre-filled from what you told us, live result, what-if sliders. "Add to my plan" adds a goal after a confirm step.', head:appHead(c.em + ' ' + esc(c.name), esc(c.q) + (c.tip ? '<span class="note" style="display:block;margin-top:8px">💡 ' + esc(c.tip) + '</span>' : ''), 'xback'),
-  html:'<div class="eyebrow" style="margin:2px 0 8px">' + esc(CATS.find(x => x.id === c.cat).name) + '</div>' + (INFL_TOOLS.includes(c.id) && (!inflSet() || S.inflEdit) ? '<div class="card" style="margin-bottom:12px">' + inflChoice('calc') + '</div>' : '') + '<div class="card" style="margin-bottom:12px">' + c.inputs.map(i => fieldR(i, v[i.k], (S.calcSrc || {})[p])).join('') + '</div><div id="cout" aria-live="polite">' + calcOut(c) + '</div>' + (INFL_TOOLS.includes(c.id) && inflSet() && !S.inflEdit ? '<p class="small" style="margin:8px 2px 0">Prices rising ' + inflTxt() + ' (your choice) · <button class="link" style="padding:0;font-size:13px" data-a="infledit">Change</button></p>' : '') +
+  html:'<div class="eyebrow" style="margin:2px 0 8px">' + esc(CATS.find(x => x.id === c.cat).name) + '</div>' + (ADJ_TOOLS.includes(c.id) ? '<div class="adjrow"><button class="chip sm' + ((S.adjInfl || {})[c.id] ? ' sel' : '') + '" role="switch" aria-checked="' + !!(S.adjInfl || {})[c.id] + '" data-a="adjinfl" data-p="' + c.id + '">' + ((S.adjInfl || {})[c.id] ? '✓ ' : '') + 'Adjust for inflation</button><span class="small">Show the result in today\'s money</span></div>' : '') +
+    (INFL_TOOLS.includes(c.id) && (!ADJ_TOOLS.includes(c.id) || (S.adjInfl || {})[c.id]) && (!inflSet() || S.inflEdit) ? '<div class="card" style="margin-bottom:12px">' + inflChoice('calc') + '</div>' : '') + '<div class="card" style="margin-bottom:12px">' + c.inputs.map(i => fieldR(i, v[i.k], (S.calcSrc || {})[p])).join('') + '</div><div id="cout" aria-live="polite">' + calcOut(c) + '</div>' + (INFL_TOOLS.includes(c.id) && inflSet() && !S.inflEdit && (!ADJ_TOOLS.includes(c.id) || (S.adjInfl || {})[c.id]) ? '<p class="small" style="margin:8px 2px 0">Prices rising ' + inflTxt() + ' (your choice) · <button class="link" style="padding:0;font-size:13px" data-a="infledit">Change</button></p>' : '') +
    (c.wi ? '<div class="card" style="margin-top:12px;border:1.5px dashed #B9C9D6;box-shadow:none"><b>What if…</b>' + c.wi.map(i => fieldR(i, v[i.k], (S.calcSrc || {})[p])).join('') + '</div>' : '') +
    '<div class="grid2" style="margin-top:12px"><button class="btn sm" style="width:100%" data-a="calcadd" data-p="' + p + '">＋ Add to my plan</button><button class="btn sm ghost" style="width:100%" data-a="expertfor" data-p="' + ({home:'mortgage', retire:'pension', protect:'protection', invest:'investment'}[c.cat] || 'planner') + '">Ask an expert</button></div><p class="disc">Illustrative figures, not a guarantee and not advice.</p>'}; };
 V.VIDS = () => { const f = S.vf || 'all', list = VIDEOS.filter(v => f === 'all' || v.kind === f);
@@ -1718,7 +1737,10 @@ function foundations(){ const F = finNums(), f = S.fin, has = k => !!S.src[k] &&
   else add({e:'🪂', name:'Emergency fund', st:'na', s:'Add your assets to check this', sec:2});
   // 3. Clear costly debt & protect your family: the weakest item shows
   const items = [];
-  if (has('debt')){ if (F.debt > 1){ const r = F.debtPayM > 0 ? payoff(F.debt, AS.debtRate * 100, F.debtPayM) : {m:Infinity}; items.push(r.m <= 24 ? {st:'mid', s:'Debt of ' + eur(F.debt) + ' clears in about ' + Math.max(1, Math.ceil(r.m)) + ' months', a:'debtpay'} : {st:'bad', s:'Debt of ' + eur(F.debt) + (r.m === Infinity ? ' with no repayment set' : ' takes about ' + Math.ceil(r.m / 12) + ' years to clear'), a:'debtpay'}); } else items.push({st:'ok', s:'No costly debt'}); }
+  if (has('cardBal') || has('loanBal') || has('debt')){
+    if (F.cardBal > 1){ const r = payoff(F.cardBal, F.cardRate * 100, F.cardPayM); items.push(r.m <= 12 ? {st:'mid', s:'Credit card ' + eur(F.cardBal) + ' clears in about ' + Math.max(1, Math.ceil(r.m)) + ' months', a:'debtpay'} : {st:'bad', s:'Credit card ' + eur(F.cardBal) + (r.m === Infinity ? ' with no repayment set' : ' takes about ' + Math.ceil(r.m) + ' months to clear'), a:'debtpay'}); }
+    if (F.loanBal > 1){ const r = payoff(F.loanBal, F.loanRate * 100, F.loanPayM); items.push(r.m <= 24 ? {st:'mid', s:'Loans of ' + eur(F.loanBal) + ' clear in about ' + Math.max(1, Math.ceil(r.m)) + ' months', a:'debtpay'} : {st:'bad', s:'Loans of ' + eur(F.loanBal) + (r.m === Infinity ? ' with no repayment set' : ' take about ' + Math.ceil(r.m / 12) + ' years to clear'), a:'debtpay'}); }
+    if (F.debt <= 1) items.push({st:'ok', s:'No costly debt'}); }
   const needLife = S.about.partner || S.about.deps > 0, working = f.work && f.work !== 'Not working';
   if (needLife){ if (!has('life')) items.push({st:'na', s:'Add your protection to check life cover', sec:4}); else items.push(f.life === 'Yes' ? {st:'ok', s:'Life cover in place'} : {st:f.life === 'No' ? 'bad' : 'mid', s:(f.life === 'No' ? 'No life cover, and ' : 'Not sure about life cover, and ') + (S.about.deps > 0 ? 'people rely on you' : 'you plan with a partner'), a:'lifecover'}); }
   if (working){ if (!has('ip')) items.push({st:'na', s:'Add your protection to check income protection', sec:4}); else items.push(f.ip === 'Yes' ? {st:'ok', s:'Income protection in place'} : {st:'mid', s:'No income protection if you couldn\'t work', a:'incomegap'}); }
@@ -1732,6 +1754,7 @@ function foundations(){ const F = finNums(), f = S.fin, has = k => !!S.src[k] &&
   // 5. Grow wealth & legacy: never coral
   const wl = S.goals.filter(g => g.k === 'wealth' || g.kind === 'legacy'), wlOn = P && wl.some(g => P.pct[g.id] >= 95), inv = (has('invest') && F.invest > 0);
   add({e:'🌳', name:'Grow wealth & legacy', st:inv || wlOn ? 'ok' : wl.length ? 'mid' : 'na', s:inv ? 'Investing ' + eur(F.invest) + (wlOn ? ' · ' + (wl.find(g => P.pct[g.id] >= 95).name.toLowerCase()) + ' on track' : '') : wlOn ? wl.find(g => P.pct[g.id] >= 95).name + ' on track' : wl.length ? wl[0].name + ' not on track yet' : 'Not started yet'});
+  L.forEach((l, i) => { if (l.st === 'ok' && L.slice(0, i).some(x => x.st === 'bad' || x.st === 'mid')){ l.st = 'held'; l.s0 = l.s; l.s = l.s + ' · strengthen your foundations first'; } });   // Pooja, 1 Oct: no "Solid" above a weaker level
   return L; }
 const FND_WHY = ['Spending less than you earn is what makes every other goal possible. Your spare money each month is what we count towards goals.',
   'An emergency fund is easy-access money for surprises, like a repair or a gap in pay. A common guide is ' + FND_TARGET + ' months of essential spending.',
@@ -1742,7 +1765,7 @@ function fndNext(L){ L = L || foundations(); const x = L.find(l => l.st !== 'ok'
   const t = x.n === 1 ? (x.st === 'bad' ? 'Spend less than you earn first' : 'Give yourself more room each month') : x.n === 2 ? 'Build your emergency fund first' : x.n === 3 ? (x.a === 'debtpay' ? 'Clear your costly debt first' : 'Check your protection first') : x.n === 4 ? 'Get your goals on track' : 'Start growing your wealth when you\'re ready';
   const d = x.st === 'na' ? x.s + '.' : x.n === 2 && x.m != null ? 'You\'re ' + (Math.floor(x.m * 10) / 10).toLocaleString('en-IE') + ' of ' + FND_TARGET + ' months there.' : x.s + '.';
   return {x, t, d}; }
-const FND_CLS = {ok:'good', mid:'nudge', bad:'alert', na:'na'}, FND_LBL = {ok:'Solid', mid:'In progress', bad:'Needs attention', na:'Not started'};
+const FND_CLS = {ok:'good', mid:'nudge', bad:'alert', na:'na', held:'held'}, FND_LBL = {ok:'Solid', mid:'In progress', bad:'Needs attention', na:'Not started', held:'In place'};
 function fndHTML(compact){ const L = foundations(), nx = fndNext(L);
   return '<ol class="fnd' + (compact ? ' sm' : '') + '" aria-label="Your financial foundations, from the bottom up">' + L.map((l, i) => '<li style="width:' + (100 - i * 7) + '%"><button class="fr ' + FND_CLS[l.st] + '" data-a="sheet" data-p="fnd|' + i + '"><span class="fe" aria-hidden="true">' + l.e + '</span><span class="fm"><b>' + l.n + '. ' + l.name + '</b>' + (compact ? '' : '<span class="fs">' + esc(l.s) + '</span>') + '</span><span class="fb">' + FND_LBL[l.st] + '</span></button></li>').join('') + '</ol>' +
     (nx && !compact ? '<p class="small" style="margin:8px 0 0;color:var(--ink)"><b>Next best step:</b> ' + esc(nx.t) + '. ' + esc(nx.d) + '</p>' : ''); }
@@ -1750,7 +1773,7 @@ function fndCard(){ return '<div class="card" id="r-fnd"><h3 class="h">Your fina
 function fndSheet(i){ const l = foundations()[+i]; if (!l) return '';
   const act = l.st === 'na' ? (l.make ? ['makeplan', '', 'Make my plan'] : ['fsec', l.sec, 'Add it now']) : l.n === 1 ? ['calc', 'surplus', 'Open the Monthly surplus calculator'] : l.n === 2 ? ['calc', 'emergency', 'Open the Emergency fund calculator'] : l.n === 3 ? (l.a ? ['calc', l.a, l.a === 'debtpay' ? 'Open Debt repayment' : l.a === 'lifecover' ? 'Open the Life cover tool' : 'Open Income protection gap'] : ['expertfor', 'protection', 'Talk to a protection expert']) : l.n === 4 ? ['gowi', '', 'Try a what-if'] : ['expertfor', 'investment', 'Talk to an investment expert'];
   return '<div class="eyebrow">Level ' + l.n + ' of 5 · ' + FND_LBL[l.st] + '</div><h2 class="t">' + l.e + ' ' + l.name + '</h2><p class="sub" style="color:var(--ink)"><b>' + esc(l.s) + '.</b></p>' + (l.items && l.items.length > 1 ? '<ul class="small" style="margin:0 0 10px;padding-left:18px;color:var(--ink)">' + l.items.map(x => '<li>' + esc(x.s) + '</li>').join('') + '</ul>' : '') +
-    '<p class="sub">' + FND_WHY[l.n - 1] + '</p><button class="btn" data-a="' + act[0] + '"' + (act[1] !== '' ? ' data-p="' + act[1] + '"' : '') + '>' + act[2] + '</button><button class="btn ghost" style="margin-top:10px" data-a="closesheet">Close</button><p class="disc">Guidance, not advice.</p>'; }
+    (l.st === 'held' ? '<p class="sub" style="color:var(--ink)">This level is in place, but a level below it still needs work. Good planning is built from the bottom up, so the lower level comes first.</p>' : '') + '<p class="sub">' + FND_WHY[l.n - 1] + '</p><button class="btn" data-a="' + act[0] + '"' + (act[1] !== '' ? ' data-p="' + act[1] + '"' : '') + '>' + act[2] + '</button><button class="btn ghost" style="margin-top:10px" data-a="closesheet">Close</button><p class="disc">Guidance, not advice.</p>'; }
 function nextStep(){ const P = project(), gs = S.goals.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id] || a.age - b.age), w = gs[0];
   const looks = checkItems().filter(x => x.st === 'look' && !S.ack[x.k]).length;
   if (looks) return {e:'⚠️', t:looks === 1 ? 'One detail needs a look' : looks + ' details need a look', d:'So your plan stays accurate. It takes a minute.', a:'me', p:'money', b:'Check it'};
@@ -1997,6 +2020,7 @@ const ACT = {
   acksec:p => { FSEC.find(x => x.id === p).f.filter(fieldVisible).forEach(k => { if (!FF[k].opt) S.ack[k] = true; }); focusKey = null; render(); },
   toresults:() => { if (!S.checked || !inflSet()) return; toResults(); },
   infl:p => { if (p === 'other'){ S.inflOther = true; if (S.infl == null) S.infl = 0.025; focusKey = '[data-nb^="infl|"]'; } else { S.infl = +p; S.inflOther = false; S.inflEdit = false; focusKey = '[data-a="infl"][data-p="' + p + '"]'; } version('Inflation: ' + pc(S.infl)); render(); },
+  adjinfl:p => { S.adjInfl = S.adjInfl || {}; S.adjInfl[p] = !S.adjInfl[p]; focusKey = '[data-a="adjinfl"]'; render(); },
   infledit:() => { S.inflEdit = true; focusKey = '[data-a="infl"]'; render(); },
   meback:() => { S.me = 'home'; S.fsec = null; S.upl = null; if (S.tab === 'exp') S.exp = 'home'; render(); },
   tab:p => { if (p === 'explore' || S.tab === 'explore') { S.xs = []; S.play = false; } S.tab = p; S.sheet = null; if (S.app || !S.pb) { S.fsec = null; S.upl = null; } if (p === 'me') S.me = 'home'; if (p === 'exp' && !['c1','c2','c3'].includes(S.exp)) S.exp = 'home'; if (p === 'plan'){ S.planSeg = 'main'; S.planGo = 'timeline'; } lastId = null; render(); },
@@ -2171,7 +2195,7 @@ function loadSample(){
   put('name', 'Aoife', 'pre'); put('age', 38, 'pre'); put('retireAge', 63, 'pre'); put('pAge', 37, 'typed');
   put('work', 'Employed', 'doc', 99); put('income', 58000, 'doc', 98); put('pIncome', 22000, 'typed'); put('otherM', 0, 'none'); put('costsM', 3600, 'est'); put('oneOffY', 1800, 'doc', 81);
   put('home', 'Own with mortgage', 'doc', 99); put('homeValue', 420000, 'typed'); put('cash', 9000, 'doc', 97); put('invest', 6200, 'doc', 88);
-  put('mortBal', 203700, 'doc', 96); put('mortRate', 3.85, 'doc', 94); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('debt', 2800, 'doc', 85); put('debtPayM', 140, 'doc', 78);
+  put('mortBal', 203700, 'doc', 96); put('mortRate', 3.85, 'doc', 94); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('cardBal', 400, 'doc', 86); put('cardPayM', 40, 'doc', 80); put('loanBal', 3500, 'doc', 88); put('loanPayM', 100, 'doc', 84);   // small card balance + a car loan
   put('life', 'Yes', 'doc', 95); put('ip', 'No', 'typed'); put('ci', 'Not sure', 'typed'); put('workCover', 'Yes', 'doc', 90); put('health', 'Yes', 'typed');
   put('pension', 72000, 'doc', 95); put('pensionM', 520, 'doc', 91); put('sp', 'Expect full', 'typed'); S.look.pension = 'Statement is over 12 months old';
   S.partner = {mode:'manual', email:'', sent:false, name:'Cian'};
