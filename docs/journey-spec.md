@@ -426,3 +426,22 @@ Pooja's words: "first they get a feeling about how it works… 5–6 questions m
 - Exception: Q2 option 3 shows **"The Opportunist"**, the term Pooja asked for (Lifecast calls it "The Early Adopter").
 - Every term carries a plain-English line. Section names pair the term with a plain label: "Risk appetite: how much risk you want", "Risk capacity / capacity for loss: how much you can afford to lose", "Time horizon: how long you can wait", "Investor behaviour: how you tend to act".
 - Scoring stays the Financial Planner's (docs/fp-review-round1.md). With Q6 moved out of Discover, the first read uses Q7 for capacity; Q6 joins at the money-profile step.
+
+## 13. Money profile questions rewritten (Pooja, 1 Oct 2026; binding, replaces the u-questions in §3/§12)
+Goal: catchy for a layperson, hooks an expert. **Every option carries a financial / behavioural term as a tag** (same style as Discover), and every question carries a section term + plain-English line. Total questions stay at 13.
+
+| # | Section term · plain line | Question | Options → tag |
+|---|---|---|---|
+| Q6 (kept as is) | Investment capacity · what you can put to work | How much could you comfortably invest each month? | unchanged (Starter / Moderate / Good / High capacity, Variable income) |
+| u9 | Time horizon · how long your money can stay invested | If you put money away to grow, when might you need it back? | ⏱️ Within 2 years → Short horizon · 📆 In 2 to 5 years → Medium horizon · 🗓️ In 5 to 10 years → Long horizon · 🌳 Not for 10+ years → Very long horizon · time in the market |
+| u10 | Capacity for loss · what a fall would really cost you | Markets dip and your investments are down 20% for a whole year. What would that actually mean for your life? (sub: "Not how you'd feel. What would really change.") Visual panel €10,000 → €8,000, like Discover Q9. | 😟 I'd struggle to pay the bills → Low capacity for loss · ⏸️ I'd have to put a goal on hold → Limited capacity for loss · 🙂 Annoying, but life goes on → Moderate capacity for loss · 😎 Nothing changes, I won't need it for years → High capacity for loss |
+| u12 | Income stability · how steady your pay is | How steady is your income? | 🌪️ Uncertain right now → Income risk · 🌦️ It changes month to month → Variable income · ⛅ Fairly steady → Stable income · ☀️ Rock solid (permanent job or pension) → Secure income |
+| u14 (NEW, replaces u13 sustainability) | Emergency fund · your safety net | If your income stopped tomorrow, how long could your savings keep you going? | 😬 Less than a month → No emergency fund · 🐷 1 to 3 months → Thin buffer · 🛟 3 to 6 months → Emergency fund in place · 🏰 6 months or more → Strong safety net |
+| u4 | Decision style · how you make big money calls | A big money decision lands on your desk, like switching your pension. What's your move? | 🔬 Dig into every detail myself → Self-directed · Due diligence · 🧭 Get the gist, then check with an expert → Validator · 🤝 Hand it to an expert I trust → Delegator · Advice-seeker · ⏳ Leave it for another day → Procrastination · Status quo bias |
+| u11 | Knowledge & experience · what you've done before | How would you describe your investing know-how? | 🌱 Total beginner → Novice investor · 📘 I know the basics: savings and pension → Basic knowledge · 📈 I've invested in funds or shares → Experienced investor · 🏆 I'm confident I can beat the market → Very experienced · watch for overconfidence bias |
+
+Notes
+- Sustainability preferences (MiFID II) are no longer a profile question. Instead they become an optional chip in the adviser pre-meeting questions ("I'd like sustainable / ethical options") and in Me › Privacy & preferences, so the adviser can still capture them.
+- Scoring: keep the Financial Planner's logic; option order = score 1→4 for u9, u10, u12, u11, u14. u14 joins capacity (with Q6, Q7, u10, u12). u4: option 4 adds the trait "Procrastination · Status quo bias". u11 option 4 adds the trait "Overconfidence bias" but keeps the experience score 4.
+- Screen copy bug: the step header said "2 quick questions" while 7 were shown. The header must say "7 quick questions · your first 6 answers are filled in" or "N of 7 left".
+- What the full 13 now covers: money mindset (Q2, Q12) · behavioural biases (Q4 herd/FOMO, Q9 loss aversion/panic selling/anchoring, u4 procrastination/status quo, u11 overconfidence) · risk appetite (Q8) · capacity and resilience (Q6, Q7, u10, u12, u14) · time horizon (u9) · knowledge & experience (u11).
