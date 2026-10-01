@@ -1405,20 +1405,18 @@ const CALCS = [
     const rentCost = v.rent * 12 * v.y, upkeep = v.price * 0.01 * v.y, value = fvL(v.price, v.g, v.y), equity = value - bal;
     return {lbl:'Home equity after ' + v.y + ' yrs', val:eur(equity), line:'Illustration only: renting costs about ' + eur(rentCost) + ' over ' + v.y + ' years, while buying costs about ' + eur(int + upkeep) + ' in interest and upkeep, and builds equity.', rows:[['Rent paid', eur(rentCost)],['Interest + upkeep (buying)', eur(int + upkeep)],['Home value', eur(value)]], goal:{name:'Buy a home', em:'🏡', amount:v.dep, years:3}}; }},
  {id:'goalplanner', cat:'savings', name:'Goal planner', q:'How much a month to reach my goal?', em:'🎯',
-  inputs:[I('t','Goal amount',15000,500,500000,500,'€'),I('y','Years until the goal',3,1,30,1,'y'),I('s','Already saved',2000,0,200000,500,'€'),I('r','Growth / interest',2,0,7,0.5,'%')],
-  run(v){ const rest = v.t - fvL(v.s, v.r, v.y), m = rest > 0 ? rest / (fvA(1, v.r, v.y)) : 0;
-    return {lbl:'Monthly amount (illustrative)', val:eur(m), line:'Setting aside about ' + eur(m) + ' a month for ' + v.y + ' years could reach ' + eur(v.t) + '. See how different assumptions affect it.', rows:[['Goal', eur(v.t)],['Already saved', eur(v.s)]], goal:{name:'My goal', em:'🎯', amount:v.t, years:v.y}}; }},
+  inputs:[I('t','Goal amount (today\'s prices)',15000,500,500000,500,'€'),I('y','Years until the goal',3,1,30,1,'y'),I('s','Already saved',2000,0,200000,500,'€'),I('r','Growth / interest',2,0,7,0.5,'%')],
+  run(v){ applyAssume(); const fut = v.t * Math.pow(1 + AS.infl, v.y), rest = fut - fvL(v.s, v.r, v.y), m = rest > 0 ? rest / (fvA(1, v.r, v.y)) : 0;   // monthly need is based on the future cost
+    return {lbl:'Monthly amount (illustrative)', val:eur(m), line:'Your goal will cost about ' + eur(fut) + ' in ' + v.y + ' year' + (v.y > 1 ? 's' : '') + '. Setting aside about ' + eur(m) + ' a month could reach it.' + inflLine(), rows:[['Goal in today\'s prices', eur(v.t)],['Will cost about (in ' + v.y + ' yrs)', eur(fut)],['Already saved', eur(v.s)]], goal:{name:'My goal', em:'🎯', amount:v.t, years:v.y}}; }},
  {id:'compound', cat:'savings', name:'Compound growth', q:'What could regular saving grow into?', em:'🌱',
   inputs:[I('p','Starting amount',5000,0,200000,500,'€'),I('m','Monthly addition',200,0,3000,25,'€'),I('r','Growth rate',4,0,8,0.5,'%'),I('y','Years',20,1,40,1,'y')],
   run(v){ const f = fvL(v.p, v.r, v.y) + fvA(v.m, v.r, v.y), put = v.p + v.m * 12 * v.y;
-    return {lbl:'Could grow to', val:eur(f), line:'You would put in ' + eur(put) + '. Growth could add about ' + eur(f - put) + ' (illustrative, not guaranteed).', rows:[['Paid in', eur(put)],['Illustrative growth', eur(f - put)]], goal:{name:'Build wealth', em:'📈', amount:Math.round(f), years:v.y}}; }},
+    return {lbl:'Could grow to', val:eur(f), line:'You would put in ' + eur(put) + '. Growth could add about ' + eur(f - put) + ' (illustrative, not guaranteed). That is worth about ' + eur(todayM(f, v.y)) + ' in today\'s money.' + inflLine(), rows:[['Paid in', eur(put)],['Illustrative growth', eur(f - put)], inflRow(f, v.y)], goal:{name:'Build wealth', em:'📈', amount:Math.round(todayM(f, v.y)), years:v.y}}; }},
  {id:'lumpsum', cat:'invest', name:'Lump-sum growth', q:'What could a one-off amount become?', em:'💎',
-  inputs:[I('p','Amount',10000,500,500000,100,'€'),I('r','Growth rate',4,0,8,0.5,'%'),I('y','Years',15,1,40,1,'y')],
-  run(v){ const f = fvL(v.p, v.r, v.y), late = fvL(v.p, v.r, Math.max(0, v.y - 5));
-    return {lbl:'Could grow to', val:eur(f), line:'Waiting 5 years before starting could mean about ' + eur(f - late) + ' less, which is the cost of waiting.', rows:[['If you start today', eur(f)],['If you start in 5 years', eur(late)]], goal:{name:'Build wealth', em:'📈', amount:Math.round(f), years:v.y}}; }},
- {id:'inflation', cat:'savings', name:'Future cost after inflation', q:'What will this cost in the future?', em:'🏷️',
-  inputs:[I('c','Cost today',20000,100,500000,100,'€'),I('i','Inflation',2.5,0,8,0.5,'%'),I('y','Years from now',10,1,40,1,'y')],
-  run(v){ const f = fvL(v.c, v.i, v.y); return {lbl:'Cost in ' + v.y + ' years', val:eur(f), line:'At ' + v.i + '% a year, something costing ' + eur(v.c) + ' today could cost about ' + eur(f) + '.', rows:[['Today', eur(v.c)],['Increase', eur(f - v.c)]], goal:{name:'Future goal', em:'🎯', amount:Math.round(f), years:v.y}}; }},
+  inputs:[I('p','Amount',10000,500,500000,100,'€'),I('r','Growth rate',4,0,8,0.5,'%'),I('y','Years',15,1,40,1,'y'),I('f','Yearly fees',0,0,3,0.05,'%')],
+  run(v){ const nr = ((1 + v.r / 100) * (1 - (v.f || 0) / 100) - 1) * 100, gross = fvL(v.p, v.r, v.y), f = fvL(v.p, nr, v.y), late = fvL(v.p, nr, Math.max(0, v.y - 5));   // after fees, like Regular investing
+    return {lbl:'Could grow to' + (v.f ? ' (after fees)' : ''), val:eur(f), line:'Worth about ' + eur(todayM(f, v.y)) + ' in today\'s money. Waiting 5 years before starting could mean about ' + eur(f - late) + ' less, which is the cost of waiting.' + inflLine(),
+      rows:[['If you start today', eur(f)],['If you start in 5 years', eur(late)], inflRow(f, v.y)].concat(v.f ? [['Fees cost', eur(gross - f)]] : []), goal:{name:'Build wealth', em:'📈', amount:Math.round(todayM(f, v.y)), years:v.y}}; }},
  {id:'emergency', cat:'savings', name:'Emergency fund', q:'How strong is my financial cushion?', tip:'Ideal emergency fund: 6 months of your monthly spending.', em:'🪂',
   inputs:[I('e','Essential monthly spending',2500,500,10000,100,'€'),I('mt','Months you want covered',6,1,12,1,'m'),I('s','Easy-access savings',6250,0,100000,250,'€')],
   run(v){ const t = v.e * v.mt, cov = v.s / v.e, gap = Math.max(0, t - v.s);
@@ -1429,14 +1427,14 @@ const CALCS = [
   run(v){ const ra = v.ra + (v.later || 0), y = Math.max(1, ra - v.age), ours = pensionAt(y, v.pot, v.m + (v.more || 0), v.g / 100, AS.wage), d = S.pdocs && S.pdocs.retire ? S.pdocs.retire.v : null;
     const useSt = d && d.proj != null && ra === d.nra && !v.more && mine('retirement', ['pot','m','g','age']), f = useSt ? d.proj : ours, target = Math.max(0, (v.d - (v.less || 0) - v.o)) * 25, gap = target - f;   // FP round 6: the statement's own projection is used as stated
     return {lbl:useSt ? 'Projected fund (from your statement)' : 'Projected fund', val:eur(f), line:(gap > 0 ? 'Illustrative gap of ' + eur(gap) + '. See how different assumptions affect the illustration.' : 'On these assumptions your projected fund meets the illustrative target.') + ' Contributions are assumed to rise with pay (' + pc(AS.wage) + ' a year), as in your plan.',
-      rows:[['Illustrative target (25 × the income you need)', eur(target)],['Illustrative gap', gap > 0 ? eur(gap) : 'None'],['Retiring at', String(ra)]].concat(d && d.proj != null ? [['Your statement projects (age ' + d.nra + ')', eur(d.proj)], ['On our assumptions (age ' + ra + ')', eur(ours)]] : []), goal:{name:'Comfortable retirement', em:'🌅', amount:Math.round(target), years:y}}; }},
+      rows:[['Illustrative target (25 × the income you need)', eur(target)],['Illustrative gap', gap > 0 ? eur(gap) : 'None'],['Retiring at', String(ra)], inflRow(f, y)].concat(d && d.proj != null ? [['Your statement projects (age ' + d.nra + ')', eur(d.proj)], ['On our assumptions (age ' + ra + ')', eur(ours)]] : []), goal:{name:'Comfortable retirement', em:'🌅', amount:Math.round(target), years:y}}; }},
  {id:'contrib', cat:'retire', name:'Contribution impact', q:'What difference would a small increase make?', em:'➕',
   inputs:[I('sal','Salary',60000,15000,250000,1000,'€'),I('inc','Increase contributions by',2,0.5,10,0.5,'%'),I('y','Years to retirement',25,1,45,1,'y'),I('g','Growth assumption',4.5,1,7,0.5,'%'),I('tr','Your tax rate',40,20,40,20,'%')],
   run(v){ const m = v.sal * v.inc / 100 / 12, f = fvA(m, v.g, v.y), net = m * (1 - v.tr / 100);
-    return {lbl:'Could add to your pension', val:eur(f), line:'An extra ' + eur(m) + ' a month could cost about ' + eur(net) + ' after tax relief at ' + v.tr + '% (illustrative; limits apply).', rows:[['Extra per month', eur(m)],['Cost after tax relief', eur(net)]], goal:{name:'Boost my pension', em:'🌅', amount:Math.round(f), years:v.y}}; }},
+    return {lbl:'Could add to your pension', val:eur(f), line:'An extra ' + eur(m) + ' a month could cost about ' + eur(net) + ' after tax relief at ' + v.tr + '% (illustrative; limits apply).' + inflLine(), rows:[['Extra per month', eur(m)],['Cost after tax relief', eur(net)], inflRow(f, v.y)], goal:{name:'Boost my pension', em:'🌅', amount:Math.round(f), years:v.y}}; }},
  {id:'avc', cat:'retire', name:'AVC impact', q:'What could extra voluntary contributions add?', em:'🧩',
   inputs:[I('m','AVC per month',200,25,2000,25,'€'),I('y','Years to retirement',15,1,40,1,'y'),I('g','Growth assumption',4.5,1,7,0.5,'%'),I('tr','Your tax rate',40,20,40,20,'%')],
-  run(v){ const f = fvA(v.m, v.g, v.y); return {lbl:'Could add', val:eur(f), line:'Each ' + eur(v.m) + ' AVC could cost about ' + eur(v.m * (1 - v.tr / 100)) + ' after tax relief (illustrative; age-related limits apply).', rows:[['Paid in', eur(v.m * 12 * v.y)],['Net cost to you', eur(v.m * (1 - v.tr / 100) * 12 * v.y)]], goal:{name:'Boost my pension', em:'🌅', amount:Math.round(f), years:v.y}}; }},
+  run(v){ const f = fvA(v.m, v.g, v.y); return {lbl:'Could add', val:eur(f), line:'Each ' + eur(v.m) + ' AVC could cost about ' + eur(v.m * (1 - v.tr / 100)) + ' after tax relief (illustrative; age-related limits apply).' + inflLine(), rows:[['Paid in', eur(v.m * 12 * v.y)],['Net cost to you', eur(v.m * (1 - v.tr / 100) * 12 * v.y)], inflRow(f, v.y)], goal:{name:'Boost my pension', em:'🌅', amount:Math.round(f), years:v.y}}; }},
  {id:'lastmoney', cat:'retire', name:'Will my money last?', q:'How long could my retirement savings last?', em:'⏳',
   inputs:[I('pot','Retirement savings',400000,10000,3000000,10000,'€'),I('w','Yearly withdrawal',24000,1000,200000,1000,'€'),I('g','Growth assumption',3,0,7,0.5,'%'),I('i','Inflation',2,0,5,0.5,'%')],
   run(v){ const y = lasts(v.pot, v.w, v.g, v.i); return {lbl:'Could last about', val: y >= 60 ? '60+ years' : y + ' years', line:'Withdrawing ' + eur(v.w) + ' a year, rising with inflation. An illustration, not a guarantee.', rows:[['Withdrawal rate', (v.w / v.pot * 100).toFixed(1) + '%']]}; }},
@@ -1445,10 +1443,7 @@ const CALCS = [
   run(v){ const s = [2,4,6].map(g => lasts(v.pot, v.w, g, v.i)); return {lbl:'Balanced scenario lasts', val:(s[1] >= 60 ? '60+' : s[1]) + ' years', line:'Three illustrative growth scenarios. Real returns vary year to year.', rows:[['Cautious (2%)', s[0] + ' yrs'],['Balanced (4%)', s[1] + ' yrs'],['Growth (6%)', (s[2] >= 60 ? '60+' : s[2]) + ' yrs']]}; }},
  {id:'regularinvest', cat:'invest', name:'Regular investing', q:'What could investing monthly build?', em:'🔁',
   inputs:[I('m','Monthly amount',300,25,5000,25,'€'),I('y','Years',15,1,40,1,'y'),I('g','Growth assumption',5,0,8,0.5,'%'),I('f','Yearly fees',1,0,3,0.05,'%')],
-  run(v){ const gross = fvA(v.m, v.g, v.y), net = fvA(v.m, ((1 + v.g / 100) * (1 - v.f / 100) - 1) * 100, v.y); return {lbl:'Could grow to (after fees)', val:eur(net), line:'Fees of ' + v.f + '% a year could cost about ' + eur(gross - net) + ' over ' + v.y + ' years.', rows:[['Paid in', eur(v.m * 12 * v.y)],['Before fees', eur(gross)],['Fees cost', eur(gross - net)]], goal:{name:'Build wealth', em:'📈', amount:Math.round(net), years:v.y}}; }},
- {id:'realreturn', cat:'invest', name:'Inflation-adjusted return', q:"What is my money really worth in future?", em:'🔍',
-  inputs:[I('p','Amount',20000,500,500000,100,'€'),I('r','Return',4,0,8,0.5,'%'),I('i','Inflation',2.5,0,6,0.5,'%'),I('y','Years',15,1,40,1,'y')],
-  run(v){ const n = fvL(v.p, v.r, v.y), real = n / Math.pow(1 + v.i / 100, v.y); return {lbl:"In today's money", val:eur(real), line:'It may show ' + eur(n) + ', but after inflation it buys what ' + eur(real) + ' buys today.', rows:[['Face value', eur(n)],["Today's buying power", eur(real)]]}; }},
+  run(v){ const gross = fvA(v.m, v.g, v.y), net = fvA(v.m, ((1 + v.g / 100) * (1 - v.f / 100) - 1) * 100, v.y); return {lbl:'Could grow to (after fees)', val:eur(net), line:'Worth about ' + eur(todayM(net, v.y)) + ' in today\'s money. Fees of ' + v.f + '% a year could cost about ' + eur(gross - net) + ' over ' + v.y + ' years.' + inflLine(), rows:[['Paid in', eur(v.m * 12 * v.y)],['Before fees', eur(gross)],['Fees cost', eur(gross - net)], inflRow(net, v.y)], goal:{name:'Build wealth', em:'📈', amount:Math.round(net), years:v.y}}; }},
  {id:'fees', cat:'invest', name:'Fees impact', q:'How much do fees really cost over time?', em:'🧮',
   inputs:[I('p','Amount invested',50000,1000,1000000,100,'€'),I('y','Years',20,1,40,1,'y'),I('g','Growth before fees',5,0,8,0.5,'%'),I('a','Fee A',0.5,0,3,0.1,'%'),I('b','Fee B',1.5,0,3,0.1,'%')],
   run(v){ const nf = x => v.p * Math.pow((1 + v.g / 100) * (1 - x / 100), v.y), A1 = nf(v.a), B1 = nf(v.b); return {lbl:'Difference', val:eur(Math.abs(A1 - B1)), line:'A ' + Math.abs(v.b - v.a).toFixed(1) + '% difference in yearly fees could change the outcome by about ' + eur(Math.abs(A1 - B1)) + '.', rows:[['With ' + v.a + '% fees', eur(A1)],['With ' + v.b + '% fees', eur(B1)]]}; }},
@@ -1483,7 +1478,12 @@ const CALCS = [
   inputs:[I('a','Loan amount',15000,500,100000,500,'€'),I('apr','Interest (APR)',8,0,25,0.5,'%'),I('y','Years',5,1,10,1,'y')],
   run(v){ const m = pmt(v.a, v.apr, v.y); return {lbl:'Monthly repayment', val:eur(m), line:'Total interest of about ' + eur(m * v.y * 12 - v.a) + ' over ' + v.y + ' years.', rows:[['Total repaid', eur(m * v.y * 12)]]}; }}
 ];
-const C = id => CALCS.find(c => c.id === id);
+const C = id => CALCS.find(c => c.id === (REDIRECT[id] || id));
+// Pooja, 1 Oct: inflation is applied silently from the plan's assumption (no slider); separate inflation tools removed and redirected
+const REDIRECT = {realreturn:'lumpsum', inflation:'goalplanner'};
+const todayM = (fv, y) => (applyAssume(), fv / Math.pow(1 + AS.infl, y));
+const inflRow = (fv, y) => ['Worth in today\'s money (prices rising ' + pc(AS.infl) + ' a year)', eur(todayM(fv, y))];
+const inflLine = () => ' Prices are assumed to rise ' + pc(AS.infl) + ' a year, as in your plan.';
 
 // calcVals (FP round 6): pre-filled every time from what we know, in precedence order:
 // the customer's own move of a slider in this tool > the statement's figures for this tool > Your finances (statement > typed > estimate) > the plan > tool default.
@@ -1503,8 +1503,6 @@ function calcPre(c){ applyAssume(); const p = {}, f = S.fin, has = k => S.src[k]
     case 'contrib': if (has('income')) { p.sal = F.income; p.tr = F.income > TX.band ? 40 : 20; } p.y = Math.max(1, S.retireAge - S.about.age); p.g = +(penGrowth() * 100).toFixed(2); break;
     case 'avc': if (has('income')) p.tr = F.income > TX.band ? 40 : 20; p.y = Math.max(1, S.retireAge - S.about.age); p.g = +(penGrowth() * 100).toFixed(2); break;
     case 'lastmoney': case 'drawdown': if (has('pension') || has('pensionM')) p.pot = Math.round(pensionAt(Math.max(0, S.retireAge - S.about.age), F.pension, F.pensionM, penGrowth(), AS.wage)); if (c.id === 'lastmoney') p.g = +(AS.penRet * 100).toFixed(2); p.i = AS.infl * 100; break;
-    case 'inflation': p.i = AS.infl * 100; break;
-    case 'realreturn': if (has('invest')) p.p = F.invest; p.i = AS.infl * 100; break;
     case 'lumpsum': case 'fees': case 'riskreturn': if (has('invest')) p.p = F.invest; break;
     case 'lifecover': if (has('income')) p.inc = F.income; if (mort) p.mort = F.mortBal; if (has('debt')) p.debt = F.debt; if (has('cash') || has('invest')) p.sav = F.cash + F.invest; break;
     case 'networth': if (has('cash')) p.sav = F.cash; if (has('invest')) p.inv = F.invest; if (has('pension')) p.pen = F.pension; if (/^Own/.test(f.home || '')) p.prop = (+f.homeValue || 0) + (+f.propValue || 0); if (mort) p.mort = F.mortBal; if (has('debt')) p.loans = F.debt; break;
@@ -1548,9 +1546,9 @@ function exploreScreen(){ const t = xTop(); if (!t) return V.XPL(); return V[t.v
 V.XPL = () => { const P = S.app ? project() : null, slip = P ? S.goals.filter(g => P.pct[g.id] < 95) : [];
   return {id:'XPL-01', note:'Explore (from Lifecast): what-ifs for slipping goals first (after a plan), tools by life need (6 groups, 29 calculators), tools for you, short videos + live sessions, topics that lead to the right expert. Works before a plan.', head:appHead('Explore', 'Tools, calculators and short videos. Try anything, no plan needed.'),
   html:(slip.length ? '<div class="sec"><h3>What-ifs for your goals</h3></div>' + slip.map(g => '<button class="goal" data-a="gowi" data-p="' + g.id + '"><span class="ic" style="background:var(--' + band(P.pct[g.id]) + '-l)" aria-hidden="true">' + g.e + '</span><span style="flex:1"><b>Try a what-if for ' + esc(g.name.toLowerCase()) + '</b><br><span class="small">' + P.pct[g.id] + '% covered now</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') : '') +
-   '<div class="sec"><h3>Tools by life need</h3></div><div class="grid2">' + CATS.map(c => '<button class="tile ctile" style="background:' + c.color + '" data-a="cat" data-p="' + c.id + '"><span class="e" aria-hidden="true">' + c.em + '</span><span>' + esc(c.name) + '<br><small style="opacity:.92;font-weight:600">' + CALCS.filter(x => x.cat === c.id).length + ' tools</small></span></button>').join('') + '</div>' +
+   '<div class="sec"><h3>Calculators</h3></div><div class="grid2">' + CATS.map(c => '<button class="tile ctile" style="background:' + c.color + '" data-a="cat" data-p="' + c.id + '"><span class="e" aria-hidden="true">' + c.em + '</span><span>' + esc(c.name) + '<br><small style="opacity:.92;font-weight:600">' + CALCS.filter(x => x.cat === c.id).length + ' tools</small></span></button>').join('') + '</div>' +
    '<div class="sec"><h3>Tools for you</h3></div><div class="hstrip">' + toolsForYou().map(toolTile).join('') + '</div>' + watchHTML() +
-   '<div class="sec"><h3>Topics</h3></div>' + TOPICS.map(t => '<button class="goal" data-a="topic" data-p="' + t[1] + '"><span class="ic" aria-hidden="true">' + t[0] + '</span><span style="flex:1"><b>' + t[1] + '</b><br><span class="small">' + t[2] + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
+   '<div class="sec"><h3>Focus on one area</h3></div>' + TOPICS.map(t => '<button class="goal" data-a="topic" data-p="' + t[1] + '"><span class="ic" aria-hidden="true">' + t[0] + '</span><span style="flex:1"><b>' + t[1] + '</b><br><span class="small">' + t[2] + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
    '<p class="disc">Calculators and videos explain general topics. Figures are illustrative, not a guarantee and not advice.</p>'}; };
 /* ================= STATEMENT UPLOADS in Explore (Pensions & Retirement · Home & Mortgage · Investments; Pooja, 1 Oct) =================
    One pattern: card on the category page → verified-account gate (xlsx MASTER D8) → mock reader → "We read these values" (confidence, editable)
@@ -1574,7 +1572,7 @@ const DOCT = {
     f:[['tot','Total value',6200,93,'€'], ['mon','Monthly amount invested',150,90,'€'], ['sh','Holdings: shares',70,85,'%',1], ['bo','Holdings: bonds',20,85,'%',1], ['ca','Holdings: cash',10,85,'%',1], ['chg','Annual charges',0.6,80,'%',1]],
     feed(v, c, put){ put('invest', v.tot, c.tot); return 'assets'; },
     pre(v){ const s = v.sh == null ? null : v.sh >= 70 ? 3 : v.sh >= 40 ? 2 : 1;
-      return {regularinvest:Object.assign({m:v.mon}, v.chg != null ? {f:v.chg} : {f:0, _notag:['f']}), lumpsum:{p:v.tot}, fees:Object.assign({p:v.tot}, v.chg != null ? {a:v.chg} : {a:0, _notag:['a']}), /* no charges on the statement = no default charge */ riskreturn:Object.assign({p:v.tot}, s ? {s} : {}), realreturn:{p:v.tot}}; }}
+      return {regularinvest:Object.assign({m:v.mon}, v.chg != null ? {f:v.chg} : {f:0, _notag:['f']}), lumpsum:Object.assign({p:v.tot}, v.chg != null ? {f:v.chg} : {f:0, _notag:['f']}), fees:Object.assign({p:v.tot}, v.chg != null ? {a:v.chg} : {a:0, _notag:['a']}), /* no charges on the statement = no default charge */ riskreturn:Object.assign({p:v.tot}, s ? {s} : {})}; }}
 };
 function pstCard(cat){ const T = DOCT[cat], d = S.pdocs[cat];
   return '<div class="card pst"><b style="font-size:15px">📄 Have ' + (/^[aeiou]/.test(T.what) ? 'an ' : 'a ') + T.what + ' statement? Upload it and we\'ll fill in these tools for you.</b><p class="small" style="margin:6px 0 10px">We can read: ' + T.reads.map(esc).join(' · ') + '.</p>' +
@@ -1612,11 +1610,15 @@ function pstConfirm(){ const u = S.pst, T = DOCT[u.cat], all = T.f.concat(T.extr
   S.pst = null; S.xs = [{v:'XCAT', p:u.cat}, {v:'CALC', p:T.open}]; lastId = null; render();
   toast(S.app ? 'Added to your plan too (' + where + ')' : 'Saved. Your plan will use it when you make it'); }
 const aExp = k => { const x = EXPERT_FOR[k].toLowerCase(); return (/^[aeiou]/.test(x) ? 'an ' : 'a ') + x; };
-V.XTOPIC = p => { const t = TOPICS.find(x => x[1] === p);
-  return {id:'XPL-TOPIC', note:'Topic page (Lifecast): tools and short videos for one topic. No inline adviser contact: a short link opens the Experts tab with the matching specialist pre-selected.', head:appHead(t[0] + ' ' + t[1], esc(t[2]) + '.', 'xback'),
-  html:'<div class="sec" style="margin-top:4px"><h3>Tools</h3></div>' + CALCS.filter(c => c.cat === t[4]).slice(0, 4).map(c => '<button class="goal" data-a="calc" data-p="' + c.id + '"><span class="ic" aria-hidden="true">' + c.em + '</span><span style="flex:1"><b>' + esc(c.name) + '</b><br><span class="small">' + esc(c.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
+const TOPIC_TOOLS = {Mortgages:['repayment','borrow','overpay','deposit'], Pensions:['retirement','contrib','lastmoney'], Protection:['lifecover','incomegap','mortgageprotect'], Investing:['regularinvest','lumpsum','fees','riskreturn'], Savings:['goalplanner','emergency','compound'], 'Everyday money':['budget','surplus','debtpay']};
+V.XTOPIC = p => { const t = TOPICS.find(x => x[1] === p), tools = (TOPIC_TOOLS[p] || []).map(C).filter(Boolean), live = LIVE.filter(x => x[2] === t[3]);
+  return {id:'XPL-TOPIC', note:'Topic page (Pooja, 1 Oct): actions first, then videos. (a) Try the calculator (2–4 most relevant), (b) Talk to the matching expert, (c) Upload a statement where it applies, (d) videos and live sessions.', head:appHead(t[0] + ' ' + t[1], esc(t[2]) + '.', 'xback'),
+  html:'<div class="sec" style="margin-top:4px"><h3>Try the calculator</h3></div>' + tools.map(c => '<button class="goal" data-a="calc" data-p="' + c.id + '"><span class="ic" aria-hidden="true">' + c.em + '</span><span style="flex:1"><b>' + esc(c.name) + '</b><br><span class="small">' + esc(c.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
+   '<button class="link" style="margin-top:4px;font-size:15px;display:block" data-a="expertfor" data-p="' + t[3] + '">Talk to ' + aExp(t[3]) + ' →</button>' +
+   (DOCT[t[4]] ? '<button class="link" style="font-size:15px;display:block" data-a="cat" data-p="' + t[4] + '">📄 ' + (S.pdocs[t[4]] ? 'Your ' + DOCT[t[4]].what + ' statement is uploaded · see it' : 'Upload ' + (/^[aeiou]/.test(DOCT[t[4]].what) ? 'an ' : 'a ') + DOCT[t[4]].what + ' statement to fill in these tools') + ' →</button>' : '') +
    (VIDEOS.some(v => v.kind === t[3]) ? '<div class="sec"><h3>Watch</h3></div><div class="hstrip">' + VIDEOS.filter(v => v.kind === t[3]).map(v => vThumb(v)).join('') + '</div>' : '') +
-   '<button class="link" style="margin-top:12px;font-size:15px" data-a="expertfor" data-p="' + t[3] + '">Talk to ' + aExp(t[3]) + ' →</button><p class="disc">Topics explain general ideas. They are not advice.</p>'}; };
+   (live.length ? live.map(x => '<div class="card row" style="margin-top:8px"><span class="livebadge">LIVE</span><span style="flex:1;min-width:0"><b style="font-size:14px">' + x[1] + '</b><br><span style="font-size:12.5px;color:var(--muted)">' + x[0] + ' · free</span></span><button class="link" data-a="remind">Remind me</button></div>').join('') : '') +
+   '<p class="disc">Topics explain general ideas. They are not advice.</p>'}; };
 V.XCAT = p => { const c = CATS.find(x => x.id === p); return {id:'XPL-CAT', note:'Tools in one life-need group.' + (DOCT[p] ? ' Statement upload card at the top (gated by a verified account).' : ''), head:appHead(c.em + ' ' + esc(c.name), esc(c.blurb), 'xback'),
   html:(DOCT[p] ? pstCard(p) : '') +CALCS.filter(x => x.cat === p).map(x => '<button class="goal" data-a="calc" data-p="' + x.id + '"><span class="ic" aria-hidden="true">' + x.em + '</span><span style="flex:1"><b>' + esc(x.name) + '</b><br><span class="small">' + esc(x.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('')}; };
 V.CALC = p => { const c = C(p), v = calcVals(c);
@@ -1853,7 +1855,7 @@ const ACT = {
   assume:p => { if (S.assume === p) return; S.assume = p; version('Growth assumptions: ' + AS_NAME[p]); focusKey = '[data-a="assume"][data-p="' + p + '"]'; if (document.getElementById('wi-out')) { render(); } else render(); toast(AS_NAME[p] + ' assumptions: results updated'); },
   xback:() => { const t = S.xs.pop(); if (t && t.v === 'ACCT' && S.after){ S.scr = S.after.scr; S.after = null; } if (t && t.v === 'PST') S.pst = null; S.play = false; lastId = null; render(); },
   cat:p => { S.xs.push({v:'XCAT', p}); lastId = null; render(); },
-  calc:p => { S.sheet = null; if (S.tab !== 'explore'){ S.tab = 'explore'; S.xs = []; } S.xs.push({v:'CALC', p}); lastId = null; render(); },
+  calc:p => { p = REDIRECT[p] || p; S.sheet = null; if (S.tab !== 'explore'){ S.tab = 'explore'; S.xs = []; } S.xs.push({v:'CALC', p}); lastId = null; render(); },
   videos:() => { if (S.tab !== 'explore'){ S.tab = 'explore'; S.xs = []; } S.xs.push({v:'VIDS'}); lastId = null; render(); },
   video:p => { S.play = false; if (S.tab !== 'explore'){ S.tab = 'explore'; S.xs = []; } S.xs.push({v:'VID', p}); lastId = null; render(); },
   vplay:() => { S.play = !S.play; focusKey = '[data-a="vplay"]'; render(); }, vfilter:p => { S.vf = p; focusKey = '[data-a="vfilter"][data-p="' + p + '"]'; render(); },
