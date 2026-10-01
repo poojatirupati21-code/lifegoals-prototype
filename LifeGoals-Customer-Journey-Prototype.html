@@ -87,10 +87,14 @@ h3.h{font-size:19px;margin:0 0 4px;line-height:1.2}
 .link{border:0;background:none;color:var(--sea-d);font-weight:800;font-size:13.5px;cursor:pointer;padding:8px 0;text-align:left;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
 .card{background:var(--card);border-radius:var(--r);padding:16px;box-shadow:0 1px 0 rgba(14,47,51,.04),0 6px 18px rgba(14,47,51,.06)}
 .card+.card{margin-top:12px}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;border-radius:27px;border:0;background:var(--ink);color:#fff;font-weight:800;font-size:16px;cursor:pointer;text-align:center;padding:0 18px}
-.btn:hover{background:var(--ink2)}
-.btn.sun{background:var(--sun);color:var(--ink)}.btn.sun:hover{background:#E5A320}
-.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}.btn.ghost:hover{border-color:var(--ink)}
+/* Main call-to-action: vibrant gold with navy text (Pooja, 1 Oct 2026). Contrast ~9:1. */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:54px;border-radius:27px;border:0;background:linear-gradient(180deg,#F7C24F,var(--sun));color:var(--ink);font-weight:800;font-size:16px;cursor:pointer;text-align:center;padding:0 18px;box-shadow:0 6px 16px rgba(242,177,52,.38),inset 0 -2px 0 rgba(122,82,0,.18);transition:transform .12s,box-shadow .12s,background .12s}
+.btn:hover{background:linear-gradient(180deg,#F9CB63,#F4B83F);box-shadow:0 8px 20px rgba(242,177,52,.48),inset 0 -2px 0 rgba(122,82,0,.18)}
+.btn:active{transform:translateY(1px) scale(.99);box-shadow:0 3px 8px rgba(242,177,52,.35)}
+.btn.navy{background:var(--ink);color:#fff;box-shadow:none}.btn.navy:hover{background:var(--ink2)}
+.btn.sm{background:var(--ink);color:#fff;box-shadow:none}.btn.sm:hover{background:var(--ink2)}
+.btn.sun{background:linear-gradient(180deg,#F7C24F,var(--sun));color:var(--ink)}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line);box-shadow:none}.btn.ghost:hover{border-color:var(--ink)}
 .btn.sm{min-height:44px;font-size:14px;width:auto;padding:0 18px}
 .btn[disabled]{opacity:.45;cursor:not-allowed}
 .row{display:flex;gap:10px;align-items:center}
@@ -129,7 +133,9 @@ h3.h{font-size:19px;margin:0 0 4px;line-height:1.2}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .qfoot{padding:8px 18px 28px;display:flex;justify-content:space-between;align-items:center;gap:10px}
 .qback{border:0;background:none;color:var(--muted);font-weight:700;font-size:14.5px;cursor:pointer;min-height:44px;padding:0 6px}
-.wbtn{min-height:54px;border-radius:27px;border:0;background:var(--ink);color:#fff;font-weight:800;font-size:16px;padding:0 26px;cursor:pointer}
+.wbtn{min-height:54px;border-radius:27px;border:0;background:linear-gradient(180deg,#F7C24F,var(--sun));color:var(--ink);font-weight:800;font-size:16px;padding:0 26px;cursor:pointer;box-shadow:0 6px 16px rgba(242,177,52,.38),inset 0 -2px 0 rgba(122,82,0,.18);transition:transform .12s,box-shadow .12s}
+.wbtn:hover{box-shadow:0 8px 20px rgba(242,177,52,.48)}.wbtn:active{transform:translateY(1px) scale(.99)}
+.wbtn[disabled],.btn[disabled]{box-shadow:none}
 .wbtn[disabled]{opacity:.4;cursor:default}
 .panel{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:14px;box-shadow:0 6px 18px rgba(20,30,50,.06)}
 .scn{display:flex;justify-content:space-between}.scn b{display:block;font-family:var(--fh);font-size:30px}
@@ -1244,7 +1250,7 @@ function resultsHTML(){
       (S.understood ? '<p class="pill ok" style="margin:12px 0 8px">✓ Thanks, noted</p><div class="small" style="font-weight:800;margin-bottom:6px">What would you like to ask an adviser? (optional)</div><div class="chips">' + ADV_QS.map(q => '<button class="chip sm' + (S.advQs.includes(q) ? ' sel' : '') + '" aria-pressed="' + S.advQs.includes(q) + '" data-a="advq" data-p="' + esc(q) + '">' + esc(q) + '</button>').join('') + '</div><p class="small" style="margin:6px 0 0">Sustainable / ethical options: your adviser will ask about this before recommending anything.</p>' : '<button class="btn" style="margin-top:12px" data-a="understood">That makes sense</button>') + '</div>' +
     fndCard() + wiCard() +
     '<div class="card" id="r-glancec"><h3 class="h">Your future, at a glance</h3><div id="r-glance">' + glanceHTML(P) + '</div></div>' +
-    '<div class="ends"><button class="btn" data-a="report">⬇ Download my plan</button><button class="btn sun" data-a="book">📅 Book my adviser meeting</button><button class="btn ghost" data-a="adjust">✏️ Adjust my goals</button></div>' +
+    '<div class="ends"><button class="btn navy" data-a="report">⬇ Download my plan</button><button class="btn sun" data-a="book">📅 Book my adviser meeting</button><button class="btn ghost" data-a="adjust">✏️ Adjust my goals</button></div>' +
     '<p class="disc">Guidance, not advice. Projections are illustrative, use standard assumptions and are not guaranteed. Only an authorised adviser who knows your full situation can give advice. ' + (S.versions.length ? '<button class="link" style="font-size:12px;padding:0" data-a="sheet" data-p="history">Plan history (' + S.versions.length + ')</button>' : '') + '</p>';
 }
 function liveUpdate(fromBox){ const P0 = project(), P = project(S.wi);
