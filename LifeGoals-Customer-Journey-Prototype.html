@@ -395,7 +395,7 @@ const GOALCAT = [
 ];
 const GC = k => GOALCAT.find(g => g.k === k);
 const OTHER_LIST = [['🧳','Career break',15000,5],['🌍','Moving abroad',20000,4],['🏥','Long-term care',60000,40],['📚','Fund a course',8000,2]];
-const SUGGEST = age => age < 35 ? ['safety','home','wealth'] : age < 45 ? ['family','edu','home'] : age < 55 ? ['retire','mfree'] : ['legacy','helpfam','retire'];
+const SUGGEST = age => age < 35 ? ['safety','home','wealth'] : age < 45 ? ['family','edu','home'] : age < 55 ? ['retire','mfree'] : ['retire','legacy','helpfam'];   // retirement suggested first from 45; never pre-selected
 
 /* Understand Me: 13 questions (7 from Discover + 6 new) */
 const UM = [   // §13 (Pooja, 1 Oct 2026): money-profile questions rewritten word for word; every option carries a term tag; option order = score 1→4
@@ -605,7 +605,6 @@ function mkGoal(k, custom){
   if (k === 'safety') g.amount = Math.round(val(FF.costsM.est) * 4 / 1000) * 1000;
   return g;
 }
-function ensureRetire(){ if (!S.goals.some(g => g.kind === 'retire')) S.goals.push(mkGoal('retire')); }
 const retireGoal = () => S.goals.find(g => g.kind === 'retire');
 function setRetireAge(a){ S.retireAge = a; const r = retireGoal(); if (r) r.age = a; S.fin.retireAge = a; S.src.retireAge = S.src.retireAge || 'pre'; }
 
@@ -628,7 +627,7 @@ function prsi(g){ const wk = g / 52; if (wk <= TX.prsiWk) return 0; const cr = w
 const pc = x => +(x * 100).toFixed(2) + '%';
 // Assumption rows, all built from AS / TX so the copy never drifts from the engine (FP review C1–C10, W12)
 const assumeRows = () => (applyAssume(), [['Growth assumptions', AS_NAME[S.assume || 'standard'] + ' (your choice)'], ['Prices rise (inflation)', pc(AS.infl) + ' a year'], ['Pay rises', pc(AS.wage) + ' a year'], ['Cash savings grow', pc(AS.cash) + ' a year, after tax'], ['Investments grow', pc(AS.inv) + ' a year, after charges and tax'], ['Pensions grow', pc(AS.pen) + ' a year after charges (' + pc(AS.penRet) + ' once retired)'],
-  ['State Pension', eur(AS.sp) + ' a year from ' + AS.spAge + ' (' + (S.fin.sp || 'Not sure') + ')'], ['Retirement age', '' + S.retireAge], ['Tax', '2026 Irish income tax, USC and PRSI; bands assumed to rise with prices'], ['At retirement', '25% of your pension taken tax-free (up to €200,000)'], ['Spare money each year', 'Assumed saved: 60% cash, 40% invested'], ['Plan ends', 'Age ' + AS.end]]);
+  ['State Pension', eur(AS.sp) + ' a year from ' + AS.spAge + ' (' + (S.fin.sp || 'Not sure') + ')'], (retireGoal() ? ['Retirement age', '' + S.retireAge] : ['Work income stops at', 'Age ' + S.retireAge + ' (from About you; no retirement goal)']), ['Tax', '2026 Irish income tax, USC and PRSI; bands assumed to rise with prices'], ['At retirement', '25% of your pension taken tax-free (up to €200,000)'], ['Spare money each year', 'Assumed saved: 60% cash, 40% invested'], ['Plan ends', 'Age ' + AS.end]]);
 function netPay(g){ return g <= 0 ? 0 : g - incomeTax(g) - usc(g) - prsi(g); }
 // Retirement: no PRSI at 66+, State Pension is USC-exempt, age credit and age exemption from 65, reduced USC from 70 (income <= €60,000)
 function netRet(draw, sp, age){ const g = draw + sp; if (g <= 0) return 0;
@@ -796,18 +795,18 @@ V.DS = () => ({id:'DS', note:'Save your results (§12, MASTER C8): email only, o
 function flowHead(n, eye, title, sub, back){ const pb = !S.app && S.shell, k = pbStep(); if (pb && /^Step /.test(eye)) eye = 'Step ' + k + ' of 8 · ' + PB[k - 1][1]; else if (!pb && /^Step /.test(eye)) eye = '';
   return brandBar(back) + (pb ? pbBar() : '') + '<div class="eyebrow" style="margin-top:8px">' + eye + '</div><h2 class="t" tabindex="-1">' + title + '</h2>' + (sub ? '<p class="sub" style="margin:0">' + sub + '</p>' : ''); }
 function saveBanner(){ return S.save.done ? '<div class="banner">✅ <span>Progress saved to ' + esc(S.save.email) + '</span></div>' : '<div class="banner">💾 <span>Want a break?</span><button class="link" data-a="sheet" data-p="save">Save and come back later</button></div>'; }
-V.F1 = () => { ensureRetire(); const sug = SUGGEST(S.about.age).slice(); if (S.why.includes(2) && !sug.includes('retire')) sug.unshift('retire');
+V.F1 = () => { const sug = SUGGEST(S.about.age).slice(); if (S.why.includes(2) && !sug.includes('retire')) sug.unshift('retire');
   const order = sug.concat(GOALCAT.map(g => g.k).filter(k => !sug.includes(k))), have = k => S.goals.some(g => g.k === k);
   const n = S.goals.filter(g => g.kind !== 'retire').length;
-  return {id:'F1', note:'Goal picker: DISC Q11 tiles + Wedding, Change the car, Health & care (LifeGoals 2.0 tile style), ordered by life stage. No limit. Retirement is always on the timeline.', head:flowHead(2, 'Step 2 · Define', "What's next in your life story?", "Pick any. You'll place them on your timeline next.", 'go|B1'),
+  return {id:'F1', note:'Goal picker: DISC Q11 tiles + Wedding, Change the car, Health & care (LifeGoals 2.0 tile style), ordered by life stage. No limit. Retirement is an optional goal like any other (suggested first from 45, never pre-selected).', head:flowHead(2, 'Step 2 · Define', "What's next in your life story?", "Pick any. You'll place them on your timeline next.", 'go|B1'),
   html:saveBanner() + '<div class="eyebrow" style="margin:4px 0 8px">Suggested for you</div><div class="gtiles" role="group" aria-label="Suggested goals">' + order.slice(0, sug.length).map(k => goalTile(k)).join('') + '</div><div class="eyebrow" style="margin:18px 0 8px">More goals</div><div class="gtiles" role="group" aria-label="More goals">' + order.slice(sug.length).map(k => goalTile(k)).join('') + '</div>' +
     S.goals.filter(g => g.k === 'other').map(g => '<div class="pill mint" style="margin-top:10px">' + g.e + ' ' + esc(g.name) + '</div> ').join('') +
-    (n > 6 ? '<p class="note" style="margin-top:12px">Lots of plans! You can add more later too.</p>' : '') + '<p class="small" style="margin-top:14px">🌅 Retirement is always on your timeline, so we can check your later years.</p>',
+    (n > 6 ? '<p class="note" style="margin-top:12px">Lots of plans! You can add more later too.</p>' : ''),
   foot:'<button class="btn" data-a="go" data-p="F2">Place them on my timeline</button>'};
 };
 /* Goal tile (LifeGoals 2.0 .goal-card): big emoji, name below, teal border + fill + tick when picked */
-function goalTile(k){ const c = GC(k), ret = k === 'retire', other = k === 'other', on = ret || (!other && S.goals.some(g => g.k === k)) || (other && S.goals.some(g => g.k === 'other'));
-  return '<button class="gtile' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" data-a="gpick" data-p="' + k + '"' + (ret ? ' aria-disabled="true" title="Always on your timeline"' : '') + '><span class="tick" aria-hidden="true">' + (ret ? '🔒' : '✓') + '</span><span class="em" aria-hidden="true">' + c.e + '</span><span class="nm">' + esc(c.t) + '</span></button>'; }
+function goalTile(k){ const c = GC(k), other = k === 'other', on = (!other && S.goals.some(g => g.k === k)) || (other && S.goals.some(g => g.k === 'other'));
+  return '<button class="gtile' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" data-a="gpick" data-p="' + k + '"><span class="tick" aria-hidden="true">✓</span><span class="em" aria-hidden="true">' + c.e + '</span><span class="nm">' + esc(c.t) + '</span></button>'; }
 function tlBoard(){
   const a0 = S.about.age, gs = S.goals;
   return '<div class="tl-board"><div class="tl-track" id="tl" data-a0="' + a0 + '">' +
@@ -950,7 +949,7 @@ function glanceHTML(P){ const v = S.view;
     (land ? '' : '<div class="rotnote"><svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="10" y="3" width="12" height="20" rx="2.5"/><path d="M15 19.5h2"/><path d="M5 22a11 11 0 0 0 17 7"/><path d="M22 25.5v3.8h-3.8"/></svg><span>Turn your phone sideways to see your road on a bigger screen</span></div>') +
     journeySVG(P, land ? Math.max(322, Math.min(780, innerWidth - 72)) : 322, land) + journeyNote(P);
   else if (v === 'chapters') body = '<p class="small">Your future as chapters of your life. ☀️ comfortable · 🌤️ some years use savings · 🌦️ often using savings · ⛈️ a gap to plan for. Tap a chapter to see its years.</p>' + chaptersHTML(P);
-  else body = '<p class="small">Each bar is one year of your life; the dashed line is your income.</p>' + chartSVG(P.rows, 322) + '<div class="legend"><span><i class="sw" style="background:var(--sunny)"></i>☀️ Gold: needs fully covered</span><span><i class="sw" style="background:var(--showers)"></i>🌦️ Blue: dipping into savings</span><span><i class="sw" style="background:var(--storm)"></i>⛈️ Purple: shortfall, not covered</span><span><i class="sw" style="background:var(--ink)"></i>▼ Retirement begins</span><span><i class="sw" style="background:none;border-top:2px dashed var(--ink);height:0;border-radius:0"></i>Your income each year</span></div>' + chartNote(P);
+  else body = '<p class="small">Each bar is one year of your life; the dashed line is your income.</p>' + chartSVG(P.rows, 322) + '<div class="legend"><span><i class="sw" style="background:var(--sunny)"></i>☀️ Gold: needs fully covered</span><span><i class="sw" style="background:var(--showers)"></i>🌦️ Blue: dipping into savings</span><span><i class="sw" style="background:var(--storm)"></i>⛈️ Purple: shortfall, not covered</span>' + (retireGoal() ? '<span><i class="sw" style="background:var(--ink)"></i>▼ Retirement begins</span>' : '') + '<span><i class="sw" style="background:none;border-top:2px dashed var(--ink);height:0;border-radius:0"></i>Your income each year</span></div>' + chartNote(P);
   return tabs + '<div role="tabpanel">' + body + '</div>'; }
 function journeyNote(P){ const bad = P.rows.find(isShort); return '<p class="pnote"><b>Reading your road:</b> ☀️ gold means your income covers life; 🌦️ blue means you\'re drawing on savings, which is what they\'re for. ' + (bad ? 'The road turns ⛈️ purple around <b>age ' + bad.a + '</b>: money runs short there unless the plan changes.' : 'There\'s no ⛈️ purple on your road: you don\'t run out of money before 90.') + ' Each milestone ring shows its goal\'s status the same way.' + '</p>'; }
 function chartNote(P){ const n = P.rows.filter(isShort).length; return '<p class="pnote"><b>In plain English:</b> ' + (n ? 'in ' + n + ' year' + (n > 1 ? 's' : '') + ' of your plan, your income and savings don\'t fully cover what you\'ll need (the ⛈️ purple bars). These are the gaps to close, by saving more, changing timing, or rethinking a goal.' : 'every year of your plan is covered by your income and savings. No ⛈️ purple bars. That\'s what "on track" looks like.') + '</p>'; }
@@ -964,7 +963,7 @@ function journeySVG(P, W, land){
   const Yx = x => { const f = clamp((x - pad) / (W - 2 * pad) * (n - 1), 0, n - 1), i = Math.floor(f), j = Math.min(n - 1, i + 1); return Y(i) + (Y(j) - Y(i)) * (f - i); };
   let base = '', road = '', ticks = '';
   for (let i = 0; i < n - 1; i++){ base += '<line x1="' + X(i) + '" y1="' + Y(i) + '" x2="' + X(i + 1) + '" y2="' + Y(i + 1) + '" stroke="#DCE4EC" stroke-width="' + (wide ? 16 : 13) + '" stroke-linecap="round"/>'; road += '<line x1="' + X(i) + '" y1="' + Y(i) + '" x2="' + X(i + 1) + '" y2="' + Y(i + 1) + '" stroke="' + rowCol(rows[i]) + '" stroke-width="' + (wide ? 9 : 7) + '" stroke-linecap="round"/>'; }
-  const a0 = rows[0].a, ri = rows.findIndex(r => r.rmark), fx = ri >= 0 ? X(ri) : null;
+  const a0 = rows[0].a, ri = retireGoal() ? rows.findIndex(r => r.rmark) : -1, fx = ri >= 0 ? X(ri) : null;
   // fixed items that milestones must keep clear of: "You, today", the retirement flag + label, the sunset
   const busy = [], box = (l, t, r, b) => ({l, t, r, b});
   let marks = '<circle cx="' + X(0) + '" cy="' + Y(0) + '" r="6.5" fill="var(--ink)" stroke="#fff" stroke-width="2"/>';
@@ -1024,16 +1023,16 @@ function chaptersHTML(P){ const a0 = P.rows[0].a;
   return '<div class="chapgrid">' + chapters(P).map((c, ci) => { const sh = c.rows.filter(isShort), dip = c.rows.filter(r => r.used > 1 && !isShort(r)), allRet = c.rows.every(r => r.retired);
     const wx = sh.length ? '⛈️' : dip.length > c.rows.length / 3 ? '🌦️' : dip.length ? '🌤️' : '☀️', cls = sh.length ? 'bad' : dip.length > c.rows.length / 3 ? 'warn' : 'ok';
     const story = sh.length ? 'Short by about <b>' + eur(sh.reduce((s, r) => s + r.short, 0) / sh.length) + ' a year</b> in ' + sh.length + ' of these years.' : allRet ? 'Living on your pensions and savings, and they hold up.' : dip.length ? 'Some years dip into savings. That\'s what they\'re for.' : 'Income comfortably covers life.';
-    const ev = []; if (c.rows.some(r => r.rmark)) ev.push('🏁 <b>You retire</b>');
+    const ev = []; if (retireGoal() && c.rows.some(r => r.rmark)) ev.push('🏁 <b>You retire</b>');
     S.goals.filter(g => g.kind !== 'retire' && g.age >= c.from && g.age <= c.to).forEach(g => ev.push(g.e + ' ' + esc(g.name) + ' <b style="color:var(--' + band(P.pct[g.id]) + '-t)">' + P.pct[g.id] + '%</b>'));
     const open = S.chapOpen === ci;
-    return '<button class="chap ' + cls + (open ? ' open' : '') + '" data-a="chap" data-p="' + ci + '" aria-expanded="' + open + '"><div class="w" aria-hidden="true">' + wx + '</div><div class="cb"><div class="tt">Your ' + c.dec + 's</div><div class="ag">age ' + c.from + '–' + c.to + (allRet ? ' · retired' : '') + '</div><div class="st">' + story + '</div>' + (ev.length ? '<div class="ev">' + ev.map(e => '<div>' + e + '</div>').join('') + '</div>' : '') +
+    return '<button class="chap ' + cls + (open ? ' open' : '') + '" data-a="chap" data-p="' + ci + '" aria-expanded="' + open + '"><div class="w" aria-hidden="true">' + wx + '</div><div class="cb"><div class="tt">Your ' + c.dec + 's</div><div class="ag">age ' + c.from + '–' + c.to + (allRet ? (retireGoal() ? ' · retired' : ' · after work') : '') + '</div><div class="st">' + story + '</div>' + (ev.length ? '<div class="ev">' + ev.map(e => '<div>' + e + '</div>').join('') + '</div>' : '') +
       '<div class="mo">' + (open ? '▲ Hide the years' : '▼ See it year by year') + '</div>' + (open ? '<div class="ev">' + c.rows.map(r => { const m = isShort(r), d = r.used > 1 && !m; return '<div class="cy"><b style="width:26px">' + r.a + '</b><span class="d" style="background:' + (m ? 'var(--storm)' : d ? 'var(--showers)' : 'var(--sunny)') + '"></span>' + (m ? '<b>Gap to plan for</b>: short ' + eur(r.short) : d ? 'Using savings' : 'Comfortable') + '</div>'; }).join('') + '</div>' : '') + '</div></button>'; }).join('') + '</div>'; }
 function chartSVG(rows, W){
   const H = W > 500 ? 240 : 200, top = 30, bot = 22, n = rows.length, bw = (W - 16) / n, maxV = Math.max(...rows.map(r => Math.max(r.inflow, r.needs)), 1), sy = v => H - bot - v / maxV * (H - top - bot);
   let bars = '', mk = '', line = '';
   rows.forEach((r, i) => { const x = 8 + i * bw; bars += '<rect x="' + x.toFixed(1) + '" y="' + sy(r.needs).toFixed(1) + '" width="' + Math.max(1, bw - 1.2).toFixed(1) + '" height="' + (H - bot - sy(r.needs)).toFixed(1) + '" fill="' + rowCol(r) + '"><title>Age ' + r.a + ': needs ' + eur(r.needs) + ', income ' + eur(r.inflow) + (r.short > 1 ? ', gap ' + eur(r.short) : '') + '</title></rect>';
-    if (r.rmark) mk += '<path d="M' + (x + bw / 2 - 6) + ' 6 h12 l-6 10 z" fill="var(--ink)"/><text x="' + (x + bw / 2) + '" y="27" font-size="10" font-weight="700" fill="var(--ink)" text-anchor="middle">retire</text>';
+    if (r.rmark && retireGoal()) mk += '<path d="M' + (x + bw / 2 - 6) + ' 6 h12 l-6 10 z" fill="var(--ink)"/><text x="' + (x + bw / 2) + '" y="27" font-size="10" font-weight="700" fill="var(--ink)" text-anchor="middle">retire</text>';
     if (r.a % 10 === 0) bars += '<text x="' + (x + bw / 2) + '" y="' + (H - 6) + '" font-size="10" fill="#51627A" text-anchor="middle">' + r.a + '</text>';
     line += (i ? 'L' : 'M') + (x + bw / 2).toFixed(1) + ' ' + sy(r.inflow).toFixed(1) + ' '; });
   return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Yearly cashflow chart, age ' + rows[0].a + ' to 90" style="display:block;margin-top:8px">' + bars + '<path d="' + line + '" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-dasharray="5 3"/>' + mk + '</svg>';
@@ -1078,7 +1077,7 @@ V.PLAN = () => { const hl = S.tlHl != null && gById(S.tlHl), all = S.planEdit;
     html:tlBoard() + edit + '<div class="row" style="justify-content:space-between;margin:2px 2px 0"><button class="link" data-a="addgoal">＋ Add a goal</button>' + (all ? '' : '<button class="link" data-a="planedit">✏️ Edit goal details</button>') + '</div>' + tlStrip() +
       '<div id="r-res" style="scroll-margin-top:8px"><div class="sec" style="margin-top:18px"><h3 style="font-size:21px">Your results</h3></div>' + resultsHTML() + '</div>'};
 };
-V.GOALS = () => ({id:'PLAN-ADD', note:'Add a goal from My Plan (same goal tiles).', head:appHead('Add a goal', 'Tap to add or remove.', 'seg|timeline'), html:'<div class="gtiles" role="group" aria-label="Goals">' + GOALCAT.filter(c => c.k !== 'retire').map(c => goalTile(c.k)).join('') + '</div>' + S.goals.filter(g => g.k === 'other').map(g => '<div class="pill mint" style="margin-top:10px">' + g.e + ' ' + esc(g.name) + '</div> ').join(''), foot:'<button class="btn" data-a="seg" data-p="timeline">Back to my timeline</button>'});
+V.GOALS = () => ({id:'PLAN-ADD', note:'Add a goal from My Plan (same goal tiles).', head:appHead('Add a goal', 'Tap to add or remove.', 'seg|timeline'), html:'<div class="gtiles" role="group" aria-label="Goals">' + GOALCAT.map(c => goalTile(c.k)).join('') + '</div>' + S.goals.filter(g => g.k === 'other').map(g => '<div class="pill mint" style="margin-top:10px">' + g.e + ' ' + esc(g.name) + '</div> ').join(''), foot:'<button class="btn" data-a="seg" data-p="timeline">Back to my timeline</button>'});
 const UM_NEW = ['6','u9','u10','u12','u14','u4','u11'];   // §13: u14 emergency fund replaces u13 sustainability   // §12: Q6 moved here from Discover → 7 to answer in the money profile
 const umNewCount = () => UM_NEW.filter(u => u === '6' ? typeof S.ans['6'] === 'number' : typeof S.um.a[u] === 'number').length;
 function nudge(e, t, btn, a, p){ return '<div class="nudge"><span aria-hidden="true">' + e + '</span><span>' + t + '</span>' + (btn ? '<button class="link" data-a="' + a + '"' + (p != null ? ' data-p="' + p + '"' : '') + '>' + btn + '</button>' : '') + '</div>'; }
@@ -1439,7 +1438,7 @@ function askCtx(id){ id = id || '';
   if (id === 'B4') return ['ctx', 'What is my money profile?', 'Three things: ' + SECT.appetite[0].toLowerCase() + ' (' + SECT.appetite[1] + '), ' + SECT.capacity[0].toLowerCase() + ' (' + SECT.capacity[1] + ') and ' + SECT.horizon[0].toLowerCase() + ' (' + SECT.horizon[1] + '), plus how you tend to act. Together they give an indicative risk profile your adviser confirms with you.'];
   if (/^CALC|^XPL|^VID/.test(id)) return ['ctx', 'Are these calculators advice?', 'No. They show what could happen with the figures on screen and simple assumptions. They are illustrations, not a guarantee and not a recommendation. An adviser can look at your full situation.'];
   if (/^D/.test(id)) return ['ctx', 'Why do you ask these questions?', 'They help us understand how you feel about money, so the goals and results we show fit you. There are no right or wrong answers, and nothing is saved unless you choose.'];
-  if (id === 'F1' || id === 'PLAN-ADD') return ['ctx', 'How do I choose goals?', 'Tap any that matter to you. Pick as many as you like; you can add or remove them later. Retirement is always included so we can check your later years.'];
+  if (id === 'F1' || id === 'PLAN-ADD') return ['ctx', 'How do I choose goals?', 'Tap any that matter to you. Pick as many as you like; you can add or remove them later. Retirement is a goal like any other: add it if you want us to check your later years. If you leave it out, we still assume work income stops at your retirement age in About you (66 unless you change it).'];
   if (id === 'F2' || id === 'PLAN') return ['ctx', 'How does the timeline work?', 'Each goal sits at the age you would like it to happen. Drag it left for sooner or right for later, or use the − and + buttons underneath. Rough is fine; you can change it any time.'];
   if (id === 'F4') return ['ctx', 'What is my LifeMap?', 'It is your list of goals with when and how much. Next, we add your money so we can check how far it goes.'];
   if (/^P1/.test(id)) return ['ctx', 'Why do I need an account?', 'So your money details are stored safely and only you can see them. We check your email and mobile to keep your account secure.'];
@@ -1571,10 +1570,10 @@ const ACT = {
   dssave:() => { const e = (document.getElementById('ds-email').value || '').trim(); if (!/.+@.+\..+/.test(e)){ document.getElementById('dserr').textContent = 'Please enter a valid email, or tap Skip for now.'; return; }
     S.save = {email:e, comms:document.getElementById('ds-comms').checked, done:true, asked:true}; S.acct.email = e; enterApp('Saved ✓ Check your inbox for your link'); },
   dsskip:() => { S.save.asked = true; enterApp('Welcome! Make your plan whenever you\'re ready'); },
-  gpick:p => { if (p === 'retire'){ toast('Retirement is always on your timeline'); return; } if (p === 'other'){ S.sheet = 'other'; render(); return; }
-    const i = S.goals.findIndex(g => g.k === p); if (i >= 0) S.goals.splice(i, 1); else S.goals.push(mkGoal(p)); ensureRetire(); focusKey = '[data-a="gpick"][data-p="' + p + '"]'; if (S.app) afterPlanEdit(); render(); },
+  gpick:p => { if (p === 'other'){ S.sheet = 'other'; render(); return; }
+    const i = S.goals.findIndex(g => g.k === p); if (i >= 0) S.goals.splice(i, 1); else S.goals.push(mkGoal(p)); if (S.wi.g != null && !gById(S.wi.g)) S.wi = {g:null, m:0, l:0}; focusKey = '[data-a="gpick"][data-p="' + p + '"]'; if (S.app) afterPlanEdit(); render(); },
   addother:p => { let c; if (p === 'own'){ const v = ((document.getElementById('oth') || {}).value || '').trim(); if (!v) { toast('Type a name for your goal'); return; } c = ['⭐', v.slice(0, 30), 10000, 4]; } else c = OTHER_LIST[+p];
-    S.goals.push(mkGoal('other', c)); ensureRetire(); S.sheet = null; if (S.app) afterPlanEdit(); render(); toast(c[1] + ' added'); },
+    S.goals.push(mkGoal('other', c)); S.sheet = null; if (S.app) afterPlanEdit(); render(); toast(c[1] + ' added'); },
   f2next:() => go('F4'),
   dosave:() => { const e = document.getElementById('sv-email').value.trim(); if (!/.+@.+\..+/.test(e)){ document.getElementById('sverr').textContent = 'Please enter a valid email.'; return; }
     S.save = {email:e, comms:document.getElementById('sv-comms').checked, done:true, asked:true}; if (!S.acct.email) S.acct.email = e; S.sheet = null; render(); toast('Saved ✓ Check your inbox for your link'); },
@@ -1595,7 +1594,7 @@ const ACT = {
   vplay:() => { S.play = !S.play; focusKey = '[data-a="vplay"]'; render(); }, vfilter:p => { S.vf = p; focusKey = '[data-a="vfilter"][data-p="' + p + '"]'; render(); },
   remind:() => toast('We\'ll remind you before it starts'), topic:p => { S.tab = 'exp'; S.exp = 'home'; lastId = null; render(); toast(p + ': an expert can help with this'); },
   calcadd:p => { S.sheet = 'calcadd|' + p; render(); },
-  confirmcalcadd:p => { const r = C(p).run(calcVals(C(p))), g = r.goal; if (!g) return; S.goals.push(mkGoal('other', [g.em, g.name, Math.round(g.amount), Math.max(1, g.years)])); ensureRetire(); S.sheet = null; if (S.app) afterPlanEdit(); render(); toast(S.app ? g.name + ' added to your plan' : g.name + ' added. It will be on your timeline when you make your plan'); },
+  confirmcalcadd:p => { const r = C(p).run(calcVals(C(p))), g = r.goal; if (!g) return; S.goals.push(mkGoal('other', [g.em, g.name, Math.round(g.amount), Math.max(1, g.years)])); S.sheet = null; if (S.app) afterPlanEdit(); render(); toast(S.app ? g.name + ' added to your plan' : g.name + ' added. It will be on your timeline when you make your plan'); },
   vemail:() => verify('ev', 'P1S'), vsms:() => verify('sv', 'P1K'),
   passkey:p => { S.acct.pk = p === '1'; prefillAbout(); if (p === '1') toast('Face ID added'); go('P2'); },
   upl:p => startUpload(p, ['Sample document.pdf']), uplx:() => { S.upl = null; if (!S.app) S.scr = S.fsec != null ? 'P3' : 'P2'; render(); },
@@ -1765,7 +1764,7 @@ function loadSample(){
   S = fresh();
   Object.assign(S.ans, {'2':0, '4':1, '6':2, '7':1, '8':2, '9':2, '12':1}); S.why = [0];
   S.about = {age:38, partner:true, deps:2}; S.retireAge = 63;
-  ['edu','travel','mfree','safety'].forEach(k => S.goals.push(mkGoal(k))); ensureRetire();
+  ['edu','travel','mfree','safety','retire'].forEach(k => S.goals.push(mkGoal(k)));
   const G = k => S.goals.find(g => g.k === k); G('edu').age = 48; G('edu').amount = 50000; G('travel').age = 41; G('travel').amount = 12000; G('mfree').age = 55; G('safety').age = 40; G('safety').amount = 15000; G('safety').saved = 5000; retireGoal().amount = 46000;
   S.acct = {name:'Aoife', email:'aoife@example.ie', mobile:'087 123 4567', c1:true, c2:false, ev:true, sv:true, pk:true};
   const put = (k, v, src, c) => { S.fin[k] = v; S.src[k] = src; if (c) S.conf[k] = c; };
