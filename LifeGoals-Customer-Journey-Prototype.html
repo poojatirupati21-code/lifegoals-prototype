@@ -383,9 +383,9 @@ const TYPES = {A:{name:'Achiever', e:'🎯', strap:'In control, goal-driven, dis
   E:{name:'Explorer', e:'🧭', strap:'Curious, open to new ideas, comfortable with risk.', str:['Open to new ideas','Comfortable with change'], watch:'Jumping in before your safety net is in place.'},
   C:{name:'Contented', e:'🛋️', strap:'Comfortable, steady, low-maintenance with money.', str:['Calm about money','Not easily rattled'], watch:'Putting off decisions, such as pension top-ups.'}};
 // D1 chips (Pooja, 1 Oct 2026). Keys are stored in S.why; goals = tiles moved to the front of "Suggested for you" (quietly)
-const WHY = [{k:'track', e:'🧭', t:'Am I on track for the life I want?'}, {k:'home', e:'🏡', t:'Buying a home or moving', goals:['home']}, {k:'family', e:'💍', t:'A wedding, baby or new family chapter', goals:['family','wedding','edu']},
-  {k:'job', e:'💼', t:'New job, pay rise or career change', goals:['business','safety']}, {k:'retire', e:'🌅', t:'Thinking about retirement', goals:['retire']}, {k:'stress', e:'😮‍💨', t:'Money feels stressful, I want more control', goals:['safety']},
-  {k:'idle', e:'💤', t:'My savings are sitting idle', goals:['wealth']}, {k:'adviser', e:'🤝', t:'My adviser or employer sent me'}, {k:'curious', e:'👀', t:'Just curious'}, {k:'other', e:'✏️', t:'Something else'}];
+const WHY = [{k:'track', e:'🧭', t:"Seeing if I'm on track"}, {k:'enough', e:'😊', t:'Making sure I have enough to live well', goals:['wealth','safety']},
+  {k:'retire', e:'🌅', t:'Getting ready for retirement', goals:['retire']}, {k:'safety', e:'🛟', t:'Building a safety net for emergencies', goals:['safety']},
+  {k:'change', e:'🔄', t:'A big life change is coming', goals:['home','family','business']}, {k:'curious', e:'👀', t:'Just curious'}, {k:'other', e:'✏️', t:'Something else'}];
 const DISC_FORMAL = 'This tool is designed to help you explore your preferences. It does not replace a formal suitability or risk assessment where financial advice is provided.';
 
 /* Goal tiles: DISC Q11 order, word for word */
@@ -1921,7 +1921,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape'){ if (documen
 /* ================= SAMPLE CUSTOMER + SIDE PANEL ================= */
 function loadSample(){
   S = fresh();
-  Object.assign(S.ans, {'2':0, '4':1, '6':2, '7':1, '8':2, '9':2, '12':1}); S.why = ['track', 'family'];
+  Object.assign(S.ans, {'2':0, '4':1, '6':2, '7':1, '8':2, '9':2, '12':1}); S.why = ['track', 'change'];
   S.about = {age:38, partner:true, deps:2}; S.retireAge = 63;
   ['edu','travel','mfree','safety','retire'].forEach(k => S.goals.push(mkGoal(k)));
   const G = k => S.goals.find(g => g.k === k); G('edu').age = 48; G('edu').amount = 50000; G('travel').age = 41; G('travel').amount = 12000; G('mfree').age = 55; G('safety').age = 40; G('safety').amount = 15000; G('safety').saved = 5000; retireGoal().amount = 46000;
