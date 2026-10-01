@@ -1411,11 +1411,12 @@ V.XPL = () => { const P = S.app ? project() : null, slip = P ? S.goals.filter(g 
    '<div class="sec"><h3>Tools for you</h3></div><div class="hstrip">' + toolsForYou().map(toolTile).join('') + '</div>' + watchHTML() +
    '<div class="sec"><h3>Topics</h3></div>' + TOPICS.map(t => '<button class="goal" data-a="topic" data-p="' + t[1] + '"><span class="ic" aria-hidden="true">' + t[0] + '</span><span style="flex:1"><b>' + t[1] + '</b><br><span class="small">' + t[2] + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
    '<p class="disc">Calculators and videos explain general topics. Figures are illustrative, not a guarantee and not advice.</p>'}; };
+const aExp = k => { const x = EXPERT_FOR[k].toLowerCase(); return (/^[aeiou]/.test(x) ? 'an ' : 'a ') + x; };
 V.XTOPIC = p => { const t = TOPICS.find(x => x[1] === p);
   return {id:'XPL-TOPIC', note:'Topic page (Lifecast): tools and short videos for one topic. No inline adviser contact: a short link opens the Experts tab with the matching specialist pre-selected.', head:appHead(t[0] + ' ' + t[1], esc(t[2]) + '.', 'xback'),
   html:'<div class="sec" style="margin-top:4px"><h3>Tools</h3></div>' + CALCS.filter(c => c.cat === t[4]).slice(0, 4).map(c => '<button class="goal" data-a="calc" data-p="' + c.id + '"><span class="ic" aria-hidden="true">' + c.em + '</span><span style="flex:1"><b>' + esc(c.name) + '</b><br><span class="small">' + esc(c.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
    (VIDEOS.some(v => v.kind === t[3]) ? '<div class="sec"><h3>Watch</h3></div><div class="hstrip">' + VIDEOS.filter(v => v.kind === t[3]).map(v => vThumb(v)).join('') + '</div>' : '') +
-   '<button class="link" style="margin-top:12px;font-size:15px" data-a="expertfor" data-p="' + t[3] + '">Talk to a ' + EXPERT_FOR[t[3]].toLowerCase() + ' →</button><p class="disc">Topics explain general ideas. They are not advice.</p>'}; };
+   '<button class="link" style="margin-top:12px;font-size:15px" data-a="expertfor" data-p="' + t[3] + '">Talk to ' + aExp(t[3]) + ' →</button><p class="disc">Topics explain general ideas. They are not advice.</p>'}; };
 V.XCAT = p => { const c = CATS.find(x => x.id === p); return {id:'XPL-CAT', note:'Tools in one life-need group.', head:appHead(c.em + ' ' + esc(c.name), esc(c.blurb), 'xback'),
   html:CALCS.filter(x => x.cat === p).map(x => '<button class="goal" data-a="calc" data-p="' + x.id + '"><span class="ic" aria-hidden="true">' + x.em + '</span><span style="flex:1"><b>' + esc(x.name) + '</b><br><span class="small">' + esc(x.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('')}; };
 V.CALC = p => { const c = C(p), v = calcVals(c);
@@ -1434,7 +1435,7 @@ V.VID = id => { const v = VID(id), c = C(v.tool), g = S.goals.find(x => x.spec =
    '<h2 class="t" style="font-size:22px;margin:12px 0 4px">' + esc(v.t) + '</h2><div class="small">' + esc(v.who) + ' · ' + v.mins + ' min · ' + VKIND[v.kind] + '</div>' +
    (P ? '<div class="card" style="margin-top:12px;background:var(--sea-l)"><b style="font-size:14px">Why this is for you</b><div style="font-size:14px;margin-top:4px">Your ' + esc(g.name.toLowerCase()) + ' goal is ' + P.pct[g.id] + '% covered. This video explains the basics.</div></div>' : '') +
    '<button class="btn" style="margin-top:12px" data-a="calc" data-p="' + v.tool + '">' + c.em + ' Try ' + esc(c.name) + '</button>' +
-   '<div class="grid2" style="margin-top:10px"><button class="btn sm ghost" style="width:100%" data-a="expertfor" data-p="' + v.kind + '">Talk to a ' + EXPERT_FOR[v.kind].toLowerCase() + '</button><button class="btn sm ghost" style="width:100%" data-a="toast" data-p="Saved to watch later">Save for later</button></div>' +
+   '<div class="grid2" style="margin-top:10px"><button class="btn sm ghost" style="width:100%" data-a="expertfor" data-p="' + v.kind + '">Talk to ' + aExp(v.kind) + '</button><button class="btn sm ghost" style="width:100%" data-a="toast" data-p="Saved to watch later">Save for later</button></div>' +
    '<details class="card" style="margin-top:12px"><summary style="font-weight:800;cursor:pointer;min-height:32px">Transcript</summary><p style="font-size:14px;line-height:1.55;margin:8px 0 0">' + esc(v.cc) + ' [Full transcript appears here.]</p></details>' +
    '<div class="sec"><h3>Up next</h3></div><div class="hstrip">' + next.map(x => vThumb(x)).join('') + '</div><p class="disc">Videos explain general topics. They are not personal advice.</p>'}; };
 
