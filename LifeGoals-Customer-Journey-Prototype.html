@@ -1031,12 +1031,16 @@ V.P4 = () => { const it = checkItems(), flag = it.filter(x => ['look','est','mis
 };
 V.U1 = () => ({id:'U1', note:'Loader. Never shows a made-up result.', head:flowHead(4, 'Step 4 · Understand', 'Building your plan', '', ''), html:'<div style="padding:60px 0;text-align:center"><div class="spin" aria-hidden="true"></div><p class="sub" style="margin-top:18px" role="status">Running your numbers…</p><p class="small">If this takes a while, we\'ll let you know by email and SMS when it\'s ready.</p></div>'});
 /* ================= RESULTS ================= */
+/* Option B (Pooja, 1 Oct 2026): compare like with like. "On average" = average monthly amount (today's money) going to the goal
+   over its whole timeline; "needs" = that average plus the smallest extra monthly saving that brings the goal to 100%. */
+function extraTo100(g){ const w = S.wi && S.wi.g === g.id ? S.wi : {m:0, l:0}, ok = m => project({g:g.id, m:(+w.m || 0) + m, l:+w.l || 0}).pct[g.id] >= 100;
+  if (!ok(5000)) return null; let lo = 0, hi = 5000; for (let i = 0; i < 13; i++){ const mid = (lo + hi) / 2; if (ok(mid)) hi = mid; else lo = mid; } return Math.ceil(hi / 5) * 5; }
 function goalLine(P, g){ const x = P.goal && P.goal[g.id]; if (!x) return '';
   if (g.kind === 'mfree' && S.fin.home && S.fin.home !== 'Own with mortgage') return 'No mortgage in Your finances: remove this goal, or add your mortgage';
-  if (P.pct[g.id] < 100 && P.save && x.needM > P.save.surplusM) return 'Needs more than your spare money each month (about ' + eur(x.needM) + ' a month)';
-  if (P.pct[g.id] >= 100 && x.nowM >= x.needM) return 'Fully funded' + (x.nowM > 0 ? ' · you\'re putting ' + eur(x.nowM) + ' a month' : '');
-  const ahead = x.avgM > x.nowM ? S.goals.filter(o => P.goal[o.id] && o.id !== g.id && GOAL_ORDER(o, g) < 0 && P.pct[o.id] > 0).sort(GOAL_ORDER)[0] : null;
-  return 'Needs ' + eur(x.needM) + ' a month · you\'re putting ' + eur(x.nowM) + ' a month' + (ahead ? ' now, more later as earlier goals finish' : ''); }
+  if (P.pct[g.id] >= 100) return 'Fully funded' + (x.avgM > 0 ? ' · on average you\'ll put ' + eur(x.avgM) + ' a month' : '');
+  const ex = extraTo100(g), need = ex != null ? x.avgM + ex : Math.max(x.needM || 0, x.avgM + 5);
+  if (ex == null || (P.save && need > P.save.surplusM)) return 'Needs about ' + eur(need) + ' a month, more than your spare money · on average you\'ll put ' + eur(x.avgM) + ' a month';
+  return 'Needs about ' + eur(need) + ' a month · on average you\'ll put ' + eur(x.avgM) + ' a month'; }
 function goalsBox(P){ return S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const p = P.pct[g.id], b = band(p);
   return '<div class="gs"><span class="e" aria-hidden="true">' + g.e + '</span><div class="m"><div class="nm">' + esc(g.name) + ' <span>· ' + yearsTxt(g) + '</span></div><div class="bar" role="img" aria-label="' + p + '% covered"><i style="width:' + p + '%;background:var(--' + b + ')"></i></div>' + (goalLine(P, g) ? '<div class="gl">' + goalLine(P, g) + '</div>' : '') + '</div><div class="p" style="color:var(--' + b + '-t)">' + p + '%<small><span aria-hidden="true">' + BANDE[b] + '</span> ' + BANDW[b] + '</small></div></div>'; }).join(''); }
 function findings(P){
