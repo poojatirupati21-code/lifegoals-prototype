@@ -289,6 +289,7 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 .livebadge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;letter-spacing:.08em;color:#fff;background:#B5452F;border-radius:999px;padding:3px 9px;flex-shrink:0}.livebadge::before{content:'';width:7px;height:7px;border-radius:4px;background:#fff}
 .field output{font-weight:800;color:var(--sea-d)}
 .asm .seg button{min-height:40px}
+.gtile.off{opacity:.5;cursor:not-allowed}.gtile .ghint{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:2px;line-height:1.2}
 .shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pq{border-top:1px solid var(--line);padding:10px 0}.pq:first-child{border-top:0}
 /* sheets & toast */
@@ -483,7 +484,7 @@ const ADV_QS = ['Can I retire earlier?','Am I saving enough?','How do I protect 
 let S = null;
 function fresh(){
   return {scr:'D0', app:false, tab:'plan', planSeg:'main', planGo:null, planEdit:false, me:'home', exp:'home', entry:'direct',
-    why:[], whyNote:'', di:0, ans:{}, about:{age:38, partner:null, deps:null}, goals:[], gid:1, retireAge:66,
+    why:[], whyNote:'', di:0, ans:{}, about:{age:38, partner:null, deps:null, married:null}, goals:[], gid:1, retireAge:66,
     save:{email:'', comms:false, done:false, asked:false}, tlOpen:{}, tlHl:null,
     acct:{name:'', email:'', mobile:'', c1:false, c2:false, ev:false, sv:false, pk:false},
     fin:{}, src:{}, conf:{}, look:{}, ack:{}, fsec:null, fmode:{}, upl:null, checked:false, from:null,
@@ -611,7 +612,7 @@ function mkGoal(k, custom){
   const c = GC(k), a0 = S.about.age;
   const g = {id:S.gid++, k, name:custom ? custom[1] : c.t, e:custom ? custom[0] : c.e, kind:c.kind, spec:c.spec, amount:custom ? custom[2] : c.amt, saved:0, who:'Me', prio:'Must have', flex:'Can move'};
   if (c.kind === 'retire') g.age = S.retireAge;
-  else if (c.kind === 'legacy') g.age = Math.max(a0 + 5, 85);
+  else if (c.kind === 'legacy') g.age = AS.end;   // FP round 4 F9: tested and shown at the end of the plan (90)
   else g.age = Math.min(89, a0 + (custom ? custom[3] : c.yrs));
   if (k === 'edu' && S.about.deps > 1) g.amount = c.amt * Math.min(3, S.about.deps);
   if (k === 'safety') g.amount = Math.round(val(FF.costsM.est) * 4 / 1000) * 1000;
@@ -641,7 +642,7 @@ const pc = x => +(x * 100).toFixed(2) + '%';
 function saveRows(){ const P = project(), k = S.ans['6'], q = DQ_BY('6');
   return [['What you save', 'About ' + eur(P.save.saveM) + ' a month towards your goals (' + (S.saveM != null ? 'your choice' : typeof k === 'number' ? 'from your answer: ' + q.o[k].t : 'assumed €300 cap: you haven\'t told us yet') + '; never more than half your spare money unless you set it)'],
     ['Spare money not saved', 'Assumed spent'], ['Emergency buffer', S.goals.some(g => g.k === 'safety') ? 'Your safety-net goal is your emergency fund' : '3 months of costs kept aside (you have no safety-net goal)'],
-    ['Order your savings go to goals', 'Safety net first, then must-haves, then nice-to-haves, soonest first'], ['Money for goals under 5 years', 'Kept as cash']]; }
+    ['Order your savings go to goals', 'Safety net first, then must-haves, then nice-to-haves, soonest first'], ['Money for goals under 5 years', 'Kept as cash'], ['Tax for couples', S.about.partner && S.about.married === true ? 'Joint assessment (married / civil partners)' : 'Taxed as individuals'], ['Known limits', 'Living costs stay the same to 90; your partner\'s pension and retirement age aren\'t modelled']]; }
 const assumeRows = () => (applyAssume(), [['Growth assumptions', AS_NAME[S.assume || 'standard'] + ' (your choice)'], ['Prices rise (inflation)', pc(AS.infl) + ' a year'], ['Pay rises', pc(AS.wage) + ' a year'], ['Cash savings grow', pc(AS.cash) + ' a year, after tax'], ['Investments grow', pc(AS.inv) + ' a year, after charges and tax'], ['Pensions grow', pc(AS.pen) + ' a year after charges (' + pc(AS.penRet) + ' once retired)'],
   ['State Pension', eur(AS.sp) + ' a year from ' + AS.spAge + ' (' + (S.fin.sp || 'Not sure') + ')'], (retireGoal() ? ['Retirement age', '' + S.retireAge] : ['Work income stops at', 'Age ' + S.retireAge + ' (from About you; no retirement goal)']), ['Tax', '2026 Irish income tax, USC and PRSI; bands assumed to rise with prices'], ['At retirement', '25% of your pension taken tax-free (up to €200,000)'], ...saveRows(), ['Plan ends', 'Age ' + AS.end]]);
 function netPay(g){ return g <= 0 ? 0 : g - incomeTax(g) - usc(g) - prsi(g); }
@@ -652,14 +653,20 @@ function netRet(draw, sp, age){ const g = draw + sp; if (g <= 0) return 0;
 // Net cost to take-home of the employee's own pension contributions (relief at marginal income-tax rate, within age limits and the €115,000 cap)
 const relLim = a => a < 30 ? .15 : a < 40 ? .2 : a < 50 ? .25 : a < 55 ? .3 : a < 60 ? .35 : .4;
 function pensionCost(g, E, age){ const Er = Math.min(E, relLim(age) * Math.min(g, 115000)); return E - (incomeTax(g) - incomeTax(Math.max(0, g - Er))); }
+const annPay = (bal, r, yrs) => bal > 0 ? bal * r / (1 - Math.pow(1 + r, -Math.max(1, yrs))) : 0;   // level yearly repayment (FP round 4)
+// Joint assessment (married / civil partners, Ireland 2026): standard-rate band €53,000 + the lower earner's income up to €35,000 (max €88,000); married personal credit €4,000 + €2,000 PAYE credit per earner.
+// Returns the income-tax saving versus being taxed as two single people (never negative). Today's money.
+function jointGain(g1, g2){ g1 = Math.max(0, g1); g2 = Math.max(0, g2); if (!g1 && !g2) return 0; const hi = Math.max(g1, g2), lo = Math.min(g1, g2), band = 53000 + Math.min(lo, 35000), G = g1 + g2;
+  const joint = Math.max(0, 0.2 * Math.min(G, band) + 0.4 * Math.max(0, G - band) - (4000 + 2000 * ((g1 > 0) + (g2 > 0)))), sep = incomeTax(g1) + (g2 > 0 ? incomeTax(g2) : 0);
+  return Math.max(0, sep - joint); }
 function finNums(){
   // Skipped figures count as €0 and show as ❓ Missing. Only "Estimate for me" adds a (labelled) typical figure. (spec §11)
   const f = S.fin, n = k => { const v = f[k]; return v != null && v !== '' && !isNaN(+v) ? +v : 0; };
   const mortOn = f.home === 'Own with mortgage';
-  return {age:S.about.age, R:S.retireAge, work:f.work, partner:!!S.about.partner, pAge:n('pAge') || S.about.age, income:f.work === 'Not working' ? 0 : n('income'), pIncome:S.about.partner ? n('pIncome') : 0,
+  return {age:S.about.age, R:S.retireAge, work:f.work, married:!!S.about.partner && S.about.married === true, partner:!!S.about.partner, pAge:n('pAge') || S.about.age, income:f.work === 'Not working' ? 0 : n('income'), pIncome:S.about.partner ? n('pIncome') : 0,
     otherM:n('otherM'), costsM:n('costsM'), oneOffY:n('oneOffY'), cash:n('cash'), invest:n('invest'), rentM:n('rentM'),
-    mortBal:mortOn ? n('mortBal') : 0, mortPayM:mortOn ? n('mortPayM') : 0, mortYears:mortOn ? n('mortYears') : 0, debt:n('debt'), debtPayM:n('debtPayM'),
-    pension:n('pension'), pensionM:n('pensionM'), sp:f.sp === 'Expect full' ? 1 : f.sp === 'Partly' ? 0.6 : 0.8};
+    mortBal:mortOn ? n('mortBal') : 0, mortPayM:mortOn ? Math.max(n('mortPayM'), annPay(n('mortBal'), AS.mortRate, n('mortYears') || 25) / 12) : 0, mortPayLow:mortOn && n('mortPayM') * 12 < annPay(n('mortBal'), AS.mortRate, n('mortYears') || 25) - 12, mortYears:mortOn ? n('mortYears') : 0, debt:n('debt'), debtPayM:n('debtPayM'),
+    pension:n('pension'), pensionM:f.work !== 'Not working' && n('income') > 0 ? n('pensionM') : 0, sp:f.sp === 'Expect full' ? 1 : f.sp === 'Partly' ? 0.6 : 0.8};
 }
 /* ===== Honest goal funding (FP review round 3). Replaces project(); same return shape {rows, pct} plus P.goal and P.save ===== */
 const SAVE = {
@@ -688,13 +695,14 @@ function project(wi){
   wi = wi || {}; const wg = wi.g != null ? S.goals.find(g => g.id === wi.g) : null, wm = +wi.m || 0, wl = +wi.l || 0;
   const wgR = wg && wg.kind === 'retire';
   // Goals funded from savings: spend, mfree, pot. Retirement uses the pension + cashflow; legacy is what is left at the end.
-  const fg = S.goals.filter(g => ['spend','mfree','pot'].includes(g.kind)).slice().sort(GOAL_ORDER);
+  const fg = S.goals.filter(g => ['spend','mfree','pot'].includes(g.kind)).map(g => Object.assign({}, g, {age:clamp(g.age, a0 + 1, AS.end)})).sort(GOAL_ORDER);
   // Mortgage balance path, so "Be mortgage-free" has a known cost at its date
   const mPath = []; { let m = f.mortBal; for (let t = 0; t <= N; t++){ mPath.push(Math.max(0, m)); if (m > 1){ const pay = Math.min(f.mortPayM * 12, m * (1 + AS.mortRate)); m = m * (1 + AS.mortRate) - pay; } } }
   const G = {}; fg.forEach(g => { const n = Math.max(0, g.age - a0), r = n >= SAVE.longYrs ? AS.inv : AS.cash;
-    const cost = g.kind === 'mfree' ? (f.mortBal > 0 ? mPath[Math.min(n, N)] : g.amount * Math.pow(1 + AS.infl, n)) : g.amount * Math.pow(1 + AS.infl, n);
+    const cost = g.kind === 'mfree' ? (f.mortBal > 0 ? mPath[Math.min(n + 1, N)] : g.amount * Math.pow(1 + AS.infl, n)) : g.amount * Math.pow(1 + AS.infl, n);
     G[g.id] = {g, n, r, cost, pot:0, paid:0, done:false, c0:0, cSum:0, cYrs:0, need0:0}; });
   // 1. Lump sums. Each goal's own "saved so far" first (taken from cash), then a buffer is held back, then free cash + investments in goal order.
+  const dPay = Math.max(f.debtPayM * 12, annPay(f.debt, AS.debtRate, 5));
   let cash = f.cash, inv = f.invest, pen = f.pension, mBal = f.mortBal, dBal = f.debt, mfreeDone = false;
   fg.forEach(g => { const s = Math.min(g.saved || 0, cash); G[g.id].pot += s; cash -= s; });
   if (wg && !wgR && G[wg.id]) G[wg.id].pot += wl; if (wgR) pen += wl;
@@ -710,13 +718,14 @@ function project(wi){
     let inflow = 0;
     if (working){
       const gR = f.income * wgw / infl, E = f.pensionM * 12 * (f.work === 'Self-employed' ? 1 : 0.5) * wgw / infl;
-      inflow += (netPay(gR) - pensionCost(gR, E, a)) * infl;
+      inflow += (netPay(gR) - pensionCost(gR, E, a) - (f.work === 'Self-employed' ? 0.03 * Math.max(0, gR - 100000) : 0)) * infl;   // FP round 4 F10: self-employed USC surcharge
+      if (f.married){ const pa = f.pAge + t, pR = pa < 66 ? f.pIncome * wgw / infl : 0; inflow += jointGain(gR, pR) * infl; }   // FP round 4 S3: joint assessment (married / civil partners)
       let contrib = f.pensionM * 12 * wgw; if (wgR) contrib = Math.max(0, contrib + wm * 12);
       pen = pen * (1 + AS.pen) + contrib;
       if (a >= AS.spAge) inflow += AS.sp * f.sp * infl;
     } else {
       if (a === R){ const ls = Math.min(pen * 0.25, 200000); pen -= ls; free += ls; }
-      const draw = pen / Math.max(1, AS.end - a + 1); pen = (pen - draw) * (1 + AS.penRet);
+      const draw = pen * Math.min(1, Math.max(1 / Math.max(1, AS.end - a + 1), a >= 71 ? 0.05 : a >= 61 ? 0.04 : 0)); pen = (pen - draw) * (1 + AS.penRet);
       inflow += netRet(draw / infl, a >= AS.spAge ? AS.sp * f.sp : 0, a) * infl;
     }
     if (f.partner){ const pa = f.pAge + t; inflow += pa < 66 ? netPay(f.pIncome * wgw / infl) * infl : AS.sp * f.sp * infl; }
@@ -724,14 +733,14 @@ function project(wi){
     let living = (working ? f.costsM * 12 : (rg ? rg.amount : f.costsM * 12 * 0.8)) * infl + f.oneOffY * infl;
     let fixed = 0;
     if (mBal > 1 && !mfreeDone){ const pay = Math.min(f.mortPayM * 12, mBal * (1 + AS.mortRate)); fixed += pay; mBal = mBal * (1 + AS.mortRate) - pay; }
-    if (dBal > 1){ const pay = Math.min(Math.max(f.debtPayM * 12, dBal * 0.1), dBal * (1 + AS.debtRate)); fixed += pay; dBal = dBal * (1 + AS.debtRate) - pay; }
+    if (dBal > 1){ const pay = Math.min(dPay, dBal * (1 + AS.debtRate)); fixed += pay; dBal = dBal * (1 + AS.debtRate) - pay; }
     // 2. Goals due this year are paid from their own pot, then from unallocated money. What can't be paid is a goal gap (shown on the road).
-    let goalGap = 0, goalCost = 0; const due = [], dueG = [];
+    let goalPaid = 0, goalGap = 0, goalCost = 0; const due = [], dueG = [];
     fg.forEach(g => { const x = G[g.id]; if (x.done || g.age > a) return; x.done = true; due.push(g.name);
       if (g.kind === 'pot'){ x.paid = Math.min(x.cost, x.pot); goalGap += x.cost - x.paid;
         if (g.k === 'safety') buffer += x.pot; else free += x.pot; x.pot = 0; }          // the safety net stays as the buffer; a wealth pot becomes free money
       else { let pay = Math.min(x.cost, x.pot); x.pot -= pay; const top = Math.min(x.cost - pay, free); free -= top; pay += top; free += x.pot; x.pot = 0;
-        x.paid = pay; goalGap += x.cost - pay; if (g.kind === 'mfree' && pay >= x.cost - 1){ mfreeDone = true; mBal = 0; } }
+        x.paid = pay; goalPaid += pay; goalGap += x.cost - pay; if (g.kind === 'mfree' && pay >= x.cost - 1){ mfreeDone = true; mBal = 0; } else if (g.kind === 'mfree') mBal = Math.max(0, mBal - pay); }
       gf[g.id].cost = x.cost; gf[g.id].cov = x.paid; goalCost += x.cost; dueG.push({id:g.id, name:g.name, e:g.e, kind:g.kind, cost:x.cost, paid:x.paid}); });   // exposed for the Detail chart
     // 3. Spare money this year. Only the saving amount is saved; the rest is assumed spent.
     const net = inflow - living - fixed; let used = 0, short = 0, saved = 0, spent = 0;
@@ -745,7 +754,8 @@ function project(wi){
       fg.forEach(g => { const x = G[g.id]; if (x.done) return; const n = g.age - a;
         const need = Math.max(0, (x.cost - x.pot * Math.pow(1 + x.r, n)) / annF(n, x.r, AS.wage)), give = Math.min(budget, need);
         if (t === 0) x.need0 = need; x.pot += give; budget -= give; x.cSum += give / infl; x.cYrs++; if (t === 0) x.c0 += give; });
-      free += budget;                                            // saved but not needed by any goal: unallocated
+      free += budget;
+      if (!working){ free += spent; saved += spent; spent = 0; }   // FP round 4 F7: retired income above the spending goal stays in savings                                            // saved but not needed by any goal: unallocated
     } else {
       fg.forEach(g => { const x = G[g.id]; if (!x.done){ x.cYrs++; if (t === 0) x.need0 = Math.max(0, (x.cost - x.pot * Math.pow(1 + x.r, g.age - a)) / annF(g.age - a, x.r, AS.wage)); } });
       let gap = -net; const take = v => { const d = Math.min(gap, v); gap -= d; used += d; return d; };
@@ -758,7 +768,7 @@ function project(wi){
     if (rg && !working){ gf[rg.id].cost += living; gf[rg.id].cov += living - Math.min(short, living); }
     const pots = fg.reduce((s, g) => s + G[g.id].pot, 0), liquid = free + buffer + pots;
     S.goals.forEach(g => { if (g.kind === 'legacy' && t === N){ const tgt = g.amount * infl; gf[g.id].cost = tgt; gf[g.id].cov = Math.min(tgt, free + buffer); } });
-    rows.push({t, a, yr:YEAR0 + t, inflow, needs:living + fixed, living, fixed, goalCost, dueG, short:short + goalGap, shortLiving:short, goalGap, due, used, saved, spent, liquid, pen, retired:!working, rmark:a === R});
+    rows.push({t, a, yr:YEAR0 + t, inflow, needs:living + fixed, goalPaid, living, fixed, goalCost, dueG, short:short + goalGap, shortLiving:short, goalGap, due, used, saved, spent, liquid, pen, retired:!working, rmark:a === R});
   }
   // 5. Results. Floor, so 99.6% never reads as 100%.
   const pct = {}, goal = {};
@@ -766,15 +776,17 @@ function project(wi){
   fg.forEach(g => { const x = G[g.id];
     goal[g.id] = {cost:x.cost, have:x.paid, rate:x.r, years:x.n,
       needM:Math.round(x.need0 / 12), nowM:Math.round(x.c0 / 12), avgM:x.cYrs ? Math.round(x.cSum / x.cYrs / 12) : 0}; });
+  fg.forEach(g => { if (pct[g.id] < 95){ const r = rows[g.age - a0]; if (r) r.goalShort = true; } });   // FP round 4 F1: colours follow the %
+  if (rg && rows.some(r => r.retired && r.shortLiving > Math.max(500, r.needs * 0.02))) pct[rg.id] = Math.min(pct[rg.id], 94);
   const s0 = rows[0], sur0 = f.age < R ? (s0.saved + s0.spent) / 12 : 0;
   return {rows, pct, goal, save:{surplusM:Math.round(sur0), saveM:Math.round(s0.saved / 12)}};
 }
 const band = p => p >= 95 ? 'good' : p >= 70 ? 'nudge' : 'alert';   // teal / gold / coral (Pooja, 1 Oct); weather emojis stay as icons
 const BANDW = {good:'On track', nudge:'Needs a nudge', alert:'Needs attention'}, BANDE = {good:'☀️', nudge:'🌦️', alert:'⛈️'};
-const isShort = r => r.short > Math.max(500, r.needs * 0.02);
+const isShort = r => r.shortLiving > Math.max(500, r.needs * 0.02) || !!r.goalShort;
 const rowCol = r => isShort(r) ? 'var(--alert)' : r.used > 1 ? 'var(--nudge)' : 'var(--good)';
 function extraFor(g){ for (const m of [25,50,75,100,150,200,250,300,400,500,600,750,1000,1250,1500,2000]){ if (project({g:g.id, m, l:0}).pct[g.id] >= 95) return m; } return null; }
-function yearsTxt(g){ const n = g.age - S.about.age; return g.kind === 'retire' ? 'at ' + g.age : 'in ' + n + ' year' + (n === 1 ? '' : 's'); }
+function yearsTxt(g){ const n = g.age - S.about.age; return g.kind === 'legacy' ? 'at the end of your plan (' + AS.end + ')' : g.kind === 'retire' ? 'at ' + g.age : 'in ' + n + ' year' + (n === 1 ? '' : 's'); }
 function qualityCount(){ let n = 0; FSEC.forEach(s => s.f.forEach(k => { if (fieldVisible(k) && !FF[k].opt && (S.src[k] === 'est' || !S.src[k])) n++; })); return n; }
 function skippedSecs(){ return FSEC.filter(sec => { const fs = sec.f.filter(fieldVisible); return fs.length && fs.every(k => !S.src[k] && !S.look[k]); }); }
 function roughNote(){ const sk = skippedSecs(), rough = qualityCount() > 2; if (!sk.length && !rough) return '';
@@ -861,8 +873,9 @@ V.F1 = () => { let sug = SUGGEST(S.about.age).slice(); const wg = WHY.filter(w =
   foot:'<button class="btn" data-a="go" data-p="F2">Place them on my timeline</button>'};
 };
 /* Goal tile (LifeGoals 2.0 .goal-card): big emoji, name below, teal border + fill + tick when picked */
-function goalTile(k){ const c = GC(k), other = k === 'other', on = (!other && S.goals.some(g => g.k === k)) || (other && S.goals.some(g => g.k === 'other'));
-  return '<button class="gtile' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" data-a="gpick" data-p="' + k + '"><span class="tick" aria-hidden="true">✓</span><span class="em" aria-hidden="true">' + c.e + '</span><span class="nm">' + esc(c.t) + '</span></button>'; }
+const noMort = () => !!S.fin.home && S.fin.home !== 'Own with mortgage';
+function goalTile(k){ const c = GC(k), other = k === 'other', on = (!other && S.goals.some(g => g.k === k)) || (other && S.goals.some(g => g.k === 'other')), off = k === 'mfree' && noMort() && !on;
+  return '<button class="gtile' + (on ? ' sel' : '') + (off ? ' off' : '') + '" aria-pressed="' + on + '" data-a="gpick" data-p="' + k + '"' + (off ? ' aria-disabled="true" title="Only if you have a mortgage"' : '') + '><span class="tick" aria-hidden="true">✓</span><span class="em" aria-hidden="true">' + c.e + '</span><span class="nm">' + esc(c.t) + (k === 'mfree' ? '<small class="ghint">' + (off ? 'Only if you have a mortgage' : 'For homeowners with a mortgage') + '</small>' : '') + '</span></button>'; }
 const ROT_SVG = '<svg width="30" height="30" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="10" y="3" width="12" height="20" rx="2.5"/><path d="M15 19.5h2"/><path d="M5 22a11 11 0 0 0 17 7"/><path d="M22 25.5v3.8h-3.8"/></svg>';
 function tlBoard(){
   const a0 = S.about.age, gs = S.goals;
@@ -874,7 +887,7 @@ function tlBoard(){
 /* Full goal name, wrapping to at most 2 lines (no truncation) */
 function chipInner(g){ const n = g.age - S.about.age, nm = g.name;
   return g.kind === 'retire' ? '<span aria-hidden="true">🏁</span>Retire <span class="yr">' + g.age + '</span>' : '<span aria-hidden="true">' + g.e + '</span><span class="nm">' + esc(nm) + '</span><span class="yr">in ' + n + ' yr' + (n === 1 ? '' : 's') + '</span>'; }
-function whenTxt(g){ const n = g.age - S.about.age; return (g.kind === 'retire' ? 'Age ' + g.age : 'in ' + n + ' yr' + (n === 1 ? '' : 's') + ' · age ' + g.age) + ' · ' + (YEAR0 + n); }
+function whenTxt(g){ const n = g.age - S.about.age; if (g.kind === 'legacy') return 'At the end of your plan (' + AS.end + ')'; return (g.kind === 'retire' ? 'Age ' + g.age : 'in ' + n + ' yr' + (n === 1 ? '' : 's') + ' · age ' + g.age) + ' · ' + (YEAR0 + n); }
 function gRows(only){
   return (only || S.goals).slice().sort((a, b) => a.age - b.age).map(g => { const ret = g.kind === 'retire', open = S.tlOpen[g.id];
     return '<div class="grow' + (S.tlHl === g.id ? ' hl' : '') + '" id="row-' + g.id + '"><div class="hd"><span class="e" aria-hidden="true">' + g.e + '</span><input value="' + esc(g.name) + '" data-gname="' + g.id + '" aria-label="Goal name"' + (ret ? ' readonly' : '') + '>' + (ret ? '' : '<button class="link" style="font-size:12.5px" data-a="gdel" data-p="' + g.id + '" aria-label="Remove ' + esc(g.name) + '">Remove</button>') + '</div>' +
@@ -966,7 +979,8 @@ V.PU = () => { const u = S.upl, sm = u.sec === 'smart';
         (typeof v === 'number' ? '<input class="in" style="width:120px;min-height:42px" inputmode="numeric" data-uv="' + k + '" value="' + (u.edit[k] != null ? u.edit[k] : v) + '" aria-label="' + esc(FF[k].l) + '">' : '<b>' + esc(v) + '</b>') + '</div>').join('') + '</div>'; }).join(''),
     foot:'<button class="btn" data-a="uplok">Looks right, add them</button><button class="btn ghost" data-a="uplx">Cancel</button>'};
 };
-function checkItems(){ const out = []; FSEC.forEach(s => s.f.filter(fieldVisible).forEach(k => { const src = S.src[k], look = S.look[k];
+const MORT_LOW = "This repayment wouldn't clear the mortgage in the years left";
+function checkItems(){ const out = [], fN = finNums(); if (fN.mortPayLow && !S.look.mortPayM) S.look.mortPayM = MORT_LOW; else if (!fN.mortPayLow && S.look.mortPayM === MORT_LOW) delete S.look.mortPayM; /* FP round 4 F4 */ FSEC.forEach(s => s.f.filter(fieldVisible).forEach(k => { const src = S.src[k], look = S.look[k];
   const st = look ? 'look' : src === 'est' ? 'est' : !src ? (FF[k].opt ? null : 'miss') : src === 'doc' ? 'ok' : 'typed'; if (st) out.push({k, s, st}); })); return out; }
 V.P4 = () => { const it = checkItems(), flag = it.filter(x => ['look','est','miss'].includes(x.st)), good = it.filter(x => !['look','est','miss'].includes(x.st));
   const ic = {look:'⚠️', est:'≈', miss:'❓'}, lb = {look:'Needs a look', est:'Estimated for you', miss:'Missing'};
@@ -986,6 +1000,8 @@ V.P4 = () => { const it = checkItems(), flag = it.filter(x => ['look','est','mis
 V.U1 = () => ({id:'U1', note:'Loader. Never shows a made-up result.', head:flowHead(4, 'Step 4 · Understand', 'Building your plan', '', ''), html:'<div style="padding:60px 0;text-align:center"><div class="spin" aria-hidden="true"></div><p class="sub" style="margin-top:18px" role="status">Running your numbers…</p><p class="small">If this takes a while, we\'ll let you know by email and SMS when it\'s ready.</p></div>'});
 /* ================= RESULTS ================= */
 function goalLine(P, g){ const x = P.goal && P.goal[g.id]; if (!x) return '';
+  if (g.kind === 'mfree' && S.fin.home && S.fin.home !== 'Own with mortgage') return 'No mortgage in Your finances: remove this goal, or add your mortgage';
+  if (P.pct[g.id] < 100 && P.save && x.needM > P.save.surplusM) return 'Needs more than your spare money each month (about ' + eur(x.needM) + ' a month)';
   if (P.pct[g.id] >= 100 && x.nowM >= x.needM) return 'Fully funded' + (x.nowM > 0 ? ' · you\'re putting ' + eur(x.nowM) + ' a month' : '');
   const ahead = x.avgM > x.nowM ? S.goals.filter(o => P.goal[o.id] && o.id !== g.id && GOAL_ORDER(o, g) < 0 && P.pct[o.id] > 0).sort(GOAL_ORDER)[0] : null;
   return 'Needs ' + eur(x.needM) + ' a month · you\'re putting ' + eur(x.nowM) + ' a month' + (ahead ? ' now, more later as earlier goals finish' : ''); }
@@ -1241,7 +1257,7 @@ V.ME = () => { const m = S.me;
   return {id:'ME-01', note:'Me = profile hub: name, partner (invite or add myself), dependants · money personality + indicative risk profile · re-check of first answers · deeper questions (feed My Plan). Not a gate.', head:appHead('Me', 'Your profile. It shapes your plan and helps your adviser.'),
     html:(S.book.done && needsProfile() ? nudge('🧭', 'Check your profile before your adviser meeting', 'Check now', 'toprofile') : '') +
       '<div class="card"><div class="adv"><span class="face" style="width:48px;height:48px;border-radius:16px;font-size:20px" aria-hidden="true">' + esc(nm[0]) + '</span><div style="flex:1"><b style="font-size:17px">' + esc(nm) + '</b><div class="small">Age ' + b.age + ' · retiring at ' + S.retireAge + '</div></div><button class="link" data-a="me" data-p="details">Edit</button></div>' +
-        '<div class="field" style="margin:16px 0 0"><span class="flabel">Planning with a partner?</span>' + seg('partner', [['Yes','Yes'],['No','No']], v => (v === 'Yes' && b.partner === true) || (v === 'No' && b.partner === false)) + (b.partner ? partnerBlock() : '') + '</div>' +
+        '<div class="field" style="margin:16px 0 0"><span class="flabel">Planning with a partner?</span>' + seg('partner', [['Yes','Yes'],['No','No']], v => (v === 'Yes' && b.partner === true) || (v === 'No' && b.partner === false)) + (b.partner ? marriedField() + partnerBlock() : '') + '</div>' +
         '<div class="field" style="margin:16px 0 0"><span class="flabel">Children or others who rely on you</span>' + seg('deps', [[0,'0'],[1,'1'],[2,'2'],[3,'3+']], v => b.deps === v) + '</div></div>' +
       (!discEnough() ? '<div class="card"><div class="eyebrow">Your profile</div><p class="small" style="color:var(--ink);margin:6px 0 0">Answer a few more of your first questions to see your money personality and indicative risk profile.</p><button class="link" data-a="me" data-p="recheck">Answer a few more</button></div>' :
       '<div class="card"><div class="eyebrow">Your profile</div><div class="row" style="margin-top:6px"><span style="font-size:34px" aria-hidden="true">' + P.e + '</span><div style="flex:1"><b style="font-family:var(--fh);font-size:20px">' + P.name + '</b><div class="small">' + P.strap + '</div></div></div>' +
@@ -1256,6 +1272,7 @@ function partnerLine(){ if (!S.about.partner) return 'No'; const pt = S.partner;
 /* ================= §12 APP SHELL BEFORE A PLAN: Home, My Plan empty state, plan builder ================= */
 const PB = [['B1','About you & family'],['F1','Your goals'],['F2','Your timeline'],['B4','Your money profile'],['P1','Secure your account'],['P2','Your finances'],['P4','Check your details'],['U1','Your results']];
 function pbStep(id){ id = id || S.scr; return /^B1/.test(id) ? 1 : id === 'F1' ? 2 : /^F[24]/.test(id) ? 3 : id === 'B4' ? 4 : /^P1/.test(id) ? 5 : /^P[23]|^PU/.test(id) ? 6 : id === 'P4' ? 7 : id === 'U1' ? 8 : 1; }
+function marriedField(){ const m = S.about.married; return '<div style="margin:10px 0 0"><span class="flabel" style="font-size:13.5px">Married or in a civil partnership? <span class="small" style="font-weight:600">Optional</span></span><div class="seg" role="group" aria-label="Married or in a civil partnership" style="margin:6px 0 0">' + ['Yes','No'].map(x => { const on = (m === true && x === 'Yes') || (m === false && x === 'No'); return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-a="married" data-p="' + x + '">' + x + '</button>'; }).join('') + '</div><span class="small">If yes, we use joint assessment for income tax, which can lower your tax.</span></div>'; }
 const verified = () => S.acct.ev && S.acct.sv;
 function pbBar(){ const k = pbStep(); return '<div class="pbbar" role="img" aria-label="Plan builder, step ' + k + ' of 8: ' + PB[k - 1][1] + '">' + PB.map((x, i) => '<i class="' + (i + 1 < k ? 'done' : i + 1 === k ? 'on' : '') + (i === 4 && verified() && k !== 5 ? ' skip' : '') + '"></i>').join('') + '</div>'; }
 function prefillAbout(){ if (S.acct.name){ S.fin.name = S.acct.name; S.src.name = S.src.name || 'pre'; } S.fin.age = S.about.age; S.src.age = S.src.age || 'pre'; S.fin.retireAge = S.retireAge; S.src.retireAge = S.src.retireAge || 'pre'; }
@@ -1277,7 +1294,7 @@ V.B1 = () => { const b = S.about, ok = b.partner != null && b.deps != null;
   return {id:'B1', note:'Plan builder step 1: about you & your family (name, age, partner invite or add myself, dependants). Moved out of onboarding (§12). No money figures yet.', head:flowHead(1, 'Step 1', 'About you & your family', 'So we can suggest goals that fit your life stage.', 'pbexit'),
   html:'<div class="card"><div class="field"><label for="b-name">Your first name</label><input class="in" id="b-name" data-acct="name" autocomplete="given-name" value="' + esc(S.acct.name) + '"></div>' +
     '<div class="field"><span class="flabel" id="lab-age">Your age</span>' + stepper('age', 'x', b.age, 'Your age') + '<input type="range" min="18" max="80" value="' + b.age + '" data-in="age" aria-labelledby="lab-age"></div>' +
-    '<div class="field"><span class="flabel">Planning with a partner?</span><div class="seg" role="group" aria-label="Planning with a partner">' + ['Yes','No'].map(x => { const on = (b.partner === true && x === 'Yes') || (b.partner === false && x === 'No'); return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-a="partner" data-p="' + x + '">' + x + '</button>'; }).join('') + '</div>' + (b.partner ? partnerBlock(!verified()) : '') + '</div>' +
+    '<div class="field"><span class="flabel">Planning with a partner?</span><div class="seg" role="group" aria-label="Planning with a partner">' + ['Yes','No'].map(x => { const on = (b.partner === true && x === 'Yes') || (b.partner === false && x === 'No'); return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-a="partner" data-p="' + x + '">' + x + '</button>'; }).join('') + '</div>' + (b.partner ? marriedField() + partnerBlock(!verified()) : '') + '</div>' +
     '<div class="field" style="margin:0"><span class="flabel">Children or others who rely on you</span><div class="seg" role="group" aria-label="Dependants">' + ['0','1','2','3+'].map((x, k) => '<button class="' + (b.deps === k ? 'on' : '') + '" aria-pressed="' + (b.deps === k) + '" data-a="deps" data-p="' + k + '">' + x + '</button>').join('') + '</div></div></div>',
   foot:'<button class="btn" data-a="go" data-p="F1"' + (ok ? '' : ' disabled') + '>Next: your goals</button>'}; };
 function umLeftTxt(){ const n = UM_NEW.filter(u => u === '6' ? typeof S.ans['6'] !== 'number' : typeof S.um.a[u] !== 'number').length, d = discCount();
@@ -1680,13 +1697,14 @@ const ACT = {
   dpick:p => { const q = DISC6[S.di]; S.ans[q.id] = +p; render(); const i = S.di; setTimeout(() => { if (S.scr === 'D' + (i + 2) && DISC6[S.di] === q) dnext(); }, RM() ? 0 : 280); },
   dnext:() => dnext(), dgoto:p => { S.di = +p; go('D' + (S.di + 2)); }, dprev:() => { if (S.scr === 'DR'){ S.di = DISC6.length - 1; go('D' + (S.di + 2)); return; } if (S.di <= 0) go('D1'); else { S.di--; go('D' + (S.di + 2)); } },
   age:p => { const d = +p.split('|')[1]; S.about.age = clamp(S.about.age + d, 18, 80); focusKey = '[data-a="age"][data-p="x|' + d + '"]'; render(); },
+  married:p => { const v = p === 'Yes'; S.about.married = S.about.married === v ? null : v; focusKey = '[data-a="married"][data-p="' + p + '"]'; render(); },
   partner:p => { S.about.partner = p === 'Yes'; focusKey = '[data-a="partner"][data-p="' + p + '"]'; render(); },
   deps:p => { S.about.deps = +p; focusKey = '[data-a="deps"][data-p="' + p + '"]'; render(); },
   backd:() => go('B1'),
   dssave:() => { const e = (document.getElementById('ds-email').value || '').trim(); if (!/.+@.+\..+/.test(e)){ document.getElementById('dserr').textContent = 'Please enter a valid email, or tap Skip for now.'; return; }
     S.save = {email:e, comms:document.getElementById('ds-comms').checked, done:true, asked:true}; S.acct.email = e; enterApp('Saved ✓ Check your inbox for your link'); },
   dsskip:() => { S.save.asked = true; enterApp('Welcome! Make your plan whenever you\'re ready'); },
-  gpick:p => { if (p === 'other'){ S.sheet = 'other'; render(); return; }
+  gpick:p => { if (p === 'mfree' && noMort() && !S.goals.some(g => g.k === 'mfree')){ toast('Be mortgage-free is for homeowners with a mortgage. Your finances say: ' + S.fin.home); return; } if (p === 'other'){ S.sheet = 'other'; render(); return; }
     const i = S.goals.findIndex(g => g.k === p); if (i >= 0) S.goals.splice(i, 1); else S.goals.push(mkGoal(p)); if (S.wi.g != null && !gById(S.wi.g)) S.wi = {g:null, m:0, l:0}; focusKey = '[data-a="gpick"][data-p="' + p + '"]'; if (S.app) afterPlanEdit(); render(); },
   addother:p => { let c; if (p === 'own'){ const v = ((document.getElementById('oth') || {}).value || '').trim(); if (!v) { toast('Type a name for your goal'); return; } c = ['⭐', v.slice(0, 30), 10000, 4]; } else c = OTHER_LIST[+p];
     S.goals.push(mkGoal('other', c)); S.sheet = null; if (S.app) afterPlanEdit(); render(); toast(c[1] + ' added'); },
@@ -1781,7 +1799,7 @@ function dnext(){ if (S.di >= DISC6.length - 1){ go('DR'); return; } S.di++; go(
 function verify(flag, next){ const code = [...document.querySelectorAll('[data-code]')].map(i => i.value).join(''); if (code !== '123456'){ document.getElementById('codeerr').textContent = code.length < 6 ? 'Enter all 6 digits.' : "That code doesn't match. Try 123456."; return; } S.acct[flag] = true; toast(flag === 'ev' ? 'Email verified' : 'Mobile verified'); go(next); }
 function defaultWiGoal(){ const P = project(); const w = S.goals.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id] || a.age - b.age)[0]; return w ? w.id : null; }
 function afterPlanEdit(quiet){ if (!quiet) version('Goals changed'); }
-function moveGoal(g, age){ const a0 = S.about.age; age = g.kind === 'retire' ? clamp(age, Math.max(55, a0 + 1), 75) : clamp(age, a0 + 1, 90); g.age = age; if (g.kind === 'retire') setRetireAge(age); }
+function moveGoal(g, age){ if (g.kind === 'legacy') return; const a0 = S.about.age; age = g.kind === 'retire' ? clamp(age, Math.max(55, a0 + 1), 75) : clamp(age, a0 + 1, 90); g.age = age; if (g.kind === 'retire') setRetireAge(age); }
 function startUpload(sec, files){ const fail = files.some(f => /fail/i.test(f)); S.upl = {sec, stage:'scan', files, edit:{}}; S.sheet = null;
   if (!S.app) S.scr = 'PU'; else { if (S.tab === 'plan' || S.tab === 'home') S.tab = 'me'; if (S.tab === 'me') S.me = 'fin'; else S.exp = 'fin'; }
   render(); setTimeout(() => { if (!S.upl) return; S.upl.stage = fail ? 'fail' : 'confirm'; render(); }, RM() ? 200 : 1500); }
