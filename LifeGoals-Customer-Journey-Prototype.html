@@ -290,6 +290,7 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 .field output{font-weight:800;color:var(--sea-d)}
 .asm .seg button{min-height:40px}
 .gtile.off{opacity:.5;cursor:not-allowed}.gtile .ghint{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:2px;line-height:1.2}
+.card.pst{background:linear-gradient(150deg,var(--sea-l),#fff 75%);border:1.5px solid #B5E3DB}
 .shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pq{border-top:1px solid var(--line);padding:10px 0}.pq:first-child{border-top:0}
 /* sheets & toast */
@@ -489,7 +490,7 @@ function fresh(){
     acct:{name:'', email:'', mobile:'', c1:false, c2:false, ev:false, sv:false, pk:false},
     fin:{}, src:{}, conf:{}, look:{}, ack:{}, fsec:null, fmode:{}, upl:null, checked:false, from:null,
     um:{a:{}, chips:[], done:{}, sec:null}, wi:{g:null, m:0, l:0}, pref:null, versions:[], understood:false, advQs:[],
-    view:'journey', chapOpen:null, saveM:null, saveNote:'', shell:false, pb:false, xs:[], calcV:{}, play:false, vf:'all', assume:'standard',
+    view:'journey', chapOpen:null, pst:null, pdoc:null, calcSrc:{}, after:null, saveM:null, saveNote:'', shell:false, pb:false, xs:[], calcV:{}, play:false, vf:'all', assume:'standard',
     book:{stage:null, adv:0, share:{report:false, fin:false, docs:false, um:false}, agree:false, mode:'Video', slot:null, done:false, from:'plan'},
     partner:{mode:null, email:'', sent:false, name:''}, ask:{open:null, q:'', a:null}, meEdit:{},
     sheet:null, toast:null};
@@ -866,7 +867,7 @@ V.DS = () => ({id:'DS', note:'Save your results (§12, MASTER C8): email only, o
   '<div class="qfoot"><button class="qback" data-a="dsskip">Skip for now</button><button class="wbtn" data-a="dssave">Save my results</button></div>'});
 
 /* ================= DEFINE ================= */
-function flowHead(n, eye, title, sub, back){ const pb = !S.app && S.shell, k = pbStep(); if (pb && /^Step /.test(eye)) eye = 'Step ' + k + ' of 8 · ' + PB[k - 1][1]; else if (!pb && /^Step /.test(eye)) eye = '';
+function flowHead(n, eye, title, sub, back){ const pb = !S.app && S.shell && S.tab === 'plan', k = pbStep(); if (S.tab === 'explore' && S.after && back && /^go\|(B4|P1)$/.test(back)) back = back === 'go|B4' ? 'xback' : back; if (pb && /^Step /.test(eye)) eye = 'Step ' + k + ' of 8 · ' + PB[k - 1][1]; else if (!pb && /^Step /.test(eye)) eye = '';
   return brandBar(back) + (pb ? pbBar() : '') + '<div class="eyebrow" style="margin-top:8px">' + eye + '</div><h2 class="t" tabindex="-1">' + title + '</h2>' + (sub ? '<p class="sub" style="margin:0">' + sub + '</p>' : ''); }
 function saveBanner(){ return S.save.done ? '<div class="banner">✅ <span>Progress saved to ' + esc(S.save.email) + '</span></div>' : '<div class="banner">💾 <span>Want a break?</span><button class="link" data-a="sheet" data-p="save">Save and come back later</button></div>'; }
 V.F1 = () => { let sug = SUGGEST(S.about.age).slice(); const wg = WHY.filter(w => S.why.includes(w.k)).flatMap(w => w.goals || []); sug = [...new Set(wg.concat(sug))];   // D1 answers first
@@ -1386,7 +1387,7 @@ const CALCS = [
   run(v){ const t = v.e * v.mt, cov = v.s / v.e, gap = Math.max(0, t - v.s);
     return {lbl:'You currently have', val:cov.toFixed(1) + ' months', line: gap ? 'Your target is ' + eur(t) + ' (' + v.mt + ' months). You are ' + eur(gap) + ' away.' : 'Your cushion covers ' + v.mt + ' months. Great foundation.', rows:[['Target cushion', eur(t)],['Still to build', eur(gap)]], goal: gap ? {name:'Emergency fund', em:'🪂', amount:Math.round(t), years:2} : null}; }},
  {id:'retirement', cat:'retire', name:'Retirement projection', q:'Could your current path fund the retirement you want?', em:'🌅',
-  inputs:[I('age','Your age',40,20,70,1,'age'),I('ra','Target retirement age',65,50,75,1,'age'),I('pot','Pension value today',60000,0,1500000,5000,'€'),I('m','Monthly contributions',500,0,5000,50,'€'),I('d','Desired yearly income',40000,10000,150000,1000,'€'),I('o','Other yearly income (e.g. State Pension)',15000,0,50000,500,'€'),I('g','Growth assumption',4.5,1,7,0.5,'%')],
+  inputs:[I('age','Your age',40,20,70,1,'age'),I('ra','Target retirement age',65,50,75,1,'age'),I('pot','Pension value today',60000,0,1500000,1000,'€'),I('m','Monthly contributions',500,0,5000,10,'€'),I('d','Desired yearly income',40000,10000,150000,1000,'€'),I('o','Other yearly income (e.g. State Pension)',15000,0,50000,500,'€'),I('g','Growth assumption',4.5,1,7,0.5,'%')],
   wi:[I('later','Retire later by',0,0,5,1,'y'),I('more','Save more each month',0,0,1500,50,'€'),I('less','Spend less in retirement (per year)',0,0,20000,500,'€')],
   run(v){ const y = Math.max(1, v.ra + (v.later || 0) - v.age), f = fvL(v.pot, v.g, y) + fvA(v.m + (v.more || 0), v.g, y), target = Math.max(0, (v.d - (v.less || 0) - v.o)) * 25, gap = target - f;
     return {lbl:'Projected fund', val:eur(f), line: gap > 0 ? 'Illustrative gap of ' + eur(gap) + '. See how different assumptions affect the illustration.' : 'On these assumptions your projected fund meets the illustrative target.', rows:[['Illustrative target', eur(target)],['Illustrative gap', gap > 0 ? eur(gap) : 'None'],['Retiring at', String(v.ra + (v.later || 0))]], goal:{name:'Comfortable retirement', em:'🌅', amount:Math.round(target), years:y}}; }},
@@ -1455,7 +1456,7 @@ function calcVals(c){ if (!S.calcV[c.id]){ const v = {}, f = S.fin, has = k => f
     if (c.id === 'borrow' && has('income')){ fit('inc', +f.income); if (has('pIncome')) fit('inc2', +f.pIncome); }
     S.calcV[c.id] = v; } return S.calcV[c.id]; }
 const fmtIn = (i, v) => i.u === '€' ? eur(v) : i.u === '%' ? v + '%' : i.u === 'y' ? v + ' yrs' : i.u === 'm' ? v + ' mo' : i.u === 'age' ? 'age ' + v : String(v);
-const fieldR = (i, v) => '<div class="field"><label for="c-' + i.k + '">' + esc(i.l) + '<output id="co-' + i.k + '">' + fmtIn(i, v) + '</output></label><input type="range" id="c-' + i.k + '" data-ck="' + i.k + '" min="' + i.min + '" max="' + i.max + '" step="' + i.step + '" value="' + v + '"></div>';
+const fieldR = (i, v, src) => '<div class="field"><label for="c-' + i.k + '"><span>' + esc(i.l) + (src && src.includes(i.k) ? ' <span class="tag doc">From your statement</span>' : '') + '</span><output id="co-' + i.k + '">' + fmtIn(i, v) + '</output></label><input type="range" id="c-' + i.k + '" data-ck="' + i.k + '" min="' + i.min + '" max="' + i.max + '" step="' + i.step + '" value="' + v + '"></div>';
 function calcOut(c){ const v = calcVals(c), r = c.run(v); return '<div class="card" style="background:var(--ink);color:#fff"><div class="eyebrow" style="color:var(--sun)">' + esc(r.lbl) + '</div><div style="font-family:var(--fh);font-size:36px;font-weight:800;margin:4px 0">' + r.val + '</div><p style="margin:0;font-size:14px;line-height:1.5;color:#DCE7F2">' + esc(r.line) + '</p>' + r.rows.map(x => '<div class="row" style="justify-content:space-between;border-top:1px solid rgba(255,255,255,.14);padding:8px 0;margin-top:8px;font-size:13.5px"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('') + '</div>'; }
 function toolsForYou(){ const ks = S.goals.map(g => g.spec), ids = []; const add = x => { if (!ids.includes(x)) ids.push(x); };
   if (ks.includes('mortgage')) { add('borrow'); add('deposit'); } if (ks.includes('pension')) { add('retirement'); add('contrib'); } add('goalplanner'); add('emergency'); add('surplus'); add('lifecover'); add('compound'); return ids.slice(0, 6); }
@@ -1490,18 +1491,60 @@ V.XPL = () => { const P = S.app ? project() : null, slip = P ? S.goals.filter(g 
    '<div class="sec"><h3>Tools for you</h3></div><div class="hstrip">' + toolsForYou().map(toolTile).join('') + '</div>' + watchHTML() +
    '<div class="sec"><h3>Topics</h3></div>' + TOPICS.map(t => '<button class="goal" data-a="topic" data-p="' + t[1] + '"><span class="ic" aria-hidden="true">' + t[0] + '</span><span style="flex:1"><b>' + t[1] + '</b><br><span class="small">' + t[2] + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
    '<p class="disc">Calculators and videos explain general topics. Figures are illustrative, not a guarantee and not advice.</p>'}; };
+/* ================= PENSION STATEMENT UPLOAD in Explore › Pensions & Retirement (Pooja, 1 Oct) ================= */
+// Mock document reader values: [value, confidence %]. Gate: account + email + mobile verified first (xlsx MASTER D8).
+const PST_DOCS = ['Pension benefit statement', 'Annual pension statement', 'PRSA statement', 'Employer scheme / Occupational pension statement', 'State Pension record (MyWelfare)'];
+const PST_V = {pot:['Current pension value', 72000, 95, '€'], youM:['Your monthly contribution', 260, 93, '€'], empM:['Employer monthly contribution', 260, 91, '€'], nra:['Normal retirement age on the statement', 66, 96, 'age'],
+  proj:['Projected value at retirement', 310000, 84, '€'], chg:['Annual charges', 1.0, 76, '%'], prsi:['State Pension record: PRSI years', 28, 88, 'y']};
+const PST_DATE = 'Jul 2025', PST_OLD = true;   // statement date; older than 12 months → flagged like the existing one
+const PTOOLS = ['retirement', 'contrib', 'avc', 'lastmoney', 'drawdown'];
+const spFromYears = y => y >= 40 ? 'Expect full' : y >= 10 ? 'Partly' : 'Not sure';
+function pstCard(){ const d = S.pdoc;
+  return '<div class="card pst"><b style="font-size:15px">📄 Have a pension statement? Upload it and we\'ll fill in these tools for you.</b><p class="small" style="margin:6px 0 10px">We can read: ' + PST_DOCS.map(esc).join(' · ') + '.</p>' +
+    (d ? '<div class="mini" style="align-items:center"><span>✅ Uploaded: <b>' + esc(d.name) + ' · ' + esc(d.date) + '</b></span><button class="link" data-a="pstup" data-p="sample">Replace</button></div>' :
+    '<div class="grid2"><label class="btn sm" style="width:100%;cursor:pointer">Upload a statement<input type="file" class="sr" data-pfile="1" accept=".pdf,.jpg,.jpeg,.png,.heic"></label><button class="btn sm ghost" style="width:100%" data-a="pstup" data-p="sample">Use a sample statement</button></div>') +
+    (verified() ? '' : '<p class="small" style="margin:8px 0 0">🔐 First we\'ll secure your account (email and mobile code), so your documents stay private.</p>') + '</div>'; }
+function pstStart(files){ if (!verified()){ S.after = {k:'pst', files, scr:S.scr}; S.scr = 'P1'; S.xs.push({v:'ACCT'}); lastId = null; render(); return; }
+  S.pst = {stage:'scan', files, edit:{}}; S.xs = S.xs.filter(x => x.v !== 'ACCT' && x.v !== 'PST'); S.xs.push({v:'PST'}); lastId = null; render();
+  setTimeout(() => { if (S.pst && S.pst.stage === 'scan'){ S.pst.stage = 'confirm'; render(); } }, RM() ? 200 : 1400); }
+V.ACCT = () => { const v = V[/^P1[EKS]?$/.test(S.scr) ? S.scr : 'P1'](); v.note = 'Upload gate (xlsx MASTER D8): ' + v.note; return v; };
+V.PST = () => { const u = S.pst;
+  if (!u) return V.XCAT('retire');
+  if (u.stage === 'scan') return {id:'PST-scan', note:'Reading your pension statement (mock document reader).', head:appHead('Reading your statement…', esc(u.files.join(', ')), 'xback'), html:'<div class="scan" aria-hidden="true">📄</div><p class="sub" style="text-align:center;margin-top:14px" role="status">Finding your pension figures</p>'};
+  const row = (k, [l, v, c, unit]) => '<div class="mini" style="align-items:center"><span style="flex:1"><b style="font-size:14px">' + esc(l) + '</b><br>' + (c < 80 ? '<span class="tag look">⚠️ Check this · ' + c + '% sure</span>' : '<span class="tag doc">✓ ' + c + '% sure</span>') + '</span><input class="in" style="width:110px;min-height:42px" inputmode="decimal" data-pv="' + k + '" value="' + (u.edit[k] != null ? u.edit[k] : v) + '" aria-label="' + esc(l) + (unit === '%' ? ' (%)' : '') + '"></div>';
+  return {id:'PST-confirm', note:'"We read these values, please confirm": confidence tags, editable values, statement date with the older-than-12-months flag. Feeds the 5 pension tools and Your finances › Pension (no duplication).', head:appHead('We read these values', 'Please confirm. Change anything that looks wrong.', 'xback'),
+    html:'<div class="card"><b>🌅 ' + esc(PST_DOCS[0]) + '</b><div class="small">' + esc(u.files.join(', ')) + '</div>' + ['pot','youM','empM','nra','proj','chg'].map(k => row(k, PST_V[k])).join('') +
+      '<div class="mini"><span><b style="font-size:14px">Statement date</b><br>' + (PST_OLD ? '<span class="tag est">Statement is over 12 months old</span>' : '') + '</span><b>' + PST_DATE + '</b></div></div>' +
+      '<div class="card"><b>🏛️ State Pension record (MyWelfare)</b>' + row('prsi', PST_V.prsi) + '<div class="mini"><span>Expected State Pension</span><b id="pst-sp">' + spFromYears(+(u.edit.prsi != null ? u.edit.prsi : PST_V.prsi[1])) + '</b></div><p class="small" style="margin:4px 0 0">A full State Pension needs about 40 years of PRSI contributions [confirm with MyWelfare].</p></div>' +
+      '<p class="disc">These also go into Your finances › Pension, so we won\'t ask for them again.</p>',
+    foot:'<button class="btn" data-a="pstok">Looks right, fill in my tools</button><button class="btn ghost" data-a="xback">Cancel</button>'}; };
+function pstConfirm(){ const u = S.pst, val = k => { const e = u.edit[k]; return e != null && e !== '' && !isNaN(+e) ? +e : PST_V[k][1]; }, conf = k => u.edit[k] != null && +u.edit[k] !== PST_V[k][1] ? null : PST_V[k][2];
+  const v = {}; Object.keys(PST_V).forEach(k => v[k] = val(k));
+  // Your finances › Pension: same values, source = document (never asked again)
+  const put = (k, x, c) => { S.fin[k] = x; S.src[k] = c == null ? 'typed' : 'doc'; if (c != null) S.conf[k] = c; else delete S.conf[k]; delete S.look[k]; };
+  put('pension', v.pot, conf('pot')); put('pensionM', v.youM + v.empM, conf('youM') == null || conf('empM') == null ? null : Math.min(conf('youM'), conf('empM'))); put('sp', spFromYears(v.prsi), conf('prsi'));
+  if (PST_OLD) S.look.pension = 'Statement is over 12 months old';
+  S.pdoc = {name:PST_DOCS[0], date:PST_DATE, v};
+  // Pre-fill all 5 pension tools; each pre-filled input is tagged "From your statement"
+  const age = S.about.age, yrs = Math.max(1, v.nra - age), g = Math.max(1, 5 - v.chg), pre = {
+    retirement:{pot:v.pot, m:v.youM + v.empM, ra:v.nra, age, o:Math.round(AS.sp * ({'Expect full':1, Partly:0.6}[spFromYears(v.prsi)] || 0.8) / 500) * 500, g},
+    contrib:{y:yrs, g}, avc:{y:yrs, g}, lastmoney:{pot:v.proj}, drawdown:{pot:v.proj}};
+  S.calcSrc = {}; PTOOLS.forEach(id => { const c = C(id), cur = Object.assign({}, calcVals(c)), all = c.inputs.concat(c.wi || []);
+    Object.entries(pre[id]).forEach(([k, x]) => { const i = all.find(y => y.k === k); if (!i) return; cur[k] = clamp(Math.round(x / i.step) * i.step, i.min, i.max); if (k !== 'age') (S.calcSrc[id] = S.calcSrc[id] || []).push(k); }); S.calcV[id] = cur; });
+  S.pst = null; S.xs = [{v:'XCAT', p:'retire'}, {v:'CALC', p:'retirement'}]; lastId = null; render();
+  toast(S.app ? 'Added to your plan too' : 'Saved. Your plan will use it when you make it'); }
 const aExp = k => { const x = EXPERT_FOR[k].toLowerCase(); return (/^[aeiou]/.test(x) ? 'an ' : 'a ') + x; };
 V.XTOPIC = p => { const t = TOPICS.find(x => x[1] === p);
   return {id:'XPL-TOPIC', note:'Topic page (Lifecast): tools and short videos for one topic. No inline adviser contact: a short link opens the Experts tab with the matching specialist pre-selected.', head:appHead(t[0] + ' ' + t[1], esc(t[2]) + '.', 'xback'),
   html:'<div class="sec" style="margin-top:4px"><h3>Tools</h3></div>' + CALCS.filter(c => c.cat === t[4]).slice(0, 4).map(c => '<button class="goal" data-a="calc" data-p="' + c.id + '"><span class="ic" aria-hidden="true">' + c.em + '</span><span style="flex:1"><b>' + esc(c.name) + '</b><br><span class="small">' + esc(c.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
    (VIDEOS.some(v => v.kind === t[3]) ? '<div class="sec"><h3>Watch</h3></div><div class="hstrip">' + VIDEOS.filter(v => v.kind === t[3]).map(v => vThumb(v)).join('') + '</div>' : '') +
    '<button class="link" style="margin-top:12px;font-size:15px" data-a="expertfor" data-p="' + t[3] + '">Talk to ' + aExp(t[3]) + ' →</button><p class="disc">Topics explain general ideas. They are not advice.</p>'}; };
-V.XCAT = p => { const c = CATS.find(x => x.id === p); return {id:'XPL-CAT', note:'Tools in one life-need group.', head:appHead(c.em + ' ' + esc(c.name), esc(c.blurb), 'xback'),
-  html:CALCS.filter(x => x.cat === p).map(x => '<button class="goal" data-a="calc" data-p="' + x.id + '"><span class="ic" aria-hidden="true">' + x.em + '</span><span style="flex:1"><b>' + esc(x.name) + '</b><br><span class="small">' + esc(x.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('')}; };
+V.XCAT = p => { const c = CATS.find(x => x.id === p); return {id:'XPL-CAT', note:'Tools in one life-need group.' + (p === 'retire' ? ' Pensions & Retirement: pension-statement upload card at the top (gated by a verified account).' : ''), head:appHead(c.em + ' ' + esc(c.name), esc(c.blurb), 'xback'),
+  html:(p === 'retire' ? pstCard() : '') +CALCS.filter(x => x.cat === p).map(x => '<button class="goal" data-a="calc" data-p="' + x.id + '"><span class="ic" aria-hidden="true">' + x.em + '</span><span style="flex:1"><b>' + esc(x.name) + '</b><br><span class="small">' + esc(x.q) + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('')}; };
 V.CALC = p => { const c = C(p), v = calcVals(c);
   return {id:'CALC-' + p, note:'Calculator (Lifecast): pre-filled from what you told us, live result, what-if sliders. "Add to my plan" adds a goal after a confirm step.', head:appHead(c.em + ' ' + esc(c.name), esc(c.q) + (c.tip ? '<span class="note" style="display:block;margin-top:8px">💡 ' + esc(c.tip) + '</span>' : ''), 'xback'),
-  html:'<div class="eyebrow" style="margin:2px 0 8px">' + esc(CATS.find(x => x.id === c.cat).name) + '</div><div class="card" style="margin-bottom:12px">' + c.inputs.map(i => fieldR(i, v[i.k])).join('') + '</div><div id="cout" aria-live="polite">' + calcOut(c) + '</div>' +
-   (c.wi ? '<div class="card" style="margin-top:12px;border:1.5px dashed #B9C9D6;box-shadow:none"><b>What if…</b>' + c.wi.map(i => fieldR(i, v[i.k])).join('') + '</div>' : '') +
+  html:'<div class="eyebrow" style="margin:2px 0 8px">' + esc(CATS.find(x => x.id === c.cat).name) + '</div><div class="card" style="margin-bottom:12px">' + c.inputs.map(i => fieldR(i, v[i.k], (S.calcSrc || {})[p])).join('') + '</div><div id="cout" aria-live="polite">' + calcOut(c) + '</div>' +
+   (c.wi ? '<div class="card" style="margin-top:12px;border:1.5px dashed #B9C9D6;box-shadow:none"><b>What if…</b>' + c.wi.map(i => fieldR(i, v[i.k], (S.calcSrc || {})[p])).join('') + '</div>' : '') +
    '<div class="grid2" style="margin-top:12px"><button class="btn sm" style="width:100%" data-a="calcadd" data-p="' + p + '">＋ Add to my plan</button><button class="btn sm ghost" style="width:100%" data-a="expertfor" data-p="' + ({home:'mortgage', retire:'pension', protect:'protection', invest:'investment'}[c.cat] || 'planner') + '">Ask an expert</button></div><p class="disc">Illustrative figures, not a guarantee and not advice.</p>'}; };
 V.VIDS = () => { const f = S.vf || 'all', list = VIDEOS.filter(v => f === 'all' || v.kind === f);
   return {id:'VID-00', note:'Video library (Lifecast): short explainers filtered by topic, plus live expert sessions. Every video links to a tool and an expert.', head:appHead('Watch', 'Short videos and live sessions with experts.', 'xback'),
@@ -1730,7 +1773,7 @@ const ACT = {
   makeplan:() => { S.tab = 'plan'; S.pb = true; S.sheet = null; if (!/^(B1|F1|F2|F4|B4|P1|P1E|P1S|P1K|P2|P3|PU|P4)$/.test(S.scr)) S.scr = 'B1'; lastId = null; render(); },
   pbexit:() => { S.pb = false; lastId = null; render(); toast('Saved. Carry on any time from My Plan'); },
   assume:p => { if (S.assume === p) return; S.assume = p; version('Growth assumptions: ' + AS_NAME[p]); focusKey = '[data-a="assume"][data-p="' + p + '"]'; if (document.getElementById('wi-out')) { render(); } else render(); toast(AS_NAME[p] + ' assumptions: results updated'); },
-  xback:() => { S.xs.pop(); S.play = false; lastId = null; render(); },
+  xback:() => { const t = S.xs.pop(); if (t && t.v === 'ACCT' && S.after){ S.scr = S.after.scr; S.after = null; } if (t && t.v === 'PST') S.pst = null; S.play = false; lastId = null; render(); },
   cat:p => { S.xs.push({v:'XCAT', p}); lastId = null; render(); },
   calc:p => { S.sheet = null; if (S.tab !== 'explore'){ S.tab = 'explore'; S.xs = []; } S.xs.push({v:'CALC', p}); lastId = null; render(); },
   videos:() => { if (S.tab !== 'explore'){ S.tab = 'explore'; S.xs = []; } S.xs.push({v:'VIDS'}); lastId = null; render(); },
@@ -1743,10 +1786,11 @@ const ACT = {
     if (v > max){ v = max; S.saveNote = 'That\'s all of your spare money each month, so we can\'t count more than this. '; }
     S.saveM = v; focusKey = '[data-a="savem"][data-p="' + p + '"]'; render(); },
   savereset:() => { S.saveM = null; S.saveNote = ''; focusKey = '[data-a="savem"][data-p="25"]'; render(); },
+  pstup:p => pstStart(['Pension benefit statement · ' + PST_DATE + '.pdf']), pstok:() => pstConfirm(),
   calcadd:p => { S.sheet = 'calcadd|' + p; render(); },
   confirmcalcadd:p => { const r = C(p).run(calcVals(C(p))), g = r.goal; if (!g) return; S.goals.push(mkGoal('other', [g.em, g.name, Math.round(g.amount), Math.max(1, g.years)])); S.sheet = null; if (S.app) afterPlanEdit(); render(); toast(S.app ? g.name + ' added to your plan' : g.name + ' added. It will be on your timeline when you make your plan'); },
   vemail:() => verify('ev', 'P1S'), vsms:() => verify('sv', 'P1K'),
-  passkey:p => { S.acct.pk = p === '1'; prefillAbout(); if (p === '1') toast('Face ID added'); go('P2'); },
+  passkey:p => { S.acct.pk = p === '1'; prefillAbout(); if (p === '1') toast('Face ID added'); if (S.after && S.after.k === 'pst'){ const a = S.after; S.after = null; S.scr = a.scr; pstStart(a.files); return; } go('P2'); },
   upl:p => startUpload(p, ['Sample document.pdf']), uplx:() => { S.upl = null; if (!S.app) S.scr = S.fsec != null ? 'P3' : 'P2'; render(); },
   uplfail:() => { const sec = S.upl.sec; S.missingDocs = (S.missingDocs || []).concat(S.upl.files); S.upl = null; const i = FSEC.findIndex(s => s.id === sec); S.fmode[sec] = 'type'; if (i >= 0) openSec(i); else { if (!S.app) S.scr = 'P2'; render(); } },
   uplok:() => confirmUpload(),
@@ -1852,6 +1896,8 @@ function bind(){
   if (ph.querySelector('#wi-out')) { if (S.wi.g == null) S.wi.g = defaultWiGoal(); liveUpdate(); const c = ph.querySelector('[data-a="wig"][data-p="' + S.wi.g + '"]'); if (c) { c.classList.add('sel'); c.setAttribute('aria-pressed', 'true'); } }
   ph.querySelectorAll('input[data-ck]').forEach(inp => inp.addEventListener('input', () => { const t = xTop(); if (!t || t.v !== 'CALC') return; const c = C(t.p), v = calcVals(c), k = inp.dataset.ck, i = c.inputs.concat(c.wi || []).find(x => x.k === k); v[k] = +inp.value;
     const o = document.getElementById('co-' + k); if (o) o.textContent = fmtIn(i, v[k]); const out = document.getElementById('cout'); if (out) out.innerHTML = calcOut(c); }));
+  ph.querySelectorAll('input[type=file][data-pfile]').forEach(i => i.addEventListener('change', () => { const fs = [...i.files].map(f => f.name); if (fs.length) pstStart(fs); }));
+  ph.querySelectorAll('[data-pv]').forEach(i => i.addEventListener('input', () => { if (!S.pst) return; S.pst.edit[i.dataset.pv] = i.value; if (i.dataset.pv === 'prsi'){ const e = document.getElementById('pst-sp'); if (e) e.textContent = spFromYears(+i.value || 0); } }));
   ph.querySelectorAll('[data-whynote]').forEach(i => i.addEventListener('input', () => { S.whyNote = i.value.slice(0, 60); }));
   ph.querySelectorAll('[data-partner]').forEach(i => i.addEventListener('input', () => { S.partner[i.dataset.partner] = i.value.slice(0, 60); }));
   const ai = ph.querySelector('#ask-in'); if (ai) ai.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ACT.askgo(); } });
