@@ -682,13 +682,17 @@ const GOAL_ORDER = (a, b) => (a.k === 'safety' ? 0 : 1) - (b.k === 'safety' ? 0 
   || a.age - b.age || a.id - b.id;                                                          // then by date
 // Saving that grows with pay (w) into a pot growing at r: value after n years of 1 a year (paid at the start of each year)
 const annF = (n, r, w) => { let s = 0; for (let t = 0; t < n; t++) s += Math.pow(1 + w, t) * Math.pow(1 + r, n - t); return s; };
-function saveCap(surplusM){                                  // monthly saving, today's money, before what-if
+function saveAuto(surplusM){                                 // the Q6 rule: monthly saving, today's money, before what-if
   const k = typeof S.ans['6'] === 'number' ? S.ans['6'] : null, sp = Math.max(0, surplusM);
-  if (S.saveM != null) return Math.min(S.saveM, sp);         // adapted: the customer's own "My monthly saving" (never more than the spare money)
   if (k === 4) return SAVE.shareVaries * sp;
   const cap = k == null ? SAVE.noAnswer : SAVE.band[k];
   return Math.min(cap, SAVE.share * sp);
 }
+// FP round 5: the customer's own "My monthly saving" (S.saveM, today's money) is this year's amount. Raising it above the
+// Q6 rule keeps the rule's later growth (never less than the rule in any year); lowering it caps every year. Monotone in S.saveM and in income.
+function saveCap(surplusM, auto0){ const sp = Math.max(0, surplusM), auto = saveAuto(sp);
+  if (S.saveM == null) return auto;
+  return Math.min(sp, S.saveM >= auto0 ? Math.max(S.saveM, auto) : Math.min(S.saveM, auto)); }
 function project(wi){
   applyAssume();
   const f = finNums(), a0 = f.age, R = f.R, N = AS.end - a0, rg = S.goals.find(g => g.kind === 'retire');
@@ -712,7 +716,7 @@ function project(wi){
   fg.forEach(g => { const x = G[g.id], want = Math.max(0, x.cost / Math.pow(1 + x.r, x.n) - x.pot), take = Math.min(want, free); x.pot += take; free -= take; });
   const gr = 0.6 * AS.cash + 0.4 * AS.inv;                     // unallocated money: same 60/40 cash/invest mix as before
   const gf = {}; S.goals.forEach(g => gf[g.id] = {cost:0, cov:0});
-  const rows = [];
+  const rows = []; let auto0 = 0;
   for (let t = 0; t <= N; t++){
     const a = a0 + t, infl = Math.pow(1 + AS.infl, t), wgw = Math.pow(1 + AS.wage, t), working = a < R;
     let inflow = 0;
@@ -744,8 +748,9 @@ function project(wi){
       gf[g.id].cost = x.cost; gf[g.id].cov = x.paid; goalCost += x.cost; dueG.push({id:g.id, name:g.name, e:g.e, kind:g.kind, cost:x.cost, paid:x.paid}); });   // exposed for the Detail chart
     // 3. Spare money this year. Only the saving amount is saved; the rest is assumed spent.
     const net = inflow - living - fixed; let used = 0, short = 0, saved = 0, spent = 0;
+    if (t === 0) auto0 = saveAuto(Math.max(0, net) / 12);         // the Q6 rule's amount today (FP round 5)
     if (net >= 0){
-      const base = working ? saveCap(net / 12 / infl) * 12 * infl : 0;
+      const base = working ? saveCap(net / 12 / infl, auto0) * 12 * infl : 0;
       let budget = Math.max(0, base + (!wgR && wm < 0 && working ? wm * 12 * infl : 0));         // "saving less" lowers the saving amount
       const extra = !wgR && wm > 0 && working && wg && G[wg.id] && !G[wg.id].done ? wm * 12 * infl : 0;  // "extra towards X" (today's money, kept level in real terms)
       budget = Math.min(budget, net); const ex = Math.min(extra, net - budget); saved = budget + ex; spent = net - saved;
