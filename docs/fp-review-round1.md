@@ -352,3 +352,27 @@ The test used: a line crosses the line when it tells **this customer** what to *
 - CBI Quarterly Bulletin June 2026 (inflation 3.5% / 2.9%): [Chartered Accountants Ireland summary](https://www.charteredaccountants.ie/News/central-bank-s-bulletin-notes--domestic-resilience--despite-rising-inflation)
 - ARF imputed distribution 4% / 5%; auto-enrolment (My Future Fund) from 1 Jan 2026: [Cantor ARF brochure](https://cantorfitzgerald.ie/wp-content/uploads/2026/06/ARF-6pp-A4-Brochure-6-26.pdf) · [ifac auto-enrolment](https://downloads.ifac.ie/x/b31d5fcd3d/auto-enrolment-information.pdf)
 - From the reviewer's knowledge (not re-fetched in this round; the CBI, ESMA and actuaries.ie sites are blocked from this environment): pension relief age limits 15–40% with the €115,000 cap; lump sum €200,000 tax-free; age credit €245; age exemption €18,000; PRSI credit €12 a week tapering to €424. Before release, check these against Revenue.
+
+---
+
+## Round 2: money-profile rewrite (§13)
+
+Reviewer: Financial Planner · 1 Oct 2026 · Spec and prototype not edited.
+
+**1. Coverage: OK.** Risk tolerance (Q8, Q9), capacity for loss (u10, Q7, u14), time horizon (u9), K&E (u11), liquidity (Q7, u14), income stability (u12). Nothing critical is missing. **S:** keep the optional u11 product chips (Savings · Pension · Shares or funds · Crypto · None), which §13 drops. ESMA says firms must not rely on self-assessment alone.
+
+**2. Sustainability: acceptable**, because LifeGoals makes no recommendation and the adviser asks before any recommendation (Delegated Reg 2021/1253). Fixes: never pre-select the chip (CPC 2025). Add the line "Your adviser will ask about this before recommending anything." Remove the UM13 row from the §3 coverage table.
+
+**3. Scoring: CHANGE (M).** The new u10 order reverses old index 3 ("Not sure" → cap 3 becomes "Nothing changes").
+```
+u10: 0→cap 2 · 1→cap 3 · 2→cap 4 · 3→none
+u14: 0→cap 2 + thin · 1→cap 3 + thin · 2,3→none
+     (thin feeds capLo, so K16/K14c fires: yes, safety first, as a message, not an override)
+u11 option 4: KE 4 (not 5) unless chips include "Shares or funds"; never K17; adviser flag "Overconfidence"
+Q7 = emergency savings but u14 = 0 → adviser flag "inconsistent answers"
+```
+
+**4. Wording.** Validator and Delegator are standard industry segments (self-directed / validator / delegator), so **OK**. Changes:
+- u12 option 4: "Very steady (e.g. permanent job or pension)" → "Very stable income". In pensions, "Secure income" means a guaranteed income.
+- u11 option 3 tag: "Some investing experience" (one fund isn't "Experienced").
+- u11 option 4 tag: "Self-rated expert · watch for overconfidence bias".
