@@ -291,6 +291,10 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 .asm .seg button{min-height:40px}
 .gtile.off{opacity:.5;cursor:not-allowed}.gtile .ghint{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-top:2px;line-height:1.2}
 .card.pst{background:linear-gradient(150deg,var(--sea-l),#fff 75%);border:1.5px solid #B5E3DB}
+.nbox{display:inline-flex;align-items:center;justify-content:flex-end;gap:1px;min-height:44px;padding:0 2px;border-bottom:1.5px dashed #8CC7BF;font-weight:800;color:var(--sea-d)}
+.nbox .nb{border:0;background:transparent;font:inherit;font-weight:800;color:var(--sea-d);text-align:right;padding:4px 0;min-width:2.6ch;max-width:16ch;box-sizing:content-box}.nbox .nb:focus{outline:none}.nbox:focus-within{border-bottom:2px solid var(--sea-d);background:var(--sea-l);border-radius:6px 6px 0 0}
+.nbox .nbu{font-weight:800;color:var(--sea-d)}.nbox .nb + .nbu{margin-left:3px}.nbhint{display:block;font-size:12px;color:var(--nudge-t);min-height:0}.nbhint:empty{display:none}
+.field .flabel{align-items:center}.wi-val .nbox{font-size:inherit}.stepper .stepv{flex:1;display:flex;justify-content:center}
 .shortcuts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .pq{border-top:1px solid var(--line);padding:10px 0}.pq:first-child{border-top:0}
 /* sheets & toast */
@@ -1193,8 +1197,8 @@ function chartSummary(P){ const rows = P.rows, s = rows.filter(chartShort), dip 
     'Across your plan there ' + (s.length > 1 ? 'are ' + s.length + ' years' : 'is 1 year') + ' with a gap, about ' + eur(s.reduce((t, r) => t + rowParts(r).short, 0)) + ' in total' + (gs.length ? '. Goals involved: ' + esc(gs.join(', ').toLowerCase()) : '') + (liv.length ? '. Everyday costs run short in ' + liv.length + ' year' + (liv.length > 1 ? 's' : '') + (liv[0] ? ', from age ' + liv[0].a : '') : '') + '. Saving more, changing timing or rethinking a goal closes it.</p>'; }
 
 function saveCtl(){ const P = project(), y = P.save.saveM, k = S.ans['6'];
-  return '<div class="field" style="margin:12px 0 4px" id="r-save"><span class="flabel">My monthly saving: <output>' + eur(y) + '</output></span><div class="wi-row"><button class="rb" data-a="savem" data-p="-25" aria-label="Save 25 euro less a month">−</button><div class="wi-val">' + eur(y) + ' a month</div><button class="rb" data-a="savem" data-p="25" aria-label="Save 25 euro more a month">+</button></div>' +
-    '<span class="small">' + (S.saveNote ? esc(S.saveNote) : S.saveM != null ? 'Your choice. ' : 'From your answer' + (typeof k === 'number' ? ' "' + esc(DQ_BY('6').o[k].t) + '"' : '') + '. ') + 'Your spare money is about ' + eur(P.save.surplusM) + ' a month; the rest is assumed spent.' + (S.saveM != null ? ' <button class="link" style="font-size:12.5px;padding:0" data-a="savereset">Use my answer</button>' : '') + '</span></div>'; }
+  return '<div class="field" style="margin:12px 0 4px" id="r-save"><span class="flabel" id="sv-l">My monthly saving</span><div class="wi-row"><button class="rb" data-a="savem" data-p="-25" aria-label="Save 25 euro less a month">−</button><div class="wi-val">' + nbox('save', 'm', y, '€', 'sv-l') + '<span class="small" style="margin-left:4px">a month</span></div><button class="rb" data-a="savem" data-p="25" aria-label="Save 25 euro more a month">+</button></div>' +
+    '<span class="small">' + (S.saveNote ? esc(S.saveNote) : S.saveM != null ? 'Your choice. ' : 'From your answer' + (typeof k === 'number' ? ' "' + esc(DQ_BY('6').o[k].t) + '"' : '') + '. ') + 'Your spare money is about ' + eur(P.save.surplusM) + ' a month; the rest is assumed spent.' + (S.saveM != null ? ' <button class="link" style="font-size:12.5px;padding:0" data-a="savereset">Use my answer</button>' : '') + '</span>' + nbHint('save', 'm') + '</div>'; }
 // FP round 5: the saving stays capped by the Q6 answer; when the measured spare money is well above it, say so (guidance wording, never applied automatically)
 function saveNudge(){ const P = project(), cur = S.saveM != null ? S.saveM : P.save.saveM, x = Math.floor(SAVE.share * P.save.surplusM / 25) * 25;
   if (!(x >= P.save.saveM + 50 && x >= cur + 50)) return '';
@@ -1203,8 +1207,8 @@ function wiCard(){ const w = S.wi, gs = S.goals.slice().sort((a, b) => a.age - b
   return '<div class="card" id="r-wi"><h3 class="h">What if…?</h3><p class="small" style="margin:0 0 10px">Try saving a bit more or less, or adding a one-off amount, and see what changes.</p>' +
     '<div class="fl" style="font-size:12px;font-weight:800;margin-bottom:6px">Growth assumptions</div>' + assumeToggle() + '<div style="height:12px"></div>' +
     '<div class="fl" style="font-size:12px;font-weight:800;margin-bottom:6px">Put it towards</div><div class="chips" role="group" aria-label="Goal for the what-if">' + gs.map(x => '<button class="chip sm' + (w.g === x.id ? ' sel' : '') + '" aria-pressed="' + (w.g === x.id) + '" data-a="wig" data-p="' + x.id + '">' + x.e + ' ' + esc(x.name) + '</button>').join('') + '</div>' +
-    saveCtl() + saveNudge() + '<div class="field" style="margin:14px 0 6px"><span class="flabel" id="wim-l">Monthly amount</span><div class="wi-row"><button class="rb" data-a="wim" data-p="-25" aria-label="25 euro less">−</button><div class="wi-val" id="wim-v">' + (w.m > 0 ? '+' : '') + eur(w.m) + '</div><button class="rb" data-a="wim" data-p="25" aria-label="25 euro more">+</button></div><input type="range" min="-500" max="1000" step="25" value="' + w.m + '" data-wi="m" aria-labelledby="wim-l" aria-valuetext="' + eur(w.m) + ' a month"><span class="small" id="wim-h">' + (w.m < 0 ? 'Saving less each month (affects your whole plan)' : w.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (counted as retirement saving)' : ' until it happens') : '−€500 to +€1,000 a month') + '</span></div>' +
-    '<div class="field" style="margin:10px 0 0"><span class="flabel" id="wil-l">One-off amount <output id="wil-v">' + eur(w.l) + '</output></span><input type="range" min="0" max="50000" step="500" value="' + w.l + '" data-wi="l" aria-labelledby="wil-l"><span class="small">e.g. from savings or a bonus</span></div>' +
+    saveCtl() + saveNudge() + '<div class="field" style="margin:14px 0 6px"><span class="flabel" id="wim-l">Monthly amount</span><div class="wi-row"><button class="rb" data-a="wim" data-p="-25" aria-label="25 euro less">−</button><div class="wi-val">' + nbox('wi', 'm', w.m, '€', 'wim-l', {id:'wim-v', sign:true}) + '</div><button class="rb" data-a="wim" data-p="25" aria-label="25 euro more">+</button></div><input type="range" min="' + Math.min(-500, w.m) + '" max="' + Math.max(1000, w.m) + '" step="25" value="' + w.m + '" data-wi="m" aria-labelledby="wim-l" aria-valuetext="' + eur(w.m) + ' a month">' + nbHint('wi', 'm') + '<span class="small" id="wim-h">' + (w.m < 0 ? 'Saving less each month (affects your whole plan)' : w.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (counted as retirement saving)' : ' until it happens') : '−€500 to +€1,000 a month') + '</span></div>' +
+    '<div class="field" style="margin:10px 0 0"><div class="flabel"><span id="wil-l">One-off amount</span>' + nbox('wi', 'l', w.l, '€', 'wil-l', {id:'wil-v'}) + '</div><input type="range" min="0" max="' + Math.max(50000, w.l) + '" step="500" value="' + w.l + '" data-wi="l" aria-labelledby="wil-l">' + nbHint('wi', 'l') + '<span class="small">e.g. from savings or a bonus</span></div>' +
     '<div class="wi-out" id="wi-out" aria-live="polite"></div><div class="grid2" style="margin-top:12px"><button class="btn sm" style="width:100%" data-a="wisave">Save as my preferred plan</button><button class="btn sm ghost" style="width:100%" data-a="wireset">Back to my plan</button></div></div>'; }
 function resultsHTML(){
   const P0 = project(), P = project(S.wi), F = findings(P0), rough = qualityCount() > 2;
@@ -1219,10 +1223,11 @@ function resultsHTML(){
     '<div class="ends"><button class="btn" data-a="report">⬇ Download my plan</button><button class="btn sun" data-a="book">📅 Book my adviser meeting</button><button class="btn ghost" data-a="adjust">✏️ Adjust my goals</button></div>' +
     '<p class="disc">Guidance, not advice. Projections are illustrative, use standard assumptions and are not guaranteed. Only an authorised adviser who knows your full situation can give advice. ' + (S.versions.length ? '<button class="link" style="font-size:12px;padding:0" data-a="sheet" data-p="history">Plan history (' + S.versions.length + ')</button>' : '') + '</p>';
 }
-function liveUpdate(){ const P0 = project(), P = project(S.wi);
+function liveUpdate(fromBox){ const P0 = project(), P = project(S.wi);
   const set = (id, h) => { const e = document.getElementById(id); if (e) e.innerHTML = h; };
   set('r-goals', goalsBox(P)); set('wi-out', wiText(P0, P)); set('r-glance', glanceHTML(P)); bindLite();
-  set('wim-v', (S.wi.m > 0 ? '+' : '') + eur(S.wi.m)); set('wil-v', eur(S.wi.l));
+  const setV = (id, t) => { const e = document.getElementById(id); if (e && document.activeElement !== e){ e.value = t; e.style.width = nbW(t); } }; setV('wim-v', (S.wi.m > 0 ? '+' : '') + nbFmt(S.wi.m)); setV('wil-v', nbFmt(S.wi.l));
+  if (fromBox) { const sv = document.querySelector('#r-save .nb'); if (sv && document.activeElement !== sv) sv.value = nbFmt(project().save.saveM); }
   const g = gById(S.wi.g); set('wim-h', S.wi.m < 0 ? 'Saving less each month (affects your whole plan)' : S.wi.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (counted as retirement saving)' : ' until it happens') : '−€500 to +€1,000 a month');
 }
 function tlStrip(){ const P = project(), n = S.goals.filter(g => P.pct[g.id] >= 95).length; return '<div class="card row" id="tl-strip" style="background:var(--sea-l)"><div style="flex:1"><b>' + n + ' of ' + S.goals.length + ' goals on track</b><div class="small" style="color:var(--ink)">Updates as you move things.</div></div><button class="btn sm" data-a="seg" data-p="results">See results ↓</button></div>'; }
@@ -1333,7 +1338,7 @@ V.PLAN0 = () => ({id:'PLAN-0', note:'My Plan before a plan exists (§12): empty 
 V.B1 = () => { const b = S.about, ok = b.partner != null && b.deps != null;
   return {id:'B1', note:'Plan builder step 1: about you & your family (name, age, partner invite or add myself, dependants). Moved out of onboarding (§12). No money figures yet.', head:flowHead(1, 'Step 1', 'About you & your family', 'So we can suggest goals that fit your life stage.', 'pbexit'),
   html:'<div class="card"><div class="field"><label for="b-name">Your first name</label><input class="in" id="b-name" data-acct="name" autocomplete="given-name" value="' + esc(S.acct.name) + '"></div>' +
-    '<div class="field"><span class="flabel" id="lab-age">Your age</span>' + stepper('age', 'x', b.age, 'Your age') + '<input type="range" min="18" max="80" value="' + b.age + '" data-in="age" aria-labelledby="lab-age"></div>' +
+    '<div class="field"><span class="flabel" id="lab-age">Your age</span><div class="stepper" role="group" aria-labelledby="lab-age"><button data-a="age" data-p="x|-1" aria-label="Less">−</button><span class="stepv">' + nbox('age', 'a', b.age, '', 'lab-age', {id:'age-v'}) + '</span><button data-a="age" data-p="x|1" aria-label="More">+</button></div><input type="range" min="18" max="80" value="' + b.age + '" data-in="age" aria-labelledby="lab-age">' + nbHint('age', 'a') + '</div>' +
     '<div class="field"><span class="flabel">Planning with a partner?</span><div class="seg" role="group" aria-label="Planning with a partner">' + ['Yes','No'].map(x => { const on = (b.partner === true && x === 'Yes') || (b.partner === false && x === 'No'); return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-a="partner" data-p="' + x + '">' + x + '</button>'; }).join('') + '</div>' + (b.partner ? marriedField() + partnerBlock(!verified()) : '') + '</div>' +
     '<div class="field" style="margin:0"><span class="flabel">Children or others who rely on you</span><div class="seg" role="group" aria-label="Dependants">' + ['0','1','2','3+'].map((x, k) => '<button class="' + (b.deps === k ? 'on' : '') + '" aria-pressed="' + (b.deps === k) + '" data-a="deps" data-p="' + k + '">' + x + '</button>').join('') + '</div></div></div>',
   foot:'<button class="btn" data-a="go" data-p="F1"' + (ok ? '' : ' disabled') + '>Next: your goals</button>'}; };
@@ -1514,8 +1519,41 @@ function calcPre(c){ applyAssume(); const p = {}, f = S.fin, has = k => S.src[k]
 function calcVals(c){ S.calcV[c.id] = S.calcV[c.id] || {}; S.calcT = S.calcT || {}; const v = S.calcV[c.id], T = S.calcT[c.id] || {}, pre = calcPre(c);
   c.inputs.concat(c.wi || []).forEach(i => { if (T[i.k] && v[i.k] != null) return; const x = pre[i.k] != null ? pre[i.k] : i.v; v[i.k] = clamp(+(+x).toFixed(4), i.min, i.max); });   // stated figures are not rounded to the slider step
   return v; }
+/* ================= Editable value boxes beside every slider (Pooja, 1 Oct) =================
+   Type a figure instead of dragging. Commits live while typing (once valid) and on Enter / blur. Typed values keep their precision;
+   the step only applies when dragging. € fields may go above the slider's top (slider pins at its end and widens); other fields clamp with a hint. */
+const nbFmt = v => { const n = +v; return Math.abs(n % 1) > 1e-9 ? (+n.toFixed(4)).toLocaleString('en-IE', {maximumFractionDigits:4}) : Math.round(n).toLocaleString('en-IE'); };
+const nbParts = u => u === '€' ? ['€', ''] : u === '%' ? ['', '%'] : u === 'y' ? ['', 'yrs'] : u === 'm' ? ['', 'mo'] : u === 'age' ? ['age ', ''] : ['', ''];
+const nbW = t => (Math.max(2, String(t).length) + 0.6) + 'ch';
+const nbParse = s => { const t = String(s).replace(/[^\d.,\-]/g, '').replace(/,/g, ''); if (t === '' || t === '-' || t === '.') return null; const n = parseFloat(t); return isFinite(n) ? n : null; };
+function nbox(kind, key, v, u, lab, o){ o = o || {}; const [pre, suf] = nbParts(u), txt = (o.sign && v > 0 ? '+' : '') + nbFmt(v);
+  return '<span class="nbox">' + (pre ? '<span class="nbu" aria-hidden="true">' + pre + '</span>' : '') + '<input class="nb"' + (o.id ? ' id="' + o.id + '"' : '') + ' type="text" inputmode="' + (o.dec ? 'decimal' : 'numeric') + '" style="width:' + nbW(txt) + '" data-nb="' + kind + '|' + key + '" value="' + txt + '"' + (lab ? ' aria-labelledby="' + lab + '"' : '') + ' autocomplete="off" enterkeyhint="done">' + (suf ? '<span class="nbu" aria-hidden="true">' + suf + '</span>' : '') + '</span>'; }
+const nbHint = (kind, key) => '<span class="nbhint" id="nh-' + kind + '-' + key + '" role="status" aria-live="polite">' + esc(((S && S.nbH) || {})[kind + '-' + key] || '') + '</span>';
+// Per-kind limits and how a value is applied. lim → {min, max (real limits), smax (slider top), widen}
+const NB = {
+  ck:{ calc:() => { const t = xTop(); return t && t.v === 'CALC' ? C(t.p) : null; },
+    lim(k){ const c = this.calc(), i = c && c.inputs.concat(c.wi || []).find(x => x.k === k); return i ? {min:i.min, max:i.u === '€' ? i.max * 10 : i.max, smax:i.max, widen:i.u === '€', u:i.u} : null; },
+    apply(k, v){ const c = this.calc(); if (!c) return; const vals = calcVals(c); vals[k] = v; S.calcT = S.calcT || {}; (S.calcT[c.id] = S.calcT[c.id] || {})[k] = true;
+      const r = document.getElementById('c-' + k); if (r){ if (v > +r.max && this.lim(k).widen) r.max = v; r.value = v; } const out = document.getElementById('cout'); if (out) out.innerHTML = calcOut(c); } },
+  wi:{ lim(k){ return k === 'm' ? {min:-5000, max:10000, smax:1000, widen:true, u:'€'} : {min:0, max:2000000, smax:50000, widen:true, u:'€'}; },
+    apply(k, v){ if (S.wi.g == null) S.wi.g = defaultWiGoal(); S.wi[k] = v; const r = document.querySelector('[data-wi="' + k + '"]'); if (r){ if (v > +r.max) r.max = v; if (v < +r.min) r.min = v; r.value = v; r.setAttribute('aria-valuetext', eur(v)); } liveUpdate(true); } },
+  save:{ lim(){ const P = project(); return {min:0, max:Math.max(0, P.save.surplusM), smax:Infinity, widen:false, u:'€', maxMsg:'That\'s all your spare money each month'}; },
+    apply(k, v){ S.saveM = v; S.saveNote = ''; liveUpdate(true); } },
+  age:{ lim(){ return {min:18, max:80, smax:80, widen:false, u:'age'}; },
+    apply(k, v){ S.about.age = Math.round(v); const r = document.querySelector('input[data-in="age"]'); if (r) r.value = S.about.age; } }
+};
+function nbCommit(inp, final){ const [kind, key] = inp.dataset.nb.split('|'), K = NB[kind]; if (!K) return; const L = K.lim(key); if (!L) return; const n = nbParse(inp.value), h = document.getElementById('nh-' + kind + '-' + key);
+  if (n == null){ if (final){ inp.value = inp.dataset.last || inp.defaultValue; } return; }
+  let v = n, msg = ''; if (v > L.max){ v = L.max; msg = L.maxMsg || 'Max ' + (L.u === '€' ? eur(L.max) : nbFmt(L.max) + (L.u === '%' ? '%' : nbParts(L.u)[1] ? ' ' + nbParts(L.u)[1] : '')); } else if (v < L.min){ v = L.min; msg = 'Min ' + (L.u === '€' ? eur(L.min) : nbFmt(L.min)); }
+  if (kind === 'age') v = Math.round(v);
+  K.apply(key, v); inp.dataset.last = (kind === 'wi' && key === 'm' && v > 0 ? '+' : '') + nbFmt(v);
+  S.nbH = S.nbH || {}; if (msg) S.nbH[kind + '-' + key] = msg; else delete S.nbH[kind + '-' + key]; if (h) h.textContent = msg; if (final){ inp.value = inp.dataset.last; inp.style.width = nbW(inp.value); if (kind === 'save' || kind === 'age') render(); } }
+function bindNB(ph){ ph.querySelectorAll('input[data-nb]').forEach(i => { if (i._nb) return; i._nb = 1;
+  i.addEventListener('input', () => { i.style.width = nbW(i.value); nbCommit(i, false); }); i.addEventListener('change', () => nbCommit(i, true));
+  i.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); nbCommit(i, true); } });
+  i.addEventListener('focus', () => i.select()); }); }
 const fmtIn = (i, v) => i.u === '€' ? eur(v) : i.u === '%' ? v + '%' : i.u === 'y' ? v + ' yrs' : i.u === 'm' ? v + ' mo' : i.u === 'age' ? 'age ' + v : String(v);
-const fieldR = (i, v, src) => '<div class="field"><label for="c-' + i.k + '"><span>' + esc(i.l) + (src && src.includes(i.k) ? ' <span class="tag doc">From your statement</span>' : '') + '</span><output id="co-' + i.k + '">' + fmtIn(i, v) + '</output></label><input type="range" id="c-' + i.k + '" data-ck="' + i.k + '" min="' + i.min + '" max="' + i.max + '" step="' + i.step + '" value="' + v + '"></div>';
+const fieldR = (i, v, src) => '<div class="field"><div class="flabel"><label id="cl-' + i.k + '" for="c-' + i.k + '">' + esc(i.l) + (src && src.includes(i.k) ? ' <span class="tag doc">From your statement</span>' : '') + '</label>' + nbox('ck', i.k, v, i.u, 'cl-' + i.k, {id:'co-' + i.k, dec:i.step % 1 !== 0 || i.u === '%'}) + '</div><input type="range" id="c-' + i.k + '" data-ck="' + i.k + '" min="' + i.min + '" max="' + Math.max(i.max, v) + '" step="' + i.step + '" value="' + v + '" aria-labelledby="cl-' + i.k + '">' + nbHint('ck', i.k) + '</div>';
 function calcOut(c){ const v = calcVals(c), r = c.run(v); return '<div class="card" style="background:var(--ink);color:#fff"><div class="eyebrow" style="color:var(--sun)">' + esc(r.lbl) + '</div><div style="font-family:var(--fh);font-size:36px;font-weight:800;margin:4px 0">' + r.val + '</div><p style="margin:0;font-size:14px;line-height:1.5;color:#DCE7F2">' + esc(r.line) + '</p>' + r.rows.map(x => '<div class="row" style="justify-content:space-between;border-top:1px solid rgba(255,255,255,.14);padding:8px 0;margin-top:8px;font-size:13.5px"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('') + '</div>'; }
 function toolsForYou(){ const ks = S.goals.map(g => g.spec), ids = []; const add = x => { if (!ids.includes(x)) ids.push(x); };
   if (ks.includes('mortgage')) { add('borrow'); add('deposit'); } if (ks.includes('pension')) { add('retirement'); add('contrib'); } add('goalplanner'); add('emergency'); add('surplus'); add('lifecover'); add('compound'); return ids.slice(0, 6); }
@@ -1902,7 +1940,7 @@ const ACT = {
   understood:() => { S.understood = true; version('Results understood'); focusKey = '#r-found .chip'; render(); },
   advq:p => { const i = S.advQs.indexOf(p); if (i >= 0) S.advQs.splice(i, 1); else S.advQs.push(p); focusKey = '[data-a="advq"][data-p="' + CSS.escape(p) + '"]'; render(); },
   wig:p => { S.wi.g = +p; focusKey = '[data-a="wig"][data-p="' + p + '"]'; render(); },
-  wim:p => { if (S.wi.g == null) S.wi.g = defaultWiGoal(); S.wi.m = clamp(S.wi.m + +p, -500, 1000); const r = document.querySelector('[data-wi="m"]'); if (r) r.value = S.wi.m; liveUpdate(); },
+  wim:p => { if (S.wi.g == null) S.wi.g = defaultWiGoal(); S.wi.m = clamp(S.wi.m + +p, -5000, 10000); const r = document.querySelector('[data-wi="m"]'); if (r) r.value = S.wi.m; liveUpdate(); },
   wisave:() => { S.pref = Object.assign({}, S.wi); version('Preferred plan: ' + (S.wi.m ? (S.wi.m > 0 ? '+' : '') + eur(S.wi.m) + '/month ' : '') + (S.wi.l ? '+' + eur(S.wi.l) + ' once' : '') + (gById(S.wi.g) ? ' → ' + gById(S.wi.g).name : '')); toast('Saved as your preferred plan (version ' + S.versions.length + ')'); },
   wireset:() => { S.wi = {g:S.wi.g, m:0, l:0}; render(); toast('Back to your plan'); },
   report:() => openReport(),
@@ -1951,8 +1989,8 @@ function bindLite(){ const w = document.querySelector('.cwrap'); if (w && !w._k)
   if (e.key === 'ArrowRight' || e.key === 'ArrowUp') v = cur + 1; else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') v = cur - 1; else if (e.key === 'Home') v = 0; else if (e.key === 'End') v = n - 1; if (v == null) return; e.preventDefault(); S.csel = clamp(v, 0, n - 1); refreshGlance('.cwrap'); }); } }
 function refreshGlance(fsel){ const e = document.getElementById('r-glance'); if (!e) { render(); return; } e.innerHTML = glanceHTML(project(S.wi)); bindLite(); const b = fsel && e.querySelector(fsel); if (b) b.focus({preventScroll:true}); }
 function bind(){
-  const ph = document.getElementById('screen'); bindLite();
-  ph.querySelectorAll('input[data-in="age"]').forEach(r => r.addEventListener('input', () => { S.about.age = +r.value; const o = ph.querySelector('.stepper output'); if (o) o.textContent = S.about.age; }));
+  const ph = document.getElementById('screen'); bindLite(); bindNB(ph);
+  ph.querySelectorAll('input[data-in="age"]').forEach(r => r.addEventListener('input', () => { S.about.age = +r.value; const o = document.getElementById('age-v') || ph.querySelector('.stepper output'); if (o) { if ('value' in o && o.tagName === 'INPUT') o.value = S.about.age; else o.textContent = S.about.age; } }));
   ph.querySelectorAll('[data-gname]').forEach(i => i.addEventListener('input', () => { gById(i.dataset.gname).name = i.value.slice(0, 30) || 'My goal'; }));
   ph.querySelectorAll('[data-gamt]').forEach(i => i.addEventListener('change', () => { gById(i.dataset.gamt).amount = Math.max(0, parseInt(i.value.replace(/\D/g, '')) || 0); render(); }));
   ph.querySelectorAll('[data-gsaved]').forEach(i => i.addEventListener('change', () => { gById(i.dataset.gsaved).saved = Math.max(0, parseInt(i.value.replace(/\D/g, '')) || 0); render(); }));
@@ -1976,7 +2014,7 @@ function bind(){
   ph.querySelectorAll('input[data-wi]').forEach(r => r.addEventListener('input', () => { if (S.wi.g == null) S.wi.g = defaultWiGoal(); S.wi[r.dataset.wi] = +r.value; r.setAttribute('aria-valuetext', eur(+r.value)); liveUpdate(); }));
   if (ph.querySelector('#wi-out')) { if (S.wi.g == null) S.wi.g = defaultWiGoal(); liveUpdate(); const c = ph.querySelector('[data-a="wig"][data-p="' + S.wi.g + '"]'); if (c) { c.classList.add('sel'); c.setAttribute('aria-pressed', 'true'); } }
   ph.querySelectorAll('input[data-ck]').forEach(inp => inp.addEventListener('input', () => { const t = xTop(); if (!t || t.v !== 'CALC') return; const c = C(t.p), v = calcVals(c), k = inp.dataset.ck, i = c.inputs.concat(c.wi || []).find(x => x.k === k); v[k] = +inp.value; S.calcT = S.calcT || {}; (S.calcT[c.id] = S.calcT[c.id] || {})[k] = true;
-    const o = document.getElementById('co-' + k); if (o) o.textContent = fmtIn(i, v[k]); const out = document.getElementById('cout'); if (out) out.innerHTML = calcOut(c); }));
+    const o = document.getElementById('co-' + k); if (o) { o.value = nbFmt(v[k]); o.style.width = nbW(o.value); } const out = document.getElementById('cout'); if (out) out.innerHTML = calcOut(c); }));
   ph.querySelectorAll('input[type=file][data-pfile]').forEach(i => i.addEventListener('change', () => { const fs = [...i.files].map(f => f.name); if (fs.length) pstStart(i.dataset.pfile, fs); }));
   ph.querySelectorAll('[data-pv]').forEach(i => i.addEventListener('input', () => { if (!S.pst) return; S.pst.edit[i.dataset.pv] = i.value; if (i.dataset.pv === 'prsi'){ const e = document.getElementById('pst-sp'); if (e) e.textContent = spFromYears(+i.value || 0); } }));
   ph.querySelectorAll('[data-whynote]').forEach(i => i.addEventListener('input', () => { S.whyNote = i.value.slice(0, 60); }));
