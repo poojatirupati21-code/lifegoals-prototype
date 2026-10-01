@@ -529,3 +529,105 @@ Wiring (for the developer):
 | **D** 50, €120k, costs €4,500/m, cash €80k, inv €250k, pension €400k, Q6 Over €750 | €606 / €1,212 | Help family 8y, Wealth 10y, Retire 63: 100 → **100** (100, 100, 98) · funded from lump sums, needs €0 · Legacy 85: 100 → **100** (0: money runs out at 90 on Cautious) |
 
 Checks on A: "−€100 a month" → 82 / 59 / 42 / 2%. "+€10k lump to wealth" → wealth 57%. Q6 Over €750 → all 100%. So the % now moves with what the customer actually puts away. Only B and D (real surplus or real assets) stay at or near 100%, which is correct.
+
+---
+
+## Round 4: cashflow accuracy audit
+
+Reviewer: Financial Planner · 1 Oct 2026 · The live prototype is not edited (a designer is rebuilding the chart). Audited a copy made on 1 Oct 2026, `scratchpad/fp/snap2.html`, which already has the round-3 engine with `S.saveM`. The engine ran in Node: `GOALCAT`, `FF`, `mkGoal`, `AS`/`TX`, the tax functions, `finNums()`, `project()` and `isShort` were taken from the copy word for word, with read-only probes added to `rows` for the checks.
+
+**Grid: 6,192 cases.**
+- 6,000 seeded random cases: age 25–60 · single or couple (partner income €0–70k) · 0–3 dependants · income €20k–150k, 15% self-employed · rent / mortgage (€80k–350k, 5–30 years) / own outright / live with family · debts €0–25k, with repayments skipped or over 36 months · cash €0–200k · investments €0–150k · pension €0–500k · contributions 0–20% · every Q6 option and unanswered · both assumption sets · 70% with a retirement goal (€20k–60k a year) · 1–8 goals of every kind, 15% due next year, 30% Nice to have, 20% with "saved so far".
+- 192 factorial cases: Q6 (6) × assumption set × retirement goal or not × single/couple × employed/self-employed × rent/mortgage.
+- 24 hand-made edge cases.
+
+### Pass / fail
+| # | Check | Today | After fixes |
+|---|---|---|---|
+| I1 | Each year: spare money = saved + spent; a deficit = taken from savings + shortfall | **Pass** (0 / 6,192) | Pass |
+| I2 | Savings continuity: last year's balance + saved − taken − goal payments + lump sum = this year's balance before growth | **Pass** | Pass |
+| I3 | Savings never grow faster than the highest assumed rate | **Pass** | Pass |
+| I4/I5 | No negative savings pot, buffer, goal pot or pension | **Pass** | Pass |
+| I6 | 25% lump sum taken once, at the retirement age | **Pass** (none if already retired; see E9) | Pass |
+| I7 | Mortgage paid off in the stated term when the repayment fits the term | **Pass** | Pass |
+| I7b | Mortgage repayment skipped (€0) or below the interest | **Fail**: €0 = the mortgage costs nothing for ever; too low = the balance grows for ever and is still paid at 90 | Pass (F4) |
+| I8 | "Be mortgage-free" pays off the right balance | **Fail** (54 cases): pays the balance at the start of the year *and* that year's instalment, about €7k too much in the example | Pass (F2) |
+| I9 | A partial mortgage-free payment reduces the mortgage | **Fail** (4): the money disappears and the balance is unchanged | Pass (F2) |
+| I10 | Other debts paid off | **Fail** (1,519, all with repayments skipped): a 10%-of-balance floor at 9% interest means only 1% a year comes off, so the debt is never cleared | Pass (F3): cleared in ≤ 5 years |
+| S1 | Take-home pay vs 2026 Irish rules. Net/gross: €20k 96.3% · €30k 87.5% · €45k 82.1% · €60k 74.8% · €80k 68.6% · €100k 64.4% · €120k 61.6% · €150k 58.8% | **Pass** for single PAYE (PRSI 4.35% for the whole year overstates 2026 by about €45–150, which doesn't matter) | — |
+| S2 | Self-employed over €100k: 3% USC surcharge | **Fail**: missing, e.g. €1,500 a year at €150k | Pass (F10) |
+| S3 | One-earner married couple: band €53k + €2k married credit | **Partial**: taxed as single, so net pay is understated by up to €3,800 a year (€80k: €54,889 vs €58,689) | N: needs a "married / civil partners" field |
+| S4 | Pension drawdown ≥ ARF imputed 4% (61–70) / 5% (71+) | **Fail** for retirement before 66: 1/(91 − age) gives 3.3% at 61 | Pass (F6) |
+| S5 | State Pension from 66 (own and partner's), and not before | **Pass** (jump of €14–15k a year in real terms at 66 when retiring at 55–63) | Pass |
+| S6 | Retired income vs pot: €300k at 60 → about €9.3k a year before 66, €24.7k with the State Pension; slowly rising in real terms | **Pass** | Pass |
+| S7 | Pension contributions with no earnings | **Fail**: "Not working" or €0 income still pays `pensionM`, so take-home goes to −€5,034 and the income line drops below zero | Pass (F5) |
+| S8 | Retired: pension income above the spending goal | **Fail**: treated as "spent", so it disappears and makes legacy and late-life results look worse | Pass (F7): kept in savings |
+| C2 | Goal < 95% ⇒ its year is purple | **Fail** (4): gaps under €500 / 2% of needs aren't shown | Pass (F1) |
+| C3 | Goal "On track" (95–99%) ⇒ its year not purple | **Fail** (76) | Pass (F1) |
+| C4 | Retirement "On track" ⇒ no purple retired year | **Fail** (112): the money-weighted % hides 1–4 short years at 86–90 | Pass (F1): capped at 94% |
+| C5 | Retirement < 95% ⇒ at least one purple year | **Pass** | Pass |
+| C6 | Life chapters and road use the same colour rule | **Pass** (both use `isShort`) | Pass |
+| C7 | Chart: a purple bar should never sit under the income line | **Fail** (3,246 year-bars): bars show living + fixed costs only, so goal payments and goal gaps are invisible | UI fix F11 (designer) |
+| C8 | Legacy is tested in the year it's shown | **Fail** (1,766): the milestone is at 85, but it is tested at 90 | UI fix F9 |
+| E1 | Zero income | Fail (S7) | Pass: no saving, goals 0%, retirement 58%, purple from today |
+| E2 | Huge goal (€5m home) | Pass: 0%, "needs €76,653 a month" | UI: "needs more than your spare money" when `needM > P.save.surplusM` |
+| E3 | Goal next year | Pass: 28%, needs €2,241 vs €427 | Pass |
+| E4 | Goal at today's age or in the past (after age is edited) | **Fail**: 11%, "Needs €0 a month · you're putting €0" | Pass (F8): treated as next year |
+| E5 | Goal after 90 | **Fail**: never tested, so it reads 100% for free | Pass (F8): tested at 90 |
+| E6 | Spending more than income | Pass: saving €0, goals 0%, purple 35–90 | Pass |
+| E7 | Partner invited, no income yet | Pass on the numbers (saving €27 a month) | UI: the rough-picture note should say "partner's income not added yet" |
+| E8 | All sections skipped | Guarded: `minOK()` blocks results. Engine alone gives retirement 41% | Keep the guard on every % (Home, Explore, Ask) |
+| E9 | Already retired (70, retirement age 66) | Pass: no lump sum, pot drawn from today | — |
+| E10 | "Be mortgage-free" with no mortgage | **Absurd**: 44% of a €150k made-up balance | UI: hide the tile unless home = "Own with mortgage" |
+| E11 | Custom saving €2,000 > spare €854 | Pass: capped at €854 | UI: say "capped at your spare money" |
+
+### Fixes (paste-ready; exact find → replace in `LifeGoals-Customer-Journey-Prototype.html`; the probed copy passed every engine check with them)
+```js
+// NEW, above finNums():
+const annPay = (bal, r, yrs) => bal > 0 ? bal * r / (1 - Math.pow(1 + r, -Math.max(1, yrs))) : 0;   // level yearly repayment
+
+// finNums()  F5 + F4
+"pension:n('pension'), pensionM:n('pensionM'), sp:"
+→ "pension:n('pension'), pensionM:f.work !== 'Not working' && n('income') > 0 ? n('pensionM') : 0, sp:"
+"mortPayM:mortOn ? n('mortPayM') : 0,"
+→ "mortPayM:mortOn ? Math.max(n('mortPayM'), annPay(n('mortBal'), AS.mortRate, n('mortYears') || 25) / 12) : 0, mortPayLow:mortOn && n('mortPayM') * 12 < annPay(n('mortBal'), AS.mortRate, n('mortYears') || 25) - 12,"
+// (show "⚠️ Needs a look: this repayment wouldn't clear the mortgage in the years left" when f.mortPayLow)
+
+// project()  F8: goal dates count from next year up to 90
+"const fg = S.goals.filter(g => ['spend','mfree','pot'].includes(g.kind)).slice().sort(GOAL_ORDER);"
+→ "const fg = S.goals.filter(g => ['spend','mfree','pot'].includes(g.kind)).map(g => Object.assign({}, g, {age:clamp(g.age, a0 + 1, AS.end)})).sort(GOAL_ORDER);"
+// F2: the balance after that year's instalment; a partial payment reduces the mortgage
+"(f.mortBal > 0 ? mPath[Math.min(n, N)] :"  →  "(f.mortBal > 0 ? mPath[Math.min(n + 1, N)] :"
+"if (g.kind === 'mfree' && pay >= x.cost - 1){ mfreeDone = true; mBal = 0; } }"
+→ "if (g.kind === 'mfree' && pay >= x.cost - 1){ mfreeDone = true; mBal = 0; } else if (g.kind === 'mfree') mBal = Math.max(0, mBal - pay); }"
+// F3: other debts repaid over at most 5 years when no (or too small a) repayment is given
+"let cash = f.cash, inv = f.invest,"  →  "const dPay = Math.max(f.debtPayM * 12, annPay(f.debt, AS.debtRate, 5));\n  let cash = f.cash, inv = f.invest,"
+"if (dBal > 1){ const pay = Math.min(Math.max(f.debtPayM * 12, dBal * 0.1), dBal * (1 + AS.debtRate));"
+→ "if (dBal > 1){ const pay = Math.min(dPay, dBal * (1 + AS.debtRate));"
+// F10: self-employed USC surcharge
+"inflow += (netPay(gR) - pensionCost(gR, E, a)) * infl;"
+→ "inflow += (netPay(gR) - pensionCost(gR, E, a) - (f.work === 'Self-employed' ? 0.03 * Math.max(0, gR - 100000) : 0)) * infl;"
+// F6: ARF imputed distribution floor
+"const draw = pen / Math.max(1, AS.end - a + 1);"
+→ "const draw = pen * Math.min(1, Math.max(1 / Math.max(1, AS.end - a + 1), a >= 71 ? 0.05 : a >= 61 ? 0.04 : 0));"
+// F7: in retirement, income above the spending goal stays in savings (insert after the line "free += budget;")
+      if (!working){ free += spent; saved += spent; spent = 0; }
+// F11 data for the chart: track goal payments
+"let goalGap = 0"  →  "let goalPaid = 0, goalGap = 0"
+"x.paid = pay; goalGap += x.cost - pay;"  →  "x.paid = pay; goalPaid += pay; goalGap += x.cost - pay;"
+"rows.push({t, a, yr:YEAR0 + t, inflow, needs:living + fixed,"  →  "rows.push({t, a, yr:YEAR0 + t, inflow, needs:living + fixed, goalPaid, goalCost:goalPaid + goalGap,"
+// F1: colours follow the percentages (insert before "const s0 = rows[0], sur0")
+  fg.forEach(g => { if (pct[g.id] < 95){ const r = rows[g.age - a0]; if (r) r.goalShort = true; } });
+  if (rg && rows.some(r => r.retired && r.shortLiving > Math.max(500, r.needs * 0.02))) pct[rg.id] = Math.min(pct[rg.id], 94);
+// and replace isShort:
+const isShort = r => r.shortLiving > Math.max(500, r.needs * 0.02) || !!r.goalShort;
+```
+UI fixes (for the designer; not engine):
+- **F11 chart.** Bar height = `r.needs + r.goalCost` (and `maxV` uses it). Draw three stacked segments: living + fixed in `rowCol(r)`; goal paid from savings (`r.goalPaid`) in a lighter tint with the tooltip "*goal* paid from savings"; and `r.short` in purple on top. The income line is unchanged. A purple bar can then never sit under the income line without a visible reason.
+- **F9 legacy.** In `mkGoal` use `else if (c.kind === 'legacy') g.age = AS.end;`. In `moveGoal` add `if (g.kind === 'legacy') return;`. Label it "at the end of your plan (90)". (The legacy figure excludes the home, which is often the real legacy; worth a footnote.)
+- **Goal line** (`goalLine()`): when `x.needM > P.save.surplusM`, say "Needs more than your spare money each month (about €X)".
+
+### Known limits (not bugs; worth a line on the Assumptions sheet)
+- Living costs stay the same until 90, so children's costs never fall away.
+- The partner's pension and the partner's own retirement age aren't modelled (partner income runs to 66).
+- "Retire comfortably" amount is treated as **spending after tax**; the tile unit "Yearly income" could be read as gross. Suggested label: "Yearly spending in retirement (today's money)".
