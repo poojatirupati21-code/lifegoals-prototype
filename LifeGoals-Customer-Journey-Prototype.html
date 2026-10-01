@@ -467,8 +467,8 @@ const FF = {
 /* mocked document reader output */
 const UPL = {
   income:{v:{work:['Employed',99], income:[58000,98], costsM:[3100,74], oneOffY:[1800,81]}, docs:['Payslip · Aug 2026','Current-account statement · Jun–Aug 2026']},
-  assets:{v:{cash:[14500,97], invest:[6200,88]}, docs:['Savings statement · Sep 2026','Investment statement · Jun 2026']},
-  liab:{v:{home:['Own with mortgage',99], mortBal:[212000,96], mortPayM:[1180,93], mortYears:[21,90], debt:[2800,85], debtPayM:[140,78]}, docs:['Mortgage statement · Aug 2026','Credit-card statement · Sep 2026']},
+  assets:{v:{cash:[9000,97], invest:[6200,88]}, docs:['Savings statement · Sep 2026','Investment statement · Jun 2026']},
+  liab:{v:{home:['Own with mortgage',99], mortBal:[203700,96], mortPayM:[1180,93], mortYears:[21,90], debt:[2800,85], debtPayM:[140,78]}, hid:{mortRate:[3.85,94]}, docs:['Mortgage statement · Aug 2026','Credit-card statement · Sep 2026']},
   prot:{v:{life:['Yes',95], ip:['No',82], workCover:['Yes',90], health:['Yes',97]}, docs:['Life cover policy · 2021','Employer benefits statement · 2026']},
   pension:{v:{pension:[72000,95], pensionM:[520,91]}, docs:['Pension statement · Jul 2025'], old:{pension:'Statement is over 12 months old'}}
 };
@@ -488,7 +488,7 @@ function fresh(){
     why:[], whyNote:'', di:0, ans:{}, about:{age:38, partner:null, deps:null, married:null}, goals:[], gid:1, retireAge:66,
     save:{email:'', comms:false, done:false, asked:false}, tlOpen:{}, tlHl:null,
     acct:{name:'', email:'', mobile:'', c1:false, c2:false, ev:false, sv:false, pk:false},
-    fin:{}, src:{}, conf:{}, look:{}, ack:{}, fsec:null, fmode:{}, upl:null, checked:false, from:null,
+    fin:{}, src:{}, conf:{}, look:{}, ack:{}, man:{}, fix:{}, docOf:{}, calcT:{}, calcDoc:{}, fsec:null, fmode:{}, upl:null, checked:false, from:null,
     um:{a:{}, chips:[], done:{}, sec:null}, wi:{g:null, m:0, l:0}, pref:null, versions:[], understood:false, advQs:[],
     view:'journey', chapOpen:null, pst:null, pdocs:{}, calcSrc:{}, after:null, saveM:null, saveNote:'', shell:false, pb:false, xs:[], calcV:{}, play:false, vf:'all', assume:'standard',
     book:{stage:null, adv:0, share:{report:false, fin:false, docs:false, um:false}, agree:false, mode:'Video', slot:null, done:false, from:'plan'},
@@ -654,7 +654,6 @@ function netRet(draw, sp, age){ const g = draw + sp; if (g <= 0) return 0;
 // Net cost to take-home of the employee's own pension contributions (relief at marginal income-tax rate, within age limits and the €115,000 cap)
 const relLim = a => a < 30 ? .15 : a < 40 ? .2 : a < 50 ? .25 : a < 55 ? .3 : a < 60 ? .35 : .4;
 function pensionCost(g, E, age){ const Er = Math.min(E, relLim(age) * Math.min(g, 115000)); return E - (incomeTax(g) - incomeTax(Math.max(0, g - Er))); }
-const annPay = (bal, r, yrs) => bal > 0 ? bal * r / (1 - Math.pow(1 + r, -Math.max(1, yrs))) : 0;   // level yearly repayment (FP round 4)
 // Joint assessment (married / civil partners, Ireland 2026): standard-rate band €53,000 + the lower earner's income up to €35,000 (max €88,000); married personal credit €4,000 + €2,000 PAYE credit per earner.
 // Returns the income-tax saving versus being taxed as two single people (never negative). Today's money.
 function jointGain(g1, g2){ g1 = Math.max(0, g1); g2 = Math.max(0, g2); if (!g1 && !g2) return 0; const hi = Math.max(g1, g2), lo = Math.min(g1, g2), band = 53000 + Math.min(lo, 35000), G = g1 + g2;
@@ -663,12 +662,22 @@ function jointGain(g1, g2){ g1 = Math.max(0, g1); g2 = Math.max(0, g2); if (!g1 
 function finNums(){
   // Skipped figures count as €0 and show as ❓ Missing. Only "Estimate for me" adds a (labelled) typical figure. (spec §11)
   const f = S.fin, n = k => { const v = f[k]; return v != null && v !== '' && !isNaN(+v) ? +v : 0; };
-  const mortOn = f.home === 'Own with mortgage';
+  const mortOn = f.home === 'Own with mortgage', mR = n('mortRate') > 0 ? n('mortRate') / 100 : AS.mortRate, mStated = mortOn ? n('mortPayM') : 0;
   return {age:S.about.age, R:S.retireAge, work:f.work, married:!!S.about.partner && S.about.married === true, partner:!!S.about.partner, pAge:n('pAge') || S.about.age, income:f.work === 'Not working' ? 0 : n('income'), pIncome:S.about.partner ? n('pIncome') : 0,
     otherM:n('otherM'), costsM:n('costsM'), oneOffY:n('oneOffY'), cash:n('cash'), invest:n('invest'), rentM:n('rentM'),
-    mortBal:mortOn ? n('mortBal') : 0, mortPayM:mortOn ? Math.max(n('mortPayM'), annPay(n('mortBal'), AS.mortRate, n('mortYears') || 25) / 12) : 0, mortPayLow:mortOn && n('mortPayM') * 12 < annPay(n('mortBal'), AS.mortRate, n('mortYears') || 25) - 12, mortYears:mortOn ? n('mortYears') : 0, debt:n('debt'), debtPayM:n('debtPayM'),
-    pension:n('pension'), pensionM:f.work !== 'Not working' && n('income') > 0 ? n('pensionM') : 0, sp:f.sp === 'Expect full' ? 1 : f.sp === 'Partly' ? 0.6 : 0.8};
+    mortBal:mortOn ? n('mortBal') : 0, mortRate:mR, mortPayM:mortOn ? (mStated || mPmt(n('mortBal'), mR, n('mortYears') || 25)) : 0, mortPayEst:mortOn && !mStated, mortPayLow:mortOn && mStated > 0 && n('mortBal') > 0 && mStated < mPmt(n('mortBal'), mR, n('mortYears') || 25) - 1, mortYears:mortOn ? n('mortYears') : 0,
+    debt:n('debt'), debtPayM:n('debt') > 0 && n('debtPayM') > n('debt') * AS.debtRate / 12 ? n('debtPayM') : mPmt(n('debt'), AS.debtRate, 5), debtPayEst:!(n('debt') > 0 && n('debtPayM') > n('debt') * AS.debtRate / 12),
+    pension:n('pension'), pensionM:f.work !== 'Not working' && n('income') > 0 ? n('pensionM') : 0, penG:penGrowth(), sp:f.sp === 'Expect full' ? 1 : f.sp === 'Partly' ? 0.6 : 0.8};
 }
+// FP round 6: stated figures are used as stated. The mortgage repayment is the one on the statement (or typed); the standard
+// formula is only an estimate when no repayment is given. Monthly amortisation, at the statement's rate when we have it.
+function mPmt(bal, r, yrs){ const i = r / 12, n = Math.max(1, Math.round(yrs * 12)); return bal > 0 ? (i ? bal * i / (1 - Math.pow(1 + i, -n)) : bal / n) : 0; }
+function amortYear(bal, r, payM){ let paid = 0; for (let m = 0; m < 12 && bal > 0.5; m++){ const it = bal * r / 12, p = Math.min(payM, bal + it); paid += p; bal = bal + it - p; } return {bal:Math.max(0, bal), paid}; }
+// Pension growth after charges: the assumption set's rate assumes typical charges of about 1% a year; a statement's own charges replace that.
+const PEN_TYP_CHG = 0.01;
+function penGrowth(){ const c = S.fin && S.fin.penChg != null && S.fin.penChg !== '' && !isNaN(+S.fin.penChg) ? +S.fin.penChg / 100 : null; return c == null ? AS.pen : AS.pen + PEN_TYP_CHG - c; }
+// Pension pot after y years: grows yearly, contributions rise with pay. The plan (project) and the Retirement tool both use this rule.
+function pensionAt(y, pot, monthly, g, w){ for (let t = 0; t < y; t++) pot = pot * (1 + g) + monthly * 12 * Math.pow(1 + w, t); return pot; }
 /* ===== Honest goal funding (FP review round 3). Replaces project(); same return shape {rows, pct} plus P.goal and P.save ===== */
 const SAVE = {
   band:[50, 200, 500, 1000, null],   // Q6 option index -> monthly amount, today's money (band midpoint; "Over €750" -> €1,000; "varies" -> share only)
@@ -703,12 +712,11 @@ function project(wi){
   // Goals funded from savings: spend, mfree, pot. Retirement uses the pension + cashflow; legacy is what is left at the end.
   const fg = S.goals.filter(g => ['spend','mfree','pot'].includes(g.kind)).map(g => Object.assign({}, g, {age:clamp(g.age, a0 + 1, AS.end)})).sort(GOAL_ORDER);
   // Mortgage balance path, so "Be mortgage-free" has a known cost at its date
-  const mPath = []; { let m = f.mortBal; for (let t = 0; t <= N; t++){ mPath.push(Math.max(0, m)); if (m > 1){ const pay = Math.min(f.mortPayM * 12, m * (1 + AS.mortRate)); m = m * (1 + AS.mortRate) - pay; } } }
+  const mPath = []; { let m = f.mortBal; for (let t = 0; t <= N; t++){ mPath.push(Math.max(0, m)); if (m > 1) m = amortYear(m, f.mortRate, f.mortPayM).bal; } }
   const G = {}; fg.forEach(g => { const n = Math.max(0, g.age - a0), r = n >= SAVE.longYrs ? AS.inv : AS.cash;
     const cost = g.kind === 'mfree' ? (f.mortBal > 0 ? mPath[Math.min(n + 1, N)] : g.amount * Math.pow(1 + AS.infl, n)) : g.amount * Math.pow(1 + AS.infl, n);
     G[g.id] = {g, n, r, cost, pot:0, paid:0, done:false, c0:0, cSum:0, cYrs:0, need0:0}; });
   // 1. Lump sums. Each goal's own "saved so far" first (taken from cash), then a buffer is held back, then free cash + investments in goal order.
-  const dPay = Math.max(f.debtPayM * 12, annPay(f.debt, AS.debtRate, 5));
   let cash = f.cash, inv = f.invest, pen = f.pension, mBal = f.mortBal, dBal = f.debt, mfreeDone = false;
   fg.forEach(g => { const s = Math.min(g.saved || 0, cash); G[g.id].pot += s; cash -= s; });
   if (wg && !wgR && G[wg.id]) G[wg.id].pot += wl; if (wgR) pen += wl;
@@ -727,7 +735,7 @@ function project(wi){
       inflow += (netPay(gR) - pensionCost(gR, E, a) - (f.work === 'Self-employed' ? 0.03 * Math.max(0, gR - 100000) : 0)) * infl;   // FP round 4 F10: self-employed USC surcharge
       if (f.married){ const pa = f.pAge + t, pR = pa < 66 ? f.pIncome * wgw / infl : 0; inflow += jointGain(gR, pR) * infl; }   // FP round 4 S3: joint assessment (married / civil partners)
       let contrib = f.pensionM * 12 * wgw; if (wgR) contrib = Math.max(0, contrib + wm * 12);
-      pen = pen * (1 + AS.pen) + contrib;
+      pen = pen * (1 + f.penG) + contrib;   // same rule as pensionAt() (Retirement tool)
       if (a >= AS.spAge) inflow += AS.sp * f.sp * infl;
     } else {
       if (a === R){ const ls = Math.min(pen * 0.25, 200000); pen -= ls; free += ls; }
@@ -738,8 +746,8 @@ function project(wi){
     inflow += (f.otherM + f.rentM) * 12 * infl;
     let living = (working ? f.costsM * 12 : (rg ? rg.amount : f.costsM * 12 * 0.8)) * infl + f.oneOffY * infl;
     let fixed = 0;
-    if (mBal > 1 && !mfreeDone){ const pay = Math.min(f.mortPayM * 12, mBal * (1 + AS.mortRate)); fixed += pay; mBal = mBal * (1 + AS.mortRate) - pay; }
-    if (dBal > 1){ const pay = Math.min(dPay, dBal * (1 + AS.debtRate)); fixed += pay; dBal = dBal * (1 + AS.debtRate) - pay; }
+    if (mBal > 1 && !mfreeDone){ const y = amortYear(mBal, f.mortRate, f.mortPayM); fixed += y.paid; mBal = y.bal; }   // FP round 6: monthly, at the stated repayment
+    if (dBal > 1){ const y = amortYear(dBal, AS.debtRate, f.debtPayM); fixed += y.paid; dBal = y.bal; }
     // 2. Goals due this year are paid from their own pot, then from unallocated money. What can't be paid is a goal gap (shown on the road).
     let goalPaid = 0, goalGap = 0, goalCost = 0; const due = [], dueG = [];
     fg.forEach(g => { const x = G[g.id]; if (x.done || g.age > a) return; x.done = true; due.push(g.name);
@@ -814,8 +822,24 @@ function ring(p, size, col){ const r = (size - 10) / 2, c = 2 * Math.PI * r; ret
 const PHASES = ['Discover','Define','Prepare','Understand'];
 function phaseBar(n){ return '<div class="phasebar" aria-label="Step ' + n + ' of 4: ' + PHASES[n - 1] + '">' + PHASES.map((_, k) => '<i class="' + (k < n ? 'on' : '') + '"></i>').join('') + '</div>'; }
 function brandBar(back, right){ return '<div class="topbar">' + (back ? '<button class="backb" data-a="' + back + '">‹ Back</button>' : '<div class="brand"><span class="mark"></span>LifeGoals</div>') + (right || '') + '</div>'; }
+/* FP round 6: data precedence, everywhere: document > customer-typed > "Estimate for me" > tool default.
+   A statement figure is never overwritten by a later manual entry: the entry is kept (S.man) and shown, and the statement value is used
+   until the customer replaces or removes the statement. Corrections on "We read these values" are reading corrections: still the statement. */
+const isDoc = k => !!S.src && S.src[k] === 'doc';
+function setManual(k, v, src){ S.man = S.man || {}; const empty = v == null || v === '';
+  if (isDoc(k)){ if (empty) delete S.man[k]; else S.man[k] = {v, src}; return false; }
+  if (empty){ delete S.fin[k]; delete S.src[k]; } else { S.fin[k] = v; S.src[k] = src; } delete S.look[k]; return true; }
+function setDoc(k, v, conf, fixed, from){ S.man = S.man || {}; S.fix = S.fix || {}; S.docOf = S.docOf || {};
+  if (!isDoc(k) && S.src[k] && S.fin[k] != null && S.fin[k] !== '') S.man[k] = {v:S.fin[k], src:S.src[k]};   // kept, so "Remove statement" can go back to it
+  S.fin[k] = v; S.src[k] = 'doc'; if (conf != null && !fixed) S.conf[k] = conf; else delete S.conf[k]; if (fixed) S.fix[k] = true; else delete S.fix[k]; if (from) S.docOf[k] = from; }
+function removeDoc(keys){ (keys || []).forEach(k => { if (!isDoc(k)) return; const m = (S.man || {})[k];
+  if (m){ S.fin[k] = m.v; S.src[k] = m.src; } else { delete S.fin[k]; delete S.src[k]; }
+  delete S.conf[k]; delete S.look[k]; delete S.ack[k]; ['fix', 'man', 'docOf'].forEach(x => { if (S[x]) delete S[x][k]; }); }); }
+function docNote(k){ const m = (S.man || {})[k]; if (!isDoc(k) || !m || String(m.v) === String(S.fin[k])) return '';
+  const f = x => FF[k] && FF[k].type === 'eur' ? eur(+x) : esc(String(x));
+  return 'You typed ' + f(m.v) + '. Your statement says ' + f(S.fin[k]) + '; we\'re using that.'; }
 function tagFor(k){ const s = S.src[k]; if (S.look[k] && !S.ack[k]) return '<span class="tag look">⚠️ Needs a look</span>';
-  return s === 'doc' ? '<span class="tag doc">✅ From document' + (S.conf[k] ? ' · ' + S.conf[k] + '%' : '') + '</span>' : s === 'typed' ? '<span class="tag typed">✏️ Your figure</span>' : s === 'est' ? '<span class="tag est">≈ Estimated</span>' : s === 'none' ? '<span class="tag none">Confirmed none</span>' : s === 'pre' ? '<span class="tag pre">From your answers</span>' : '<span class="tag none">❓ Missing</span>'; }
+  return s === 'doc' ? '<span class="tag doc">✅ ' + ((S.fix || {})[k] ? 'From your statement (corrected)' : 'From document' + (S.conf[k] ? ' · ' + S.conf[k] + '%' : '')) + '</span>' : s === 'typed' ? '<span class="tag typed">✏️ Your figure</span>' : s === 'est' ? '<span class="tag est">≈ Estimated</span>' : s === 'none' ? '<span class="tag none">Confirmed none</span>' : s === 'pre' ? '<span class="tag pre">From your answers</span>' : '<span class="tag none">❓ Missing</span>'; }
 function fmtField(k){ const v = S.fin[k], d = FF[k]; if (v == null || v === '') return '—'; return d.type === 'eur' ? eur(+v) : String(v); }
 const gById = id => S.goals.find(g => g.id === +id);
 function statusWord(st){ return st === 'done' ? 'Done' : st === 'look' ? 'Needs a look' : st === 'part' ? 'In progress' : 'Not started'; }
@@ -947,10 +971,10 @@ function fieldHTML(k){ const d = FF[k], v = S.fin[k];
   const id = 'f-' + k, lab = '<label for="' + id + '">' + esc(d.l) + ' <span id="tag-' + k + '">' + tagFor(k) + '</span></label>';
   let inp = '';
   if (d.type === 'choice' || d.type === 'ynn'){ const os = d.o || ['Yes','No','Not sure'];
-    return '<div class="field"><span class="flabel">' + esc(d.l) + ' <span id="tag-' + k + '">' + tagFor(k) + '</span></span><div class="chips" role="group" aria-label="' + esc(d.l) + '">' + os.map(o => '<button class="chip sm' + (v === o ? ' sel' : '') + '" aria-pressed="' + (v === o) + '" data-a="fchoice" data-p="' + k + '|' + o + '">' + esc(o) + '</button>').join('') + '</div>' + (d.type === 'choice' && d.est ? '<div class="fhelp"><button class="link" data-a="fest" data-p="' + k + '">Not sure? Estimate for me</button></div>' : '') + '</div>'; }
+    return '<div class="field"><span class="flabel">' + esc(d.l) + ' <span id="tag-' + k + '">' + tagFor(k) + '</span></span><div class="chips" role="group" aria-label="' + esc(d.l) + '">' + os.map(o => '<button class="chip sm' + (v === o ? ' sel' : '') + '" aria-pressed="' + (v === o) + '" data-a="fchoice" data-p="' + k + '|' + o + '">' + esc(o) + '</button>').join('') + '</div>' + (docNote(k) ? '<span class="small" style="display:block;color:var(--acc-d)" role="status">' + docNote(k) + '</span>' : '') + (d.type === 'choice' && d.est ? '<div class="fhelp"><button class="link" data-a="fest" data-p="' + k + '">Not sure? Estimate for me</button></div>' : '') + '</div>'; }
   if (d.type === 'text') inp = '<input class="in" id="' + id + '" data-fin="' + k + '" value="' + esc(v || '') + '">';
   else inp = '<div class="inw">' + (d.type === 'eur' ? '<span class="cur" aria-hidden="true">€</span>' : '') + '<input class="in' + (d.type === 'eur' ? ' eur' : '') + '" id="' + id + '" inputmode="numeric" data-fin="' + k + '" value="' + (v == null ? '' : Math.round(+v)) + '"' + (d.hint ? ' aria-describedby="h-' + k + '"' : '') + '></div>';
-  return '<div class="field">' + lab + inp + (d.hint ? '<span class="small" id="h-' + k + '">' + esc(d.hint) + '</span>' : '') + (d.pre || d.type === 'text' ? '' : '<div class="fhelp"><button class="link" data-a="fest" data-p="' + k + '">Not sure? Estimate for me</button><button class="link" data-a="fnone" data-p="' + k + '">I don\'t have this</button></div>') + '</div>';
+  return '<div class="field">' + lab + inp + '<span class="small dnote" id="dn-' + k + '" role="status" style="display:block;color:var(--acc-d)">' + docNote(k) + '</span>' + (d.hint ? '<span class="small" id="h-' + k + '">' + esc(d.hint) + '</span>' : '') + (d.pre || d.type === 'text' ? '' : '<div class="fhelp"><button class="link" data-a="fest" data-p="' + k + '">Not sure? Estimate for me</button><button class="link" data-a="fnone" data-p="' + k + '">I don\'t have this</button></div>') + '</div>';
 }
 /* Partner: two choices side by side (Pooja Q4). Same state in Your finances and the Me tab, so it is never asked twice. */
 function partnerBlock(noMoney){ const pt = S.partner, m = pt.mode;
@@ -963,7 +987,8 @@ function partnerBlock(noMoney){ const pt = S.partner, m = pt.mode;
   if (!m) h += '<p class="small" style="margin:10px 0 0">Pick one. You can change it later in <b>Me</b>.</p>';
   return h; }
 V.P3 = () => { const sec = FSEC[S.fsec], mode = sec.docs.length ? (S.fmode[sec.id] || 'type') : 'type';
-  const body = mode === 'upload' ? uploadPick(sec) : '<div class="card">' + sec.f.filter(fieldVisible).filter(k => !(sec.id === 'about' && k === 'pAge')).map(fieldHTML).join('') +
+  const nDoc = sec.f.filter(k => isDoc(k)).length, docBar = nDoc ? '<div class="card" id="docbar" style="background:var(--ok-l);box-shadow:none"><b>📄 ' + nDoc + ' figure' + (nDoc > 1 ? 's' : '') + ' from your statement</b><p class="small" style="margin:4px 0 6px;color:var(--ink)">Statement figures are used ahead of anything typed. To use your own figures instead, remove the statement.</p><div class="row" style="gap:16px"><button class="link" data-a="docrep" data-p="' + S.fsec + '">Replace statement</button><button class="link" data-a="docrem" data-p="' + S.fsec + '">Remove statement</button></div></div>' : '';
+  const body = mode === 'upload' ? uploadPick(sec) : docBar + '<div class="card">' + sec.f.filter(fieldVisible).filter(k => !(sec.id === 'about' && k === 'pAge')).map(fieldHTML).join('') +
     (sec.id === 'income' && S.about.partner && S.partner.mode === 'invite' ? '<p class="note">💌 Your partner adds their own income' + (S.partner.sent ? ' (invite sent to ' + esc(S.partner.email) + ')' : '') + '. Until then it counts as €0 in your plan.</p>' : '') + '</div>' +
     (sec.id === 'about' ? '<div class="card"><div class="field"><span class="flabel">Planning with a partner? <span class="tag pre">From your answers</span></span><div class="seg" role="group" style="margin:0" aria-label="Planning with a partner">' + ['Yes','No'].map(x => { const on = (x === 'Yes') === !!S.about.partner; return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-a="partner" data-p="' + x + '">' + x + '</button>'; }).join('') + '</div></div>' +
       '<div class="field" style="margin:0"><span class="flabel">Children or others who rely on you <span class="tag pre">From your answers</span></span><div class="seg" role="group" style="margin:0" aria-label="Dependants">' + ['0','1','2','3+'].map((x, k) => '<button class="' + (S.about.deps === k ? 'on' : '') + '" aria-pressed="' + (S.about.deps === k) + '" data-a="deps" data-p="' + k + '">' + x + '</button>').join('') + '</div></div>' +
@@ -1318,11 +1343,16 @@ V.B4 = () => { const n = UM_NEW.filter(u => u === '6' ? typeof S.ans['6'] !== 'n
 
 /* ================= EXPLORE (ported from Lifecast: CATS / CALCS / calcVals / calcOut, VIDEOS / LIVE / watchHTML) ================= */
 const fvL = (p, r, y) => p * Math.pow(1 + r / 100, y);
-const fvA = (m, r, y) => { const i = r / 100 / 12, n = y * 12; return i ? m * (Math.pow(1 + i, n) - 1) / i : m * n; };
+const fvA = (m, r, y) => { const i = Math.pow(1 + r / 100, 1 / 12) - 1, n = y * 12; return i ? m * (Math.pow(1 + i, n) - 1) / i : m * n; };   // FP round 6: monthly rate equivalent to the annual growth rate (same basis as fvL and the plan)
 const pmt = (P, r, y) => { const i = r / 100 / 12, n = y * 12; return i ? P * i / (1 - Math.pow(1 + i, -n)) : P / n; };
+// FP round 6: the customer's own figure, if the tool still shows the figures we pre-filled (not moved by the customer)
+const mine = (id, keys) => !keys.some(k => ((S.calcT || {})[id] || {})[k]);
+const statedM = k => S.src && S.src[k] && S.src[k] !== 'est' && +S.fin[k] > 0 ? +S.fin[k] : null;   // a stated (statement or typed) monthly figure
+const srcWord = k => S.src[k] === 'doc' ? 'your statement' : 'your figures';
 const yrs = m => { const y = Math.floor(m / 12), mo = Math.round(m % 12); return y ? y + ' yr' + (y > 1 ? 's' : '') + (mo ? ' ' + mo + ' mo' : '') : mo + ' months'; };
-function payoff(bal, r, pay){ let m = 0, int = 0; const i = r / 100 / 12; while (bal > 0 && m < 1200){ const it = bal * i; int += it; bal = bal + it - pay; m++; if (pay <= it) return {m:Infinity, int}; } return {m, int}; }
-function lasts(pot, w, g, inf){ let y = 0; while (pot > 0 && y < 60){ pot = pot * (1 + g / 100) - w; w *= 1 + inf / 100; y++; } return y; }
+// FP round 6: ignore a rounding cent, so an exact repayment ends on the term
+function payoff(bal, r, pay){ let m = 0, int = 0; const i = r / 100 / 12; while (bal > 0.005 && m < 1200){ const it = bal * i; int += it; bal = bal + it - pay; m++; if (pay <= it) return {m:Infinity, int}; } return {m, int}; }
+function lasts(pot, w, g, inf){ let y = 0; while (y < 60){ pot = pot * (1 + g / 100) - w; if (pot < 0) break; w *= 1 + inf / 100; y++; } return y; }   // FP round 6: counts full years paid only
 const CATS = [
   {id:'home', name:'Home & Mortgage', em:'🏡', color:'var(--c2)', blurb:'Borrowing, deposits, repayments'},
   {id:'savings', name:'Savings & Goals', em:'🎯', color:'var(--c3)', blurb:'Plan any goal, see growth'},
@@ -1335,16 +1365,19 @@ const I = (k, l, v, min, max, step, u) => ({k, l, v, min, max, step, u});
 
 const CALCS = [
  {id:'borrow', cat:'home', name:'How much could I borrow?', q:'What home price could be within reach?', em:'🏡',
-  inputs:[I('inc','Your gross income',60000,15000,250000,1000,'€'),I('inc2','Partner income',0,0,250000,1000,'€'),I('dep','Deposit saved',25000,0,200000,1000,'€'),I('rate','Interest rate',4,1,8,0.1,'%'),I('term','Term',30,10,35,1,'y')],
+  inputs:[I('inc','Your gross income',60000,15000,250000,1000,'€'),I('inc2','Partner income',0,0,250000,1000,'€'),I('dep','Deposit saved',25000,0,200000,1000,'€'),I('ftb','First-time buyer (1 = yes, 0 = no)',1,0,1,1,''),I('rate','Interest rate',4,1,8,0.1,'%'),I('term','Term',30,10,35,1,'y')],
   wi:[I('xdep','Save extra towards deposit',0,0,50000,1000,'€')],
-  run(v){ const loan = (v.inc + v.inc2) * 4, dep = v.dep + (v.xdep || 0), price = loan + dep, m = pmt(loan, v.rate, v.term);
-    return {lbl:'Homes up to about', val:eur(price), line:'Based on an illustrative 4× income limit, you could borrow around ' + eur(loan) + '. Lending rules and exemptions apply [confirm current Central Bank rules].',
-      rows:[['Estimated borrowing', eur(loan)],['Your deposit', eur(dep)],['Monthly repayment (illustrative)', eur(m)]], goal:{name:'Buy a home', em:'🏡', amount:Math.round(price * 0.1), years:3}}; }},
+  run(v){ const lti = v.ftb ? 4 : 3.5, dep = v.dep + (v.xdep || 0), byInc = (v.inc + v.inc2) * lti, byDep = dep * 9, loan = Math.min(byInc, byDep), price = loan + dep, m = pmt(loan, v.rate, v.term);   // FP round 6: CBI 4x / 3.5x income and 90% LTV (10% deposit)
+    return {lbl:'Homes up to about', val:eur(price), line:'Central Bank rules: up to ' + lti + '× income for ' + (v.ftb ? 'first-time' : 'second and subsequent') + ' buyers, and at least a 10% deposit (90% loan-to-value). Here the ' + (byDep < byInc ? 'deposit' : 'income limit') + ' sets the amount. Lenders can make some exceptions [confirm current Central Bank rules].',
+      rows:[['Borrowing by income (' + lti + '×)', eur(byInc)],['Borrowing by deposit (90% LTV)', eur(byDep)],['Your deposit', eur(dep)],['Monthly repayment (illustrative)', eur(m)]], goal:{name:'Buy a home', em:'🏡', amount:Math.round(price * 0.1), years:3}}; }},
  {id:'repayment', cat:'home', name:'Monthly mortgage repayment', q:'What would my monthly repayment be?', em:'🧾',
   inputs:[I('loan','Mortgage amount',300000,50000,1000000,1000,'€'),I('rate','Interest rate',4,1,8,0.05,'%'),I('term','Term',30,5,35,1,'y')],
   wi:[I('dr','If rates changed by',0,-2,3,0.25,'%')],
-  run(v){ const r = v.rate + (v.dr || 0), m = pmt(v.loan, r, v.term), tot = m * v.term * 12;
-    return {lbl:'Monthly repayment', val:eur(m), line:'Over ' + v.term + ' years at ' + r.toFixed(2) + '%, you would repay about ' + eur(tot) + ' in total.', rows:[['Total interest', eur(tot - v.loan)],['Total repaid', eur(tot)]], goal:{name:'Buy a home', em:'🏡', amount:v.loan, years:3}}; }},
+  run(v){ const calc = pmt(v.loan, v.rate, v.term), own = mine('repayment', ['loan','rate','term']) ? statedM('mortPayM') : null, base = own || calc, r = v.rate + (v.dr || 0);
+    const m = v.dr ? base + pmt(v.loan, r, v.term) - calc : base, po = payoff(v.loan, v.rate, base), diff = own && Math.abs(own - calc) >= 5;
+    if (v.dr) return {lbl:'If your rate changed to ' + r.toFixed(2) + '%', val:eur(m), line:'What-if: your repayment would be about ' + eur(m) + ' a month, ' + eur(Math.abs(m - base)) + (m >= base ? ' more' : ' less') + ' than ' + (own ? 'the ' + eur(own) + ' on ' + srcWord('mortPayM') : 'now') + '.', rows:[['Repayment now', eur(base)],['Change over a year', eur((m - base) * 12)]], goal:{name:'Buy a home', em:'🏡', amount:v.loan, years:3}};
+    return {lbl:own ? 'Your monthly repayment' : 'Monthly repayment', val:eur(base), line:own ? 'From ' + srcWord('mortPayM') + '.' + (diff ? ' The standard formula on these figures gives about ' + eur(calc) + '; we use your lender\'s figure.' : '') : 'Over ' + v.term + ' years at ' + v.rate.toFixed(2) + '%, using the standard repayment formula.',
+      rows:[['Mortgage free in', po.m === Infinity ? 'Not at this repayment' : yrs(po.m)],['Total interest', po.m === Infinity ? '—' : eur(po.int)],['Total repaid', po.m === Infinity ? '—' : eur(v.loan + po.int)]], goal:{name:'Buy a home', em:'🏡', amount:v.loan, years:3}}; }},
  {id:'deposit', cat:'home', name:'Deposit calculator', q:'How long until I have my deposit?', em:'🐷',
   inputs:[I('price','Home price',350000,100000,1000000,5000,'€'),I('pc','Deposit needed',10,5,30,1,'%'),I('saved','Saved so far',12000,0,200000,500,'€'),I('mo','Monthly saving',800,50,5000,50,'€')],
   wi:[I('xmo','Save extra each month',0,0,1500,50,'€')],
@@ -1352,12 +1385,12 @@ const CALCS = [
     return {lbl:'Time to your deposit', val: left ? yrs(Math.ceil(m)) : 'You have it', line:'You need ' + eur(need) + ' and have ' + eur(v.saved) + '. Saving ' + eur(v.mo + (v.xmo || 0)) + ' a month closes the gap.', rows:[['Deposit needed', eur(need)],['Still to save', eur(left)]], goal:{name:'Home deposit', em:'🔑', amount:Math.round(need), years:Math.max(1, Math.ceil(m / 12))}}; }},
  {id:'overpay', cat:'home', name:'Mortgage overpayment', q:'What if I paid a little extra each month?', em:'⏩',
   inputs:[I('bal','Mortgage balance',250000,20000,1000000,1000,'€'),I('rate','Interest rate',4,1,8,0.05,'%'),I('yrs','Years left',25,3,35,1,'y'),I('x','Extra each month',200,0,2000,25,'€')],
-  run(v){ const p = pmt(v.bal, v.rate, v.yrs), a = payoff(v.bal, v.rate, p), b = payoff(v.bal, v.rate, p + v.x);
-    return {lbl:'Mortgage free sooner by', val:yrs(Math.max(0, a.m - b.m)), line:'Paying ' + eur(v.x) + ' extra a month could save about ' + eur(a.int - b.int) + ' in interest (illustrative; check your lender\'s overpayment terms).', rows:[['New time to mortgage free', yrs(b.m)],['Interest saved', eur(a.int - b.int)]], goal:{name:'Mortgage free', em:'🔑', amount:v.bal, years:Math.ceil(b.m / 12)}}; }},
+  run(v){ const own = mine('overpay', ['bal','rate','yrs']) ? statedM('mortPayM') : null, p = own || pmt(v.bal, v.rate, v.yrs), a = payoff(v.bal, v.rate, p), b = payoff(v.bal, v.rate, p + v.x);
+    return {lbl:'Mortgage free sooner by', val:a.m === Infinity ? '—' : yrs(Math.max(0, a.m - b.m)), line:'Paying ' + eur(v.x) + ' extra a month on top of ' + eur(p) + (own ? ' (from ' + srcWord('mortPayM') + ')' : '') + ' could save about ' + eur(a.int - b.int) + ' in interest (illustrative; check your lender\'s overpayment terms).', rows:[['Mortgage free now in', a.m === Infinity ? '—' : yrs(a.m)],['With the extra', yrs(b.m)],['Interest saved', eur(a.int - b.int)]], goal:{name:'Mortgage free', em:'🔑', amount:v.bal, years:Math.ceil(b.m / 12)}}; }},
  {id:'ratechange', cat:'home', name:'Interest-rate impact', q:'What if my mortgage rate changed?', em:'📊',
   inputs:[I('loan','Mortgage balance',300000,50000,1000000,1000,'€'),I('rate','Current rate',4,1,8,0.05,'%'),I('term','Years left',25,5,35,1,'y'),I('d','Rate change',1,-2,3,0.25,'%')],
-  run(v){ const a = pmt(v.loan, v.rate, v.term), b = pmt(v.loan, v.rate + v.d, v.term);
-    return {lbl:'Monthly change', val:(b >= a ? '+' : '') + eur(b - a), line:'A ' + (v.d >= 0 ? 'rise' : 'fall') + ' of ' + Math.abs(v.d) + '% would move your repayment from ' + eur(a) + ' to ' + eur(b) + ' a month.', rows:[['Now', eur(a)],['After change', eur(b)],['Change over a year', eur((b - a) * 12)]]}; }},
+  run(v){ const calc = pmt(v.loan, v.rate, v.term), own = mine('ratechange', ['loan','rate','term']) ? statedM('mortPayM') : null, a = own || calc, b = a + pmt(v.loan, v.rate + v.d, v.term) - calc;
+    return {lbl:'Monthly change', val:(b >= a ? '+' : '') + eur(b - a), line:'What-if: if your rate changed to ' + (v.rate + v.d).toFixed(2) + '%, your repayment would be about ' + eur(b) + ' a month instead of ' + eur(a) + (own ? ' (from ' + srcWord('mortPayM') + ')' : '') + '.', rows:[['Now', eur(a)],['After change', eur(b)],['Change over a year', eur((b - a) * 12)]]}; }},
  {id:'term', cat:'home', name:'Mortgage term comparison', q:'Shorter or longer term: what is the trade-off?', em:'⚖️',
   inputs:[I('loan','Mortgage amount',300000,50000,1000000,1000,'€'),I('rate','Interest rate',4,1,8,0.05,'%'),I('a','Term A',25,5,35,1,'y'),I('b','Term B',35,5,35,1,'y')],
   run(v){ const ma = pmt(v.loan, v.rate, v.a), mb = pmt(v.loan, v.rate, v.b), ia = ma * v.a * 12 - v.loan, ib = mb * v.b * 12 - v.loan;
@@ -1387,10 +1420,12 @@ const CALCS = [
   run(v){ const t = v.e * v.mt, cov = v.s / v.e, gap = Math.max(0, t - v.s);
     return {lbl:'You currently have', val:cov.toFixed(1) + ' months', line: gap ? 'Your target is ' + eur(t) + ' (' + v.mt + ' months). You are ' + eur(gap) + ' away.' : 'Your cushion covers ' + v.mt + ' months. Great foundation.', rows:[['Target cushion', eur(t)],['Still to build', eur(gap)]], goal: gap ? {name:'Emergency fund', em:'🪂', amount:Math.round(t), years:2} : null}; }},
  {id:'retirement', cat:'retire', name:'Retirement projection', q:'Could your current path fund the retirement you want?', em:'🌅',
-  inputs:[I('age','Your age',40,20,70,1,'age'),I('ra','Target retirement age',65,50,75,1,'age'),I('pot','Pension value today',60000,0,1500000,1000,'€'),I('m','Monthly contributions',500,0,5000,10,'€'),I('d','Desired yearly income',40000,10000,150000,1000,'€'),I('o','Other yearly income (e.g. State Pension)',15000,0,50000,500,'€'),I('g','Growth assumption',4.5,1,7,0.5,'%')],
+  inputs:[I('age','Your age',40,20,70,1,'age'),I('ra','Target retirement age',65,50,75,1,'age'),I('pot','Pension value today',60000,0,1500000,1000,'€'),I('m','Monthly contributions',500,0,5000,10,'€'),I('d','Desired yearly income',40000,10000,150000,1000,'€'),I('o','Other yearly income (e.g. State Pension)',15000,0,50000,500,'€'),I('g','Growth after charges',4.5,1,7,0.25,'%')],
   wi:[I('later','Retire later by',0,0,5,1,'y'),I('more','Save more each month',0,0,1500,50,'€'),I('less','Spend less in retirement (per year)',0,0,20000,500,'€')],
-  run(v){ const y = Math.max(1, v.ra + (v.later || 0) - v.age), f = fvL(v.pot, v.g, y) + fvA(v.m + (v.more || 0), v.g, y), target = Math.max(0, (v.d - (v.less || 0) - v.o)) * 25, gap = target - f;
-    return {lbl:'Projected fund', val:eur(f), line: gap > 0 ? 'Illustrative gap of ' + eur(gap) + '. See how different assumptions affect the illustration.' : 'On these assumptions your projected fund meets the illustrative target.', rows:[['Illustrative target', eur(target)],['Illustrative gap', gap > 0 ? eur(gap) : 'None'],['Retiring at', String(v.ra + (v.later || 0))]], goal:{name:'Comfortable retirement', em:'🌅', amount:Math.round(target), years:y}}; }},
+  run(v){ const ra = v.ra + (v.later || 0), y = Math.max(1, ra - v.age), ours = pensionAt(y, v.pot, v.m + (v.more || 0), v.g / 100, AS.wage), d = S.pdocs && S.pdocs.retire ? S.pdocs.retire.v : null;
+    const useSt = d && d.proj != null && ra === d.nra && !v.more && mine('retirement', ['pot','m','g','age']), f = useSt ? d.proj : ours, target = Math.max(0, (v.d - (v.less || 0) - v.o)) * 25, gap = target - f;   // FP round 6: the statement's own projection is used as stated
+    return {lbl:useSt ? 'Projected fund (from your statement)' : 'Projected fund', val:eur(f), line:(gap > 0 ? 'Illustrative gap of ' + eur(gap) + '. See how different assumptions affect the illustration.' : 'On these assumptions your projected fund meets the illustrative target.') + ' Contributions are assumed to rise with pay (' + pc(AS.wage) + ' a year), as in your plan.',
+      rows:[['Illustrative target (25 × the income you need)', eur(target)],['Illustrative gap', gap > 0 ? eur(gap) : 'None'],['Retiring at', String(ra)]].concat(d && d.proj != null ? [['Your statement projects (age ' + d.nra + ')', eur(d.proj)], ['On our assumptions (age ' + ra + ')', eur(ours)]] : []), goal:{name:'Comfortable retirement', em:'🌅', amount:Math.round(target), years:y}}; }},
  {id:'contrib', cat:'retire', name:'Contribution impact', q:'What difference would a small increase make?', em:'➕',
   inputs:[I('sal','Salary',60000,15000,250000,1000,'€'),I('inc','Increase contributions by',2,0.5,10,0.5,'%'),I('y','Years to retirement',25,1,45,1,'y'),I('g','Growth assumption',4.5,1,7,0.5,'%'),I('tr','Your tax rate',40,20,40,20,'%')],
   run(v){ const m = v.sal * v.inc / 100 / 12, f = fvA(m, v.g, v.y), net = m * (1 - v.tr / 100);
@@ -1406,13 +1441,13 @@ const CALCS = [
   run(v){ const s = [2,4,6].map(g => lasts(v.pot, v.w, g, v.i)); return {lbl:'Balanced scenario lasts', val:(s[1] >= 60 ? '60+' : s[1]) + ' years', line:'Three illustrative growth scenarios. Real returns vary year to year.', rows:[['Cautious (2%)', s[0] + ' yrs'],['Balanced (4%)', s[1] + ' yrs'],['Growth (6%)', (s[2] >= 60 ? '60+' : s[2]) + ' yrs']]}; }},
  {id:'regularinvest', cat:'invest', name:'Regular investing', q:'What could investing monthly build?', em:'🔁',
   inputs:[I('m','Monthly amount',300,25,5000,25,'€'),I('y','Years',15,1,40,1,'y'),I('g','Growth assumption',5,0,8,0.5,'%'),I('f','Yearly fees',1,0,3,0.05,'%')],
-  run(v){ const gross = fvA(v.m, v.g, v.y), net = fvA(v.m, v.g - v.f, v.y); return {lbl:'Could grow to (after fees)', val:eur(net), line:'Fees of ' + v.f + '% a year could cost about ' + eur(gross - net) + ' over ' + v.y + ' years.', rows:[['Paid in', eur(v.m * 12 * v.y)],['Before fees', eur(gross)],['Fees cost', eur(gross - net)]], goal:{name:'Build wealth', em:'📈', amount:Math.round(net), years:v.y}}; }},
+  run(v){ const gross = fvA(v.m, v.g, v.y), net = fvA(v.m, ((1 + v.g / 100) * (1 - v.f / 100) - 1) * 100, v.y); return {lbl:'Could grow to (after fees)', val:eur(net), line:'Fees of ' + v.f + '% a year could cost about ' + eur(gross - net) + ' over ' + v.y + ' years.', rows:[['Paid in', eur(v.m * 12 * v.y)],['Before fees', eur(gross)],['Fees cost', eur(gross - net)]], goal:{name:'Build wealth', em:'📈', amount:Math.round(net), years:v.y}}; }},
  {id:'realreturn', cat:'invest', name:'Inflation-adjusted return', q:"What is my money really worth in future?", em:'🔍',
   inputs:[I('p','Amount',20000,500,500000,100,'€'),I('r','Return',4,0,8,0.5,'%'),I('i','Inflation',2.5,0,6,0.5,'%'),I('y','Years',15,1,40,1,'y')],
-  run(v){ const n = fvL(v.p, v.r, v.y), real = fvL(v.p, v.r - v.i, v.y); return {lbl:"In today's money", val:eur(real), line:'It may show ' + eur(n) + ', but after inflation it buys what ' + eur(real) + ' buys today.', rows:[['Face value', eur(n)],["Today's buying power", eur(real)]]}; }},
+  run(v){ const n = fvL(v.p, v.r, v.y), real = n / Math.pow(1 + v.i / 100, v.y); return {lbl:"In today's money", val:eur(real), line:'It may show ' + eur(n) + ', but after inflation it buys what ' + eur(real) + ' buys today.', rows:[['Face value', eur(n)],["Today's buying power", eur(real)]]}; }},
  {id:'fees', cat:'invest', name:'Fees impact', q:'How much do fees really cost over time?', em:'🧮',
   inputs:[I('p','Amount invested',50000,1000,1000000,100,'€'),I('y','Years',20,1,40,1,'y'),I('g','Growth before fees',5,0,8,0.5,'%'),I('a','Fee A',0.5,0,3,0.1,'%'),I('b','Fee B',1.5,0,3,0.1,'%')],
-  run(v){ const A1 = fvL(v.p, v.g - v.a, v.y), B1 = fvL(v.p, v.g - v.b, v.y); return {lbl:'Difference', val:eur(Math.abs(A1 - B1)), line:'A ' + Math.abs(v.b - v.a).toFixed(1) + '% difference in fees could change the outcome by about ' + eur(Math.abs(A1 - B1)) + '.', rows:[['With ' + v.a + '% fees', eur(A1)],['With ' + v.b + '% fees', eur(B1)]]}; }},
+  run(v){ const nf = x => v.p * Math.pow((1 + v.g / 100) * (1 - x / 100), v.y), A1 = nf(v.a), B1 = nf(v.b); return {lbl:'Difference', val:eur(Math.abs(A1 - B1)), line:'A ' + Math.abs(v.b - v.a).toFixed(1) + '% difference in yearly fees could change the outcome by about ' + eur(Math.abs(A1 - B1)) + '.', rows:[['With ' + v.a + '% fees', eur(A1)],['With ' + v.b + '% fees', eur(B1)]]}; }},
  {id:'riskreturn', cat:'invest', name:'Risk & return simulator', q:'What range of outcomes might each style have?', em:'🎢',
   inputs:[I('p','Amount',20000,1000,1000000,100,'€'),I('y','Years',10,1,30,1,'y'),I('s','Style: 1 Cautious · 2 Balanced · 3 Growth',2,1,3,1,'')],
   run(v){ const mu = [2,4,6][v.s - 1], vol = [5,10,16][v.s - 1], spread = vol / Math.sqrt(v.y);
@@ -1424,9 +1459,9 @@ const CALCS = [
   inputs:[I('e','Essential monthly spending',2500,500,10000,100,'€'),I('sp','Months of sick pay from work',3,0,12,1,'m'),I('s','Easy-access savings',8000,0,200000,500,'€')],
   run(v){ const m = v.sp + v.s / v.e; return {lbl:'You could cope for about', val:m.toFixed(1) + ' months', line:'After that, you would have a gap of about ' + eur(v.e) + ' a month. Income protection is designed for this.', rows:[['Sick pay', v.sp + ' months'],['Savings would cover', (v.s / v.e).toFixed(1) + ' months']], goal:{name:'Protect my income', em:'🩺', amount:v.e * 12, years:1}}; }},
  {id:'mortgageprotect', cat:'protect', name:'Mortgage protection', q:'What cover would clear my mortgage?', em:'🏠',
-  inputs:[I('bal','Mortgage balance',250000,20000,1000000,5000,'€'),I('rate','Interest rate',4,1,8,0.1,'%'),I('y','Years left',25,5,35,1,'y')],
-  run(v){ const p = pmt(v.bal, v.rate, v.y), after = n => { let b = v.bal; for (let k = 0; k < n * 12; k++) b -= p - b * v.rate / 1200; return Math.max(0, b); };
-    return {lbl:'Cover needed today', val:eur(v.bal), line:'Mortgage protection usually reduces as your mortgage does. Illustrative balance over time:', rows:[['In 5 years', eur(after(5))],['In 10 years', eur(after(10))],['In 15 years', eur(after(15))]]}; }},
+  inputs:[I('bal','Mortgage balance',250000,20000,1000000,5000,'€'),I('rate','Interest rate',4,1,8,0.05,'%'),I('y','Years left',25,5,35,1,'y')],
+  run(v){ const p = (mine('mortgageprotect', ['bal','rate','y']) ? statedM('mortPayM') : null) || pmt(v.bal, v.rate, v.y), after = n => { let b = v.bal; for (let k = 0; k < n * 12 && b > 0; k++) b -= p - b * v.rate / 1200; return Math.max(0, b); };
+    return {lbl:'Cover needed today', val:eur(v.bal), line:'Mortgage protection usually reduces as your mortgage does. Illustrative balance over time, repaying ' + eur(p) + ' a month:', rows:[['In 5 years', eur(after(5))],['In 10 years', eur(after(10))],['In 15 years', eur(after(15))]]}; }},
  {id:'networth', cat:'everyday', name:'Net worth', q:'What am I worth, all in?', em:'🧾',
   inputs:[I('sav','Savings',15000,0,1000000,500,'€'),I('inv','Investments',10000,0,2000000,1000,'€'),I('pen','Pensions',60000,0,3000000,1000,'€'),I('prop','Property value',350000,0,5000000,5000,'€'),I('mort','Mortgage',250000,0,3000000,5000,'€'),I('loans','Other loans',8000,0,500000,500,'€')],
   run(v){ const a = v.sav + v.inv + v.pen + v.prop, l = v.mort + v.loans; return {lbl:'Your net worth', val:eur(a - l), line:'Everything you own minus everything you owe. Track it once or twice a year.', rows:[['You own', eur(a)],['You owe', eur(l)]]}; }},
@@ -1446,15 +1481,37 @@ const CALCS = [
 ];
 const C = id => CALCS.find(c => c.id === id);
 
-// calcVals: pre-fill from what the customer already told us (never ask twice); Lifecast defaults otherwise
-function calcVals(c){ if (!S.calcV[c.id]){ const v = {}, f = S.fin, has = k => f[k] != null && f[k] !== '' && !isNaN(+f[k]), fit = (k, x) => { const i = c.inputs.concat(c.wi || []).find(y => y.k === k); if (i) v[k] = clamp(Math.round(x / i.step) * i.step, i.min, i.max); };
-    c.inputs.concat(c.wi || []).forEach(i => v[i.k] = i.v);
-    if (v.age != null) fit('age', S.about.age);
-    if (c.id === 'retirement'){ if (has('pension')) fit('pot', +f.pension); if (has('pensionM')) fit('m', +f.pensionM); fit('ra', S.retireAge); fit('o', AS.sp); }
-    if (c.id === 'emergency'){ if (has('costsM')) fit('e', +f.costsM); if (has('cash')) fit('s', +f.cash); }
-    if (c.id === 'surplus' && has('income')){ fit('inc', netPay(+f.income) / 12); if (has('costsM')) fit('ess', +f.costsM); if (has('debtPayM')) fit('debt', +f.debtPayM); }
-    if (c.id === 'borrow' && has('income')){ fit('inc', +f.income); if (has('pIncome')) fit('inc2', +f.pIncome); }
-    S.calcV[c.id] = v; } return S.calcV[c.id]; }
+// calcVals (FP round 6): pre-filled every time from what we know, in precedence order:
+// the customer's own move of a slider in this tool > the statement's figures for this tool > Your finances (statement > typed > estimate) > the plan > tool default.
+function calcPre(c){ applyAssume(); const p = {}, f = S.fin, has = k => S.src[k] && f[k] != null && f[k] !== '' && !isNaN(+f[k]), F = finNums(), mort = F.mortBal > 0, home = S.goals.find(g => g.k === 'home');
+  const ess = F.costsM + F.mortPayM + (F.debt > 0 ? F.debtPayM : 0), take = () => { const P = project(); return P.rows[0].inflow / 12; }, rg = retireGoal();
+  p.age = S.about.age;
+  switch (c.id){
+    case 'borrow': if (has('income')) p.inc = F.income; if (has('pIncome')) p.inc2 = F.pIncome; if (home && home.saved) p.dep = home.saved; if (f.home) p.ftb = /^Own/.test(f.home) ? 0 : 1; break;
+    case 'deposit': if (home && home.saved) p.saved = home.saved; break;
+    case 'repayment': case 'ratechange': if (mort){ p.loan = F.mortBal; p.rate = F.mortRate * 100; p.term = F.mortYears || 25; } break;
+    case 'term': if (mort){ p.loan = F.mortBal; p.rate = F.mortRate * 100; p.a = F.mortYears || 25; } break;
+    case 'overpay': if (mort){ p.bal = F.mortBal; p.rate = F.mortRate * 100; p.yrs = F.mortYears || 25; } break;
+    case 'mortgageprotect': if (mort){ p.bal = F.mortBal; p.rate = F.mortRate * 100; p.y = F.mortYears || 25; } break;
+    case 'emergency': if (has('costsM')) p.e = ess; if (has('cash')) p.s = F.cash; break;
+    case 'incomegap': if (has('costsM')) p.e = ess; if (has('cash')) p.s = F.cash; break;
+    case 'retirement': if (has('pension')) p.pot = F.pension; if (has('pensionM')) p.m = F.pensionM; p.ra = S.retireAge; p.o = Math.round(AS.sp * F.sp); p.g = +(penGrowth() * 100).toFixed(2); if (rg) p.d = rg.amount; break;
+    case 'contrib': if (has('income')) { p.sal = F.income; p.tr = F.income > TX.band ? 40 : 20; } p.y = Math.max(1, S.retireAge - S.about.age); p.g = +(penGrowth() * 100).toFixed(2); break;
+    case 'avc': if (has('income')) p.tr = F.income > TX.band ? 40 : 20; p.y = Math.max(1, S.retireAge - S.about.age); p.g = +(penGrowth() * 100).toFixed(2); break;
+    case 'lastmoney': case 'drawdown': if (has('pension') || has('pensionM')) p.pot = Math.round(pensionAt(Math.max(0, S.retireAge - S.about.age), F.pension, F.pensionM, penGrowth(), AS.wage)); if (c.id === 'lastmoney') p.g = +(AS.penRet * 100).toFixed(2); p.i = AS.infl * 100; break;
+    case 'inflation': p.i = AS.infl * 100; break;
+    case 'realreturn': if (has('invest')) p.p = F.invest; p.i = AS.infl * 100; break;
+    case 'lumpsum': case 'fees': case 'riskreturn': if (has('invest')) p.p = F.invest; break;
+    case 'lifecover': if (has('income')) p.inc = F.income; if (mort) p.mort = F.mortBal; if (has('debt')) p.debt = F.debt; if (has('cash') || has('invest')) p.sav = F.cash + F.invest; break;
+    case 'networth': if (has('cash')) p.sav = F.cash; if (has('invest')) p.inv = F.invest; if (has('pension')) p.pen = F.pension; if (/^Own/.test(f.home || '')) p.prop = (+f.homeValue || 0) + (+f.propValue || 0); if (mort) p.mort = F.mortBal; if (has('debt')) p.loans = F.debt; break;
+    case 'surplus': if (has('income')){ p.inc = take(); p.ess = F.costsM + F.oneOffY / 12 + F.mortPayM; p.life = 0; p.debt = F.debt > 0 ? F.debtPayM : 0; } break;   // matches the plan's spare money this year
+    case 'budget': if (has('income')) p.inc = take(); break;
+    case 'debtpay': if (F.debt > 0){ p.b = F.debt; p.p = F.debtPayM; p.apr = AS.debtRate * 100; } break;
+  }
+  Object.assign(p, (S.calcDoc || {})[c.id] || {}); return p; }
+function calcVals(c){ S.calcV[c.id] = S.calcV[c.id] || {}; S.calcT = S.calcT || {}; const v = S.calcV[c.id], T = S.calcT[c.id] || {}, pre = calcPre(c);
+  c.inputs.concat(c.wi || []).forEach(i => { if (T[i.k] && v[i.k] != null) return; const x = pre[i.k] != null ? pre[i.k] : i.v; v[i.k] = clamp(+(+x).toFixed(4), i.min, i.max); });   // stated figures are not rounded to the slider step
+  return v; }
 const fmtIn = (i, v) => i.u === '€' ? eur(v) : i.u === '%' ? v + '%' : i.u === 'y' ? v + ' yrs' : i.u === 'm' ? v + ' mo' : i.u === 'age' ? 'age ' + v : String(v);
 const fieldR = (i, v, src) => '<div class="field"><label for="c-' + i.k + '"><span>' + esc(i.l) + (src && src.includes(i.k) ? ' <span class="tag doc">From your statement</span>' : '') + '</span><output id="co-' + i.k + '">' + fmtIn(i, v) + '</output></label><input type="range" id="c-' + i.k + '" data-ck="' + i.k + '" min="' + i.min + '" max="' + i.max + '" step="' + i.step + '" value="' + v + '"></div>';
 function calcOut(c){ const v = calcVals(c), r = c.run(v); return '<div class="card" style="background:var(--ink);color:#fff"><div class="eyebrow" style="color:var(--sun)">' + esc(r.lbl) + '</div><div style="font-family:var(--fh);font-size:36px;font-weight:800;margin:4px 0">' + r.val + '</div><p style="margin:0;font-size:14px;line-height:1.5;color:#DCE7F2">' + esc(r.line) + '</p>' + r.rows.map(x => '<div class="row" style="justify-content:space-between;border-top:1px solid rgba(255,255,255,.14);padding:8px 0;margin-top:8px;font-size:13.5px"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('') + '</div>'; }
@@ -1498,28 +1555,32 @@ V.XPL = () => { const P = S.app ? project() : null, slip = P ? S.goals.filter(g 
 const spFromYears = y => y >= 40 ? 'Expect full' : y >= 10 ? 'Partly' : 'Not sure';
 const DOCT = {
   retire:{em:'🌅', what:'pension', title:'Pension benefit statement', date:'Jul 2025', old:true, reads:['Pension benefit statement', 'Annual pension statement', 'PRSA statement', 'Employer scheme / Occupational pension statement', 'State Pension record (MyWelfare)'], open:'retirement',
-    f:[['pot','Current pension value',72000,95,'€'], ['youM','Your monthly contribution',260,93,'€'], ['empM','Employer monthly contribution',260,91,'€'], ['nra','Normal retirement age on the statement',66,96,'age'], ['proj','Projected value at retirement',310000,84,'€',1], ['chg','Annual charges',1.0,76,'%',1]],
+    f:[['pot','Current pension value',72000,95,'€'], ['youM','Your monthly contribution',260,93,'€'], ['empM','Employer monthly contribution',260,91,'€'], ['nra','Normal retirement age on the statement',66,96,'age'], ['proj','Projected value at retirement',694000,84,'€',1], ['chg','Annual charges',1.0,76,'%',1]],
     extra:{t:'🏛️ State Pension record (MyWelfare)', f:[['prsi','State Pension record: PRSI years',28,88,'y']]},
-    feed(v, c, put){ put('pension', v.pot, c.pot); put('pensionM', v.youM + v.empM, c.youM == null || c.empM == null ? null : Math.min(c.youM, c.empM)); put('sp', spFromYears(v.prsi), c.prsi); return 'pension'; },
-    pre(v){ const age = S.about.age, yrs = Math.max(1, v.nra - age), gr = d => v.chg != null ? {g:d - v.chg} : {};   // charges only if the statement shows them
-      return {retirement:Object.assign({pot:v.pot, m:v.youM + v.empM, ra:v.nra, o:Math.round(AS.sp * ({'Expect full':1, Partly:0.6}[spFromYears(v.prsi)] || 0.8) / 500) * 500}, gr(4.5)),
-        contrib:Object.assign({y:yrs}, gr(4.5)), avc:Object.assign({y:yrs}, gr(4.5)), lastmoney:v.proj != null ? {pot:v.proj} : {pot:v.pot}, drawdown:v.proj != null ? {pot:v.proj} : {pot:v.pot}}; }},
+    feed(v, c, put){ put('pension', v.pot, c.pot); put('pensionM', v.youM + v.empM, c.youM == null || c.empM == null ? null : Math.min(c.youM, c.empM)); put('sp', spFromYears(v.prsi), c.prsi); if (v.chg != null) put('penChg', v.chg, c.chg); else removeDoc(['penChg']); return 'pension'; },
+    pre(v){ applyAssume(); const age = S.about.age, ra = S.app && retireGoal() ? S.retireAge : v.nra, yrs = Math.max(1, ra - age), gr = () => v.chg != null ? {g:+((AS.pen + PEN_TYP_CHG - v.chg / 100) * 100).toFixed(2)} : {};   // FP round 6: growth after the statement's own charges, same rule as the plan
+      return {retirement:Object.assign({pot:v.pot, m:v.youM + v.empM, ra, o:Math.round(AS.sp * ({'Expect full':1, Partly:0.6}[spFromYears(v.prsi)] || 0.8) / 500) * 500}, gr()),
+        contrib:Object.assign({y:yrs}, gr()), avc:Object.assign({y:yrs}, gr()), lastmoney:v.proj != null ? {pot:v.proj} : {pot:v.pot}, drawdown:v.proj != null ? {pot:v.proj} : {pot:v.pot}}; }},
   home:{em:'🏡', what:'mortgage', title:'Mortgage statement', date:'Aug 2026', old:false, reads:['Mortgage statement', 'Annual mortgage statement', 'Mortgage offer letter', 'Property valuation', 'LPT record'], open:'repayment',
-    f:[['bal','Outstanding balance',212000,96,'€'], ['rate','Interest rate',3.85,94,'%'], ['pay','Monthly repayment',1180,93,'€'], ['yrs','Term remaining',21,90,'y'], ['hval','Property value (from the valuation)',420000,82,'€',1]],
+    f:[['bal','Outstanding balance',203700,96,'€'], ['rate','Interest rate',3.85,94,'%'], ['pay','Monthly repayment',1180,93,'€'], ['yrs','Term remaining',21,90,'y'], ['hval','Property value (from the valuation)',420000,82,'€',1]],
     text:[['Rate type','Fixed until Mar 2028',88], ['Lender','Demo Bank A',97]],
-    feed(v, c, put){ put('home', 'Own with mortgage', 99); put('mortBal', v.bal, c.bal); put('mortPayM', v.pay, c.pay); put('mortYears', v.yrs, c.yrs); if (v.hval != null) put('homeValue', v.hval, c.hval); return 'liabilities and assets'; },
+    feed(v, c, put){ put('home', 'Own with mortgage', 99); put('mortBal', v.bal, c.bal); put('mortRate', v.rate, c.rate); put('mortPayM', v.pay, c.pay); put('mortYears', v.yrs, c.yrs); if (v.hval != null) put('homeValue', v.hval, c.hval); return 'liabilities and assets'; },
     pre(v){ return {repayment:{loan:v.bal, rate:v.rate, term:v.yrs}, overpay:{bal:v.bal, rate:v.rate, yrs:v.yrs}, ratechange:{loan:v.bal, rate:v.rate, term:v.yrs}, term:{loan:v.bal, rate:v.rate, a:v.yrs}}; }},
   invest:{em:'📈', what:'investment', title:'Investment statement', date:'Jun 2026', old:false, reads:['Investment / brokerage statement', 'Fund statement', 'Share scheme / ESPP / RSU statement', 'Crypto holdings statement'], open:'regularinvest',
-    f:[['tot','Total value',18400,93,'€'], ['mon','Monthly amount invested',150,90,'€'], ['sh','Holdings: shares',70,85,'%',1], ['bo','Holdings: bonds',20,85,'%',1], ['ca','Holdings: cash',10,85,'%',1], ['chg','Annual charges',0.6,80,'%',1]],
+    f:[['tot','Total value',6200,93,'€'], ['mon','Monthly amount invested',150,90,'€'], ['sh','Holdings: shares',70,85,'%',1], ['bo','Holdings: bonds',20,85,'%',1], ['ca','Holdings: cash',10,85,'%',1], ['chg','Annual charges',0.6,80,'%',1]],
     feed(v, c, put){ put('invest', v.tot, c.tot); return 'assets'; },
     pre(v){ const s = v.sh == null ? null : v.sh >= 70 ? 3 : v.sh >= 40 ? 2 : 1;
       return {regularinvest:Object.assign({m:v.mon}, v.chg != null ? {f:v.chg} : {f:0, _notag:['f']}), lumpsum:{p:v.tot}, fees:Object.assign({p:v.tot}, v.chg != null ? {a:v.chg} : {a:0, _notag:['a']}), /* no charges on the statement = no default charge */ riskreturn:Object.assign({p:v.tot}, s ? {s} : {}), realreturn:{p:v.tot}}; }}
 };
 function pstCard(cat){ const T = DOCT[cat], d = S.pdocs[cat];
   return '<div class="card pst"><b style="font-size:15px">📄 Have ' + (/^[aeiou]/.test(T.what) ? 'an ' : 'a ') + T.what + ' statement? Upload it and we\'ll fill in these tools for you.</b><p class="small" style="margin:6px 0 10px">We can read: ' + T.reads.map(esc).join(' · ') + '.</p>' +
-    (d ? '<div class="mini" style="align-items:center"><span>✅ Uploaded: <b>' + esc(d.name) + ' · ' + esc(d.date) + '</b></span><button class="link" data-a="pstup" data-p="' + cat + '">Replace</button></div>' :
+    (d ? '<div class="mini" style="align-items:center"><span>✅ Uploaded: <b>' + esc(d.name) + ' · ' + esc(d.date) + '</b></span><span class="row" style="gap:12px"><button class="link" data-a="pstup" data-p="' + cat + '">Replace statement</button><button class="link" data-a="pstrem" data-p="' + cat + '">Remove statement</button></span></div>' :
     '<div class="grid2"><label class="btn sm" style="width:100%;cursor:pointer">Upload a statement<input type="file" class="sr" data-pfile="' + cat + '" accept=".pdf,.jpg,.jpeg,.png,.heic"></label><button class="btn sm ghost" style="width:100%" data-a="pstup" data-p="' + cat + '">Use a sample statement</button></div>') +
     (verified() ? '' : '<p class="small" style="margin:8px 0 0">🔐 First we\'ll secure your account (email and mobile code), so your documents stay private.</p>') + '</div>'; }
+const DOC_HIDDEN = {liab:['mortRate'], pension:['penChg']};   // statement figures with no field of their own in Your finances
+function pstRemove(cat){ const d = S.pdocs[cat]; if (!d) return; const ids = Object.keys(DOCT[cat].pre(d.v));
+  removeDoc(Object.keys(S.docOf || {}).filter(k => S.docOf[k] === 'pst:' + cat)); delete S.pdocs[cat];
+  ids.forEach(id => { if (S.calcDoc) delete S.calcDoc[id]; if (S.calcSrc) delete S.calcSrc[id]; if (S.calcT) delete S.calcT[id]; }); }
 function pstStart(cat, files){ files = files || [DOCT[cat].title + ' · ' + DOCT[cat].date + '.pdf'];
   if (!verified()){ S.after = {k:'pst', cat, files, scr:S.scr}; S.scr = 'P1'; S.xs.push({v:'ACCT'}); lastId = null; render(); return; }
   S.pst = {cat, stage:'scan', files, edit:{}}; S.xs = S.xs.filter(x => x.v !== 'ACCT' && x.v !== 'PST'); S.xs.push({v:'PST'}); lastId = null; render();
@@ -1537,12 +1598,13 @@ V.PST = () => { const u = S.pst; if (!u) return V.XPL(); const T = DOCT[u.cat];
 function pstConfirm(){ const u = S.pst, T = DOCT[u.cat], all = T.f.concat(T.extra ? T.extra.f : []), v = {}, c = {};
   all.forEach(([k, l, d, cf, unit, opt]) => { const e = u.edit[k]; if (e != null && String(e).trim() === ''){ v[k] = opt ? null : d; c[k] = opt ? null : cf; return; }   // cleared optional field = not on the statement
     const x = e != null && !isNaN(+e) ? +e : d; v[k] = x; c[k] = e != null && +e !== d ? null : cf; });
-  const put = (k, x, cf) => { S.fin[k] = x; S.src[k] = cf == null ? 'typed' : 'doc'; if (cf != null) S.conf[k] = cf; else delete S.conf[k]; delete S.look[k]; };
+  const put = (k, x, cf) => { delete S.look[k]; setDoc(k, x, cf, cf == null, 'pst:' + u.cat); };   // FP round 6: corrected values stay statement figures
   const where = T.feed(v, c, put); if (T.old && u.cat === 'retire') S.look.pension = 'Statement is over 12 months old';
   S.pdocs[u.cat] = {name:T.title, date:T.date, v};
   const pre = T.pre(v); S.calcSrc = S.calcSrc || {};
-  Object.entries(pre).forEach(([id, vals]) => { const cc = C(id), cur = Object.assign({}, calcVals(cc)), ins = cc.inputs.concat(cc.wi || []); S.calcSrc[id] = [];
-    Object.entries(vals).forEach(([k, x]) => { const i = ins.find(y => y.k === k); if (!i || x == null) return; cur[k] = +clamp(Math.round(x / i.step) * i.step, i.min, i.max).toFixed(3); if (!(vals._notag || []).includes(k)) S.calcSrc[id].push(k); }); S.calcV[id] = cur; });
+  S.calcDoc = S.calcDoc || {}; S.calcT = S.calcT || {};
+  Object.entries(pre).forEach(([id, vals]) => { const cc = C(id), ins = cc.inputs.concat(cc.wi || []), keep = {}; S.calcSrc[id] = []; S.calcT[id] = {};   // a new statement resets the tool to the statement
+    Object.entries(vals).forEach(([k, x]) => { if (k === '_notag' || x == null || !ins.find(y => y.k === k)) return; keep[k] = x; if (!(vals._notag || []).includes(k)) S.calcSrc[id].push(k); }); S.calcDoc[id] = keep; calcVals(cc); });
   S.pst = null; S.xs = [{v:'XCAT', p:u.cat}, {v:'CALC', p:T.open}]; lastId = null; render();
   toast(S.app ? 'Added to your plan too (' + where + ')' : 'Saved. Your plan will use it when you make it'); }
 const aExp = k => { const x = EXPERT_FOR[k].toLowerCase(); return (/^[aeiou]/.test(x) ? 'an ' : 'a ') + x; };
@@ -1798,7 +1860,9 @@ const ACT = {
     if (v > max){ v = max; S.saveNote = 'That\'s all of your spare money each month, so we can\'t count more than this. '; }
     S.saveM = v; focusKey = '[data-a="savem"][data-p="' + p + '"]'; render(); },
   savereset:() => { S.saveM = null; S.saveNote = ''; focusKey = '[data-a="savem"][data-p="25"]'; render(); },
-  pstup:p => pstStart(DOCT[p] ? p : 'retire'), pstok:() => pstConfirm(),
+  pstup:p => pstStart(DOCT[p] ? p : 'retire'), pstok:() => pstConfirm(), pstrem:p => { pstRemove(p); toast('Statement removed. Your own figures are used again'); render(); },
+  docrep:p => { S.fmode[FSEC[+p].id] = 'upload'; render(); },
+  docrem:p => { const sec = FSEC[+p]; removeDoc(sec.f.concat(DOC_HIDDEN[sec.id] || [])); Object.keys(DOCT).forEach(c => { if (S.pdocs[c] && !Object.values(S.docOf || {}).includes('pst:' + c)) pstRemove(c); }); toast('Statement removed. Your own figures are used again'); render(); },
   calcadd:p => { S.sheet = 'calcadd|' + p; render(); },
   confirmcalcadd:p => { const r = C(p).run(calcVals(C(p))), g = r.goal; if (!g) return; S.goals.push(mkGoal('other', [g.em, g.name, Math.round(g.amount), Math.max(1, g.years)])); S.sheet = null; if (S.app) afterPlanEdit(); render(); toast(S.app ? g.name + ' added to your plan' : g.name + ' added. It will be on your timeline when you make your plan'); },
   vemail:() => verify('ev', 'P1S'), vsms:() => verify('sv', 'P1K'),
@@ -1808,9 +1872,9 @@ const ACT = {
   uplok:() => confirmUpload(),
   fsec:p => openSec(p), fmode:p => { S.fmode[FSEC[S.fsec].id] = p; render(); },
   fback:() => finBack(), fsave:() => { const sec = FSEC[S.fsec]; if (sec.id === 'about'){ S.fin.name && (S.acct.name = S.fin.name); } toast(sec.t + ' saved'); if (S.app) afterPlanEdit(true); finBack(); },
-  fchoice:p => { const [k, v] = p.split('|'); S.fin[k] = v; S.src[k] = 'typed'; delete S.look[k]; focusKey = '[data-a="fchoice"][data-p="' + p + '"]'; render(); },
-  fest:p => { const d = FF[p]; S.fin[p] = val(d.est); S.src[p] = 'est'; delete S.look[p]; focusKey = '[data-a="fest"][data-p="' + p + '"]'; render(); },
-  fnone:p => { S.fin[p] = 0; S.src[p] = 'none'; delete S.look[p]; focusKey = '[data-a="fnone"][data-p="' + p + '"]'; render(); },
+  fchoice:p => { const [k, v] = p.split('|'); setManual(k, v, 'typed'); focusKey = '[data-a="fchoice"][data-p="' + p + '"]'; render(); },
+  fest:p => { const d = FF[p]; setManual(p, val(d.est), 'est'); focusKey = '[data-a="fest"][data-p="' + p + '"]'; render(); },
+  fnone:p => { setManual(p, 0, 'none'); focusKey = '[data-a="fnone"][data-p="' + p + '"]'; render(); },
   fix:p => { if (!S.app) S.from = 'check'; openSec(p); }, ack:p => { S.ack[p] = true; render(); },
   acksec:p => { FSEC.find(x => x.id === p).f.filter(fieldVisible).forEach(k => { if (!FF[k].opt) S.ack[k] = true; }); focusKey = null; render(); },
   toresults:() => { if (!S.checked) return; toResults(); },
@@ -1870,10 +1934,9 @@ function startUpload(sec, files){ const fail = files.some(f => /fail/i.test(f));
   if (!S.app) S.scr = 'PU'; else { if (S.tab === 'plan' || S.tab === 'home') S.tab = 'me'; if (S.tab === 'me') S.me = 'fin'; else S.exp = 'fin'; }
   render(); setTimeout(() => { if (!S.upl) return; S.upl.stage = fail ? 'fail' : 'confirm'; render(); }, RM() ? 200 : 1500); }
 function confirmUpload(){ const u = S.upl, secs = u.sec === 'smart' ? ['income','assets','liab','pension'] : [u.sec];
-  secs.forEach(sid => { const U = UPL[sid]; Object.entries(U.v).forEach(([k, [v, c]]) => { let nv = u.edit[k] != null ? +u.edit[k] : v; const prev = S.fin[k];
-    if (S.src[k] === 'typed' && typeof nv === 'number' && prev && Math.abs(prev - nv) / Math.max(prev, nv) > 0.1) S.look[k] = 'You typed ' + eur(prev) + ', the document says ' + eur(nv);
-    else delete S.look[k];
-    S.fin[k] = nv; S.src[k] = 'doc'; S.conf[k] = c; if (u.edit[k] != null && +u.edit[k] !== v) S.src[k] = 'typed'; });
+  secs.forEach(sid => { const U = UPL[sid]; Object.entries(U.v).forEach(([k, [v, c]]) => { const fixed = u.edit[k] != null && +u.edit[k] !== v, nv = fixed ? +u.edit[k] : v;
+    delete S.look[k]; setDoc(k, nv, c, fixed, 'upl:' + sid); });   // FP round 6: the document wins over a typed figure; a correction here is still the document
+    Object.entries(U.hid || {}).forEach(([k, [v, c]]) => setDoc(k, v, c, false, 'upl:' + sid));
     if (U.old) Object.entries(U.old).forEach(([k, why]) => { S.look[k] = why; }); });
   S.upl = null; toast('Added from your documents'); if (S.app) { S.fsec = null; if (S.tab === 'me') S.me = 'money'; render(); } else { S.fsec = null; go('P2'); } }
 
@@ -1894,11 +1957,11 @@ function bind(){
     i.addEventListener('paste', e => { const t = (e.clipboardData.getData('text') || '').replace(/\D/g, ''); if (t.length === 6){ e.preventDefault(); all.forEach((x, k) => x.value = t[k]); all[5].focus(); } }); });
   if (ph.querySelector('[data-code]')) ph.querySelector('[data-code]').focus();
   ph.querySelectorAll('[data-fin]').forEach(i => i.addEventListener('input', () => { const k = i.dataset.fin, d = FF[k];
-    if (d.type === 'text') S.fin[k] = i.value; else { const n = parseInt(i.value.replace(/[^\d]/g, '')); if (isNaN(n)) { delete S.fin[k]; delete S.src[k]; } else { S.fin[k] = d.type === 'num' ? clamp(n, 0, 120) : n; } }
-    if (S.fin[k] != null && S.fin[k] !== '') { S.src[k] = 'typed'; delete S.look[k]; }
-    if (k === 'age' && S.fin.age >= 18) { S.about.age = S.fin.age; }
-    if (k === 'retireAge' && S.fin.retireAge >= 50 && S.fin.retireAge <= 75) setRetireAge(S.fin.retireAge);
-    const tg = document.getElementById('tag-' + k); if (tg) tg.innerHTML = tagFor(k); }));
+    let nv; if (d.type === 'text') nv = i.value; else { const n = parseInt(i.value.replace(/[^\d]/g, '')); nv = isNaN(n) ? null : d.type === 'num' ? clamp(n, 0, 120) : n; }
+    const used = setManual(k, nv, 'typed');   // FP round 6: a statement figure is not overwritten; the entry is kept and shown
+    if (used && k === 'age' && S.fin.age >= 18) { S.about.age = S.fin.age; }
+    if (used && k === 'retireAge' && S.fin.retireAge >= 50 && S.fin.retireAge <= 75) setRetireAge(S.fin.retireAge);
+    const tg = document.getElementById('tag-' + k); if (tg) tg.innerHTML = tagFor(k); const dn = document.getElementById('dn-' + k); if (dn) dn.innerHTML = docNote(k); }));
   ph.querySelectorAll('input[type=file][data-file]').forEach(i => i.addEventListener('change', () => { const fs = [...i.files].map(f => f.name); if (fs.length) startUpload(i.dataset.file, fs); }));
   ph.querySelectorAll('[data-uv]').forEach(i => i.addEventListener('input', () => { S.upl.edit[i.dataset.uv] = parseInt(i.value.replace(/\D/g, '')) || 0; }));
   ph.querySelectorAll('[data-chk]').forEach(i => i.addEventListener('change', () => { S.checked = i.checked; document.getElementById('seeres').disabled = !i.checked; }));
@@ -1906,7 +1969,7 @@ function bind(){
   ph.querySelectorAll('[data-agree]').forEach(i => i.addEventListener('change', () => { S.book.agree = i.checked; shareBtn(); }));
   ph.querySelectorAll('input[data-wi]').forEach(r => r.addEventListener('input', () => { if (S.wi.g == null) S.wi.g = defaultWiGoal(); S.wi[r.dataset.wi] = +r.value; r.setAttribute('aria-valuetext', eur(+r.value)); liveUpdate(); }));
   if (ph.querySelector('#wi-out')) { if (S.wi.g == null) S.wi.g = defaultWiGoal(); liveUpdate(); const c = ph.querySelector('[data-a="wig"][data-p="' + S.wi.g + '"]'); if (c) { c.classList.add('sel'); c.setAttribute('aria-pressed', 'true'); } }
-  ph.querySelectorAll('input[data-ck]').forEach(inp => inp.addEventListener('input', () => { const t = xTop(); if (!t || t.v !== 'CALC') return; const c = C(t.p), v = calcVals(c), k = inp.dataset.ck, i = c.inputs.concat(c.wi || []).find(x => x.k === k); v[k] = +inp.value;
+  ph.querySelectorAll('input[data-ck]').forEach(inp => inp.addEventListener('input', () => { const t = xTop(); if (!t || t.v !== 'CALC') return; const c = C(t.p), v = calcVals(c), k = inp.dataset.ck, i = c.inputs.concat(c.wi || []).find(x => x.k === k); v[k] = +inp.value; S.calcT = S.calcT || {}; (S.calcT[c.id] = S.calcT[c.id] || {})[k] = true;
     const o = document.getElementById('co-' + k); if (o) o.textContent = fmtIn(i, v[k]); const out = document.getElementById('cout'); if (out) out.innerHTML = calcOut(c); }));
   ph.querySelectorAll('input[type=file][data-pfile]').forEach(i => i.addEventListener('change', () => { const fs = [...i.files].map(f => f.name); if (fs.length) pstStart(i.dataset.pfile, fs); }));
   ph.querySelectorAll('[data-pv]').forEach(i => i.addEventListener('input', () => { if (!S.pst) return; S.pst.edit[i.dataset.pv] = i.value; if (i.dataset.pv === 'prsi'){ const e = document.getElementById('pst-sp'); if (e) e.textContent = spFromYears(+i.value || 0); } }));
@@ -1988,7 +2051,7 @@ function loadSample(){
   put('name', 'Aoife', 'pre'); put('age', 38, 'pre'); put('retireAge', 63, 'pre'); put('pAge', 37, 'typed');
   put('work', 'Employed', 'doc', 99); put('income', 58000, 'doc', 98); put('pIncome', 22000, 'typed'); put('otherM', 0, 'none'); put('costsM', 3600, 'est'); put('oneOffY', 1800, 'doc', 81);
   put('home', 'Own with mortgage', 'doc', 99); put('homeValue', 420000, 'typed'); put('cash', 9000, 'doc', 97); put('invest', 6200, 'doc', 88);
-  put('mortBal', 212000, 'doc', 96); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('debt', 2800, 'doc', 85); put('debtPayM', 140, 'doc', 78);
+  put('mortBal', 203700, 'doc', 96); put('mortRate', 3.85, 'doc', 94); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('debt', 2800, 'doc', 85); put('debtPayM', 140, 'doc', 78);
   put('life', 'Yes', 'doc', 95); put('ip', 'No', 'typed'); put('ci', 'Not sure', 'typed'); put('workCover', 'Yes', 'doc', 90); put('health', 'Yes', 'typed');
   put('pension', 72000, 'doc', 95); put('pensionM', 520, 'doc', 91); put('sp', 'Expect full', 'typed'); S.look.pension = 'Statement is over 12 months old';
   S.partner = {mode:'manual', email:'', sent:false, name:'Cian'};

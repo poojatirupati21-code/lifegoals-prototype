@@ -659,3 +659,91 @@ Reviewer: Financial Planner · 1 Oct 2026 · Changed only the engine and one Wha
 | e2e.js 390 / 1280 / 844, chart.js, fp4.js, road.js, v7.js | all exit 0, `ERRORS 0` |
 
 In fp4.js, `I9_mortgageGoneAfter: false` is expected: that customer covers only 7% of paying the mortgage off in 5 years, so the mortgage correctly stays.
+
+---
+
+## Round 6: data precedence and calculator accuracy
+
+Reviewer: Financial Planner · 1 Oct 2026. Edited `LifeGoals-Customer-Journey-Prototype.html` (engine, data handling, Explore calculators). Not committed. A copy taken before the change is at `scratchpad/fp/pre-r6.html`. New test: `scratchpad/precedence.js`, 57 checks.
+
+### 1. Data precedence: document > typed > "Estimate for me" > tool default
+- **New helpers:**
+  - `setManual(k, v, src)` handles everything the customer enters: typing, a choice chip, "Estimate for me", "I don't have this".
+  - `setDoc(k, v, conf, fixed, from)` handles every upload: plan uploads in `confirmUpload` and Explore statements in `pstConfirm`.
+  - `removeDoc(keys)` takes a statement out.
+  - `docNote(k)` writes the note shown next to the field.
+- **Typing over a statement figure:** `S.fin[k]` keeps the statement value. The entry is kept in `S.man[k]`, and the field shows "You typed €1,500. Your statement says €1,180; we're using that." The engine, tools and report use only `S.fin`, so the statement value is used everywhere.
+- **Uploading after typing:** the document wins. The old "You typed €A, the document says €B" item was a "Needs a look" flag; it is now the same note, settled in favour of the document. The typed figure is kept so it can come back.
+- **Corrections** on "We read these values" stay statement figures (`S.fix[k]`), tagged "✅ From your statement (corrected)". Before, they became "typed" and could then be overwritten.
+- **Replace statement / Remove statement:**
+  - In a Your finances section that has statement figures, both links appear.
+  - In Explore, the uploaded-statement card now has "Replace statement" and "Remove statement".
+  - Remove puts back the customer's latest manual figure (typed or estimated), or "Missing" if there was none. It also clears the statement's hidden figures (mortgage rate, pension charges) and the tools' "From your statement" pre-fills.
+- **Explore tools** (`calcPre`/`calcVals`) are now pre-filled fresh each time, in this order:
+  1. the customer's own slider move in that tool (`S.calcT`)
+  2. that statement's figures (`S.calcDoc`)
+  3. Your finances (already ordered statement > typed > estimate)
+  4. the plan
+  5. the tool default
+
+  Stated figures are no longer rounded to the slider step (€203,700 used to become €204,000).
+
+### 2. Stated figures used as stated
+- **Mortgage repayment.** `finNums().mortPayM` is the stated repayment (statement or typed). The standard formula is used only when no repayment is given, and that case is flagged `mortPayEst`. This replaces round 4's `max(stated, formula)`, which lifted €1,180 to €1,236. If the stated repayment wouldn't clear the balance in the term, the figure is still used and flagged "⚠️ Needs a look". The engine now amortises **monthly** (`amortYear`) at the **statement's rate** (`mortRate`, hidden field) when we have it.
+- **Other debts:** the stated repayment is used. A 5-year repayment is assumed only if none is given, or if it doesn't cover the interest.
+- **Tools:**
+  - Repayment, Overpayment, Rate impact and Mortgage protection start from the stated €1,180 ("From your statement").
+  - The formula figure appears only as a labelled what-if, e.g. "If your rate changed to 4.85%… about €1,290 a month, €110 more than the €1,180 on your statement."
+  - If a lender's figure differs from the formula, the tool says so and uses the lender's.
+- **Pension.** The statement's own projection is shown as stated: "Projected fund (from your statement) €694,000" at the statement age. Our figure is labelled "On our assumptions (age 63)". The statement's charges replace the typical 1% inside the growth rate (`penGrowth()`), and the plan uses the same rate.
+- **Sample statements are now consistent:**
+  - Mortgage: €203,700 at 3.85% over 21 years = €1,180.0 a month (was €212,000, which gives €1,228).
+  - Pension: projection €694,000 at 66, matching the plan's rule (our figure €694,098).
+  - Investments: €6,200 in both the plan upload and the Explore statement (was €18,400 vs €6,200).
+  - Cash: €9,000 in both.
+
+  The sample projection is in future money; real Irish pension statements usually project in today's money, so the reader should capture which basis is used.
+
+### 3. Calculator audit (29 tools; reference cases all PASS in `precedence.js` §5–6)
+| Tool | Verdict | Reference case (expected = hand / standard formula) |
+|---|---|---|
+| How much could I borrow | **Fixed**: was 4× income for everyone with no deposit limit. Now CBI rules: **4× (first-time) / 3.5× (others)** and a **90% LTV for both** (a 10% deposit). Second and subsequent buyers moved from 80% to 90% in Jan 2023, so the "80%" in the brief is out of date. New first-time-buyer input, pre-filled from home status. | €60k, €25k deposit, FTB → €250,000 (deposit limit) · €60k deposit → €300,000 · mover → €270,000 |
+| Monthly repayment | **Fixed**: uses the stated repayment; the formula appears only as a what-if; shows "Mortgage free in" | €300k 4% 30y = €1,432 · sample = €1,180, mortgage free in 21 yrs = plan |
+| Mortgage overpayment | **Fixed**: base = stated repayment; a rounding cent no longer adds a month | €250k 4% 25y, no extra → 25 yrs |
+| Interest-rate impact | **Fixed**: change applied to the stated repayment | €300k 4%→5% 25y = +€170 |
+| Term comparison | OK | €300k 4% 25y = €1,584 |
+| Rent vs buy | OK (illustrative; no stamp duty or opportunity cost, as labelled) | — |
+| Deposit | OK (no interest, as labelled) | €35k − €12k at €800/m = 29 months |
+| Goal planner | **Fixed** (monthly rate = annual rate, as in the plan) | €15k, 3y, €2k, 2% = €347 |
+| Compound growth | **Fixed** (same basis) | €5k + €200/m, 4%, 20y = €83,724 |
+| Lump-sum growth | OK | €10k 4% 15y = €18,009 |
+| Future cost after inflation | OK; pre-filled with the plan's inflation | €20k 2.5% 10y = €25,602 |
+| Emergency fund | **Fixed pre-fill**: essentials = costs + mortgage + loan repayments | €2,500 × 6, €6,250 → 2.5 months |
+| Retirement projection | **Fixed**: same rule as the plan (yearly, contributions rising with pay, growth after the statement's charges); statement projection shown as stated | €72k + €520/m, 4.5%, 40→65 = €575,656 = plan pot |
+| Contribution impact | OK; pre-filled salary, years and marginal rate | €60k +2% at 40% → €60/m net |
+| AVC impact | **Fixed** basis | €200/m 4.5% 15y = €50,902 |
+| Will my money last | **Fixed**: counted a year the pot ran out as a full year | €400k, €24k rising 2%, 3% → 18 full years |
+| Drawdown scenarios | **Fixed** (same function) | — |
+| Regular investing | **Fixed**: fees applied exactly, `(1+g)(1−fee)` | €300/m 5% 15y 1% = €73,109 |
+| Inflation-adjusted return | **Fixed**: exact `÷(1+i)^y` (was `r − i`) | €20k 4% vs 2.5% 15y = €24,870 |
+| Fees impact | **Fixed** (exact) | €50k 5% 20y, 0.5% vs 1.5% = €21,953 |
+| Risk & return | OK | €20k 4% 10y = €29,605 |
+| Life cover | OK; pre-filled from finances | €60k × 60% × 15y + €260k debts − €120k = €680,000 |
+| Income protection gap | OK | 3 + €8k/€2.5k = 6.2 months |
+| Mortgage protection | **Fixed**: stated repayment | €250k 4% 25y, after 5y = €217,762 |
+| Net worth | OK; pre-filled | €435k − €258k = €177,000 |
+| Monthly surplus | **Fixed pre-fill**: take-home, costs, mortgage and loans as in the plan | sample €124 = plan spare money |
+| Budget 50/30/20 | OK | 20% of €3,500 = €700 |
+| Debt repayment | OK; pre-filled with the stated repayment and the plan's 9% | €5k 18% €250/m = 24 months; sample clears in the plan's year 2 |
+| Loan repayment | OK | €15k 8% 5y = €304 |
+
+Agreement with the plan (§6 of the test): surplus tool = plan spare money · overpayment tool's "mortgage free in" = plan mortgage end (21 years) · retirement projection = plan pension pot at 63 · debt tool = plan's debt-free year.
+
+### 4. Test results (0 errors)
+- `precedence.js`: **57 / 57 pass**. It covers type → upload → type again, estimate and choice after a statement, a correction tagged "(corrected)", Replace / Remove in Your finances and in Explore, and €1,180 in the tool, plan, report and what-if. It also covers sample consistency, 31 calculator reference cases and 4 tool-vs-plan agreements.
+- e2e.js 390 / 1280 / 844, chart.js, fp4.js, fp/mono.js (4,200 checks, 0 failures), road.js, landfit.js, noret.js, v5–v9.js: all exit 0, `ERRORS 0`.
+- Round-4 harness (6,192 cases), rebuilt from the live file: 0 failures. Two of its mortgage checks were written for the old yearly mortgage maths, so they are now covered by fp4.js instead.
+
+Deliberate consequence: a stated repayment below the interest (e.g. €500 on €300k) is now used as stated. The mortgage never clears in the plan, and the field shows "⚠️ Needs a look". Before, it was silently raised.
+
+Sources: [Central Bank: targeted changes to the mortgage measures](https://www.centralbank.ie/news/article/central-bank-announces-targeted-changes-to-mortgage-measures-framework) · [McCann FitzGerald summary](https://www.mccannfitzgerald.com/knowledge/financial-services-regulation/new-mortgage-lending-rules-announced-by-the-central-bank)
