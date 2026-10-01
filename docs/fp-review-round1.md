@@ -631,3 +631,31 @@ UI fixes (for the designer; not engine):
 - Living costs stay the same until 90, so children's costs never fall away.
 - The partner's pension and the partner's own retirement age aren't modelled (partner income runs to 66).
 - "Retire comfortably" amount is treated as **spending after tax**; the tile unit "Yearly income" could be read as gross. Suggested label: "Yearly spending in retirement (today's money)".
+
+---
+
+## Round 5: monotonicity fix
+
+Reviewer: Financial Planner · 1 Oct 2026 · Changed only the engine and one What-if line in `LifeGoals-Customer-Journey-Prototype.html`. Not committed.
+
+**Root cause.** The fault was not in how savings are earmarked to goals or in the cashflow. It was in what "My monthly saving" meant. The automatic saving amount follows the Q6 rule *every year*: `min(Q6 amount, 50% of that year's spare money)`. In the sample, that is €34 a month today, rising towards €500 as the loan ends and pay outgrows prices. Once the customer pressed +/−, `saveCap()` replaced that rule with a **flat** `min(S.saveM, spare)` in every future year. So "€34 → €62" raised this year's saving but cut every later year's saving to €62. In the sample, Be mortgage-free fell from 100% to 19% and 8 shortfall years were added (the designer saw 71% → 55% on an earlier build).
+
+**Fix (engine):**
+- `saveAuto()` is the Q6 rule.
+- `saveCap(sp, auto0)`: if the customer moved the control **up** from today's rule amount (`auto0`), saving in each year = `min(spare, max(S.saveM, rule))`, so it is never below the rule. If they moved it **down**, saving = `min(spare, S.saveM, rule)`.
+- The direction is stored once, when the control is pressed (`S.saveUp`, set in `ACT.savem`), so a later change of income can't flip it.
+- `P.save.autoM` is exposed.
+- The Q6 cap is unchanged.
+
+**Nudge (agreed).** Under the cap, a higher income alone leaves the goals unchanged. That is right for a guidance tool: we don't assume people save money they told us they can't. But they should be told. `saveNudge()` adds one line under "My monthly saving" in the What-if card when half of the spare money is at least €50 above the current saving: "💡 You may be able to save more than you said: your spare money is about €2,182 a month. **Try €1,075 a month** to see what changes." The button only moves the control, and the line disappears once it is used.
+
+**Tests (all 0 errors):**
+
+| Test | Result |
+|---|---|
+| Monotonicity property test (`scratchpad/fp/mono.js`), 200 random customers, 4,200 checks: auto → custom +€0/25/100/300 · custom €0→€3,000 · lump €0→€50k to a random goal · What-if +€25→€1,000 · income ×1/1.2/1.5/2 with saving set above the Q6 cap | **0 failures** (before the fix: the sample failed, and 13 + 5 cases failed with the first, unflagged version) |
+| Sample customer, saving auto €34 / €59 / €100 / €300 / €500 | edu 41→41→41→55→80 · travel 23→25→29→47→47 · mortgage-free 100 throughout · shortfall years 11→11→11→11→9 |
+| Round-4 harness, rebuilt from the live file (6,192 cases) + edge cases | 0 failures |
+| e2e.js 390 / 1280 / 844, chart.js, fp4.js, road.js, v7.js | all exit 0, `ERRORS 0` |
+
+In fp4.js, `I9_mortgageGoneAfter: false` is expected: that customer covers only 7% of paying the mortgage off in 5 years, so the mortgage correctly stays.

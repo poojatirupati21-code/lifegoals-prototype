@@ -692,7 +692,8 @@ function saveAuto(surplusM){                                 // the Q6 rule: mon
 // Q6 rule keeps the rule's later growth (never less than the rule in any year); lowering it caps every year. Monotone in S.saveM and in income.
 function saveCap(surplusM, auto0){ const sp = Math.max(0, surplusM), auto = saveAuto(sp);
   if (S.saveM == null) return auto;
-  return Math.min(sp, S.saveM >= auto0 ? Math.max(S.saveM, auto) : Math.min(S.saveM, auto)); }
+  const up = S.saveUp != null ? S.saveUp : S.saveM >= auto0 - 0.5;   // fixed when the customer moves the control (S.saveUp), so a later income change can't flip it
+  return Math.min(sp, up ? Math.max(S.saveM, auto) : Math.min(S.saveM, auto)); }
 function project(wi){
   applyAssume();
   const f = finNums(), a0 = f.age, R = f.R, N = AS.end - a0, rg = S.goals.find(g => g.kind === 'retire');
@@ -784,7 +785,7 @@ function project(wi){
   fg.forEach(g => { if (pct[g.id] < 95){ const r = rows[g.age - a0]; if (r) r.goalShort = true; } });   // FP round 4 F1: colours follow the %
   if (rg && rows.some(r => r.retired && r.shortLiving > Math.max(500, r.needs * 0.02))) pct[rg.id] = Math.min(pct[rg.id], 94);
   const s0 = rows[0], sur0 = f.age < R ? (s0.saved + s0.spent) / 12 : 0;
-  return {rows, pct, goal, save:{surplusM:Math.round(sur0), saveM:Math.round(s0.saved / 12)}};
+  return {rows, pct, goal, save:{surplusM:Math.round(sur0), saveM:Math.round(s0.saved / 12), autoM:auto0}};
 }
 const band = p => p >= 95 ? 'good' : p >= 70 ? 'nudge' : 'alert';   // teal / gold / coral (Pooja, 1 Oct); weather emojis stay as icons
 const BANDW = {good:'On track', nudge:'Needs a nudge', alert:'Needs attention'}, BANDE = {good:'☀️', nudge:'🌦️', alert:'⛈️'};
@@ -1164,11 +1165,15 @@ function chartSummary(P){ const rows = P.rows, s = rows.filter(chartShort), dip 
 function saveCtl(){ const P = project(), y = P.save.saveM, k = S.ans['6'];
   return '<div class="field" style="margin:12px 0 4px" id="r-save"><span class="flabel">My monthly saving: <output>' + eur(y) + '</output></span><div class="wi-row"><button class="rb" data-a="savem" data-p="-25" aria-label="Save 25 euro less a month">−</button><div class="wi-val">' + eur(y) + ' a month</div><button class="rb" data-a="savem" data-p="25" aria-label="Save 25 euro more a month">+</button></div>' +
     '<span class="small">' + (S.saveNote ? esc(S.saveNote) : S.saveM != null ? 'Your choice. ' : 'From your answer' + (typeof k === 'number' ? ' "' + esc(DQ_BY('6').o[k].t) + '"' : '') + '. ') + 'Your spare money is about ' + eur(P.save.surplusM) + ' a month; the rest is assumed spent.' + (S.saveM != null ? ' <button class="link" style="font-size:12.5px;padding:0" data-a="savereset">Use my answer</button>' : '') + '</span></div>'; }
+// FP round 5: the saving stays capped by the Q6 answer; when the measured spare money is well above it, say so (guidance wording, never applied automatically)
+function saveNudge(){ const P = project(), cur = S.saveM != null ? S.saveM : P.save.saveM, x = Math.floor(SAVE.share * P.save.surplusM / 25) * 25;
+  if (!(x >= P.save.saveM + 50 && x >= cur + 50)) return '';
+  return '<p class="small" id="r-savenudge" style="margin:6px 0 0">💡 You may be able to save more than you said: your spare money is about ' + eur(P.save.surplusM) + ' a month. <button class="link" style="font-size:12.5px;padding:0" data-a="savem" data-p="' + (x - cur) + '">Try ' + eur(x) + ' a month</button> to see what changes.</p>'; }
 function wiCard(){ const w = S.wi, gs = S.goals.slice().sort((a, b) => a.age - b.age), g = gById(w.g);
   return '<div class="card" id="r-wi"><h3 class="h">What if…?</h3><p class="small" style="margin:0 0 10px">Try saving a bit more or less, or adding a one-off amount, and see what changes.</p>' +
     '<div class="fl" style="font-size:12px;font-weight:800;margin-bottom:6px">Growth assumptions</div>' + assumeToggle() + '<div style="height:12px"></div>' +
     '<div class="fl" style="font-size:12px;font-weight:800;margin-bottom:6px">Put it towards</div><div class="chips" role="group" aria-label="Goal for the what-if">' + gs.map(x => '<button class="chip sm' + (w.g === x.id ? ' sel' : '') + '" aria-pressed="' + (w.g === x.id) + '" data-a="wig" data-p="' + x.id + '">' + x.e + ' ' + esc(x.name) + '</button>').join('') + '</div>' +
-    saveCtl() + '<div class="field" style="margin:14px 0 6px"><span class="flabel" id="wim-l">Monthly amount</span><div class="wi-row"><button class="rb" data-a="wim" data-p="-25" aria-label="25 euro less">−</button><div class="wi-val" id="wim-v">' + (w.m > 0 ? '+' : '') + eur(w.m) + '</div><button class="rb" data-a="wim" data-p="25" aria-label="25 euro more">+</button></div><input type="range" min="-500" max="1000" step="25" value="' + w.m + '" data-wi="m" aria-labelledby="wim-l" aria-valuetext="' + eur(w.m) + ' a month"><span class="small" id="wim-h">' + (w.m < 0 ? 'Saving less each month (affects your whole plan)' : w.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (counted as retirement saving)' : ' until it happens') : '−€500 to +€1,000 a month') + '</span></div>' +
+    saveCtl() + saveNudge() + '<div class="field" style="margin:14px 0 6px"><span class="flabel" id="wim-l">Monthly amount</span><div class="wi-row"><button class="rb" data-a="wim" data-p="-25" aria-label="25 euro less">−</button><div class="wi-val" id="wim-v">' + (w.m > 0 ? '+' : '') + eur(w.m) + '</div><button class="rb" data-a="wim" data-p="25" aria-label="25 euro more">+</button></div><input type="range" min="-500" max="1000" step="25" value="' + w.m + '" data-wi="m" aria-labelledby="wim-l" aria-valuetext="' + eur(w.m) + ' a month"><span class="small" id="wim-h">' + (w.m < 0 ? 'Saving less each month (affects your whole plan)' : w.m > 0 ? 'Extra each month towards ' + esc(g ? g.name.toLowerCase() : 'your goal') + (g && g.kind === 'retire' ? ' (counted as retirement saving)' : ' until it happens') : '−€500 to +€1,000 a month') + '</span></div>' +
     '<div class="field" style="margin:10px 0 0"><span class="flabel" id="wil-l">One-off amount <output id="wil-v">' + eur(w.l) + '</output></span><input type="range" min="0" max="50000" step="500" value="' + w.l + '" data-wi="l" aria-labelledby="wil-l"><span class="small">e.g. from savings or a bonus</span></div>' +
     '<div class="wi-out" id="wi-out" aria-live="polite"></div><div class="grid2" style="margin-top:12px"><button class="btn sm" style="width:100%" data-a="wisave">Save as my preferred plan</button><button class="btn sm ghost" style="width:100%" data-a="wireset">Back to my plan</button></div></div>'; }
 function resultsHTML(){
@@ -1734,7 +1739,7 @@ const ACT = {
   remind:() => toast('We\'ll remind you before it starts'), topic:p => { S.xs.push({v:'XTOPIC', p}); lastId = null; render(); },
   expertfor:p => { S.tab = 'exp'; S.exp = 'home'; S.xs = []; S.play = false; if (EXPERT_FOR[p]) S.book.spec = p; S.sheet = null; lastId = null; render(); },
   spec:p => { S.book.spec = S.book.spec === p ? null : p; focusKey = '[data-a="spec"][data-p="' + p + '"]'; render(); },
-  savem:p => { const P = project(), cur = S.saveM != null ? S.saveM : P.save.saveM, max = Math.max(0, P.save.surplusM); let v = Math.max(0, Math.round((cur + +p) / 25) * 25); S.saveNote = '';
+  savem:p => { const P = project(), cur = S.saveM != null ? S.saveM : P.save.saveM, max = Math.max(0, P.save.surplusM); let v = Math.max(0, Math.round((cur + +p) / 25) * 25); S.saveNote = ''; S.saveUp = v >= P.save.autoM - 0.5;
     if (v > max){ v = max; S.saveNote = 'That\'s all of your spare money each month, so we can\'t count more than this. '; }
     S.saveM = v; focusKey = '[data-a="savem"][data-p="' + p + '"]'; render(); },
   savereset:() => { S.saveM = null; S.saveNote = ''; focusKey = '[data-a="savem"][data-p="25"]'; render(); },
