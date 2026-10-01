@@ -376,3 +376,156 @@ Q7 = emergency savings but u14 = 0 → adviser flag "inconsistent answers"
 - u12 option 4: "Very steady (e.g. permanent job or pension)" → "Very stable income". In pensions, "Secure income" means a guaranteed income.
 - u11 option 3 tag: "Some investing experience" (one fund isn't "Experienced").
 - u11 option 4 tag: "Self-rated expert · watch for overconfidence bias".
+
+---
+
+## Round 3: honest goal funding
+
+Reviewer: Financial Planner · 1 Oct 2026 · Design only. The prototype is not edited (retirement is being made optional in parallel). The code below was run in Node against the live `AS`/`TX`/`finNums()`/tax functions, which were copied out of `LifeGoals-Customer-Journey-Prototype.html`, using a mocked `S`.
+
+### Why today's results read 100%
+`project()` (~line 649) has three problems. (1) It saves **all** of each year's spare money (`cash += net*0.6; inv += net*0.4`). (2) A `pot` goal counts as covered when **total** liquid money ≥ target, so the same euro covers several goals. (3) There is no per-goal check of required vs available saving. A €1,000/month surplus therefore funds everything.
+
+### Rules (customer-explainable)
+| # | Rule | Customer wording (Assumptions sheet) |
+|---|---|---|
+| G1 | **What you save each month** = the lower of (a) your Q6 answer and (b) **50%** of the measured spare money (take-home + other income − living costs − mortgage/loan payments). Q6 amounts: Under €100 → €50 · €100–300 → €200 · €300–750 → €500 · Over €750 → €1,000 · "It changes month to month" → a third of the spare money, with no band amount. Q6 not answered → €300 cap (labelled assumption). It rises with pay and stops at retirement. | "What you save: the lower of what you said you could comfortably put away and half of your spare money. The rest is assumed spent." |
+| G2 | **Spare money that isn't saved is spent.** It never builds up in the background. | (same line) |
+| G3 | **What-if ± a month** changes G1. "−€X" lowers saving for the whole plan. "+€X towards *goal*" is extra, comes out of the spent part, and goes to that goal first. Any amount above what that goal needs goes to unallocated savings. A lump goes to that goal's pot (or the pension). | unchanged |
+| G4 | **Earmarking order:** Build a safety net first (it is the emergency fund), then **Must have** before **Nice to have**, then the earliest date. Each euro funds one goal only. | "Your savings go to your goals in order: safety net first, then must-haves, then nice-to-haves, soonest first." |
+| G5 | **Lump sums** at the start: each goal's own "saved so far" (taken from cash), then, if there is no safety-net goal, **3 months of living costs held back as a buffer**. The rest of cash + investments then goes to goals in G4 order, each taking only today's value of what it needs. | "Three months of costs are kept aside for emergencies and not used for goals." |
+| G6 | **Each year**, each goal not yet reached in G4 order takes the monthly amount it still needs. That is the level saving, rising with pay, that would reach the inflated cost by the goal date from its current pot. If the budget runs out, later goals wait. When a goal is reached, its share passes to the next goal. | — |
+| G7 | **Growth by horizon:** goals under 5 years grow at the active set's **cash** rate, goals 5+ years at the **investment** rate. Unallocated money grows at the old 60/40 mix. | "Money for goals under 5 years is assumed kept as cash." |
+| G8 | **At the goal date:** spend / mortgage-free goals are paid from their own pot, then from unallocated money (never another goal's pot or the buffer). Pot goals count **only their own pot**. Afterwards the safety-net pot becomes the buffer and a wealth pot becomes unallocated. | — |
+| G9 | **Coverage %** = paid ÷ inflated cost, **rounded down** (99.6% shows 99%). The goal also reports `needM` (monthly saving needed now to reach 100%, today's money), `nowM` (the amount going to it this year) and `avgM` (the average to its date). | UI line: "Needs €X a month · you're putting €Y a month" (+ "more later, once *earlier goal* is done" when avgM > nowM) |
+| G10 | **Retirement** stays on the pension + cashflow logic and is **optional**. With no retirement goal, retired living costs = 80% of today's costs and no retirement % is reported. The lump sum at retirement goes to unallocated savings. Legacy = unallocated + buffer at 90. | — |
+| G11 | **Shortfall years:** draw from unallocated money, then the buffer, then goal pots in reverse G4 order (nice-to-have/latest first). Purple only after that. | — |
+| G12 | **The road can't contradict the %:** `row.short` = living shortfall + **any goal gap that year** (spend, mortgage-free and pot). `row.due` names the goal. | journeyNote: "Around age X, money for *goal* falls short" when `goalGap` > 0 and `shortLiving` = 0 |
+
+Guidance check: the outputs are illustrations on stated assumptions ("could", "on our assumptions"). No product is named, so this does not cross into advice (§4 test).
+
+### Paste-ready code (replaces `project()`; keeps `{rows, pct}`, adds `P.goal[id]` and `P.save`; `extraFor()`, `findings()` and `wiText()` work unchanged)
+```js
+/* ===== Honest goal funding (FP review round 3). Replaces project(); same return shape {rows, pct} plus P.goal and P.save ===== */
+const SAVE = {
+  band:[50, 200, 500, 1000, null],   // Q6 option index -> monthly amount, today's money (band midpoint; "Over €750" -> €1,000; "varies" -> share only)
+  share:0.5,                         // at most half of the measured monthly spare money is saved
+  shareVaries:0.33,                  // "It changes month to month": a third
+  noAnswer:300,                      // Q6 not answered: €300 a month cap (shown as an assumption)
+  buffer:3,                          // months of living costs kept back as an emergency buffer when there is no safety-net goal
+  longYrs:5                          // goals 5+ years away grow at the investment rate, sooner ones at the cash rate
+};
+const GOAL_ORDER = (a, b) => (a.k === 'safety' ? 0 : 1) - (b.k === 'safety' ? 0 : 1)       // safety net first, always
+  || (a.prio === 'Nice to have' ? 1 : 0) - (b.prio === 'Nice to have' ? 1 : 0)            // then Must have before Nice to have
+  || a.age - b.age || a.id - b.id;                                                          // then by date
+// Saving that grows with pay (w) into a pot growing at r: value after n years of 1 a year (paid at the start of each year)
+const annF = (n, r, w) => { let s = 0; for (let t = 0; t < n; t++) s += Math.pow(1 + w, t) * Math.pow(1 + r, n - t); return s; };
+function saveCap(surplusM){                                  // monthly saving, today's money, before what-if
+  const k = typeof S.ans['6'] === 'number' ? S.ans['6'] : null, sp = Math.max(0, surplusM);
+  if (k === 4) return SAVE.shareVaries * sp;
+  const cap = k == null ? SAVE.noAnswer : SAVE.band[k];
+  return Math.min(cap, SAVE.share * sp);
+}
+function project(wi){
+  applyAssume();
+  const f = finNums(), a0 = f.age, R = f.R, N = AS.end - a0, rg = S.goals.find(g => g.kind === 'retire');
+  wi = wi || {}; const wg = wi.g != null ? S.goals.find(g => g.id === wi.g) : null, wm = +wi.m || 0, wl = +wi.l || 0;
+  const wgR = wg && wg.kind === 'retire';
+  // Goals funded from savings: spend, mfree, pot. Retirement uses the pension + cashflow; legacy is what is left at the end.
+  const fg = S.goals.filter(g => ['spend','mfree','pot'].includes(g.kind)).slice().sort(GOAL_ORDER);
+  // Mortgage balance path, so "Be mortgage-free" has a known cost at its date
+  const mPath = []; { let m = f.mortBal; for (let t = 0; t <= N; t++){ mPath.push(Math.max(0, m)); if (m > 1){ const pay = Math.min(f.mortPayM * 12, m * (1 + AS.mortRate)); m = m * (1 + AS.mortRate) - pay; } } }
+  const G = {}; fg.forEach(g => { const n = Math.max(0, g.age - a0), r = n >= SAVE.longYrs ? AS.inv : AS.cash;
+    const cost = g.kind === 'mfree' ? (f.mortBal > 0 ? mPath[Math.min(n, N)] : g.amount * Math.pow(1 + AS.infl, n)) : g.amount * Math.pow(1 + AS.infl, n);
+    G[g.id] = {g, n, r, cost, pot:0, paid:0, done:false, c0:0, cSum:0, cYrs:0, need0:0}; });
+  // 1. Lump sums. Each goal's own "saved so far" first (taken from cash), then a buffer is held back, then free cash + investments in goal order.
+  let cash = f.cash, inv = f.invest, pen = f.pension, mBal = f.mortBal, dBal = f.debt, mfreeDone = false;
+  fg.forEach(g => { const s = Math.min(g.saved || 0, cash); G[g.id].pot += s; cash -= s; });
+  if (wg && !wgR && G[wg.id]) G[wg.id].pot += wl; if (wgR) pen += wl;
+  const hasSafety = fg.some(g => g.k === 'safety');
+  let buffer = hasSafety ? 0 : Math.min(cash, SAVE.buffer * f.costsM); cash -= buffer;
+  let free = cash + inv;                                       // unallocated money (spent first in a shortfall, funds retirement and legacy)
+  fg.forEach(g => { const x = G[g.id], want = Math.max(0, x.cost / Math.pow(1 + x.r, x.n) - x.pot), take = Math.min(want, free); x.pot += take; free -= take; });
+  const gr = 0.6 * AS.cash + 0.4 * AS.inv;                     // unallocated money: same 60/40 cash/invest mix as before
+  const gf = {}; S.goals.forEach(g => gf[g.id] = {cost:0, cov:0});
+  const rows = [];
+  for (let t = 0; t <= N; t++){
+    const a = a0 + t, infl = Math.pow(1 + AS.infl, t), wgw = Math.pow(1 + AS.wage, t), working = a < R;
+    let inflow = 0;
+    if (working){
+      const gR = f.income * wgw / infl, E = f.pensionM * 12 * (f.work === 'Self-employed' ? 1 : 0.5) * wgw / infl;
+      inflow += (netPay(gR) - pensionCost(gR, E, a)) * infl;
+      let contrib = f.pensionM * 12 * wgw; if (wgR) contrib = Math.max(0, contrib + wm * 12);
+      pen = pen * (1 + AS.pen) + contrib;
+      if (a >= AS.spAge) inflow += AS.sp * f.sp * infl;
+    } else {
+      if (a === R){ const ls = Math.min(pen * 0.25, 200000); pen -= ls; free += ls; }
+      const draw = pen / Math.max(1, AS.end - a + 1); pen = (pen - draw) * (1 + AS.penRet);
+      inflow += netRet(draw / infl, a >= AS.spAge ? AS.sp * f.sp : 0, a) * infl;
+    }
+    if (f.partner){ const pa = f.pAge + t; inflow += pa < 66 ? netPay(f.pIncome * wgw / infl) * infl : AS.sp * f.sp * infl; }
+    inflow += (f.otherM + f.rentM) * 12 * infl;
+    let living = (working ? f.costsM * 12 : (rg ? rg.amount : f.costsM * 12 * 0.8)) * infl + f.oneOffY * infl;
+    let fixed = 0;
+    if (mBal > 1 && !mfreeDone){ const pay = Math.min(f.mortPayM * 12, mBal * (1 + AS.mortRate)); fixed += pay; mBal = mBal * (1 + AS.mortRate) - pay; }
+    if (dBal > 1){ const pay = Math.min(Math.max(f.debtPayM * 12, dBal * 0.1), dBal * (1 + AS.debtRate)); fixed += pay; dBal = dBal * (1 + AS.debtRate) - pay; }
+    // 2. Goals due this year are paid from their own pot, then from unallocated money. What can't be paid is a goal gap (shown on the road).
+    let goalGap = 0; const due = [];
+    fg.forEach(g => { const x = G[g.id]; if (x.done || g.age > a) return; x.done = true; due.push(g.name);
+      if (g.kind === 'pot'){ x.paid = Math.min(x.cost, x.pot); goalGap += x.cost - x.paid;
+        if (g.k === 'safety') buffer += x.pot; else free += x.pot; x.pot = 0; }          // the safety net stays as the buffer; a wealth pot becomes free money
+      else { let pay = Math.min(x.cost, x.pot); x.pot -= pay; const top = Math.min(x.cost - pay, free); free -= top; pay += top; free += x.pot; x.pot = 0;
+        x.paid = pay; goalGap += x.cost - pay; if (g.kind === 'mfree' && pay >= x.cost - 1){ mfreeDone = true; mBal = 0; } }
+      gf[g.id].cost = x.cost; gf[g.id].cov = x.paid; });
+    // 3. Spare money this year. Only the saving amount is saved; the rest is assumed spent.
+    const net = inflow - living - fixed; let used = 0, short = 0, saved = 0, spent = 0;
+    if (net >= 0){
+      const base = working ? saveCap(net / 12 / infl) * 12 * infl : 0;
+      let budget = Math.max(0, base + (!wgR && wm < 0 && working ? wm * 12 * infl : 0));         // "saving less" lowers the saving amount
+      const extra = !wgR && wm > 0 && working && wg && G[wg.id] && !G[wg.id].done ? wm * 12 * infl : 0;  // "extra towards X" (today's money, kept level in real terms)
+      budget = Math.min(budget, net); const ex = Math.min(extra, net - budget); saved = budget + ex; spent = net - saved;
+      if (ex > 0){ const x = G[wg.id], n = x.g.age - a, need = Math.max(0, (x.cost - x.pot * Math.pow(1 + x.r, n)) / annF(n, x.r, AS.wage)), give = Math.min(ex, need);
+        x.pot += give; x.cSum += give / infl; free += ex - give; if (t === 0) x.c0 += give; }
+      fg.forEach(g => { const x = G[g.id]; if (x.done) return; const n = g.age - a;
+        const need = Math.max(0, (x.cost - x.pot * Math.pow(1 + x.r, n)) / annF(n, x.r, AS.wage)), give = Math.min(budget, need);
+        if (t === 0) x.need0 = need; x.pot += give; budget -= give; x.cSum += give / infl; x.cYrs++; if (t === 0) x.c0 += give; });
+      free += budget;                                            // saved but not needed by any goal: unallocated
+    } else {
+      fg.forEach(g => { const x = G[g.id]; if (!x.done){ x.cYrs++; if (t === 0) x.need0 = Math.max(0, (x.cost - x.pot * Math.pow(1 + x.r, g.age - a)) / annF(g.age - a, x.r, AS.wage)); } });
+      let gap = -net; const take = v => { const d = Math.min(gap, v); gap -= d; used += d; return d; };
+      free -= take(free); buffer -= take(buffer);
+      fg.slice().reverse().forEach(g => { const x = G[g.id]; if (!x.done && gap > 0) x.pot -= take(x.pot); });   // Nice-to-have and latest goals give way first
+      short = gap;
+    }
+    // 4. Growth
+    free *= 1 + gr; buffer *= 1 + AS.cash; fg.forEach(g => { const x = G[g.id]; if (!x.done) x.pot *= 1 + x.r; });
+    if (rg && !working){ gf[rg.id].cost += living; gf[rg.id].cov += living - Math.min(short, living); }
+    const pots = fg.reduce((s, g) => s + G[g.id].pot, 0), liquid = free + buffer + pots;
+    S.goals.forEach(g => { if (g.kind === 'legacy' && t === N){ const tgt = g.amount * infl; gf[g.id].cost = tgt; gf[g.id].cov = Math.min(tgt, free + buffer); } });
+    rows.push({t, a, yr:YEAR0 + t, inflow, needs:living + fixed, short:short + goalGap, shortLiving:short, goalGap, due, used, saved, spent, liquid, pen, retired:!working, rmark:a === R});
+  }
+  // 5. Results. Floor, so 99.6% never reads as 100%.
+  const pct = {}, goal = {};
+  S.goals.forEach(g => { const x = gf[g.id]; pct[g.id] = x.cost > 0 ? (x.cov >= x.cost - 1 ? 100 : clamp(Math.floor(x.cov / x.cost * 100), 0, 99)) : 100; });
+  fg.forEach(g => { const x = G[g.id];
+    goal[g.id] = {cost:x.cost, have:x.paid, rate:x.r, years:x.n,
+      needM:Math.round(x.need0 / 12), nowM:Math.round(x.c0 / 12), avgM:x.cYrs ? Math.round(x.cSum / x.cYrs / 12) : 0}; });
+  const s0 = rows[0], sur0 = f.age < R ? (s0.saved + s0.spent) / 12 : 0;
+  return {rows, pct, goal, save:{surplusM:Math.round(sur0), saveM:Math.round(s0.saved / 12)}};
+}
+```
+Wiring (for the developer):
+- `goalsBox()` / report §4: under each non-retirement goal add `'Needs ' + eur(x.needM) + ' a month · you\'re putting ' + eur(x.nowM)` with `x = P.goal[g.id]`.
+- `assumeRows()`: replace the 'Spare money each year' row with G1/G2 wording, and add the G5 and G7 lines.
+- `journeyNote()` / `chartNote()`: use `r.goalGap` and `r.due` for the goal-gap wording in G12. `isShort()` is unchanged.
+- Q6 is read by option index (`S.ans['6']`), not by `dsc('6')`, because "varies" and "€100–300" share score 2.
+
+### Sanity table (Standard set; Cautious in brackets; old = today's engine)
+| Customer (inputs) | Saves / spare | Goal: old → **new** (Cautious) · needs / putting now |
+|---|---|---|
+| **A** (Pooja's case) 30, single, €55k, costs €2,400/m, cash €6k, pension €12k, Q6 €100–300, no retirement goal | €200 / €1,029 | Safety net 2y: 100 → **100** (100) · €174/€174 · Home 18y: 100 → **100** (99) · €140/€26 · Business 26y (Nice): 100 → **100** (81) · €54/€0 · Wealth 27y (Nice): 100 → **18** (4) · €102/€0. Road: purple at 57 (wealth gap) |
+| **B** couple 40, €75k + €45k, costs €4,000/m, mortgage €220k, cash €30k, inv €20k, Q6 Over €750 | €943 / €1,886 | Car 3y (Nice): 100 → **100** (93) · €846/€846 · Education 10y: 100 → **100** (100) · Mortgage-free 15y (Nice): 100 → **100** (100) · Retire 65: 100 → **100** (100) |
+| **C** 26, single, €32k, costs €2,000/m, cash €1.5k, no pension, Q6 Under €100 | €50 / €310 | Travel 2y (Nice): 100 → **0** (0) · €337/€0 · Wedding 3y: 36 → **7** (6) · €705/€50 · Home 5y: 21 → **3** (3) · €614/€0 · Retire 66: 89 → **54** (53). Road: purple from 28 |
+| **D** 50, €120k, costs €4,500/m, cash €80k, inv €250k, pension €400k, Q6 Over €750 | €606 / €1,212 | Help family 8y, Wealth 10y, Retire 63: 100 → **100** (100, 100, 98) · funded from lump sums, needs €0 · Legacy 85: 100 → **100** (0: money runs out at 90 on Cautious) |
+
+Checks on A: "−€100 a month" → 82 / 59 / 42 / 2%. "+€10k lump to wealth" → wealth 57%. Q6 Over €750 → all 100%. So the % now moves with what the customer actually puts away. Only B and D (real surplus or real assets) stay at or near 100%, which is correct.
