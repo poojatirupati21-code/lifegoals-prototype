@@ -1,0 +1,672 @@
+<!doctype html><html lang="en-IE"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>LifeGoals Adviser Platform</title>
+<meta name="description" content="Clickable adviser-journey prototype for LifeGoals: partner, verify, learn, profile, match-ready, then verify, plan, implement and review client plans.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Layout: fixed navy rail + one-screen workspace. Each page fits the viewport; only inner panels scroll. Same brand tokens as the customer prototype. */
+:root{
+  --ink:#0B2545;--ink2:#13315C;--muted:#51627A;--line:#DCE4EC;--mist:#F3F7F9;--card:#FFFFFF;--bg:#E9EFEC;
+  --sea:#0F9D8F;--sea-d:#0B7A70;--sea-l:#D9F2EE;--sun:#F2B134;--sun-l:#FDF0D2;--acc-d:#7A5200;
+  --good:#0F9D8F;--good-t:#09685F;--good-l:#D9F2EE;--nudge:#F2B134;--nudge-t:#7A5200;--nudge-l:#FDF0D2;--alert:#E8674A;--alert-t:#B23A1F;--alert-l:#FBE4DD;
+  --ok-t:#1A7F4B;--ok-l:#E3F4EA;--sky-t:#1F5F92;--sky-l:#E1EFFA;--storm-t:#5E548E;--storm-l:#E7E3F4;--gap-t:#B42318;--gap-l:#FBE7E6;
+  --rail:#0B2545;--rail2:#16365F;--railt:#B9C7D8;--white:#FFFFFF;--shadow:0 1px 2px rgba(11,37,69,.06),0 6px 20px rgba(11,37,69,.06);
+  --fh:'Bricolage Grotesque','Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --fb:'Figtree',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --r:16px;color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--fb);font-size:14px;color:var(--ink);background:var(--bg);line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3,h4{font-family:var(--fh);letter-spacing:-.01em;margin:0;text-wrap:balance}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+
+/* shell */
+.app{display:grid;grid-template-columns:236px minmax(0,1fr);height:100%}
+.rail{background:var(--rail);color:var(--white);display:flex;flex-direction:column;padding:18px 12px 12px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:0 8px 14px}
+.brand b{font-family:var(--fh);font-size:20px;font-weight:800}
+.brand small{display:block;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--sun);font-weight:800}
+.me{display:flex;gap:10px;align-items:center;background:var(--rail2);border-radius:12px;padding:10px;margin:0 0 12px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;background:var(--sea);color:var(--white);flex-shrink:0}
+.av.lg{width:52px;height:52px;font-size:17px}
+.av.sun{background:var(--sun);color:var(--ink)}
+.me .nm{font-weight:700;font-size:13px}.me .st{font-size:11.5px;color:var(--railt)}
+.grp{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--railt);font-weight:800;margin:12px 10px 6px}
+.nav{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:var(--white);text-align:left;padding:8px 10px;border-radius:10px;cursor:pointer;font-size:13.5px;min-height:38px}
+.nav:hover{background:var(--rail2)}.nav.on{background:var(--white);color:var(--ink);font-weight:700}
+.nav .ix{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--railt);display:grid;place-items:center;font-size:10.5px;font-weight:800;flex-shrink:0;color:var(--railt)}
+.nav.on .ix{border-color:var(--ink);color:var(--ink)}
+.nav .ix.done{background:var(--sea);border-color:var(--sea);color:var(--white)}
+.nav .bd{margin-left:auto;background:var(--sun);color:var(--ink);font-size:11px;font-weight:800;border-radius:20px;padding:1px 7px}
+.nav svg{width:20px;height:20px;flex-shrink:0}
+.railfoot{margin-top:auto;padding:12px 10px 0;border-top:1px solid var(--rail2);display:flex;gap:12px;flex-wrap:wrap}
+.railfoot button{background:none;border:0;color:var(--railt);font-size:12px;cursor:pointer;padding:4px 0;text-decoration:underline}
+
+.main{display:flex;flex-direction:column;min-width:0;height:100%;overflow:hidden}
+.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;padding:18px 28px 14px;flex-wrap:wrap}
+.top h1{font-size:26px;font-weight:800}
+.top p{margin:2px 0 0;color:var(--muted);max-width:68ch}
+.jr{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.jr .lbl{font-size:11.5px;color:var(--muted);font-weight:700}
+.jr .lbl b{color:var(--ink)}
+.ticks{display:flex;gap:3px}
+.ticks i{width:18px;height:6px;border-radius:3px;background:var(--line)}
+.ticks i.d{background:var(--sea)}.ticks i.c{background:var(--sun)}
+.body{flex:1;min-height:0;padding:0 28px 22px;overflow:auto}
+
+/* building blocks */
+.card{background:var(--card);border-radius:var(--r);padding:18px;box-shadow:var(--shadow);min-width:0}
+.card h3{font-size:16px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.card h3 .r{margin-left:auto}
+.lab{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:0 0 6px}
+.muted{color:var(--muted)}.small{font-size:12.5px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.sp{flex:1}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.split{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:16px;height:100%}
+.split>.col{display:flex;flex-direction:column;gap:16px;min-height:0;overflow:auto;padding:2px}
+.fill{height:100%}
+.split.dash{height:auto;flex:1;min-height:0;grid-template-columns:minmax(0,1.8fr) minmax(0,1fr)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:12px;padding:10px 16px;min-height:42px;font-weight:700;cursor:pointer;background:var(--ink);color:var(--white)}
+.btn:hover{background:var(--ink2)}
+.btn.sea{background:var(--sea-d)}.btn.sea:hover{background:var(--good-t)}
+.btn.sun{background:var(--sun);color:var(--ink)}.btn.sun:hover{background:#E5A320}
+.btn.ghost{background:var(--white);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}.btn.ghost:hover{background:var(--mist)}
+.btn.sm{min-height:32px;padding:5px 11px;font-size:12.5px;border-radius:9px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;padding:0;color:var(--sea-d);font-weight:700;cursor:pointer;text-decoration:underline;font-size:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--line);background:var(--white);border-radius:30px;padding:5px 12px;font-size:12.5px;cursor:pointer;font-weight:600;min-height:32px}
+.chip:hover{border-color:var(--sea)}
+.chip.sel{background:var(--sea-l);border-color:var(--sea);color:var(--good-t)}
+.chip.sel::before{content:'✓ ';font-weight:800}
+.chip[disabled]{opacity:.5;cursor:not-allowed}
+#root{height:100%}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 9px;font-size:11.5px;font-weight:800;white-space:nowrap}
+.p-good{background:var(--good-l);color:var(--good-t)}.p-nudge{background:var(--nudge-l);color:var(--nudge-t)}.p-alert{background:var(--alert-l);color:var(--alert-t)}
+.p-verified{background:var(--ok-l);color:var(--ok-t)}.p-estimated{background:var(--nudge-l);color:var(--nudge-t)}.p-missing{background:var(--gap-l);color:var(--gap-t)}
+.p-conflicting{background:var(--storm-l);color:var(--storm-t)}.p-outdated{background:var(--sky-l);color:var(--sky-t)}.p-requested{background:var(--mist);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+.p-grey{background:var(--mist);color:var(--muted)}.p-ink{background:var(--ink);color:var(--white)}
+label.fld{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.inp{border:1.5px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--white);font-weight:500;color:var(--ink);min-height:40px;width:100%}
+.inp:focus{border-color:var(--sea);outline:none;box-shadow:0 0 0 3px var(--sea-l)}
+textarea.inp{resize:vertical;min-height:70px}
+.chk{display:flex;gap:9px;align-items:flex-start;cursor:pointer;font-size:13px;padding:5px 0}
+.chk input{width:18px;height:18px;accent-color:var(--sea-d);margin:1px 0 0;flex-shrink:0}
+ul.ticklist{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+ul.ticklist li{display:flex;gap:8px;font-size:13px}
+ul.ticklist li::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--sea);margin-top:7px;flex-shrink:0}
+.foot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+.hr{height:1px;background:var(--line);margin:12px 0}
+.bar{height:8px;border-radius:5px;background:var(--mist);overflow:hidden;flex:1;min-width:60px}
+.bar i{display:block;height:100%;border-radius:5px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:800;padding:6px 8px;border-bottom:1.5px solid var(--line)}
+.tbl td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tw{overflow-x:auto}
+.empty{text-align:center;padding:30px 16px;color:var(--muted)}
+.note{background:var(--sun-l);color:var(--acc-d);border-radius:10px;padding:8px 12px;font-size:12.5px;font-weight:600}
+.note.sea{background:var(--sea-l);color:var(--good-t)}
+.note.storm{background:var(--storm-l);color:var(--storm-t)}
+
+/* welcome */
+.wel{height:100%;overflow:auto;padding:32px 28px;display:flex;flex-direction:column;gap:22px;max-width:1180px;margin:0 auto}
+.wel .hero{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:center}
+.wel h1{font-size:clamp(28px,4vw,44px);font-weight:800;line-height:1.05}
+.wel h1 em{font-style:normal;color:var(--sea-d)}
+.wel .lead{font-size:16px;color:var(--muted);max-width:56ch;margin:12px 0 0}
+.door{display:flex;gap:14px;align-items:center;text-align:left;width:100%;border:0;cursor:pointer;background:var(--card);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow)}
+.door:hover{box-shadow:inset 0 0 0 2px var(--sea),var(--shadow)}
+.door b{font-family:var(--fh);font-size:17px;display:block}
+.door span{color:var(--muted);font-size:13px}
+.door .ar{margin-left:auto;font-size:20px;color:var(--sea-d)}
+.lanes{display:grid;grid-template-columns:110px repeat(9,minmax(0,1fr));gap:4px;font-size:11.5px;min-width:820px}
+.lanes .h{font-weight:800;color:var(--muted);font-size:11px;letter-spacing:.06em;text-transform:uppercase;align-self:center}
+.lanes .c{background:var(--card);border-radius:8px;padding:7px 8px;line-height:1.25;font-weight:600}
+.lanes .c.cu{background:var(--sky-l);color:var(--sky-t)}
+.lanes .c.ad{background:var(--mist);color:var(--muted)}
+.lanes .c.meet{background:var(--sea-l);color:var(--good-t)}
+.lanes .n{text-align:center;font-weight:800;color:var(--muted);font-size:11px}
+
+/* stat tiles + pipeline */
+.stat{background:var(--card);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow);border:0;text-align:left;cursor:pointer}
+.stat:hover{box-shadow:inset 0 0 0 2px var(--sea),var(--shadow)}
+.stat b{font-family:var(--fh);font-size:28px;font-weight:800;display:block;line-height:1.1}
+.stat span{font-size:12.5px;color:var(--muted);font-weight:600}
+.pipe{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;min-height:0}
+.lane{background:var(--mist);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:7px;min-height:150px}
+.lane h4{font-family:var(--fb);font-size:11px;font-weight:800;letter-spacing:.04em;gap:6px;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;padding:2px 4px}
+.cc{background:var(--card);border:0;border-radius:10px;padding:9px 10px;text-align:left;cursor:pointer;box-shadow:var(--shadow);font-size:12.5px}
+.cc:hover{box-shadow:inset 0 0 0 2px var(--sea),var(--shadow)}
+.cc b{display:block;font-size:13px}
+.cc .nx{color:var(--muted);display:block;margin-top:3px}
+.alist{display:flex;flex-direction:column}
+.ai{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.ai:last-child{border-bottom:0}
+.ai .t{min-width:0;flex:1}
+.ai .when{font-weight:800;font-size:12px;color:var(--sea-d);width:64px;flex-shrink:0}
+.dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0}
+
+/* matches + clients */
+.mlist{display:flex;flex-direction:column;gap:8px}
+.mi{border:0;background:var(--card);border-radius:12px;padding:11px 12px;text-align:left;cursor:pointer;box-shadow:var(--shadow);display:flex;gap:10px;align-items:center;width:100%}
+.mi.on{box-shadow:inset 0 0 0 2px var(--ink),var(--shadow)}
+.mi .t{flex:1;min-width:0}
+.mi b{font-size:13.5px}.mi .t span{display:block;font-size:12px;color:var(--muted)}
+.fit{font-family:var(--fh);font-weight:800;font-size:18px;text-align:right;line-height:1}
+.fit small{display:block;font-family:var(--fb);font-size:10px;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.mgrid{display:grid;grid-template-columns:240px minmax(0,1fr);gap:16px;height:100%}
+.mgrid>.col{min-height:0;overflow:auto;padding:2px}
+.why{display:flex;flex-wrap:wrap;gap:6px}
+.why span{font-size:12px;font-weight:700;border-radius:8px;padding:4px 9px;background:var(--ok-l);color:var(--ok-t)}
+.why span.x{background:var(--gap-l);color:var(--gap-t)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px}
+.kv dt{color:var(--muted);font-weight:600}.kv dd{margin:0;font-weight:700}
+.goalrow{display:grid;grid-template-columns:minmax(0,1.3fr) auto minmax(80px,1fr) 44px auto;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}
+.goalrow:last-child{border-bottom:0}
+.goalrow .pc{font-weight:800;text-align:right}
+.step{display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:9px;overflow:hidden}
+.step button{border:0;background:var(--white);width:28px;height:28px;cursor:pointer;font-weight:800}
+.step button:hover{background:var(--mist)}
+.step span{padding:0 8px;font-weight:700;font-size:12.5px;min-width:58px;text-align:center}
+.casehead{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.tabs{display:flex;gap:4px;background:var(--card);border-radius:12px;padding:4px;box-shadow:var(--shadow);flex-wrap:wrap}
+.tab{border:0;background:none;border-radius:9px;padding:7px 12px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:7px;color:var(--muted)}
+.tab:hover{background:var(--mist)}.tab.on{background:var(--ink);color:var(--white)}
+.tab .ix{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:800;background:var(--mist);color:var(--muted)}
+.tab.on .ix{background:var(--sun);color:var(--ink)}
+.tab .ix.done{background:var(--sea);color:var(--white)}
+.casegrid{display:grid;grid-template-columns:200px minmax(0,1fr);gap:16px;height:100%}
+.casegrid>.col{min-height:0;overflow:auto;padding:2px}
+.casebody{display:flex;flex-direction:column;min-height:0;height:100%}
+.casebody>.split{flex:1;min-height:0}
+input[type=range]{width:100%;accent-color:var(--sea-d)}
+.slots{display:grid;grid-template-columns:52px repeat(5,minmax(0,1fr));gap:5px;font-size:12px}
+.slots .h{font-weight:800;color:var(--muted);text-align:center;align-self:center}
+.slot{border:1.5px solid var(--line);background:var(--white);border-radius:8px;min-height:32px;cursor:pointer;font-size:11.5px;font-weight:700;color:var(--muted)}
+.slot.sel{background:var(--sea);border-color:var(--sea);color:var(--white)}
+.doc{display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.doc:last-child{border-bottom:0}
+.doc .t{flex:1;min-width:0}
+.doc .t span{display:block;font-size:12px;color:var(--muted)}
+.mod{border:0;background:var(--card);border-radius:var(--r);padding:16px;text-align:left;cursor:pointer;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.mod:hover{box-shadow:inset 0 0 0 2px var(--sea),var(--shadow)}
+.mod b{font-family:var(--fh);font-size:16px}
+.mod .d{color:var(--muted);font-size:13px}
+.pv{background:var(--ink);color:var(--white);border-radius:var(--r);padding:18px}
+.pv .tag{display:inline-block;background:var(--rail2);color:var(--white);font-size:11.5px;font-weight:700;border-radius:8px;padding:3px 8px;margin:0 4px 4px 0}
+.pv .q{color:var(--sun);font-weight:700;font-size:12.5px}
+.pv p{color:var(--railt);font-size:13px;margin:8px 0 0}
+.style{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.style button{border:1.5px solid var(--line);background:var(--white);border-radius:12px;padding:9px;text-align:left;cursor:pointer;font-size:12px;color:var(--muted)}
+.style button b{display:block;color:var(--ink);font-size:13px}
+.style button.sel{border-color:var(--sea);background:var(--sea-l)}
+.rec{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
+.rec:last-child{border-bottom:0}
+.rec .t{flex:1;min-width:0}.rec .t span{display:block;font-size:12px;color:var(--muted)}
+.x{border:0;background:none;cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:2px 6px;border-radius:6px}
+.x:hover{background:var(--mist);color:var(--ink)}
+.sel-st{border:1.5px solid var(--line);border-radius:8px;padding:4px 6px;font-size:12.5px;font-weight:700;background:var(--white)}
+.log{display:flex;flex-direction:column;gap:0;font-size:13px}
+.log div{display:flex;gap:12px;padding:6px 0;border-left:2px solid var(--line);padding-left:12px;position:relative}
+.log div::before{content:'';position:absolute;left:-6px;top:11px;width:10px;height:10px;border-radius:50%;background:var(--sea)}
+.log b{width:72px;flex-shrink:0;color:var(--muted);font-size:12px}
+.chart{width:100%;height:auto;display:block}
+
+/* modal + toast */
+.ov{position:fixed;inset:0;background:rgba(11,37,69,.45);display:grid;place-items:center;padding:16px;z-index:20}
+.dlg{background:var(--card);border-radius:20px;max-width:640px;width:100%;max-height:calc(100% - 32px);overflow:auto;padding:22px;box-shadow:0 30px 70px rgba(11,37,69,.35)}
+.dlg h2{font-size:22px;margin-bottom:4px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--white);padding:11px 18px;border-radius:12px;font-weight:700;font-size:13.5px;z-index:30;box-shadow:0 10px 30px rgba(11,37,69,.3);max-width:calc(100% - 32px)}
+@media (prefers-reduced-motion:no-preference){.toast{animation:up .25s ease-out}@keyframes up{from{transform:translate(-50%,10px);opacity:.4}}}
+
+/* narrow screens: rail becomes a top strip and pages flow normally */
+@media (max-width:1100px){.pipe{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:900px){
+  .app{display:block;height:auto}
+  .rail{flex-direction:row;flex-wrap:wrap;align-items:center;gap:4px;padding:10px 16px;overflow:visible}
+  .brand{padding:0 8px 0 0}.me,.grp,.railfoot{display:none}
+  .nav{width:auto;padding:6px 9px;min-height:34px;font-size:12.5px}.nav .ix,.nav svg{display:none}
+  .main{height:auto;overflow:visible}
+  .top{padding:16px 16px 12px}.body{padding:0 16px 22px;overflow:visible}
+  .split,.split.dash,.mgrid,.g2,.g3,.wel .hero{grid-template-columns:minmax(0,1fr);height:auto}
+  .split>.col,.mgrid>.col,.casegrid>.col{overflow:visible}
+  .pipe{grid-template-columns:minmax(0,1fr)}
+  .fill,.casebody{height:auto}
+  .style{grid-template-columns:minmax(0,1fr)}
+  .goalrow{grid-template-columns:minmax(0,1fr) auto 44px}.goalrow .bar,.goalrow .pill{display:none}
+  .wel{padding:22px 16px}
+}
+</style>
+
+<div id="root"></div>
+
+<script>
+const STAGES = ['Partner with LifeGoals','Verify & join','Learn the platform','Build your profile','Become match-ready','Receive, review & verify','Design, present & refine','Implement','Review & evolve'];
+const CUST = ['Start with why','Shape your LifeMap','Add your money once','See your life roadmap','Explore future forks','Match, meet & verify','Discuss & agree the plan','Approve & take action','Live, track & adapt'];
+const SETUP = [['partner','Partner with LifeGoals'],['verify','Verify & join'],['learn','Learn the platform'],['profile','Adviser profile'],['ready','Match-ready settings']];
+const CASE_TABS = [['verify','Verify',6],['plan','Plan & agree',7],['implement','Implement',8],['review','Review',9]];
+const TAGS = {verified:'Verified', estimated:'Estimated', missing:'Missing', conflicting:'Conflicting', outdated:'Outdated', requested:'Requested'};
+const EXPERTISE = ['Mortgages','Retirement & pensions','Investments','Protection','Tax','Estate & legacy','Debt','Business owners'];
+const SPECS = ['First-time buyers','Young families','Pre-retirees','Self-employed','Couples & blended families','Moving to Ireland'];
+const CASES = ['First home','Mortgage switch','Pension top-up','Retirement income','Start investing','Protection review','Estate & gifting'];
+const AREAS = ['Dublin','Kildare','Wicklow','Meath','Anywhere by video'];
+const MODES = ['Video','In person','Phone'];
+const DAYS = ['Mon','Tue','Wed','Thu','Fri'], TIMES = ['09:00','11:00','14:00','16:00'];
+
+const eur = n => '€' + Math.round(n).toLocaleString('en-IE');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const R = 0.035;
+const fv = (g, extra) => { const y = Math.max(0.5, g.yrs + (g.off || 0)), k = Math.pow(1 + R, y); return g.have * k + (g.m + extra) * 12 * ((k - 1) / R); };
+const pct = (g, extra = 0) => Math.min(100, Math.round(fv(g, extra) / g.amt * 100));
+const band = p => p >= 90 ? ['good','On track'] : p >= 65 ? ['nudge','Needs a nudge'] : ['alert','At risk'];
+const pillFor = p => { const [c, t] = band(p); return '<span class="pill p-' + c + '">' + t + '</span>'; };
+const barFor = p => '<div class="bar"><i style="width:' + p + '%;background:var(--' + band(p)[0] + ')"></i></div>';
+const extraFor = (c, g) => { const tw = c.goals.reduce((a, x) => a + x.w, 0); return (c.extra || 0) * g.w / tw; };
+
+/* ---------- sample data (fictional examples) ---------- */
+const DISC_AOIFE = {Appetite:'Mostly growth, with some risk', Composure:'Uneasy, but waits', Capacity:'€300 to €750 a month', 'Surprise bill':'Probably', Horizon:'5 to 10 years', Experience:'Knows the basics', Ethical:'A little'};
+const mkClient = o => Object.assign({stage:'verify', extra:0, notes:'', recs:[], suit:{}, planStatus:'draft', ver:[{v:1, t:'Preliminary LifeGoals Report', by:'LifeGoals', d:'28 Sep'}], actions:[], events:[], review:{next:'Apr 2027'}, log:[]}, o);
+const CLIENT_SEED = () => ({
+  aoife: mkClient({id:'aoife', name:'Aoife Kelly', ini:'AK', age:38, loc:'Dublin 8', hh:'Single, no dependants', code:'LG-1042',
+    meet:{when:'Thu 8 Oct · 10:00', mode:'Video (Zoom)', held:false},
+    facts:[{k:'Gross income', v:'€68,000 a year', tag:'verified', src:'Payslips ×3'},{k:'Rent', v:'€1,650 a month', tag:'verified', src:'Bank statement'},
+      {k:'Living costs', v:'€2,450 a month', tag:'estimated', src:'Customer estimate'},{k:'Deposit savings', v:'€24,500', tag:'verified', src:'Bank statement'},
+      {k:'Emergency fund', v:'€6,000', tag:'verified', src:'Credit union statement'},{k:'Employer pension (DC)', v:'€41,200', tag:'outdated', src:'Statement Jan 2025'},
+      {k:'Credit card', v:'€1,800', tag:'conflicting', src:'Form says €800, statement €1,800'},{k:'Crypto holdings', v:'€2,100', tag:'estimated', src:'Customer estimate'},
+      {k:'Life & income protection', v:'Not given', tag:'missing', src:'No policy documents'},{k:'Death-in-service benefit', v:'Not known', tag:'missing', src:'Employee benefits statement needed'}],
+    goals:[{n:'Buy first home (deposit)', yrs:3, amt:60000, have:24500, m:450, w:3},{n:'Emergency fund (3 months)', yrs:1, amt:9000, have:6000, m:150, w:1},{n:'Retire at 63', yrs:25, amt:520000, have:41200, m:350, w:2}],
+    disc:DISC_AOIFE, flag:['Wants growth, but low composure','Says adventurous, but reacts anxiously under stress. Route to a calmer plan than they picked; flag for a call if markets fall.'],
+    qs:['Can I afford a home by 41?','Should I pay into my pension or save the deposit first?','Do I need income protection?'],
+    recOpts:[['Mortgage approval in principle','Lender panel','You','30 Oct'],['Help to Buy eligibility check','Revenue','Client','16 Oct'],['Raise pension to 8% for full employer match','Employer scheme','Client','1 Nov'],['Income protection, 75% of salary','Protection insurer','You','6 Nov'],['Clear credit card before mortgage application','Client','Client','15 Nov']]}),
+  walsh: mkClient({id:'walsh', name:'Ciara & Conor Walsh', ini:'CW', age:44, loc:'Lucan', hh:'Married, 2 children (9 and 12)', stage:'plan', code:'LG-0988',
+    meet:{when:'Fri 9 Oct · 14:00', mode:'In person, Dublin 2', held:true}, notes:'Verified 24 Sep. Both want to stop work at 62. Conor has a final-salary scheme from a previous employer.',
+    facts:[{k:'Joint gross income', v:'€141,000 a year', tag:'verified', src:'Payslips, EDS'},{k:'Mortgage', v:'€182,000 at 3.9%, 17 yrs left', tag:'verified', src:'Mortgage statement'},{k:'Pensions', v:'€210,000 combined', tag:'verified', src:'Pension statements'},{k:'Savings', v:'€13,000', tag:'verified', src:'Bank statements'},{k:'Life cover', v:'Mortgage protection only', tag:'verified', src:'Policy schedule'}],
+    goals:[{n:'College for Ella & Jack', yrs:7, amt:40000, have:8000, m:250, w:2},{n:'Mortgage-free by 58', yrs:12, amt:95000, have:5000, m:300, w:1},{n:'Retire at 62', yrs:17, amt:680000, have:210000, m:900, w:2}],
+    disc:{Appetite:'Mostly safe, with a little growth', Composure:'Adjusts fairly easily', Capacity:'More than €750 a month', Horizon:'More than 10 years', Experience:'Fairly comfortable'}, flag:['Low appetite, but high capacity','Could take more risk, but does not want to. Respect the preference; gently show what over-caution costs over time.'],
+    recs:[{t:'Increase AVCs by €200 a month', prov:'Pension provider', owner:'Client', due:'1 Nov'}], ver:[{v:1, t:'Preliminary LifeGoals Report', by:'LifeGoals', d:'12 Sep'},{v:2, t:'Adviser draft', by:'You', d:'2 Oct'}],
+    recOpts:[['Overpay mortgage by €300 a month','Lender','Client','1 Nov'],['Education savings plan for Ella & Jack','Investment provider','You','20 Oct'],['Family life cover review','Protection insurer','You','27 Oct'],['Trace Conor\'s deferred pension','Former employer scheme','You','30 Oct']],
+    log:[{d:'12 Sep', t:'Match accepted, consent given'},{d:'24 Sep', t:'Verification meeting held, profile verified'}]}),
+  sean: mkClient({id:'sean', name:'Seán O\'Brien', ini:'SO', age:59, loc:'Dún Laoghaire', hh:'Married, 2 adult children', stage:'implement', code:'LG-0901', planStatus:'approved',
+    meet:{when:'Tue 13 Oct · 11:00', mode:'Phone', held:true}, notes:'Plan v3 approved 22 Sep.',
+    facts:[{k:'Gross income', v:'€96,000 a year', tag:'verified', src:'EDS 2025'},{k:'Pensions', v:'€380,000', tag:'verified', src:'3 pension statements'},{k:'Home', v:'€780,000, no mortgage', tag:'verified', src:'Valuation'}],
+    goals:[{n:'Retirement income at 65', yrs:6, amt:600000, have:380000, m:1200, w:3},{n:'Legacy for grandchildren', yrs:6, amt:50000, have:20000, m:200, w:1}],
+    disc:{Appetite:'Mostly safe, with a little growth', Composure:'Stays calm', Horizon:'5 to 10 years', Experience:'Fairly comfortable'}, flag:null,
+    recs:[{t:'Consolidate two old pensions into a PRB'},{t:'Will and enduring power of attorney'},{t:'Annual gifting under the small gift exemption'}],
+    ver:[{v:1, t:'Preliminary LifeGoals Report', by:'LifeGoals', d:'20 Aug'},{v:2, t:'Adviser draft', by:'You', d:'9 Sep'},{v:3, t:'Agreed plan, client approved', by:'Seán', d:'22 Sep'}],
+    actions:[{t:'Consolidate two old pensions into a PRB', prov:'Pension provider', owner:'You', due:'14 Oct', st:'In progress'},{t:'Sign pension transfer forms', prov:'Pension provider', owner:'Client', due:'9 Oct', st:'Blocked'},{t:'Will and enduring power of attorney', prov:'Solicitor', owner:'Client', due:'30 Oct', st:'Not started'},{t:'Set up annual gifting', prov:'Client bank', owner:'Client', due:'1 Dec', st:'Done'}],
+    log:[{d:'20 Aug', t:'Match accepted'},{d:'2 Sep', t:'Profile verified'},{d:'22 Sep', t:'Plan v3 approved and e-signed'}]}),
+  grainne: mkClient({id:'grainne', name:'Gráinne Doyle', ini:'GD', age:34, loc:'Rathmines', hh:'Single, partner not on plan', stage:'review', code:'LG-0712', planStatus:'approved',
+    meet:{when:'Review due Jan 2027', mode:'Video', held:true},
+    facts:[{k:'Gross income', v:'€74,000 a year', tag:'outdated', src:'Reported new salary €82,000'},{k:'Investments', v:'€18,000', tag:'verified', src:'Broker statement'},{k:'Savings', v:'€9,000', tag:'verified', src:'Bank statement'}],
+    goals:[{n:'Build long-term investments', yrs:11, amt:120000, have:18000, m:500, w:2},{n:'Sabbatical travel fund', yrs:2, amt:15000, have:9000, m:250, w:1}],
+    disc:{Appetite:'Mostly growth, with some risk', Composure:'Sees drops as a chance', Horizon:'More than 10 years', Experience:'Fairly comfortable', Ethical:'Yes, this matters'}, flag:['High across the board','Willing, able and calm under pressure. Ready for a growth conversation.'],
+    recs:[{t:'Monthly investment into a sustainable global fund'},{t:'Sabbatical savings in a regular saver'}],
+    ver:[{v:1, t:'Preliminary LifeGoals Report', by:'LifeGoals', d:'4 Mar'},{v:2, t:'Agreed plan, client approved', by:'Gráinne', d:'21 Mar'}],
+    actions:[{t:'Monthly investment into a sustainable global fund', prov:'Investment platform', owner:'Client', due:'1 Apr', st:'Done'},{t:'Sabbatical savings in a regular saver', prov:'Bank', owner:'Client', due:'1 Apr', st:'Done'}],
+    events:[{t:'New job: salary up to €82,000', d:'30 Sep', done:false},{t:'Thinking of buying a home with her partner in 2028', d:'30 Sep', done:false}],
+    log:[{d:'4 Mar', t:'Match accepted'},{d:'21 Mar', t:'Plan approved'},{d:'15 May', t:'Implementation confirmed to LifeGoals'},{d:'30 Sep', t:'Client reported a life event'}]})
+});
+const MATCH_SEED = () => [
+  {id:'m1', client:'aoife', code:'LG-1042', age:38, area:'Dublin 8 · 3 km away', hh:'Single, no dependants', fit:92, needs:['Mortgages','Retirement & pensions'], pref:'Video, weekday mornings',
+   why:[['Mortgage and pension expertise',1],['3 km from your office',1],['Speaks English',1],['Prefers video, you offer it',1],['You have a slot on Thu 8 Oct',1]], data:[7,3,2], st:'new'},
+  {id:'m2', client:'brendan', code:'LG-1047', age:61, area:'Bray · 19 km away', hh:'Married, adult children', fit:81, needs:['Retirement & pensions','Estate & legacy'], pref:'In person',
+   why:[['Retirement expertise',1],['Pre-retiree specialism',1],['Inside your service area',1],['Estate planning: refer to a specialist',0]], data:[9,2,1], st:'new',
+   goals:[['Retire at 64',94],['Help children with deposits',71],['Estate plan',40]], flag:['Low appetite, but high capacity','Could take more risk, but does not want to.']},
+  {id:'m3', client:'ola', code:'LG-1051', age:29, area:'Cork · video only', hh:'Single', fit:54, needs:['Business owners','Tax'], pref:'Video, evenings',
+   why:[['Video meetings',1],['Business finance is outside your expertise',0],['Evening slots not offered',0]], data:[4,5,3], st:'new',
+   goals:[['Start a business',48],['Freelance safety net',62]], flag:['Wants risk, but low capacity','Keen on risk, but thin cushion. Build the safety net first.']}
+];
+
+let S;
+function reset(){
+  S = {screen:'welcome', done:{partner:false, verify:false, learn:false, profile:false, ready:false}, agree:false,
+    adv:{name:'Niamh Byrne', firm:'Byrne Financial Planning Ltd', cbi:'C184207', status:'Retail intermediary (multi-agency)', quals:['QFA','CFP®'], yrs:14},
+    docs:{qual:'needed', cbi:'needed', pi:'needed', mcc:'needed', id:'needed'}, learned:{},
+    prof:{exp:['Mortgages','Retirement & pensions','Investments','Protection'], spec:['First-time buyers','Young families'], loc:'Dublin 2', langs:'English, Irish', style:'Collaborator', mode:'Video or in person',
+      bio:'I help people turn big life plans into simple monthly steps, with no jargon and no pressure.'},
+    rd:{cap:6, cases:['First home','Pension top-up','Retirement income','Protection review'], areas:['Dublin','Kildare','Wicklow','Anywhere by video'], modes:['Video','In person'],
+      slots:['Mon 09:00','Mon 11:00','Tue 14:00','Wed 09:00','Wed 11:00','Thu 09:00','Thu 11:00','Fri 14:00']},
+    matches:MATCH_SEED(), clients:CLIENT_SEED(), active:['walsh','sean','grainne'], msel:'m1', sel:'walsh', tab:'plan', modal:null, toast:null, decline:null};
+}
+reset();
+
+/* ---------- shell ---------- */
+const ICON = {
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+  match:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="3.5"/><circle cx="16" cy="9" r="3.5"/><path d="M2.5 20c.8-3 3-4.5 5.5-4.5s4.2 1 5 2.5c.8-1.5 2.5-2.5 5-2.5s4.7 1.5 5.5 4.5" transform="translate(-1 0)"/></svg>',
+  clients:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6M7 17h8"/></svg>'
+};
+const LOGO = '<svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="16" fill="#0F9D8F"/><path d="M7 25c4-1 5-5 9-6s6-5 4-9" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round"/><circle cx="21" cy="9" r="3" fill="#F2B134"/></svg>';
+const setupCount = () => SETUP.filter(([k]) => S.done[k]).length;
+const newMatches = () => S.done.ready ? S.matches.filter(m => m.st === 'new' || m.st === 'pending').length : 0;
+
+function rail(){
+  const live = S.done.ready;
+  const n = (k, label, ix, badge) => '<button class="nav' + (S.screen === k ? ' on' : '') + '" data-a="go" data-p="' + k + '">' + ix + '<span>' + label + '</span>' + (badge ? '<span class="bd">' + badge + '</span>' : '') + '</button>';
+  return '<nav class="rail" aria-label="Adviser navigation"><div class="brand">' + LOGO + '<div><b>LifeGoals</b><small>Adviser</small></div></div>' +
+    '<div class="me"><span class="av">NB</span><div><div class="nm">' + esc(S.adv.name) + '</div><div class="st">' + (live ? '● Match-ready · ' + S.rd.cap + ' a month' : 'Set-up ' + setupCount() + ' of 5') + '</div></div></div>' +
+    '<div class="grp">Get set up</div>' + SETUP.map(([k, l], i) => n(k, l, '<span class="ix' + (S.done[k] ? ' done' : '') + '">' + (S.done[k] ? '✓' : i + 1) + '</span>')).join('') +
+    '<div class="grp">Client work</div>' + n('home', 'Dashboard', ICON.home) + n('matches', 'Match requests', ICON.match, newMatches()) + n('clients', 'Clients', ICON.clients, null) +
+    '<div class="railfoot"><button data-a="restart">Restart prototype</button>' + (live ? '' : '<button data-a="skip">Skip set-up</button>') + '</div></nav>';
+}
+function pageHead(title, sub, stage){
+  return '<header class="top"><div><h1>' + title + '</h1>' + (sub ? '<p>' + sub + '</p>' : '') + '</div>' +
+    (stage ? '<div class="jr" aria-label="Adviser journey stage ' + stage + ' of 9"><span class="lbl">Adviser journey · <b>' + stage + ' of 9 · ' + STAGES[stage - 1] + '</b></span><div class="ticks">' +
+      STAGES.map((s, i) => '<i class="' + (i + 1 < stage ? 'd' : i + 1 === stage ? 'c' : '') + '" title="' + (i + 1) + '. ' + s + '"></i>').join('') + '</div></div>' : '') + '</header>';
+}
+
+/* ---------- welcome ---------- */
+function welcome(){
+  const lane = (arr, cls) => arr.map((t, i) => '<div class="c ' + (i >= 5 ? 'meet' : cls) + '">' + t + '</div>').join('');
+  return '<main class="wel"><div class="brand" style="padding:0">' + LOGO + '<div><b style="color:var(--ink)">LifeGoals</b><small style="color:var(--sea-d)">For advisers</small></div></div>' +
+    '<div class="hero"><div><h1>Meet clients who already know <em>what they want their money to do.</em></h1><p class="lead">LifeGoals customers arrive with a LifeMap, a financial snapshot and a preliminary report. You verify, advise and agree the plan. We handle discovery, data capture, matching and tracking.</p></div>' +
+    '<div style="display:flex;flex-direction:column;gap:10px"><button class="door" data-a="start"><span class="av sun">＋</span><span><b>Partner with LifeGoals</b><span>New adviser · about 20 minutes to get match-ready</span></span><span class="ar">→</span></button>' +
+    '<button class="door" data-a="skip"><span class="av">NB</span><span><b>Sign in as Niamh Byrne</b><span>Example adviser who is already match-ready</span></span><span class="ar">→</span></button></div></div>' +
+    '<section class="card"><h3>Where you meet the customer</h3><p class="small muted" style="margin:0 0 10px">The two journeys run separately and join at step 6. Everything the customer did in steps 1 to 5 arrives with the match.</p>' +
+    '<div class="tw"><div class="lanes"><div></div>' + CUST.map((_, i) => '<div class="n">' + (i + 1) + '</div>').join('') +
+    '<div class="h">Customer</div>' + lane(CUST, 'cu') + '<div class="h">You</div>' + lane(STAGES, 'ad') + '</div></div></section></main>';
+}
+
+/* ---------- set-up: 1 partner ---------- */
+function partner(){
+  const col = (h, items) => '<div class="card"><h3>' + h + '</h3><ul class="ticklist">' + items.map(i => '<li>' + i + '</li>').join('') + '</ul></div>';
+  return pageHead('Partner with LifeGoals', 'Read how the partnership works, what it costs and who is responsible for what.', 1) + '<div class="body">' +
+    '<div class="g3">' + col('How it works', ['Customers build a LifeMap, add their money and get a preliminary report before they meet anyone.','You see an anonymous Match Preview and accept or decline.','After the customer consents, you get the full report and verified data.','You give the regulated advice. LifeGoals tracks actions and reviews.']) +
+    col('Commercial model (pilot)', ['No platform or subscription fee during the pilot.','An introduction fee applies only when a plan is implemented.','The customer is told about the fee before they agree to anything.','You set and charge your own advice fees. Monthly statement from LifeGoals.']) +
+    '<div class="card"><h3>Who does what</h3><div class="lab">You</div><p class="small" style="margin:0 0 10px">Regulated advice, suitability, KYC and AML checks, product recommendations, Consumer Protection Code duties.</p><div class="lab">LifeGoals</div><p class="small" style="margin:0 0 10px">Discovery questions, data capture, preliminary guidance (never advice), matching, consent records, tracking and support.</p><div class="lab">Support</div><p class="small" style="margin:0">A named partner manager, a 30-minute onboarding call and a help centre.</p></div></div>' +
+    '<div class="card foot"><label class="chk" style="flex:1;min-width:240px"><input type="checkbox" id="agree" data-a="agree"' + (S.agree ? ' checked' : '') + '><span>I have read the partnership terms, the fee disclosure and the responsibilities above.</span></label>' +
+    '<button class="btn ghost" data-a="toast" data-p="Request sent. Your partner manager will email you a time.">Book a call first</button><button class="btn sea" data-a="donePartner"' + (S.agree ? '' : ' disabled') + '>Request partnership</button></div></div>';
+}
+
+/* ---------- 2 verify & join ---------- */
+const DOCS = [['qual','Qualification certificates','QFA, CFP® or equivalent'],['cbi','Central Bank authorisation','Letter or register extract'],['pi','Professional indemnity insurance','Current schedule of cover'],['mcc','Minimum Competency Code record','CPD log for this year'],['id','Photo ID','Passport or driving licence']];
+function verify(){
+  const st = {needed:['p-missing','Needed'], checking:['p-estimated','Checking…'], ok:['p-verified','Verified']};
+  const all = DOCS.every(([k]) => S.docs[k] === 'ok');
+  return pageHead('Verify & join', 'Tell us who you are and upload your credentials. We check every adviser before they can be matched.', 2) + '<div class="body"><div class="split">' +
+    '<div class="col"><div class="card"><h3>Your details</h3><div class="g2">' +
+      fld('Full name', 'adv.name', S.adv.name) + fld('Firm', 'adv.firm', S.adv.firm) + fld('Central Bank reference', 'adv.cbi', S.adv.cbi) +
+      '<label class="fld">Regulatory status<select class="inp" id="adv-status" data-f="adv.status">' + ['Retail intermediary (multi-agency)','Tied agent','Investment firm (MiFID)','Mortgage credit intermediary'].map(o => '<option' + (S.adv.status === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></label>' +
+      fld('Years advising', 'adv.yrs', S.adv.yrs, 'number') + '</div><div class="lab" style="margin-top:14px">Qualifications</div>' + chips('adv.quals', ['QFA','CFP®','APA','LIA Dip.','CFA','Special Mortgage Qualification']) +
+    '</div><div class="note sea">✓ Found on the Central Bank register as ' + esc(S.adv.cbi) + '. Authorised for insurance, investment and mortgage mediation.</div></div>' +
+    '<div class="col"><div class="card"><h3>Documents <span class="r small muted">' + DOCS.filter(([k]) => S.docs[k] === 'ok').length + ' of 5 verified</span></h3>' +
+      DOCS.map(([k, t, d]) => '<div class="doc"><div class="t"><b>' + t + '</b><span>' + d + '</span></div><span class="pill ' + st[S.docs[k]][0] + '">' + st[S.docs[k]][1] + '</span>' + (S.docs[k] === 'needed' ? '<button class="btn sm ghost" data-a="upload" data-p="' + k + '">Upload</button>' : '') + '</div>').join('') +
+      '<div class="foot"><button class="link" data-a="uploadAll">Upload all (prototype)</button><span class="sp"></span><button class="btn sea" data-a="doneVerify"' + (all ? '' : ' disabled') + '>Submit and continue</button></div>' +
+    '</div><p class="small muted" style="margin:0">KYC documents for your customers stay with you. LifeGoals only checks your own credentials.</p></div></div></div>';
+}
+function fld(label, path, val, type){ return '<label class="fld">' + label + '<input class="inp" id="' + path.replace('.', '-') + '" type="' + (type || 'text') + '" data-f="' + path + '" value="' + esc(val) + '"></label>'; }
+function chips(path, opts){ const arr = get(path); return '<div class="chips">' + opts.map(o => '<button class="chip' + (arr.includes(o) ? ' sel' : '') + '" aria-pressed="' + arr.includes(o) + '" data-a="tog" data-p="' + path + '|' + esc(o) + '">' + esc(o) + '</button>').join('') + '</div>'; }
+function get(path){ return path.split('.').reduce((o, k) => o[k], S); }
+function set(path, v){ const ks = path.split('.'), last = ks.pop(); ks.reduce((o, k) => o[k], S)[last] = v; }
+
+/* ---------- 3 learn ---------- */
+const MODS = [
+  {k:'journey', t:'The customer journey', min:4, d:'What customers do in steps 1 to 5 and what arrives with a match.',
+   body:() => '<p>Customers answer 12 discovery questions, choose life goals, place them on a timeline, add or upload their money once and receive a preliminary report. They can test scenarios before asking for an adviser.</p><div class="tw"><div class="lanes" style="min-width:560px;grid-template-columns:repeat(9,minmax(0,1fr))">' + CUST.map((c, i) => '<div class="c ' + (i >= 5 ? 'meet' : 'cu') + '">' + (i + 1) + '. ' + c + '</div>').join('') + '</div></div><p class="small muted">You join at step 6. The customer never has to repeat what they already told LifeGoals.</p>'},
+  {k:'disc', t:'Reading the discovery profile', min:5, d:'Willingness, capacity and composure, and where they disagree.',
+   body:() => '<p>The value is not one score. It is spotting where what the client wants (appetite), can afford (capacity) and how they behave under stress (composure) do not line up.</p><div class="tw"><table class="tbl"><tr><th>If you see</th><th>It means</th><th>What to do</th></tr>' +
+     [['Wants risk, low composure','Says adventurous, reacts anxiously','Calmer plan than they picked; call if markets fall'],['Wants risk, low capacity','Keen, but thin cushion or short time frame','Safety net first; explain why risk waits'],['Low appetite, high capacity','Could take more risk, does not want to','Respect it; show what over-caution costs'],['Low across the board','Cautious, thin cushion','Protection and emergency fund first'],['High across the board','Willing, able and calm','Ready for a growth conversation']].map(r => '<tr><td><b>' + r[0] + '</b></td><td>' + r[1] + '</td><td>' + r[2] + '</td></tr>').join('') + '</table></div>'},
+  {k:'report', t:'The Preliminary LifeGoals Report', min:4, d:'Goal status, data confidence labels and the assumptions behind them.',
+   body:() => '<p>Each goal gets a status from the cashflow projection, using governed Irish assumptions.</p><div class="row" style="margin-bottom:10px">' + pillFor(95) + pillFor(75) + pillFor(40) + '</div><p>Every fact carries a confidence label, so you know what to check first:</p><div class="row">' + Object.keys(TAGS).filter(k => k !== 'requested').map(k => '<span class="pill p-' + k + '">' + TAGS[k] + '</span>').join('') + '</div><p class="small muted">The report is labelled preliminary guidance. It is a starting point for your verification, not advice.</p>'},
+  {k:'boundary', t:'Advice boundary and consent', min:3, d:'What LifeGoals says, what only you say, and when you can see data.',
+   body:() => '<ul class="ticklist"><li>Before consent you see an anonymous Match Preview only.</li><li>The customer gives explicit consent before you see their name, report and documents.</li><li>LifeGoals shows educational comparisons. You own regulated advice, suitability and product choice.</li><li>Fees and conflicts are disclosed to the customer before they agree.</li><li>Ongoing access follows consent and retention rules. If consent is withdrawn, access stops.</li></ul>'}
+];
+function learn(){
+  const n = MODS.filter(m => S.learned[m.k]).length;
+  return pageHead('Learn the platform', 'Four short modules on the tools and the report format you will use with clients.', 3) + '<div class="body">' +
+    '<div class="row" style="margin-bottom:14px"><div class="bar" style="max-width:320px"><i style="width:' + n * 25 + '%;background:var(--sea)"></i></div><b class="small">' + n + ' of 4 complete</b></div>' +
+    '<div class="g2">' + MODS.map((m, i) => '<button class="mod" data-a="openMod" data-p="' + m.k + '"><div class="row"><span class="pill ' + (S.learned[m.k] ? 'p-verified">✓ Done' : 'p-grey">' + m.min + ' min') + '</span><span class="small muted">Module ' + (i + 1) + '</span></div><b>' + m.t + '</b><span class="d">' + m.d + '</span></button>').join('') + '</div>' +
+    '<div class="foot"><span class="sp"></span><button class="btn sea" data-a="doneLearn"' + (n === 4 ? '' : ' disabled') + '>Continue to your profile</button></div></div>';
+}
+
+/* ---------- 4 profile ---------- */
+const STYLES = [['Educator','Explains every step so clients decide'],['Collaborator','Builds the plan together, side by side'],['Delegate','Takes it off the client\'s plate']];
+function previewCard(){
+  const p = S.prof;
+  return '<div class="lab">How customers see you</div><div class="pv"><div class="row"><span class="av lg sun">NB</span><div><b style="font-family:var(--fh);font-size:18px">' + esc(S.adv.name) + '</b><div class="q">' + esc(S.adv.quals.join(', ')) + ' · ' + esc(S.adv.yrs) + ' years</div></div></div>' +
+    '<p>📍 ' + esc(p.loc) + ' · ' + esc(p.mode) + '<br>🗣 ' + esc(p.langs) + ' · ' + esc(p.style) + ' style</p><div style="margin-top:10px">' + p.exp.map(e => '<span class="tag">' + esc(e) + '</span>').join('') + '</div>' +
+    '<p>“' + esc(p.bio) + '”</p><p style="color:var(--sun);font-weight:700">Good fit for: ' + esc(p.spec.join(', ') || 'add specialisms') + '</p></div>';
+}
+function profile(){
+  return pageHead('Build your adviser profile', 'This is what customers see on their Match card, and what our matching uses.', 4) + '<div class="body"><div class="split">' +
+    '<div class="col"><div class="card"><div class="lab">Expertise</div>' + chips('prof.exp', EXPERTISE) + '<div class="lab" style="margin-top:14px">Customers you specialise in</div>' + chips('prof.spec', SPECS) +
+    '<div class="g2" style="margin-top:14px">' + fld('Office location', 'prof.loc', S.prof.loc) + fld('Languages', 'prof.langs', S.prof.langs) + '</div>' +
+    '<div class="lab" style="margin-top:14px">Service style</div><div class="style">' + STYLES.map(([s, d]) => '<button class="' + (S.prof.style === s ? 'sel' : '') + '" data-a="style" data-p="' + s + '"><b>' + s + '</b>' + d + '</button>').join('') + '</div>' +
+    '<label class="fld" style="margin-top:14px">One line about you<textarea class="inp" id="prof-bio" data-f="prof.bio" data-live="1" rows="2">' + esc(S.prof.bio) + '</textarea></label></div></div>' +
+    '<div class="col"><div id="pv">' + previewCard() + '</div><div class="foot" style="margin-top:0"><span class="sp"></span><button class="btn sea" data-a="doneProfile"' + (S.prof.exp.length ? '' : ' disabled') + '>' + (S.done.profile ? 'Save changes' : 'Save and continue') + '</button></div></div></div></div>';
+}
+
+/* ---------- 5 match-ready ---------- */
+function ready(){
+  const r = S.rd, checks = [['Partnership agreed', S.done.partner],['Credentials verified', S.done.verify],['Training complete', S.done.learn],['Profile published', S.done.profile],['At least 3 open slots', r.slots.length >= 3]];
+  const ok = checks.every(c => c[1]);
+  return pageHead('Become match-ready', 'Set how many new clients you can take, which cases you want, and when you can meet.', 5) + '<div class="body"><div class="split">' +
+    '<div class="col"><div class="card"><div class="row"><div><div class="lab" style="margin:0">New clients a month</div><span class="small muted">LifeGoals pauses matches when you reach this.</span></div><span class="sp"></span><div class="step"><button data-a="cap" data-p="-1" aria-label="Fewer">−</button><span class="num">' + r.cap + '</span><button data-a="cap" data-p="1" aria-label="More">+</button></div></div>' +
+    '<div class="hr"></div><div class="lab">Preferred cases</div>' + chips('rd.cases', CASES) + '<div class="lab" style="margin-top:12px">Service areas</div>' + chips('rd.areas', AREAS) + '<div class="lab" style="margin-top:12px">Meeting options</div>' + chips('rd.modes', MODES) + '</div></div>' +
+    '<div class="col"><div class="card"><h3>Weekly availability <span class="r small muted">' + r.slots.length + ' slots</span></h3><div class="slots"><div></div>' + DAYS.map(d => '<div class="h">' + d + '</div>').join('') +
+      TIMES.map(t => '<div class="h">' + t + '</div>' + DAYS.map(d => { const k = d + ' ' + t, on = r.slots.includes(k); return '<button class="slot' + (on ? ' sel' : '') + '" aria-pressed="' + on + '" aria-label="' + k + '" data-a="slot" data-p="' + k + '">' + (on ? 'Open' : '') + '</button>'; }).join('')).join('') + '</div></div>' +
+    '<div class="card"><h3>Ready to go live?</h3>' + checks.map(([t, v]) => '<div class="chk" style="cursor:default"><span class="pill ' + (v ? 'p-verified">✓' : 'p-missing">!') + '</span>' + t + '</div>').join('') +
+    '<div class="foot"><span class="sp"></span><button class="btn sun" data-a="goLive"' + (ok ? '' : ' disabled') + '>' + (S.done.ready ? 'Save settings' : 'Go live') + '</button></div></div></div></div></div>';
+}
+
+/* ---------- dashboard ---------- */
+const clientsAt = st => S.active.map(id => S.clients[id]).filter(c => c.stage === st);
+const nextStep = c => ({verify: c.meet.held ? 'Close data gaps' : 'Verification meeting ' + c.meet.when.split('·')[0], plan: c.planStatus === 'sent' ? 'Awaiting client approval' : 'Finish plan draft', implement: c.actions.filter(a => a.st !== 'Done').length + ' actions open', review: c.events.filter(e => !e.done).length ? 'Life event reported' : 'Review ' + c.review.next})[c.stage];
+function attention(){
+  const out = [];
+  if (S.done.ready) S.matches.filter(m => m.st === 'new').forEach(m => out.push(['var(--sun)', 'New match ' + m.code + ': ' + m.needs.join(' + '), 'matches', m.id]));
+  S.active.forEach(id => { const c = S.clients[id];
+    const cf = c.facts.filter(f => f.tag === 'conflicting' || f.tag === 'missing').length; if (c.stage === 'verify' && cf) out.push(['var(--storm-t)', c.name + ': ' + cf + ' facts missing or conflicting', 'case', id + '|verify']);
+    if (c.planStatus === 'sent') out.push(['var(--sky-t)', c.name + ': plan sent, awaiting approval', 'case', id + '|plan']);
+    c.actions.filter(a => a.st === 'Blocked').forEach(a => out.push(['var(--alert)', c.name + ': ' + a.t + ' is blocked', 'case', id + '|implement']));
+    c.events.filter(e => !e.done).forEach(e => out.push(['var(--sea)', c.name + ' reported: ' + e.t, 'case', id + '|review']));
+  });
+  return out;
+}
+function home(){
+  if (!S.done.ready) return pageHead('Dashboard', '', 0) + '<div class="body"><div class="card empty"><h3 style="justify-content:center">Finish set-up to start receiving matches</h3><p>You have completed ' + setupCount() + ' of 5 set-up steps.</p><button class="btn sea" data-a="go" data-p="' + (SETUP.find(([k]) => !S.done[k]) || ['ready'])[0] + '">Continue set-up</button></div></div>';
+  const act = attention(), lanes = [['New match', S.matches.filter(m => m.st === 'new' || m.st === 'pending')], ['Verify', clientsAt('verify')], ['Plan & agree', clientsAt('plan')], ['Implement', clientsAt('implement')], ['Review', clientsAt('review')]];
+  const meets = S.active.map(id => S.clients[id]).filter(c => !c.meet.held || c.stage === 'plan' || c.stage === 'implement').map(c => [c.meet.when.split('·')[1] || '', c.meet.when.split('·')[0], c]);
+  return pageHead('Good morning, Niamh', 'Friday 2 October. Here is what needs you today.', 0) + '<div class="body" style="display:flex;flex-direction:column;gap:16px">' +
+    '<div class="g4">' + [[lanes[0][1].length, 'New match requests', 'matches'], [S.active.length, 'Active clients', 'clients'], [act.length, 'Items need attention', 'clients'], [Math.max(0, S.rd.cap - lanes[0][1].length - lanes[1][1].length - lanes[2][1].length), 'Spare capacity this month', 'ready']].map(([n, l, g]) => '<button class="stat" data-a="go" data-p="' + g + '"><b class="num">' + n + '</b><span>' + l + '</span></button>').join('') + '</div>' +
+    '<div class="split dash"><div class="col"><div class="card"><h3>Pipeline</h3><div class="pipe">' + lanes.map(([t, arr], i) => '<div class="lane"><h4>' + t + '<span>' + arr.length + '</span></h4>' +
+      arr.map(x => i === 0 ? '<button class="cc" data-a="openMatch" data-p="' + x.id + '"><b>' + x.code + ' · ' + x.age + '</b><span class="nx">' + x.needs[0] + ' · fit ' + x.fit + '%</span></button>' : '<button class="cc" data-a="case" data-p="' + x.id + '|' + x.stage + '"><b>' + esc(x.name) + '</b><span class="nx">' + nextStep(x) + '</span></button>').join('') + '</div>').join('') + '</div></div></div>' +
+    '<div class="col"><div class="card"><h3>Needs your attention</h3><div class="alist">' + (act.length ? act.map(([c, t, g, p]) => '<div class="ai"><span class="dot" style="background:' + c + '"></span><span class="t">' + esc(t) + '</span><button class="link small" data-a="' + (g === 'matches' ? 'openMatch' : 'case') + '" data-p="' + p + '">Open</button></div>').join('') : '<p class="muted small">Nothing waiting. Nice.</p>') + '</div></div>' +
+    '<div class="card"><h3>Coming up</h3><div class="alist">' + meets.map(([t, d, c]) => '<div class="ai"><span class="when">' + esc(d.trim()) + '<br>' + esc(t.trim()) + '</span><span class="t"><b>' + esc(c.name) + '</b><br><span class="small muted">' + esc(c.meet.mode) + ' · ' + STAGES[{verify:5, plan:6, implement:7, review:8}[c.stage]] + '</span></span></div>').join('') + '</div></div></div></div></div>';
+}
+
+/* ---------- matches ---------- */
+function matchGoals(m){ if (m.goals) return m.goals; const c = S.clients[m.client]; return c.goals.map(g => [g.n, pct(g)]); }
+function matches(){
+  if (!S.done.ready) return pageHead('Match requests', '', 6) + '<div class="body"><div class="card empty"><h3 style="justify-content:center">You are not match-ready yet</h3><p>Matches appear here once you go live.</p><button class="btn sea" data-a="go" data-p="ready">Go to match-ready settings</button></div></div>';
+  const m = S.matches.find(x => x.id === S.msel) || S.matches[0], c = S.clients[m.client] || {};
+  const showName = m.st === 'accepted';
+  const disc = m.client === 'aoife' ? c.disc : null, flag = m.flag || c.flag;
+  let act;
+  if (m.st === 'new') act = S.decline === m.id ? '<div class="card"><h3>Why are you declining?</h3><p class="small muted" style="margin:0 0 8px">The customer is not told the reason. LifeGoals offers the next best adviser.</p><div class="chips">' + ['No capacity right now','Outside my expertise','Possible conflict of interest','Too far to meet','Other'].map(r => '<button class="chip" data-a="declineWhy" data-p="' + r + '">' + r + '</button>').join('') + '</div><div class="foot"><button class="link" data-a="declineCancel">Cancel</button></div></div>'
+    : '<div class="card foot" style="margin:0;padding:12px 18px"><span class="small muted" style="flex:1;min-width:200px">Accepting asks the customer for consent to share their full report and documents with you.</span><button class="btn ghost" data-a="decline" data-p="' + m.id + '">Decline</button><button class="btn sea" data-a="accept" data-p="' + m.id + '">Accept match</button></div>';
+  else if (m.st === 'pending') act = '<div class="note">⏳ Waiting for the customer to consent to sharing. They have been sent an email and an SMS.</div><div class="foot" style="margin:0"><button class="btn sun" data-a="consent" data-p="' + m.id + '">Simulate: customer consents</button></div>';
+  else if (m.st === 'accepted') act = '<div class="note sea">✓ Consent given. Full report, documents and contact details are unlocked.</div><div class="foot" style="margin:0"><button class="btn sea" data-a="case" data-p="' + m.client + '|verify">Open client file</button></div>';
+  else act = '<div class="note storm">Declined (' + esc(m.reason) + '). LifeGoals will offer this customer the next adviser.</div>';
+  return pageHead('Match requests', 'Review the anonymous Match Preview, then accept or decline. You see names and documents only after consent.', 6) + '<div class="body"><div class="mgrid">' +
+    '<div class="col"><div class="mlist">' + S.matches.map(x => '<button class="mi' + (x.id === m.id ? ' on' : '') + '" data-a="msel" data-p="' + x.id + '"><div class="t"><b>' + x.code + ' · ' + x.age + '</b><span>' + x.needs.join(', ') + '</span><span>' + ({new:'New', pending:'Awaiting consent', accepted:'Accepted', declined:'Declined'})[x.st] + '</span></div><div class="fit num">' + x.fit + '%<small>Fit</small></div></button>').join('') + '</div></div>' +
+    '<div class="col" style="display:flex;flex-direction:column;gap:14px"><div class="card"><div class="row"><span class="av lg' + (showName ? '' : ' sun') + '">' + (showName ? c.ini : '?') + '</span><div><h2 style="font-size:20px">' + (showName ? esc(c.name) : 'Customer ' + m.code) + '</h2><span class="muted small">' + m.age + ' · ' + m.area + ' · ' + m.hh + ' · prefers ' + m.pref + '</span></div><span class="sp"></span><div class="fit num" style="font-size:26px">' + m.fit + '%<small>Match fit</small></div></div>' +
+      '<div class="lab" style="margin-top:14px">Why you were matched</div><div class="why">' + m.why.map(([t, ok]) => '<span class="' + (ok ? '' : 'x') + '">' + (ok ? '✓ ' : '✕ ') + t + '</span>').join('') + '</div></div>' + act +
+    '<div class="g2"><div class="card"><h3>Goals from the preliminary report</h3>' + matchGoals(m).map(([n, p]) => '<div class="goalrow" style="grid-template-columns:minmax(0,1fr) minmax(60px,.8fr) 40px"><span>' + esc(n) + '</span>' + barFor(p) + '<span class="pc num">' + p + '%</span></div>').join('') +
+      '<div class="lab" style="margin-top:12px">Data readiness</div><div class="row small"><span class="pill p-verified">' + m.data[0] + ' verified</span><span class="pill p-estimated">' + m.data[1] + ' estimated</span><span class="pill p-missing">' + m.data[2] + ' missing</span></div></div>' +
+      '<div class="card"><h3>Discovery read</h3>' + (disc ? '<dl class="kv">' + Object.entries(disc).slice(0, 5).map(([k, v]) => '<dt>' + k + '</dt><dd>' + v + '</dd>').join('') + '</dl>' : '') + (flag ? '<div class="note storm" style="margin-top:10px"><b>' + flag[0] + '.</b> ' + flag[1] + '</div>' : '') +
+      (c.qs ? '<div class="lab" style="margin-top:12px">They want to ask</div><ul class="ticklist">' + c.qs.map(q => '<li>' + q + '</li>').join('') + '</ul>' : '') + '</div></div></div></div></div>';
+}
+
+/* ---------- clients / case workspace ---------- */
+function clients(){
+  if (!S.active.length) return pageHead('Clients', '', 0) + '<div class="body"><div class="card empty">No clients yet. Accept a match to start.</div></div>';
+  if (!S.active.includes(S.sel)) S.sel = S.active[0];
+  const c = S.clients[S.sel], stIx = CASE_TABS.findIndex(t => t[0] === c.stage), tIx = CASE_TABS.findIndex(t => t[0] === S.tab);
+  const body = {verify:tVerify, plan:tPlan, implement:tImplement, review:tReview}[S.tab](c);
+  return pageHead(esc(c.name), c.age + ' · ' + esc(c.loc) + ' · ' + esc(c.hh) + ' · ' + c.code, CASE_TABS[tIx][2]) + '<div class="body"><div class="casebody"><div class="casehead"><div class="tabs" role="tablist">' + CASE_TABS.map(([k, l], i) => '<button class="tab' + (S.tab === k ? ' on' : '') + '" role="tab" aria-selected="' + (S.tab === k) + '" data-a="tab" data-p="' + k + '"><span class="ix' + (i < stIx ? ' done' : '') + '">' + (i < stIx ? '✓' : i + 1) + '</span>' + l + '</button>').join('') + '</div><span class="sp"></span><span class="pill p-ink">Advice owner: you</span><label class="sr" for="csw">Switch client</label><select class="sel-st" id="csw" data-a="csw">' + S.active.map(id => { const x = S.clients[id]; return '<option value="' + id + '"' + (id === c.id ? ' selected' : '') + '>' + esc(x.name) + ' · ' + CASE_TABS.find(t => t[0] === x.stage)[1] + '</option>'; }).join('') + '</select></div>' + body + '</div></div>';
+}
+
+function tVerify(c){
+  const open = c.facts.filter(f => f.tag === 'missing' || f.tag === 'conflicting').length, ver = c.facts.filter(f => f.tag === 'verified').length;
+  const canGo = c.meet.held && !open && c.stage === 'verify';
+  return '<div class="split"><div class="col"><div class="card"><h3>Financial profile <span class="r small muted num">' + ver + ' of ' + c.facts.length + ' verified</span></h3><div class="tw"><table class="tbl"><tr><th>Item</th><th>Value</th><th>Status</th><th></th></tr>' +
+    c.facts.map((f, i) => '<tr><td><b>' + f.k + '</b><br><span class="small muted">' + esc(f.src) + '</span></td><td class="num">' + f.v + '</td><td><span class="pill p-' + f.tag + '">' + TAGS[f.tag] + '</span></td><td style="text-align:right;white-space:nowrap">' +
+      (f.tag === 'verified' ? '' : f.tag === 'requested' ? '<button class="link small" data-a="factUp" data-p="' + i + '">Simulate upload</button>' : '<button class="btn sm ghost" data-a="factOk" data-p="' + i + '">Confirm</button> <button class="btn sm ghost" data-a="factReq" data-p="' + i + '">Request doc</button>') + '</td></tr>').join('') + '</table></div></div></div>' +
+    '<div class="col"><div class="card"><h3>Verification meeting</h3><dl class="kv"><dt>When</dt><dd>' + c.meet.when + '</dd><dt>How</dt><dd>' + c.meet.mode + '</dd></dl>' +
+      '<div class="foot">' + (c.meet.held ? '<span class="pill p-verified">✓ Meeting held</span>' : '<button class="btn sm ghost" data-a="toast" data-p="Zoom opens here in the live product.">Join video</button><button class="btn sm" data-a="held">Mark as held</button>') + '</div>' +
+      '<label class="fld" style="margin-top:12px">Meeting notes<textarea class="inp" id="notes-' + c.id + '" data-f="clients.' + c.id + '.notes" rows="2" placeholder="What did you confirm or change?">' + esc(c.notes) + '</textarea></label></div>' +
+    (c.flag ? '<div class="card"><h3>Discovery read</h3><div class="note storm"><b>' + c.flag[0] + '.</b> ' + c.flag[1] + '</div></div>' : '') +
+    '<div class="card">' + (c.stage === 'verify' ? '<p class="small muted" style="margin:0 0 10px">Move on when the meeting is held and nothing is missing or conflicting. Requested documents can follow.</p><button class="btn sea" style="width:100%" data-a="toPlan"' + (canGo ? '' : ' disabled') + '>Profile verified, start the plan</button>' : '<span class="pill p-verified">✓ Verified Customer Financial Profile</span>') + '</div></div></div>';
+}
+
+function goalsHTML(c, locked){
+  return c.goals.map((g, i) => { const p = pct(g, extraFor(c, g)), was = pct(Object.assign({}, g, {off:0}), 0); return '<div class="goalrow"><span><b>' + esc(g.n) + '</b><br><span class="small muted num">' + eur(g.amt) + ' · was ' + was + '%</span></span><div class="step"><button data-a="yrs" data-p="' + i + '|-1" aria-label="Sooner"' + (locked ? ' disabled' : '') + '>−</button><span class="num">Age ' + (c.age + g.yrs + (g.off || 0)) + '</span><button data-a="yrs" data-p="' + i + '|1" aria-label="Later"' + (locked ? ' disabled' : '') + '>+</button></div>' + barFor(p) + '<span class="pc num">' + p + '%</span>' + pillFor(p) + '</div>'; }).join('');
+}
+function tPlan(c){
+  const total = c.goals.reduce((a, g) => a + g.m, 0) + (c.extra || 0), locked = c.planStatus !== 'draft';
+  const suit = [['needs','Needs and objectives recorded'],['risk','Risk profile matches the discovery read'],['loss','Capacity for loss assessed'],['costs','Costs, charges and fees disclosed'],['alts','Alternatives considered and explained']];
+  const allSuit = suit.every(([k]) => c.suit[k]);
+  const opts = (c.recOpts || []).filter(o => !c.recs.some(r => r.t === o[0]));
+  let cta;
+  if (c.planStatus === 'draft') cta = '<button class="btn sea" style="width:100%" data-a="sendPlan"' + (c.recs.length && allSuit ? '' : ' disabled') + '>Share plan v' + (c.ver.length + (c.ver[c.ver.length - 1].by === 'You' ? 0 : 1)) + ' with ' + esc(c.name.split(' ')[0]) + '</button>' + (c.recs.length && allSuit ? '' : '<p class="small muted" style="margin:6px 0 0">Add a recommendation and complete the suitability record to share.</p>');
+  else if (c.planStatus === 'sent') cta = '<div class="note">Sent to the client portal. They can ask questions or request changes.</div><div class="foot"><button class="btn ghost sm" data-a="clientChange">Simulate: client asks for a change</button><button class="btn sun sm" data-a="approve">Simulate: client approves</button></div>';
+  else cta = '<span class="pill p-verified">✓ Final Agreed LifeGoals Financial Plan</span>';
+  return '<div class="split"><div class="col"><div class="card"><h3>Scenario workspace <span class="r small muted">Educational projection at 3.5% a year</span></h3>' +
+    '<div class="chips" style="margin-bottom:12px">' + [['base','Preliminary report',0],['pref','Customer\'s preferred',150],['adv','Adviser draft',null]].map(([k, l, v]) => '<button class="chip' + ((v === null ? !['0','150'].includes(String(c.extra)) : c.extra === v) ? ' sel' : '') + '" data-a="scen" data-p="' + (v === null ? 'adv' : v) + '"' + (locked ? ' disabled' : '') + '>' + l + '</button>').join('') + '</div>' +
+    '<label class="fld">Extra monthly saving: <b class="num" id="xl" style="color:var(--ink)">' + eur(c.extra || 0) + '</b><input type="range" id="extra-' + c.id + '" min="0" max="800" step="25" value="' + (c.extra || 0) + '" data-a="extra"' + (locked ? ' disabled' : '') + '></label>' +
+    '<div id="gl" style="margin-top:8px">' + goalsHTML(c, locked) + '</div>' +
+    '<div class="hr"></div><div class="row small"><span class="muted">Total monthly saving across goals</span><span class="sp"></span><b class="num" id="tl">' + eur(total) + '</b></div></div>' +
+    '<div class="card"><h3>Versions</h3>' + c.ver.map(v => '<div class="doc"><span class="pill p-grey">v' + v.v + '</span><div class="t"><b>' + esc(v.t) + '</b><span>' + esc(v.by) + ' · ' + v.d + '</span></div></div>').join('') + '</div></div>' +
+    '<div class="col"><div class="card"><h3>Recommendations</h3>' + (c.recs.length ? c.recs.map((r, i) => '<div class="rec"><div class="t"><b>' + esc(r.t) + '</b>' + (r.prov ? '<span>' + esc(r.prov) + ' · ' + r.owner + ' · by ' + r.due + '</span>' : '') + '</div>' + (locked ? '' : '<button class="x" data-a="recDel" data-p="' + i + '" aria-label="Remove">×</button>') + '</div>').join('') : '<p class="small muted" style="margin:0">No recommendations yet.</p>') +
+      (!locked && opts.length ? '<div class="lab" style="margin-top:12px">Add</div><div class="chips">' + opts.map(o => '<button class="chip" data-a="recAdd" data-p="' + esc(o[0]) + '">+ ' + esc(o[0]) + '</button>').join('') + '</div>' : '') + '</div>' +
+    '<div class="card"><h3>Suitability record</h3>' + suit.map(([k, l]) => '<label class="chk"><input type="checkbox" id="suit-' + c.id + '-' + k + '" data-a="suit" data-p="' + k + '"' + (c.suit[k] || locked ? ' checked' : '') + (locked ? ' disabled' : '') + '>' + l + '</label>').join('') + '<div class="hr"></div>' + cta + '</div></div></div>';
+}
+
+function tImplement(c){
+  if (!c.actions.length) return '<div class="card empty">Actions appear here once the client approves the plan.</div>';
+  const ready = c.actions.every(a => a.st === 'Done' || a.st === 'In progress') && c.stage === 'implement';
+  const done = c.actions.filter(a => a.st === 'Done').length;
+  return '<div class="split" style="grid-template-columns:minmax(0,1fr)"><div class="col"><div class="card"><h3>Implementation tracker <span class="r small muted num">' + done + ' of ' + c.actions.length + ' done</span></h3><div class="tw"><table class="tbl"><tr><th>Action</th><th>Provider</th><th>Owner</th><th>Due</th><th>Status</th></tr>' +
+    c.actions.map((a, i) => '<tr><td><b>' + esc(a.t) + '</b></td><td>' + esc(a.prov) + '</td><td>' + a.owner + '</td><td class="num">' + a.due + '</td><td><select class="sel-st" id="act-' + c.id + '-' + i + '" data-a="actSt" data-p="' + i + '" aria-label="Status">' + ['Not started','In progress','Done','Blocked'].map(s => '<option' + (a.st === s ? ' selected' : '') + '>' + s + '</option>').join('') + '</select></td></tr>').join('') + '</table></div></div>' +
+    '<div class="card foot" style="margin:0"><span class="small muted" style="flex:1;min-width:220px">' + (c.stage === 'implement' ? 'Tell LifeGoals when every action is done or under way with an owner. This closes the Suitability and Implementation Record.' : '✓ Implementation confirmed to LifeGoals.') + '</span><button class="btn ghost" data-a="toast" data-p="Reminder sent to ' + esc(c.name.split(' ')[0]) + ' by secure message.">Nudge client</button>' +
+    (c.stage === 'implement' ? '<button class="btn sea" data-a="implemented"' + (ready ? '' : ' disabled') + '>Confirm implemented</button>' : '') + '</div></div></div>';
+}
+
+function tReview(c){
+  if (c.stage !== 'review') return '<div class="card empty">Reviews start once implementation is confirmed.</div>';
+  const W = 520, rowH = 34;
+  const chart = '<svg class="chart" viewBox="0 0 ' + W + ' ' + (c.goals.length * rowH + 10) + '" role="img" aria-label="Goal progress">' + c.goals.map((g, i) => { const p = pct(g, extraFor(c, g)), cur = Math.min(100, Math.round(g.have / g.amt * 100)), y = i * rowH + 4, x0 = 196, w = W - x0 - 50;
+    return '<text x="0" y="' + (y + 15) + '" font-size="12" font-weight="700" fill="#0B2545">' + esc(g.n.length > 24 ? g.n.slice(0, 23) + '…' : g.n) + '</text><rect x="' + x0 + '" y="' + (y + 4) + '" width="' + w + '" height="14" rx="7" fill="#F3F7F9"/><rect x="' + x0 + '" y="' + (y + 4) + '" width="' + (w * p / 100) + '" height="14" rx="7" fill="' + ({good:'#D9F2EE', nudge:'#FDF0D2', alert:'#FBE4DD'})[band(p)[0]] + '"/><rect x="' + x0 + '" y="' + (y + 4) + '" width="' + Math.max(4, w * cur / 100) + '" height="14" rx="7" fill="#0F9D8F"/><text x="' + (W - 2) + '" y="' + (y + 15) + '" font-size="12" font-weight="800" text-anchor="end" fill="#0B2545">' + p + '%</text>'; }).join('') + '</svg>';
+  return '<div class="split"><div class="col"><div class="card"><h3>Goal progress</h3>' + chart + '<p class="small muted" style="margin:6px 0 0"><span class="pill p-good" style="background:var(--sea);color:var(--white)">Saved so far</span> <span class="pill p-grey">Projected by target date</span></p></div>' +
+    '<div class="card"><h3>Service record</h3><div class="log">' + c.log.slice().reverse().map(l => '<div><b>' + l.d + '</b><span>' + esc(l.t) + '</span></div>').join('') + '</div></div></div>' +
+    '<div class="col"><div class="card"><h3>Life events</h3>' + (c.events.length ? c.events.map((e, i) => '<div class="rec"><div class="t"><b>' + esc(e.t) + '</b><span>Reported ' + e.d + '</span></div>' + (e.done ? '<span class="pill p-verified">✓ Handled</span>' : '<button class="btn sm sun" data-a="evPlan" data-p="' + i + '">Update plan</button>') + '</div>').join('') : '<p class="small muted" style="margin:0">No life events reported since the last review.</p>') + '</div>' +
+    '<div class="card"><h3>Next review</h3><label class="fld">Review date<select class="inp" id="rev-' + c.id + '" data-f="clients.' + c.id + '.review.next">' + ['Jan 2027','Apr 2027','Oct 2027'].map(o => '<option' + (c.review.next === o ? ' selected' : '') + '>' + o + '</option>').join('') + '</select></label>' +
+    '<div class="foot"><span class="sp"></span><button class="btn sea" data-a="saveReview">Save living plan</button></div></div></div></div>';
+}
+
+/* ---------- modal + render ---------- */
+function modal(){
+  if (!S.modal) return '';
+  const m = MODS.find(x => x.k === S.modal);
+  return '<div class="ov" data-a="closeMod"><div class="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgt"><div class="row"><h2 id="dlgt">' + m.t + '</h2><span class="sp"></span><button class="x" data-a="closeMod" aria-label="Close">×</button></div><p class="small muted" style="margin:0 0 12px">' + m.min + ' minute read</p>' + m.body() + '<div class="foot"><span class="sp"></span><button class="btn sea" data-a="learned" data-p="' + m.k + '">' + (S.learned[m.k] ? 'Close' : 'Mark as complete') + '</button></div></div></div>';
+}
+const SCREENS = {partner, verify, learn, profile, ready, home, matches, clients};
+function render(){
+  const root = document.getElementById('root');
+  const sc = root.querySelector('.body,.wel'), st = sc ? sc.scrollTop : 0, same = render.last === S.screen + S.tab + S.sel;
+  root.innerHTML = S.screen === 'welcome' ? welcome() : '<div class="app">' + rail() + '<div class="main">' + SCREENS[S.screen]() + '</div></div>';
+  root.insertAdjacentHTML('beforeend', modal() + (S.toast ? '<div class="toast" role="status">' + esc(S.toast) + '</div>' : ''));
+  if (same) { const b = root.querySelector('.body,.wel'); if (b) b.scrollTop = st; }
+  render.last = S.screen + S.tab + S.sel;
+}
+let tt;
+function toast(t){ S.toast = t; clearTimeout(tt); tt = setTimeout(() => { S.toast = null; render(); }, 2800); }
+const C = () => S.clients[S.sel];
+const go = k => { S.screen = k; S.modal = null; };
+const nextSetup = () => { const n = SETUP.find(([k]) => !S.done[k]); go(n ? n[0] : 'home'); };
+
+const A = {
+  go: p => go(p), start: () => go('partner'), restart: () => reset(),
+  skip: () => { Object.keys(S.done).forEach(k => S.done[k] = true); S.agree = true; Object.keys(S.docs).forEach(k => S.docs[k] = 'ok'); MODS.forEach(m => S.learned[m.k] = true); go('home'); },
+  toast: p => toast(p),
+  agree: (p, el) => { S.agree = el.checked; },
+  donePartner: () => { S.done.partner = true; toast('Partnership requested. Next, verify your credentials.'); go('verify'); },
+  upload: p => { S.docs[p] = 'checking'; setTimeout(() => { S.docs[p] = 'ok'; render(); }, 900); },
+  uploadAll: () => DOCS.forEach(([k]) => { if (S.docs[k] === 'needed') A.upload(k); }),
+  doneVerify: () => { S.done.verify = true; toast('Credentials verified. Welcome to LifeGoals.'); go('learn'); },
+  openMod: p => { S.modal = p; }, closeMod: (p, el, e) => { if (e.target === el) S.modal = null; else return false; },
+  learned: p => { S.learned[p] = true; S.modal = null; },
+  doneLearn: () => { S.done.learn = true; go('profile'); },
+  tog: p => { const [path, v] = p.split('|'), arr = get(path), i = arr.indexOf(v); i < 0 ? arr.push(v) : arr.splice(i, 1); },
+  style: p => { S.prof.style = p; },
+  doneProfile: () => { const first = !S.done.profile; S.done.profile = true; toast('Profile saved.'); if (first) go('ready'); },
+  cap: p => { S.rd.cap = Math.max(1, Math.min(15, S.rd.cap + +p)); },
+  slot: p => { const i = S.rd.slots.indexOf(p); i < 0 ? S.rd.slots.push(p) : S.rd.slots.splice(i, 1); },
+  goLive: () => { const first = !S.done.ready; S.done.ready = true; if (first) { toast('You are live. Your first match request has arrived.'); go('matches'); } else toast('Settings saved.'); },
+  msel: p => { S.msel = p; S.decline = null; }, openMatch: p => { S.msel = p; go('matches'); },
+  accept: p => { S.matches.find(m => m.id === p).st = 'pending'; },
+  consent: p => { const m = S.matches.find(x => x.id === p); m.st = 'accepted';
+    if (!S.clients[m.client]) S.clients[m.client] = mkClient({id:m.client, name:m.client === 'brendan' ? 'Brendan Carroll' : 'Ola Adeyemi', ini:m.client === 'brendan' ? 'BC' : 'OA', age:m.age, loc:m.area.split(' ·')[0], hh:m.hh, code:m.code, meet:{when:'Wed 14 Oct · 09:00', mode:m.pref.split(',')[0], held:false},
+      facts:[{k:'Gross income', v:'Provided', tag:'verified', src:'Payslips'},{k:'Pension statements', v:'Not given', tag:'missing', src:'Requested in portal'},{k:'Living costs', v:'Estimate', tag:'estimated', src:'Customer estimate'}],
+      goals:m.goals.map(([n, p2]) => ({n, yrs:5, amt:100000, have:Math.round(1000 * p2 / Math.pow(1 + R, 5)), m:0, w:1})), flag:m.flag, recOpts:[['Pension review','Pension provider','You','30 Oct'],['Protection review','Protection insurer','You','6 Nov']]});
+    S.clients[m.client].log.push({d:'2 Oct', t:'Match accepted, consent given'});
+    if (!S.active.includes(m.client)) S.active.unshift(m.client); toast('Consent received. The client file is ready.'); },
+  decline: p => { S.decline = p; }, declineCancel: () => { S.decline = null; },
+  declineWhy: p => { const m = S.matches.find(x => x.id === S.decline); m.st = 'declined'; m.reason = p; S.decline = null; toast('Match declined. Thank you for the quick reply.'); },
+  case: p => { const [id, tab] = p.split('|'); S.sel = id; S.tab = tab || S.clients[id].stage; go('clients'); },
+  tab: p => { S.tab = p; },
+  csw: (p, el) => { S.sel = el.value; S.tab = S.clients[el.value].stage; },
+  factOk: p => { C().facts[p].tag = 'verified'; C().facts[p].src += ' · confirmed with client'; },
+  factReq: p => { const f = C().facts[p]; f.tag = 'requested'; toast('Secure document request sent for: ' + f.k); },
+  factUp: p => { const f = C().facts[p]; f.tag = 'verified'; f.src = 'Uploaded by client today'; },
+  held: () => { C().meet.held = true; C().log.push({d:'2 Oct', t:'Verification meeting held'}); },
+  toPlan: () => { const c = C(); c.stage = 'plan'; S.tab = 'plan'; c.log.push({d:'2 Oct', t:'Profile verified'}); toast('Verified Customer Financial Profile saved.'); },
+  scen: p => { const c = C(); if (p === 'adv') { if (c.extra === 0 || c.extra === 150) c.extra = 200; } else { c.extra = +p; c.goals.forEach(g => g.off = 0); } },
+  extra: (p, el) => { C().extra = +el.value; },
+  yrs: p => { const [i, d] = p.split('|'), g = C().goals[+i]; g.off = Math.max(-g.yrs + 1, (g.off || 0) + +d); },
+  recAdd: p => { const o = C().recOpts.find(x => x[0] === p); C().recs.push({t:o[0], prov:o[1], owner:o[2], due:o[3]}); },
+  recDel: p => { C().recs.splice(+p, 1); },
+  suit: (p, el) => { C().suit[p] = el.checked; },
+  sendPlan: () => { const c = C(); if (c.ver[c.ver.length - 1].by !== 'You') c.ver.push({v:c.ver.length + 1, t:'Adviser draft', by:'You', d:'2 Oct'}); c.planStatus = 'sent'; c.log.push({d:'2 Oct', t:'Plan v' + c.ver.length + ' shared with client'}); toast('Plan shared in the client portal.'); },
+  clientChange: () => { const c = C(); c.planStatus = 'draft'; c.ver.push({v:c.ver.length + 1, t:'Client asked: can the first goal be a year later?', by:c.name.split(' ')[0], d:'2 Oct'}); toast('Client requested a change. The plan is back in draft.'); },
+  approve: () => { const c = C(); c.planStatus = 'approved'; c.stage = 'implement'; S.tab = 'implement';
+    c.ver.push({v:c.ver.length + 1, t:'Agreed plan, client approved', by:c.name.split(' ')[0], d:'2 Oct'});
+    const prev = c.actions; c.actions = c.recs.map(r => prev.find(a => a.t === r.t) || {t:r.t, prov:r.prov || 'Provider', owner:r.owner || 'You', due:r.due || '30 Oct', st:'Not started'}); c.log.push({d:'2 Oct', t:'Plan approved and e-signed'}); toast('Plan approved. Actions added to the tracker.'); },
+  actSt: (p, el) => { C().actions[+p].st = el.value; },
+  implemented: () => { const c = C(); c.stage = 'review'; S.tab = 'review'; c.review.next = 'Apr 2027'; c.log.push({d:'2 Oct', t:'Implementation confirmed to LifeGoals'}); toast('LifeGoals notified. Next review scheduled.'); },
+  evPlan: p => { const c = C(); c.events[+p].done = true; c.planStatus = 'draft'; c.suit = {}; c.log.push({d:'2 Oct', t:'Plan reopened after life event: ' + c.events[+p].t}); S.tab = 'plan'; c.stage = 'plan'; toast('Plan reopened as a new draft version.'); },
+  saveReview: () => { const c = C(); c.log.push({d:'2 Oct', t:'Living plan updated, next review ' + c.review.next}); toast('Updated living plan saved. Review set for ' + c.review.next + '.'); }
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]'); if (!el || el.disabled) return;
+  if (el.tagName === 'SELECT' || (el.tagName === 'INPUT' && el.type === 'range')) return;
+  const fn = A[el.dataset.a]; if (!fn) return;
+  if (fn(el.dataset.p, el, e) === false) return;
+  render();
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.matches('select[data-a], input[type=range][data-a]')) { A[el.dataset.a](el.dataset.p, el); render(); return; }
+  if (el.dataset.f && el.tagName === 'SELECT') { set(el.dataset.f, el.value); render(); }
+});
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.type === 'range' && el.dataset.a) { A[el.dataset.a](el.dataset.p, el); const c = C();
+    document.getElementById('gl').innerHTML = goalsHTML(c, false); document.getElementById('xl').textContent = eur(c.extra);
+    document.getElementById('tl').textContent = eur(c.goals.reduce((a, g) => a + g.m, 0) + c.extra); return; }
+  if (el.dataset.f && el.tagName !== 'SELECT') { set(el.dataset.f, el.type === 'number' ? +el.value : el.value); const pv = document.getElementById('pv'); if (pv) pv.innerHTML = previewCard(); }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.modal) { S.modal = null; render(); } });
+render();
+</script>
+</html>
