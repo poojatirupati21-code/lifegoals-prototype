@@ -747,3 +747,87 @@ Agreement with the plan (§6 of the test): surplus tool = plan spare money · ov
 Deliberate consequence: a stated repayment below the interest (e.g. €500 on €300k) is now used as stated. The mortgage never clears in the plan, and the field shows "⚠️ Needs a look". Before, it was silently raised.
 
 Sources: [Central Bank: targeted changes to the mortgage measures](https://www.centralbank.ie/news/article/central-bank-announces-targeted-changes-to-mortgage-measures-framework) · [McCann FitzGerald summary](https://www.mccannfitzgerald.com/knowledge/financial-services-regulation/new-mortgage-lending-rules-announced-by-the-central-bank)
+
+## Round 7: Irish rules audit applied
+
+Source: `deliverables/irish-rules-and-rates-audit.md` (register values used exactly) and `deliverables/LifeGoals-Calculators.xlsx` (workbook of 2 Oct 2026 10:19:52Z). Prototype only; nothing committed.
+
+### 1. What changed
+- **All 33 Wrong + 5 Outdated items fixed**:
+  - W items: #4, 8, 9, 12, 13, 20, 22–25, 29, 31, 32, 35, 36, 38 (auto-enrolment phase 1), 41–43, 45, 46, 58–61, 65, 73–77, 79 and 81.
+  - O items: #19, 67, 70, 71 and 72.
+  - The register's customer-choice rows (#30, 44, 55, 85, 86) are now B inputs.
+- **Tax engine** (`hhTax`). One household tax function serves working and retired years:
+  - Joint assessment, with the married band and the €35k uplift, applies before and after retirement.
+  - The PAYE credit is capped at 20% of PAYE income.
+  - Age credit and age exemption, with 40% marginal relief.
+  - USC: State Pension exempt, reduced rates at 70+, 3% surcharge on self-employed income over €100k.
+  - PRSI: none at 66+. ARF draws before 66 pay PRSI. Class S is max(€650, rate). The 2026 rate is a blend (4.2375%), rising 4.35% → 4.5% → 4.7%.
+  - The State Pension, other income and rental income are taxed.
+- **Credits**. About you has one optional "Do any of these apply to you?" chip group: I rent my home (Rent Tax Credit), I'm a single parent (SPCCC + €48k band), and my partner cares for someone at home (Home Carer).
+- **Retirement**:
+  - Lump sum is 25% up to €500k: €200k tax-free, €200k–€500k at 20%.
+  - SFT rises from €2.2m by €200k a year, taxed at 40%.
+  - ARF minimum draws are 4% / 5% / 6%.
+  - Earliest pension draw is age 60.
+  - State Pension is pro-rata from 10 years, with the +€10 a week supplement at 80.
+  - Partner gets the State Pension or the Qualified Adult rate.
+- **No hidden assumptions**:
+  - The 50% "employee share" is now a visible "your own monthly contribution" field.
+  - There is one safety-net setting (6 months of essentials) for the goal, the plan buffer and the calculator.
+  - Inflation is 3.9% (CSO HICP flash, Sep 2026) everywhere, including the chip label.
+  - All "[confirm …]" placeholders are removed (0 left).
+- **`RULES_IE_2026`**: 80 constants, each with value, source URL, effective date and a verify flag (79 flagged). `RULES_VERSION` reads "Irish rules 2026 · checked 2 Oct 2026" and shows in Assumptions and the report.
+- **"Your assumptions" screen** (all 27 B items):
+  - Reachable from the Assumptions sheet, the What-if card and Me.
+  - Inflation stays a required pick. Every other item says "Suggested · change if you like".
+  - Four collapsible groups: Prices & growth, Retirement, Safety net & debt, Plan length.
+  - Changes drive the plan and the calculators live.
+  - Calculators keep their own visible inputs, with defaults taken from the assumptions.
+- **Calculators** now match the corrected workbook and its "Prototype must be updated to match" list:
+  - APR treated as effective.
+  - Exact NPER, last payment and total interest.
+  - Stamp duty and fees in borrow / deposit / rent-or-buy.
+  - Start-of-year drawdown.
+  - 1-in-20 bad year uses 1.645σ.
+  - Retirement gap shown in today's money.
+  - Explicit hand-offs to the plan.
+
+### 2. Tests (all 0 FAILS, 0 ERRORS)
+- New: `rules.js` 67 / 67 (the §4 take-home table to the euro, the §4 combination checks and the credits).
+- New: `asm.js` 35 / 35 (the rules object and label, the assumptions screen, live engine effects, retirement rules, all 28 calculators rendering).
+- New: `calc-vs-xlsx.js` 145 / 145 within €0.50 (28 calculators × 5 cases + 5 tax-engine cases). 62 constants match the workbook register. Run last; the workbook timestamp was unchanged.
+- e2e.js 390 / 1280 / 844, precedence 57 / 57, chart, fp4, fp/mono (4,200 checks), road, landfit, noret, v5–v11, v12 35 / 35: all pass.
+- Round-4 harness, 6,192 cases, rebuilt from the live file: 0 failures.
+
+**Changed expectations and why**
+- e2e.js, v11.js, v12.js: inflation chip 3.5% → 3.9%. The report text now reads "CSO HICP flash, Sep 2026" (#67).
+- v12.js: year-1 card / loan repayment uses the effective APR (#65).
+- v10.js: the retirement row reads "Projected fund in today's money", because the headline is now the gap (C12).
+- fp4.js:
+  - The partial mortgage-free case has €40k cash, because the 6-month buffer holds back €22k (B16).
+  - The self-employed surcharge case sets auto-enrolment to No, so that the 1.5% employee cost does not distort the comparison.
+- precedence.js:
+  - Sample statement projection is €722,000 (wage growth 3%).
+  - Retirement checks read the projected or calculated fund.
+  - Loan €302.15 (C28).
+  - Income gap 8.7 months (C22).
+  - Life cover €227,590 (C21).
+  - Borrow €200,000 / €294,059 / €264,356, now with stamp duty and fees (C01).
+  - Deposit 37 months (C03).
+
+### 3. Open
+1. Auto-enrolment contribution steps after 2028 are not in the audit. They are held at phase-1 rates (1.5% / 1.5% / 0.5%).
+2. 79 of 80 rule sources are flagged "verify". This includes the Home Carer rate and income limit.
+3. Budget 2027 (6 Oct) will need a rules update.
+4. Earliest draw age 60 is applied to every pot. Occupational schemes that allow 50 are not distinguished.
+5. Not modelled:
+   - the medical-card USC rate;
+   - the full Qualified Adult means test;
+   - the partner's own private pension;
+   - Help to Buy;
+   - LPT;
+   - State Pension deferral;
+   - the survivor-age switch.
+6. PRSI on rental and other unearned income uses the €5k threshold. It needs checking against Class K.
+7. Another agent's WIP commit 1d58f47 sits under these uncommitted edits.
