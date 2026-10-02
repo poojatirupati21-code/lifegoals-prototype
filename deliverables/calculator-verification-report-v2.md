@@ -9,13 +9,13 @@ Workbook: `deliverables/LifeGoals-Calculators.xlsx` (v2.3, 2 Oct 2026). v2.3 app
 | Calculators | 28 (C01–C28, CALCS order) |
 | 1. Independent reference: cases | 406 (14 per calculator: blank template with example values on, examples typed in, low/edge, high/edge, branch/edge, 2 random, 0% inflation, inflation blank, 4% inflation, 3 statement rounds, Irish rules checks; plus a blank template with examples off, checked by the named tests) |
 | 1. Independent reference: output checks | 4900: **4900 PASS, 0 FAIL** |
-| 2. Live recalculation: inputs changed one at a time | 252 tests (all 240 calculator inputs, incl. 48 type-3 choices, 24 type-2 ranges, 62 statement cells and 10 inflation choices, + the 6 Tax engine inputs): **252 PASS, 0 FAIL** |
+| 2. Live recalculation: inputs changed one at a time | 252 tests (all 240 calculator inputs, incl. 45 type-3 choices, 24 type-2 ranges, 62 statement cells and 10 inflation choices, + the 6 Tax engine inputs): **252 PASS, 0 FAIL** |
 | Tax engine vs independent tax calculation | 112 checks over 13 status / income cases: **112 PASS** · the audit's 11 §4 test cases on the sheet: ALL PASS (to the cent) |
-| Named tests (blank template shows "Choose your…"; template + examples = typed examples; type 1 not inputs; inflation blank / 0% / 2% / 4%; statements; C12 projection; Irish rules) | 57: **57 PASS, 0 FAIL** |
+| Named tests (blank template shows "Choose your…"; template + examples = typed examples; type 1 not inputs; inflation blank / 0% / 2% / 4%; statements; C12 projection; Irish rules) | 60: **60 PASS, 0 FAIL** |
 | 3. recalc.py | every round "success", 0 formula errors (1,508 formulas), with Fill_Example = No and = Yes; delivered file recalculated, cached values present |
 | Calculation settings | calcMode auto, fullCalcOnLoad = 1 (Excel recalculates on open) |
 | Checker test | Changing Illness Benefit to €255, upkeep to 1.01% and C27 to APR/12 gave 26 FAILs (C07, C22, C27); breaking the statement-charges rule and the C12 "today's money" rule gave 15 FAILs (C12, C13, C14); setting stamp duty to 1.1% and the USC 2% band to €28,000 in the register gave 36 FAILs (C01, C03, C07, C25, C26, Tax engine) |
-| Editable cells | 178 yellow typed inputs (all blank in the template: 24 type 2, 48 type-3 choices, 90 your own figures, 16 optional) and 62 grey-blue statement cells on the calculators, 6 on the Tax engine (the type-1 rules register is not editable); each has data validation, an input message and a cell note |
+| Editable cells | 178 yellow typed inputs (all blank in the template: 24 type 2, 48 type-3 choices (3 age fields with guidance only), 90 your own figures, 16 optional) and 62 grey-blue statement cells on the calculators, 6 on the Tax engine (the type-1 rules register is not editable); each has data validation, an input message and a cell note |
 | Layout | FROZEN (v2.3) for the prototype-vs-workbook check: sheet order README, C01–C28, Tax engine, Document reader spec, Assumptions; every input row = label B, entry C, unit D, guidance E, Example only F, Value used G; named cells as in the manifest. |
 
 ## Method
@@ -26,12 +26,12 @@ Workbook: `deliverables/LifeGoals-Calculators.xlsx` (v2.3, 2 Oct 2026). v2.3 app
 
 ## Journey spec §14: defaults vs customer choice (v2.3)
 
-- **Types:** type 1 (set by Government · 2026) values sit only on Assumptions: grey, no data validation, not inputs. Calculator inputs: type 2 range 24; type 3 your choice 48; type 3 your own figure 90; type 3 optional (blank = none) 16; statement-reader cells 62. Tax engine: 6 inputs (4 your figure, 2 optional).
-- **Blank template:** every input cell is empty; the "Value used" column applies IF(ISBLANK(input), IF(Fill_Example="Yes", example, ""), input). Results that need a blank input show "Choose your … to see this" (helper rows "CHOICES STILL NEEDED" at the bottom of each sheet list the inputs each result needs); results that don't need it still calculate. Retirement age and plan-to age are blank too.
+- **Types:** type 1 (set by Government · 2026) values sit only on Assumptions: grey, no data validation, not inputs. Calculator inputs: type 2 range 24; type 3 your choice 45; type 3 retirement age / plan-until age with §14 guidance only (no standard) 3; type 3 your own figure 90; type 3 optional (blank = none) 16; statement-reader cells 62. Tax engine: 6 inputs (4 your figure, 2 optional).
+- **Blank template:** every input cell is empty; the "Value used" column applies IF(ISBLANK(input), IF(Fill_Example="Yes", example, ""), input). Results that need a blank input show "Choose your … to see this" (helper rows "CHOICES STILL NEEDED" at the bottom of each sheet list the inputs each result needs); results that don't need it still calculate. Retirement age and plan-until age are blank too and carry only the §14 guidance ("You can usually draw a pension from 60 (some schemes from 50); State Pension is paid from 66." / "At 65, average life expectancy in Ireland is about 83 for men and 86 for women (CSO); many people plan to 90–95."), never a "standard" (prototype cross-check fix, v2.3.1).
 - **Fill example values? (README, default No):** with Yes every blank input uses its grey "Example only" figure: the standard for type 3 choices, the sample customer's figure for type 2 and your-own-figure inputs.
-- **Unchanged values give unchanged results:** with Fill_Example = Yes the blank template equals typing the examples in (named test), and against the previous version (v2.2) 328 of 345 R1 outputs are identical. Differences only where an example value changed: C08 (4), C09 (5), C10 (8). The example changes: C08 growth 1% (the cash standard after DIRT; was 2%); C09 and C10 growth 5% (one investment standard before charges and tax; was 4%); C13/C14 add the "room left" row; C15 at the cap shows "60+ years".
+- **Unchanged values give unchanged results:** with Fill_Example = Yes the blank template equals typing the examples in (named test), and against the previous version (v2.2) 328 of 345 R1 outputs are identical. Differences only where an example value changed: C08 (4), C09 (5), C10 (8). The example changes: C08 growth 1% (the cash standard after DIRT; was 2%); C09 and C10 growth 5% (one investment standard before charges and tax; was 4%); C13/C14 add the "room left" row; C15 at the 60-year cap shows "Beyond [plan-until age] (your plan-until age)", as the prototype.
 - **One figure everywhere:** "Ireland today" inflation = 3.9%, CSO HICP flash estimate, September 2026 (published 1 Oct 2026), the same value, month and index as the prototype's RULES_IE_2026.infl.ie (checked in the HTML on 2 Oct 2026). Other repeated guidance uses the prototype's values: ECB target 2%; pay rises 3%; cash 1% after DIRT; pension 4.5% working / 3.15% retired; mortgage rates 3.5%–4.5% (new mortgages averaged 3.49%, June 2026); cards 13%–23% APR; fund charges 0.5%–1.5%; State Pension €299.30 a week; life expectancy at 65 about 83 (men) / 86 (women), CSO.
-- **UI/UX Appendix B fixes:** "an income protection need" (the workbook already had "an"; the wording is in the spec sheet copy); "1.0 months" → "1 month" (C11, C22); C15 at the cap no longer says "age 126"; C13/C14 add "Room left for relief after what you already pay in".
+- **UI/UX Appendix B fixes:** "an income protection need" (the workbook already had "an"; the wording is in the spec sheet copy); "1.0 months" → "1 month" (C11, C22); C15 at the cap reads "Beyond 90 (your plan-until age)" like the prototype, not "age 126" or "60+ years" in an age field; C13/C14 add "Room left for relief after what you already pay in".
 
 ## What changed (Irish rules audit) and why
 
@@ -102,7 +102,7 @@ Workbook: `deliverables/LifeGoals-Calculators.xlsx` (v2.3, 2 Oct 2026). v2.3 app
 | Where | Audit class | Item |
 |---|---|---|
 | All calculators | Journey spec §14 | Every input typed: 1 = set by Government (Assumptions only, grey, not an input); 2 = range ("Usually between X and Y (source)"); 3 = personal, blank until chosen ("Generally the standard is X (source). Choose what you want to use."). Blank inputs give "Choose your … to see this"; README switch "Fill example values?" (default No) fills them from the grey "Example only" column. |
-| C11, C15, C22, C13 | UI/UX Appendix B | Singular "1 month"; C15 at the 60-year cap reads "Lasts 60+ years: beyond your plan age" (not "age 126"); C13/C14 show the relief room left after what you already pay in. |
+| C11, C15, C22, C13 | UI/UX Appendix B | Singular "1 month"; C15 at the 60-year cap reads "Beyond [plan-until age] (your plan-until age)", as the prototype (not "age 126"); C13/C14 show the relief room left after what you already pay in. |
 | C01 | Should | Remove the placeholder "[confirm current Central Bank rules]" from the customer line (prototype copy; the workbook uses the audit's replacement wording). |
 | C01, C03 | Nice | Help to Buy as an optional deposit input (rules audit #62). |
 | C02 | Nice | Use "−" (not "-") in the rate text (prototype copy). |
@@ -215,7 +215,10 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | Blank template + Fill_Example = Yes gives exactly the results of typing the example values in | all calculators | 0 | 0 | PASS |
 | Type 1 values are not inputs: no yellow cells and no data validation on Assumptions | Assumptions | 0 / 0 | 0 / 0 | PASS |
 | Type 1 values are not inputs: no calculator input has a register name | 70 register names | 0 | 0 | PASS |
-| Every calculator input is typed 2 or 3 (range / your choice / your figure / optional) or a statement cell | all inputs | range, judgement, yours, optional, statement | judgement, optional, range, statement, yours | PASS |
+| Retirement_Age: §14 guidance only, no "standard" wording | C12 | no "standard is" | none | PASS |
+| Age_At_Start: §14 guidance only, no "standard" wording | C15 | no "standard is" | none | PASS |
+| Plan_To_Age: §14 guidance only, no "standard" wording | C15 | no "standard is" | none | PASS |
+| Every calculator input is typed 2 or 3 (range / your choice / your figure / optional) or a statement cell | all inputs | range, judgement, guided, yours, optional, statement | guided, judgement, optional, range, statement, yours | PASS |
 
 ## Live recalculation test
 
@@ -3611,8 +3614,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C15-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C15-R2 Low / edge | Years_Lasting | 60 | 60 | 0 | PASS |
 | C15-R2 Low / edge | Withdrawal_Rate | 0.0003 | 0.0003 | -3.25e-19 | PASS |
-| C15-R2 Low / edge | Lasts_To_Age | 60+ years | 60+ years |  | PASS |
-| C15-R2 Low / edge | [shown] Lasts_To_Age | Lasts 60+ years: beyond your plan age (90) | Lasts 60+ years: beyond your plan age (90) |  | PASS |
+| C15-R2 Low / edge | Lasts_To_Age | Beyond 90 (your plan-until age) | Beyond 90 (your plan-until age) |  | PASS |
+| C15-R2 Low / edge | [shown] Lasts_To_Age | Beyond 90 (your plan-until age) | Beyond 90 (your plan-until age) |  | PASS |
 | C15-R2 Low / edge | [shown] Years_Lasting | 60+ years | 60+ years |  | PASS |
 | C15-R2 Low / edge | Used_Retirement_Savings | 3000000 | 3000000 | 0 | PASS |
 | C15-R2 Low / edge | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
@@ -3635,8 +3638,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C15-R4 Branch / edge | Statement_Check |  |  |  | PASS |
 | C15-R5 Random (seed 1) | Years_Lasting | 60 | 60 | 0 | PASS |
 | C15-R5 Random (seed 1) | Withdrawal_Rate | 0.0214 | 0.0214 | -1.04e-17 | PASS |
-| C15-R5 Random (seed 1) | Lasts_To_Age | 60+ years | 60+ years |  | PASS |
-| C15-R5 Random (seed 1) | [shown] Lasts_To_Age | Lasts 60+ years: beyond your plan age (91) | Lasts 60+ years: beyond your plan age (91) |  | PASS |
+| C15-R5 Random (seed 1) | Lasts_To_Age | Beyond 91 (your plan-until age) | Beyond 91 (your plan-until age) |  | PASS |
+| C15-R5 Random (seed 1) | [shown] Lasts_To_Age | Beyond 91 (your plan-until age) | Beyond 91 (your plan-until age) |  | PASS |
 | C15-R5 Random (seed 1) | [shown] Years_Lasting | 60+ years | 60+ years |  | PASS |
 | C15-R5 Random (seed 1) | Used_Retirement_Savings | 2430000 | 2430000 | 0 | PASS |
 | C15-R5 Random (seed 1) | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
