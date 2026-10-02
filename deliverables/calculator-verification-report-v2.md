@@ -1,28 +1,37 @@
 # LifeGoals calculators v2: verification report
 
-Workbook: `deliverables/LifeGoals-Calculators.xlsx` (v2.2, 2 Oct 2026). v2.2 applies `deliverables/irish-rules-and-rates-audit.md` (Irish rules 2026 · checked 2 Oct 2026): see "What changed (Irish rules audit) and why". Earlier: v2.0 It was redesigned as a tool and corrected per `deliverables/independent-accuracy-audit.md`. v2.1 adds Pooja's two decisions: inflation is the client's own choice (blank to start), and statement figures (read by the document reader) take precedence over typed figures.
+Workbook: `deliverables/LifeGoals-Calculators.xlsx` (v2.3, 2 Oct 2026). v2.3 applies journey spec §14 (defaults vs customer choice): see "Journey spec §14". v2.2 v2.2 applies `deliverables/irish-rules-and-rates-audit.md` (Irish rules 2026 · checked 2 Oct 2026): see "What changed (Irish rules audit) and why". Earlier: v2.0 It was redesigned as a tool and corrected per `deliverables/independent-accuracy-audit.md`. v2.1 adds Pooja's two decisions: inflation is the client's own choice (blank to start), and statement figures (read by the document reader) take precedence over typed figures.
 
 ## Summary
 
 | Check | Result |
 |---|---|
 | Calculators | 28 (C01–C28, CALCS order) |
-| 1. Independent reference: cases | 377 (13 per calculator: defaults, low/edge, high/edge, branch/edge, 2 random, 0% inflation, inflation blank, 4% inflation, 3 statement rounds) |
-| 1. Independent reference: output checks | 4485: **4485 PASS, 0 FAIL** |
-| 2. Live recalculation: inputs changed one at a time | 252 tests (all 240 calculator inputs, incl. 61 "Suggested" choice inputs, 62 statement cells and 10 inflation choices, + the 6 Tax engine inputs): **252 PASS, 0 FAIL** |
-| Tax engine vs independent tax calculation | 104 checks over 13 status / income cases: **104 PASS** · the audit's 11 §4 test cases on the sheet: ALL PASS (to the cent) |
-| Named tests (inflation blank / 0% / 2% / 4%; statement vs typed; C12 projection Yes / No / age mismatch; charges; date) | 47: **47 PASS, 0 FAIL** |
-| 3. recalc.py | every round "success", 0 formula errors (1,151 formulas); delivered file recalculated, cached values present |
+| 1. Independent reference: cases | 406 (14 per calculator: blank template with example values on, examples typed in, low/edge, high/edge, branch/edge, 2 random, 0% inflation, inflation blank, 4% inflation, 3 statement rounds, Irish rules checks; plus a blank template with examples off, checked by the named tests) |
+| 1. Independent reference: output checks | 4900: **4900 PASS, 0 FAIL** |
+| 2. Live recalculation: inputs changed one at a time | 252 tests (all 240 calculator inputs, incl. 48 type-3 choices, 24 type-2 ranges, 62 statement cells and 10 inflation choices, + the 6 Tax engine inputs): **252 PASS, 0 FAIL** |
+| Tax engine vs independent tax calculation | 112 checks over 13 status / income cases: **112 PASS** · the audit's 11 §4 test cases on the sheet: ALL PASS (to the cent) |
+| Named tests (blank template shows "Choose your…"; template + examples = typed examples; type 1 not inputs; inflation blank / 0% / 2% / 4%; statements; C12 projection; Irish rules) | 57: **57 PASS, 0 FAIL** |
+| 3. recalc.py | every round "success", 0 formula errors (1,508 formulas), with Fill_Example = No and = Yes; delivered file recalculated, cached values present |
 | Calculation settings | calcMode auto, fullCalcOnLoad = 1 (Excel recalculates on open) |
 | Checker test | Changing Illness Benefit to €255, upkeep to 1.01% and C27 to APR/12 gave 26 FAILs (C07, C22, C27); breaking the statement-charges rule and the C12 "today's money" rule gave 15 FAILs (C12, C13, C14); setting stamp duty to 1.1% and the USC 2% band to €28,000 in the register gave 36 FAILs (C01, C03, C07, C25, C26, Tax engine) |
-| Editable cells | 178 yellow typed inputs (incl. 10 blank inflation choices and 61 "Suggested · change if you like" choices) and 62 grey-blue statement cells on the calculators, 6 on the Tax engine, and the rules register values; each has data validation, an input message and a cell note |
-| Layout | Stable from this version: sheet order README, C01–C28, Tax engine, Document reader spec, Assumptions; named cells as listed in the manifest. |
+| Editable cells | 178 yellow typed inputs (all blank in the template: 24 type 2, 48 type-3 choices, 90 your own figures, 16 optional) and 62 grey-blue statement cells on the calculators, 6 on the Tax engine (the type-1 rules register is not editable); each has data validation, an input message and a cell note |
+| Layout | FROZEN (v2.3) for the prototype-vs-workbook check: sheet order README, C01–C28, Tax engine, Document reader spec, Assumptions; every input row = label B, entry C, unit D, guidance E, Example only F, Value used G; named cells as in the manifest. |
 
 ## Method
 
 - **Reference:** `scratchpad/xlsx2/ref2.py`. It uses the audit's `ref.py` primitives (`annuity_pmt`, the lender-style `schedule`, `fv_ann`, `eff_monthly`, start-of-year `years_last`) and adds the audit fixes. Where the workbook uses a closed form (NPER, FV, the growing annuity, the outstanding balance), the reference uses month-by-month or year-by-year loops, so the two methods check each other. It does not read the workbook formulas or the prototype. The C21 gap is also checked against the audit's own reference formula.
 - **Excel:** each round writes the inputs into a copy of the workbook (typed inputs, statement cells, each sheet's inflation choice; the 6 Tax engine inputs per round), recalculates it with `recalc.py` and reads the results with openpyxl `data_only=True`. Tolerance: money €0.50, rates 0.0001, counts (months, years) exact, texts (e.g. "Never at this repayment", "60+ years", hand-off kinds) exact.
 - **Live test:** for each calculator, each input is changed in turn in a copy, and a named result must change in the expected direction. The baseline is recalculated in the same way. C21 "Mortgage balance" is tested with mortgage protection = No, because with Yes the balance correctly has no effect. Inputs that only matter in a branch are tested in that branch: C15 withdrawal timing uses the audit's case C (€1m pot, €40k a year, 4%), because at the defaults start and end of year both give 18 years; C13/C14 age with a binding relief limit; C20 style rates with that style selected.
+
+## Journey spec §14: defaults vs customer choice (v2.3)
+
+- **Types:** type 1 (set by Government · 2026) values sit only on Assumptions: grey, no data validation, not inputs. Calculator inputs: type 2 range 24; type 3 your choice 48; type 3 your own figure 90; type 3 optional (blank = none) 16; statement-reader cells 62. Tax engine: 6 inputs (4 your figure, 2 optional).
+- **Blank template:** every input cell is empty; the "Value used" column applies IF(ISBLANK(input), IF(Fill_Example="Yes", example, ""), input). Results that need a blank input show "Choose your … to see this" (helper rows "CHOICES STILL NEEDED" at the bottom of each sheet list the inputs each result needs); results that don't need it still calculate. Retirement age and plan-to age are blank too.
+- **Fill example values? (README, default No):** with Yes every blank input uses its grey "Example only" figure: the standard for type 3 choices, the sample customer's figure for type 2 and your-own-figure inputs.
+- **Unchanged values give unchanged results:** with Fill_Example = Yes the blank template equals typing the examples in (named test), and against the previous version (v2.2) 328 of 345 R1 outputs are identical. Differences only where an example value changed: C08 (4), C09 (5), C10 (8). The example changes: C08 growth 1% (the cash standard after DIRT; was 2%); C09 and C10 growth 5% (one investment standard before charges and tax; was 4%); C13/C14 add the "room left" row; C15 at the cap shows "60+ years".
+- **One figure everywhere:** "Ireland today" inflation = 3.9%, CSO HICP flash estimate, September 2026 (published 1 Oct 2026), the same value, month and index as the prototype's RULES_IE_2026.infl.ie (checked in the HTML on 2 Oct 2026). Other repeated guidance uses the prototype's values: ECB target 2%; pay rises 3%; cash 1% after DIRT; pension 4.5% working / 3.15% retired; mortgage rates 3.5%–4.5% (new mortgages averaged 3.49%, June 2026); cards 13%–23% APR; fund charges 0.5%–1.5%; State Pension €299.30 a week; life expectancy at 65 about 83 (men) / 86 (women), CSO.
+- **UI/UX Appendix B fixes:** "an income protection need" (the workbook already had "an"; the wording is in the spec sheet copy); "1.0 months" → "1 month" (C11, C22); C15 at the cap no longer says "age 126"; C13/C14 add "Room left for relief after what you already pay in".
 
 ## What changed (Irish rules audit) and why
 
@@ -92,6 +101,8 @@ Workbook: `deliverables/LifeGoals-Calculators.xlsx` (v2.2, 2 Oct 2026). v2.2 app
 
 | Where | Audit class | Item |
 |---|---|---|
+| All calculators | Journey spec §14 | Every input typed: 1 = set by Government (Assumptions only, grey, not an input); 2 = range ("Usually between X and Y (source)"); 3 = personal, blank until chosen ("Generally the standard is X (source). Choose what you want to use."). Blank inputs give "Choose your … to see this"; README switch "Fill example values?" (default No) fills them from the grey "Example only" column. |
+| C11, C15, C22, C13 | UI/UX Appendix B | Singular "1 month"; C15 at the 60-year cap reads "Lasts 60+ years: beyond your plan age" (not "age 126"); C13/C14 show the relief room left after what you already pay in. |
 | C01 | Should | Remove the placeholder "[confirm current Central Bank rules]" from the customer line (prototype copy; the workbook uses the audit's replacement wording). |
 | C01, C03 | Nice | Help to Buy as an optional deposit input (rules audit #62). |
 | C02 | Nice | Use "−" (not "-") in the rate text (prototype copy). |
@@ -148,21 +159,21 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 
 | Test | Where | Expected | Excel | Result |
 |---|---|---|---|---|
-| Blank inflation shows the message | C08 Monthly_Saving | Enter your inflation rate | Enter your inflation rate | PASS |
-| Blank inflation shows the message | C09 Value_Today | Enter your inflation rate | Enter your inflation rate | PASS |
-| Blank inflation shows the message | C10 Real_Return | Enter your inflation rate | Enter your inflation rate | PASS |
-| Blank inflation shows the message | C12 Gap_Today | Enter your inflation rate | Enter your inflation rate | PASS |
-| Blank inflation shows the message | C13 Value_Today | Enter your inflation rate | Enter your inflation rate | PASS |
-| Blank inflation shows the message | C14 Value_Today | Enter your inflation rate | Enter your inflation rate | PASS |
-| Blank inflation shows the message | C15 Years_Lasting | Enter your inflation rate | Enter your inflation rate | PASS |
-| Blank inflation shows the message | C16 Years_Balanced | Enter your inflation rate | Enter your inflation rate | PASS |
-| Blank inflation shows the message | C17 Value_Today | Enter your inflation rate | Enter your inflation rate | PASS |
-| Blank inflation shows the message | C18 Value_Today | Enter your inflation rate | Enter your inflation rate | PASS |
+| Blank inflation shows the message | C08 Monthly_Saving | Choose your inflation rate to see this | Choose your inflation rate to see this | PASS |
+| Blank inflation shows the message | C09 Value_Today | Choose your inflation rate to see this | Choose your inflation rate to see this | PASS |
+| Blank inflation shows the message | C10 Real_Return | Choose your inflation rate to see this | Choose your inflation rate to see this | PASS |
+| Blank inflation shows the message | C12 Gap_Today | Choose your inflation rate to see this | Choose your inflation rate to see this | PASS |
+| Blank inflation shows the message | C13 Value_Today | Choose your inflation rate to see this | Choose your inflation rate to see this | PASS |
+| Blank inflation shows the message | C14 Value_Today | Choose your inflation rate to see this | Choose your inflation rate to see this | PASS |
+| Blank inflation shows the message | C15 Years_Lasting | Choose your inflation rate to see this | Choose your inflation rate to see this | PASS |
+| Blank inflation shows the message | C16 Years_Balanced | Choose your inflation rate to see this | Choose your inflation rate to see this | PASS |
+| Blank inflation shows the message | C17 Value_Today | Choose your inflation rate to see this | Choose your inflation rate to see this | PASS |
+| Blank inflation shows the message | C18 Value_Today | Choose your inflation rate to see this | Choose your inflation rate to see this | PASS |
 | Blank inflation: hand-off | C09 Plan_Goal_Amount | Choose an inflation rate first | Choose an inflation rate first | PASS |
 | Blank inflation: hand-off | C10 Plan_Goal_Amount | Choose an inflation rate first | Choose an inflation rate first | PASS |
 | Blank inflation: hand-off | C18 Plan_Goal_Amount | Choose an inflation rate first | Choose an inflation rate first | PASS |
-| Blank inflation: results not needing it still calculate | C09 Grows_To | a number | 83,723.9615 | PASS |
-| 0% inflation: today's money = future value | C09 | 83,723.96 | 83,723.96 | PASS |
+| Blank inflation: results not needing it still calculate | C09 Grows_To | a number | 94,427.3856 | PASS |
+| 0% inflation: today's money = future value | C09 | 94,427.39 | 94,427.39 | PASS |
 | 0% inflation: today's money = future value | C17 | 41,578.56 | 41,578.56 | PASS |
 | 0% inflation: today's money = future value | C18 | 73,108.79 | 73,108.79 | PASS |
 | 0% inflation: real return = nominal return | C17 | 0.05 | 0.05 | PASS |
@@ -174,7 +185,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | Statement filled vs blank: source switches | C20 Used_Style | Your figure → From your statement | Your figure → From your statement (holdings in shares) | PASS |
 | Statement filled vs blank: result changes | C02 Monthly_Repayment | different | 1389.35 → 1180 | PASS |
 | Statement filled vs blank: result changes | C12 Projected_Fund | different | 544988.68 → 694000 | PASS |
-| Statement filled vs blank: result changes | C10 Headline | different | 18009.44 → 10202.05 | PASS |
+| Statement filled vs blank: result changes | C10 Headline | different | 20789.28 → 11776.79 | PASS |
 | Statement filled vs blank: result changes | C20 Middle | different | 29604.89 → 11103.26 | PASS |
 | C12 projection, today's money = Yes: used as stated, not deflated | C12 Fund_Today | 694000 | 694000 | PASS |
 | C12 projection, today's money = No: deflated with the client's inflation | C12 Fund_Today | 293,664.01 | 293,664.01 | PASS |
@@ -195,6 +206,16 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C12 retire at 65: 1 year before the State Pension at 66 is funded in the target | C12 R1 | 1 | 1 | PASS |
 | C25 take-home comes from the Tax engine when blank | C25 R1 | From the Tax engine / 3738.1 | From the Tax engine / 3738.1 | PASS |
 | C13 relief limit binds: 25% × €60,000 − €14,500 = €500 relieved, × 40% ÷ 12 | C13 R13 | 16.67 | 16.67 | PASS |
+| Fill_Example = No: every result that needs a blank type-2/3 input shows "Choose your … to see this" | 212 results | all | 212 of 212 | PASS |
+| Fill_Example = No: Tax engine results show "Choose your tax status to see this" | Tax engine | Choose your tax status to see this | Choose your tax status to see this | PASS |
+| Blank template: every input cell is empty (incl. retirement age and plan-to age) | all calculators | 240 | 240 | PASS |
+| Retirement_Age is type 3 (blank, no default) and uses its example only with Fill_Example = Yes | C12 | blank / 65 | None / 65 | PASS |
+| Age_At_Start is type 3 (blank, no default) and uses its example only with Fill_Example = Yes | C15 | blank / 66 | None / 66 | PASS |
+| Plan_To_Age is type 3 (blank, no default) and uses its example only with Fill_Example = Yes | C15 | blank / 90 | None / 90 | PASS |
+| Blank template + Fill_Example = Yes gives exactly the results of typing the example values in | all calculators | 0 | 0 | PASS |
+| Type 1 values are not inputs: no yellow cells and no data validation on Assumptions | Assumptions | 0 / 0 | 0 / 0 | PASS |
+| Type 1 values are not inputs: no calculator input has a register name | 70 register names | 0 | 0 | PASS |
+| Every calculator input is typed 2 or 3 (range / your choice / your figure / optional) or a statement cell | all inputs | range, judgement, yours, optional, statement | judgement, optional, range, statement, yours | PASS |
 
 ## Live recalculation test
 
@@ -207,12 +228,12 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C05 | Mortgage_Balance | 350000 | Monthly_Change | up | 167.9585 | 195.9516 | 6 | PASS |
 | C06 | Loan_Amount | 350000 | Interest_Difference | up | 76,442.2296 | 89,182.6012 | 6 | PASS |
 | C07 | Monthly_Rent | 2000 | Rent_Paid | up | 247,619.7931 | 275,133.1035 | 1 | PASS |
-| C08 | Goal_Amount | 20000 | Monthly_Saving | up | 372.2508 | 515.4242 | 4 | PASS |
-| C09 | Starting_Amount | 10000 | Grows_To | up | 83,723.9615 | 94,679.5773 | 5 | PASS |
-| C10 | Amount | 20000 | Headline | up | 18,009.4351 | 36,018.8701 | 7 | PASS |
+| C08 | Goal_Amount | 20000 | Monthly_Saving | up | 379.3716 | 524.6329 | 4 | PASS |
+| C09 | Starting_Amount | 10000 | Grows_To | up | 94,427.3856 | 107,693.8741 | 5 | PASS |
+| C10 | Amount | 20000 | Headline | up | 20,789.2818 | 41,578.5636 | 7 | PASS |
 | C11 | Essential_Spending | 3000 | Months_Covered | down | 2.5 | 2.0833 | 4 | PASS |
 | C12 | Age | 45 | Projected_Fund | down | 544,988.6781 | 386,943.9576 | 8 | PASS |
-| C13 | Salary | 80000 | Grows_To | up | 54,572.4754 | 72,763.3006 | 8 | PASS |
+| C13 | Salary | 80000 | Grows_To | up | 54,572.4754 | 72,763.3006 | 9 | PASS |
 | C14 | AVC_Per_Month | 300 | Grows_To | up | 50,902.3648 | 76,353.5472 | 8 | PASS |
 | C15 | Retirement_Savings | 500000 | Years_Lasting | up | 18 | 23 | 4 | PASS |
 | C16 | Retirement_Savings | 500000 | Years_Balanced | up | 25 | 33 | 4 | PASS |
@@ -235,9 +256,9 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C05 | Current_Rate | 0.05 | Repayment_Now | up | 1,542.3936 | 1,753.7701 | 7 | PASS |
 | C06 | Interest_Rate | 0.05 | Interest_Difference | up | 76,442.2296 | 109,775.4322 | 6 | PASS |
 | C07 | Home_Price | 400000 | Buying_Costs | up | 154,595.5854 | 177,413.2693 | 10 | PASS |
-| C08 | Years | 5 | Monthly_Saving | down | 372.2508 | 227.7579 | 5 | PASS |
-| C09 | Monthly_Addition | 300 | Grows_To | up | 83,723.9615 | 120,108.1345 | 5 | PASS |
-| C10 | Growth_Rate | 0.06 | Headline | up | 18,009.4351 | 23,965.5819 | 8 | PASS |
+| C08 | Years | 5 | Monthly_Saving | down | 379.3716 | 235.139 | 5 | PASS |
+| C09 | Monthly_Addition | 300 | Grows_To | up | 94,427.3856 | 135,007.8341 | 5 | PASS |
+| C10 | Growth_Rate | 0.06 | Headline | up | 20,789.2818 | 23,965.5819 | 8 | PASS |
 | C11 | Months_Wanted | 9 | Target | up | 15000 | 22500 | 3 | PASS |
 | C12 | Retirement_Age | 67 | Projected_Fund | up | 544,988.6781 | 621,208.7965 | 11 | PASS |
 | C13 | Increase_Pct | 0.03 | Grows_To | up | 54,572.4754 | 81,858.7131 | 7 | PASS |
@@ -263,9 +284,9 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C05 | Years_Left | 20 | Repayment_Now | up | 1,542.3936 | 1,778.6649 | 6 | PASS |
 | C06 | Term_A | 20 | Monthly_A | up | 1,542.3936 | 1,778.6649 | 4 | PASS |
 | C07 | Deposit | 50000 | Buying_Costs | down | 154,595.5854 | 151,112.0703 | 8 | PASS |
-| C08 | Saved | 5000 | Monthly_Saving | down | 372.2508 | 286.3468 | 4 | PASS |
-| C09 | Growth_Rate | 0.06 | Grows_To | up | 83,723.9615 | 106,723.4039 | 5 | PASS |
-| C10 | Years | 20 | Headline | up | 18,009.4351 | 21,911.2314 | 7 | PASS |
+| C08 | Saved | 5000 | Monthly_Saving | down | 379.3716 | 294.7532 | 4 | PASS |
+| C09 | Growth_Rate | 0.06 | Grows_To | up | 94,427.3856 | 106,723.4039 | 5 | PASS |
+| C10 | Years | 20 | Headline | up | 20,789.2818 | 26,532.9771 | 7 | PASS |
 | C11 | Savings | 8000 | Months_Covered | up | 2.5 | 3.2 | 3 | PASS |
 | C12 | Pension_Today | 100000 | Projected_Fund | up | 544,988.6781 | 665,206.0564 | 7 | PASS |
 | C13 | Years | 30 | Grows_To | up | 54,572.4754 | 74,706.4088 | 2 | PASS |
@@ -291,9 +312,9 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C05 | Rate_Change | 0.02 | Monthly_Change | up | 167.9585 | 344.9256 | 4 | PASS |
 | C06 | Term_B | 30 | Monthly_B | up | 1,283.715 | 1,389.3468 | 3 | PASS |
 | C07 | Mortgage_Rate | 0.05 | Buying_Costs | up | 154,595.5854 | 192,631.8745 | 5 | PASS |
-| C08 | Growth_Rate | 0.04 | Monthly_Saving | down | 372.2508 | 358.364 | 4 | PASS |
-| C09 | Years | 25 | Grows_To | up | 83,723.9615 | 115,098.8055 | 6 | PASS |
-| C10 | Yearly_Fees | 0.01 | Headline | down | 18,009.4351 | 15,489.1651 | 10 | PASS |
+| C08 | Growth_Rate | 0.04 | Monthly_Saving | down | 379.3716 | 358.364 | 4 | PASS |
+| C09 | Years | 25 | Grows_To | up | 94,427.3856 | 134,078.6788 | 6 | PASS |
+| C10 | Yearly_Fees | 0.01 | Headline | down | 20,789.2818 | 17,879.9955 | 10 | PASS |
 | C11 | Safety_Goal_Years | 3 | Plan_Goal_Years | up | 2 | 3 | 1 | PASS |
 | C12 | Monthly_Contribution | 800 | Projected_Fund | up | 544,988.6781 | 763,786.2446 | 9 | PASS |
 | C13 | Growth_Rate | 0.05 | Grows_To | up | 54,572.4754 | 58,573.4521 | 3 | PASS |
@@ -318,9 +339,9 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C05 | Actual_Repayment | 1700 | Repayment_After | up | 1,710.3521 | 1,867.9585 | 3 | PASS |
 | C06 | Stmt_Balance | 350000 | Interest_Difference | up | 76,442.2296 | 89,182.6012 | 6 | PASS |
 | C07 | Years | 15 | Rent_Paid | up | 247,619.7931 | 401,736.54 | 8 | PASS |
-| C08 | Inflation_Choice | 0.04 | Monthly_Saving | up | 372.2508 | 398.0153 | 4 | PASS |
-| C09 | Inflation_Choice | 0.04 | Value_Today | down | 56,343.826 | 38,210.5231 | 3 | PASS |
-| C10 | Adjust_For_Inflation | Yes | Headline | down | 18,009.4351 | 13,381.2755 | 2 | PASS |
+| C08 | Inflation_Choice | 0.04 | Monthly_Saving | up | 379.3716 | 405.5119 | 4 | PASS |
+| C09 | Inflation_Choice | 0.04 | Value_Today | down | 63,546.9236 | 43,095.4261 | 3 | PASS |
+| C10 | Adjust_For_Inflation | Yes | Headline | down | 20,789.2818 | 15,446.7426 | 2 | PASS |
 | C12 | Desired_Income | 50000 | Gap_Today | up | 294,276.5766 | 544,276.5766 | 3 | PASS |
 | C13 | Tax_Rate | 0.2 | Net_Cost_Per_Month | up | 60 | 80 | 2 | PASS |
 | C14 | Typical_Pension_Charges | 0.015 | Grows_To | up | 50,902.3648 | 52,964.9189 | 3 | PASS |
@@ -341,10 +362,10 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C05 | Stmt_Balance | 350000 | Monthly_Change | up | 167.9585 | 195.9516 | 6 | PASS |
 | C06 | Stmt_Rate | 0.05 | Interest_Difference | up | 76,442.2296 | 109,775.4322 | 6 | PASS |
 | C07 | House_Growth | 0.04 | Home_Equity | up | 180,595.9531 | 272,033.4058 | 4 | PASS |
-| C10 | Wait_Years | 8 | Cost_Of_Waiting | up | 3,206.9922 | 4,850.1173 | 2 | PASS |
+| C10 | Wait_Years | 8 | Cost_Of_Waiting | up | 4,500.3355 | 6,718.2776 | 2 | PASS |
 | C12 | Other_Income | 20000 | Gap_Today | down | 294,276.5766 | 187,812.5766 | 2 | PASS |
 | C13 | Typical_Pension_Charges | 0.015 | Grows_To | up | 54,572.4754 | 58,573.4521 | 3 | PASS |
-| C14 | Salary | 20000 | Net_Cost | up | 21600 | 36000 | 5 | PASS |
+| C14 | Salary | 20000 | Net_Cost | up | 21600 | 36000 | 6 | PASS |
 | C15 | Plan_To_Age | 95 | shown:Lasts_To_Age | change | Runs out 6 years before your plan age | Runs out 11 years before your plan age | 1 | PASS |
 | C16 | Withdrawal_Timing | End of year | Years_Balanced | up | 25 | 26 | 2 | PASS |
 | C17 | Stmt_Statement_Date | 2025-08-28 | Statement_Check | change | Up to date | Needs a look: statement is more than 12 months old | 1 | PASS |
@@ -360,10 +381,10 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C05 | Stmt_Rate | 0.05 | Repayment_Now | up | 1,542.3936 | 1,753.7701 | 7 | PASS |
 | C06 | Stmt_Term | 20 | Monthly_A | up | 1,542.3936 | 1,778.6649 | 4 | PASS |
 | C07 | RentBuy_Term | 25 | Monthly_Repayment | up | 1,458.8141 | 1,619.5133 | 5 | PASS |
-| C10 | Inflation_Choice | 0.04 | Value_Today | down | 13,381.2755 | 10000 | 4 | PASS |
+| C10 | Inflation_Choice | 0.04 | Value_Today | down | 15,446.7426 | 11,543.5502 | 4 | PASS |
 | C12 | Growth_Rate | 0.05 | Projected_Fund | up | 544,988.6781 | 590,954.3998 | 8 | PASS |
-| C13 | Age | 50 | Net_Cost_Per_Month | down | 66.6667 | 60 | 4 | PASS |
-| C14 | Age | 50 | Net_Cost | down | 30000 | 21600 | 5 | PASS |
+| C13 | Age | 50 | Net_Cost_Per_Month | down | 66.6667 | 60 | 5 | PASS |
+| C14 | Age | 50 | Net_Cost | down | 30000 | 21600 | 6 | PASS |
 | C15 | Inflation_Choice | 0.04 | Years_Lasting | down | 18 | 15 | 2 | PASS |
 | C16 | Inflation_Choice | 0.04 | Years_Balanced | down | 25 | 20 | 3 | PASS |
 | C18 | Stmt_Monthly_Invested | 400 | Headline | up | 73,108.7854 | 105,929.8378 | 12 | PASS |
@@ -378,10 +399,10 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C05 | Stmt_Term | 20 | Repayment_Now | up | 1,542.3936 | 1,778.6649 | 6 | PASS |
 | C06 | Stmt_Statement_Date | 2025-08-28 | Statement_Check | change | Up to date | Needs a look: statement is more than 12 months old | 1 | PASS |
 | C07 | Rent_Growth | 0.05 | Rent_Paid | up | 247,619.7931 | 271,682.4788 | 1 | PASS |
-| C10 | Stmt_Total_Value | 20000 | Headline | up | 18,009.4351 | 36,018.8701 | 9 | PASS |
+| C10 | Stmt_Total_Value | 20000 | Headline | up | 20,789.2818 | 41,578.5636 | 9 | PASS |
 | C12 | Retire_Later | 2 | Projected_Fund | up | 544,988.6781 | 621,208.7965 | 11 | PASS |
-| C13 | Existing_Pension_Year | 14500 | Net_Cost_Per_Month | up | 60 | 83.3333 | 3 | PASS |
-| C14 | Existing_Pension_Year | 14000 | Net_Cost | up | 21600 | 30000 | 4 | PASS |
+| C13 | Existing_Pension_Year | 14500 | Net_Cost_Per_Month | up | 60 | 83.3333 | 4 | PASS |
+| C14 | Existing_Pension_Year | 14000 | Net_Cost | up | 21600 | 30000 | 5 | PASS |
 | C15 | Stmt_Projected_Fund | 600000 | Years_Lasting | up | 18 | 29 | 4 | PASS |
 | C16 | Stmt_Projected_Fund | 600000 | Years_Balanced | up | 25 | 44 | 4 | PASS |
 | C18 | Stmt_Charges | 0.02 | Headline | down | 73,108.7854 | 67,346.3385 | 9 | PASS |
@@ -395,7 +416,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C04 | Stmt_Repayment | 1500 | Months_Now | down | 300 | 236 | 12 | PASS |
 | C05 | Stmt_Repayment | 1700 | Repayment_After | up | 1,710.3521 | 1,867.9585 | 3 | PASS |
 | C07 | Upkeep_Rate | 0.02 | Buying_Costs | up | 154,595.5854 | 192,919.6089 | 2 | PASS |
-| C10 | Stmt_Charges | 0.01 | Headline | down | 18,009.4351 | 15,489.1651 | 11 | PASS |
+| C10 | Stmt_Charges | 0.01 | Headline | down | 20,789.2818 | 17,879.9955 | 11 | PASS |
 | C12 | Save_More | 200 | Projected_Fund | up | 544,988.6781 | 690,853.7224 | 8 | PASS |
 | C13 | Inflation_Choice | 0.04 | Value_Today | down | 33,263.6084 | 20,471.0525 | 1 | PASS |
 | C14 | Inflation_Choice | 0.04 | Value_Today | down | 37,821.2068 | 28,264.2763 | 1 | PASS |
@@ -457,14 +478,22 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| TE-R1 Defaults · Single €60,000 | TE_Income_Tax | 11,200 | 11200 | 0.00e+00 | PASS |
-| TE-R1 Defaults · Single €60,000 | TE_USC | 1,332.82 | 1,332.82 | 0.00e+00 | PASS |
-| TE-R1 Defaults · Single €60,000 | TE_PRSI | 2,610 | 2610 | 4.55e-13 | PASS |
-| TE-R1 Defaults · Single €60,000 | TE_Take_Home | 44,857.18 | 44,857.18 | 0.00e+00 | PASS |
-| TE-R1 Defaults · Single €60,000 | TE_Take_Home_Month | 3,738.0983 | 3,738.0983 | -3.18e-12 | PASS |
-| TE-R1 Defaults · Single €60,000 | TE_Marginal_Rate | 0.4 | 0.4 | 0.00e+00 | PASS |
-| TE-R1 Defaults · Single €60,000 | TE_Band | 44000 | 44000 | 0.00e+00 | PASS |
-| TE-R1 Defaults · Single €60,000 | TE_Credits | 4000 | 4000 | 0.00e+00 | PASS |
+| TE-R0 Blank template, example values ON (Fill_Example = Yes) · Single €60,000 | TE_Income_Tax | 11,200 | 11200 | 0.00e+00 | PASS |
+| TE-R0 Blank template, example values ON (Fill_Example = Yes) · Single €60,000 | TE_USC | 1,332.82 | 1,332.82 | 0.00e+00 | PASS |
+| TE-R0 Blank template, example values ON (Fill_Example = Yes) · Single €60,000 | TE_PRSI | 2,610 | 2610 | 4.55e-13 | PASS |
+| TE-R0 Blank template, example values ON (Fill_Example = Yes) · Single €60,000 | TE_Take_Home | 44,857.18 | 44,857.18 | 0.00e+00 | PASS |
+| TE-R0 Blank template, example values ON (Fill_Example = Yes) · Single €60,000 | TE_Take_Home_Month | 3,738.0983 | 3,738.0983 | -3.18e-12 | PASS |
+| TE-R0 Blank template, example values ON (Fill_Example = Yes) · Single €60,000 | TE_Marginal_Rate | 0.4 | 0.4 | 0.00e+00 | PASS |
+| TE-R0 Blank template, example values ON (Fill_Example = Yes) · Single €60,000 | TE_Band | 44000 | 44000 | 0.00e+00 | PASS |
+| TE-R0 Blank template, example values ON (Fill_Example = Yes) · Single €60,000 | TE_Credits | 4000 | 4000 | 0.00e+00 | PASS |
+| TE-R1 Example values typed in · Single €60,000 | TE_Income_Tax | 11,200 | 11200 | 0.00e+00 | PASS |
+| TE-R1 Example values typed in · Single €60,000 | TE_USC | 1,332.82 | 1,332.82 | 0.00e+00 | PASS |
+| TE-R1 Example values typed in · Single €60,000 | TE_PRSI | 2,610 | 2610 | 4.55e-13 | PASS |
+| TE-R1 Example values typed in · Single €60,000 | TE_Take_Home | 44,857.18 | 44,857.18 | 0.00e+00 | PASS |
+| TE-R1 Example values typed in · Single €60,000 | TE_Take_Home_Month | 3,738.0983 | 3,738.0983 | -3.18e-12 | PASS |
+| TE-R1 Example values typed in · Single €60,000 | TE_Marginal_Rate | 0.4 | 0.4 | 0.00e+00 | PASS |
+| TE-R1 Example values typed in · Single €60,000 | TE_Band | 44000 | 44000 | 0.00e+00 | PASS |
+| TE-R1 Example values typed in · Single €60,000 | TE_Credits | 4000 | 4000 | 0.00e+00 | PASS |
 | TE-R2 Low / edge · Married one earner €25,000 | TE_Income_Tax | 0 | 0 | 0.00e+00 | PASS |
 | TE-R2 Low / edge · Married one earner €25,000 | TE_USC | 319.82 | 319.82 | 0.00e+00 | PASS |
 | TE-R2 Low / edge · Married one earner €25,000 | TE_PRSI | 1,087.5 | 1,087.5 | 0.00e+00 | PASS |
@@ -564,27 +593,44 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 
 ## Reference comparison by calculator
 
-### C01 Borrowing: 221/221 PASS
+### C01 Borrowing: 238/238 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C01-R1 Defaults | Income_Multiple | 4 | 4 | 0 | PASS |
-| C01-R1 Defaults | Total_Deposit | 25000 | 25000 | 0 | PASS |
-| C01-R1 Defaults | Cash_For_Price | 22000 | 22000 | 0 | PASS |
-| C01-R1 Defaults | Borrow_By_Income | 240000 | 240000 | 0 | PASS |
-| C01-R1 Defaults | Price_By_Deposit | 200,000 | 200000 | 0 | PASS |
-| C01-R1 Defaults | Price_By_Income | 259,405.9406 | 259,405.9406 | -4.07e-10 | PASS |
-| C01-R1 Defaults | Income_Cash | 262000 | 262000 | 0 | PASS |
-| C01-R1 Defaults | Cash_At_Band_1 | 110000 | 110000 | 0 | PASS |
-| C01-R1 Defaults | Cash_At_Band_2 | 170000 | 170000 | 0 | PASS |
-| C01-R1 Defaults | Home_Price | 200,000 | 200000 | 0 | PASS |
-| C01-R1 Defaults | Max_Loan | 180,000 | 180000 | 0 | PASS |
-| C01-R1 Defaults | Stamp_Duty | 2,000 | 2000 | 0 | PASS |
-| C01-R1 Defaults | Monthly_Repayment | 833.6081 | 833.6081 | 6.37e-12 | PASS |
-| C01-R1 Defaults | Limit_Set_By | Your deposit | Your deposit |  | PASS |
-| C01-R1 Defaults | Plan_Goal_Amount | 25,000 | 25000 | 0 | PASS |
-| C01-R1 Defaults | Plan_Goal_Saved | 25000 | 25000 | 0 | PASS |
-| C01-R1 Defaults | Plan_Goal_Years | 3 | 3 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Income_Multiple | 4 | 4 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Total_Deposit | 25000 | 25000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Cash_For_Price | 22000 | 22000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Borrow_By_Income | 240000 | 240000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Price_By_Deposit | 200,000 | 200000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Price_By_Income | 259,405.9406 | 259,405.9406 | -4.07e-10 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Income_Cash | 262000 | 262000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Cash_At_Band_1 | 110000 | 110000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Cash_At_Band_2 | 170000 | 170000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Home_Price | 200,000 | 200000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Max_Loan | 180,000 | 180000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Stamp_Duty | 2,000 | 2000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Repayment | 833.6081 | 833.6081 | 6.37e-12 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Limit_Set_By | Your deposit | Your deposit |  | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Amount | 25,000 | 25000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Saved | 25000 | 25000 | 0 | PASS |
+| C01-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Years | 3 | 3 | 0 | PASS |
+| C01-R1 Example values typed in | Income_Multiple | 4 | 4 | 0 | PASS |
+| C01-R1 Example values typed in | Total_Deposit | 25000 | 25000 | 0 | PASS |
+| C01-R1 Example values typed in | Cash_For_Price | 22000 | 22000 | 0 | PASS |
+| C01-R1 Example values typed in | Borrow_By_Income | 240000 | 240000 | 0 | PASS |
+| C01-R1 Example values typed in | Price_By_Deposit | 200,000 | 200000 | 0 | PASS |
+| C01-R1 Example values typed in | Price_By_Income | 259,405.9406 | 259,405.9406 | -4.07e-10 | PASS |
+| C01-R1 Example values typed in | Income_Cash | 262000 | 262000 | 0 | PASS |
+| C01-R1 Example values typed in | Cash_At_Band_1 | 110000 | 110000 | 0 | PASS |
+| C01-R1 Example values typed in | Cash_At_Band_2 | 170000 | 170000 | 0 | PASS |
+| C01-R1 Example values typed in | Home_Price | 200,000 | 200000 | 0 | PASS |
+| C01-R1 Example values typed in | Max_Loan | 180,000 | 180000 | 0 | PASS |
+| C01-R1 Example values typed in | Stamp_Duty | 2,000 | 2000 | 0 | PASS |
+| C01-R1 Example values typed in | Monthly_Repayment | 833.6081 | 833.6081 | 6.37e-12 | PASS |
+| C01-R1 Example values typed in | Limit_Set_By | Your deposit | Your deposit |  | PASS |
+| C01-R1 Example values typed in | Plan_Goal_Amount | 25,000 | 25000 | 0 | PASS |
+| C01-R1 Example values typed in | Plan_Goal_Saved | 25000 | 25000 | 0 | PASS |
+| C01-R1 Example values typed in | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 | C01-R2 Low / edge | Income_Multiple | 3.5 | 3.5 | 0 | PASS |
 | C01-R2 Low / edge | Total_Deposit | 0 | 0 | 0 | PASS |
 | C01-R2 Low / edge | Cash_For_Price | 0 | 0 | 0 | PASS |
@@ -790,32 +836,54 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C01-R13 Irish rules checks | Plan_Goal_Saved | 200000 | 200000 | 0 | PASS |
 | C01-R13 Irish rules checks | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 
-### C02 Mortgage repayment: 286/286 PASS
+### C02 Mortgage repayment: 308/308 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C02-R1 Defaults | Monthly_Rate | 0.0031 | 0.0031 | 4.34e-19 | PASS |
-| C02-R1 Defaults | Formula_Repayment | 1,389.3468 | 1,389.3468 | 7.28e-12 | PASS |
-| C02-R1 Defaults | Monthly_Repayment | 1,389.3468 | 1,389.3468 | 7.28e-12 | PASS |
-| C02-R1 Defaults | Months_To_Pay | 360 | 360 | 0 | PASS |
-| C02-R1 Defaults | Total_Interest | 200,164.8389 | 200,164.8389 | -8.41e-09 | PASS |
-| C02-R1 Defaults | Final_Payment | 1,389.3468 | 1,389.3468 | -1.23e-08 | PASS |
-| C02-R1 Defaults | Total_Repaid | 500,164.8389 | 500,164.8389 | -8.38e-09 | PASS |
-| C02-R1 Defaults | New_Rate | 0.0375 | 0.0375 | 0 | PASS |
-| C02-R1 Defaults | Repayment_If_Changed | 1,389.3468 | 1,389.3468 | 7.28e-12 | PASS |
-| C02-R1 Defaults | Change_Per_Year | 0 | 0 | 0 | PASS |
-| C02-R1 Defaults | Plan_Goal_Amount | 33,333 | 33333 | 0 | PASS |
-| C02-R1 Defaults | Plan_Goal_Years | 3 | 3 | 0 | PASS |
-| C02-R1 Defaults | [shown] Months_To_Pay | 30 years | 30 years |  | PASS |
-| C02-R1 Defaults | Used_Loan_Amount | 300000 | 300000 | 0 | PASS |
-| C02-R1 Defaults | [shown] Used_Loan_Amount | Your figure | Your figure |  | PASS |
-| C02-R1 Defaults | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
-| C02-R1 Defaults | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
-| C02-R1 Defaults | Used_Term_Years | 30 | 30 | 0 | PASS |
-| C02-R1 Defaults | [shown] Used_Term_Years | Your figure | Your figure |  | PASS |
-| C02-R1 Defaults | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
-| C02-R1 Defaults | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
-| C02-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Rate | 0.0031 | 0.0031 | 4.34e-19 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Formula_Repayment | 1,389.3468 | 1,389.3468 | 7.28e-12 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Repayment | 1,389.3468 | 1,389.3468 | 7.28e-12 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Months_To_Pay | 360 | 360 | 0 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Total_Interest | 200,164.8389 | 200,164.8389 | -8.41e-09 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Final_Payment | 1,389.3468 | 1,389.3468 | -1.23e-08 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Total_Repaid | 500,164.8389 | 500,164.8389 | -8.38e-09 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | New_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Repayment_If_Changed | 1,389.3468 | 1,389.3468 | 7.28e-12 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Change_Per_Year | 0 | 0 | 0 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Amount | 33,333 | 33333 | 0 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Years | 3 | 3 | 0 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Months_To_Pay | 30 years | 30 years |  | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Loan_Amount | 300000 | 300000 | 0 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Loan_Amount | Your figure | Your figure |  | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Term_Years | 30 | 30 | 0 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Term_Years | Your figure | Your figure |  | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
+| C02-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C02-R1 Example values typed in | Monthly_Rate | 0.0031 | 0.0031 | 4.34e-19 | PASS |
+| C02-R1 Example values typed in | Formula_Repayment | 1,389.3468 | 1,389.3468 | 7.28e-12 | PASS |
+| C02-R1 Example values typed in | Monthly_Repayment | 1,389.3468 | 1,389.3468 | 7.28e-12 | PASS |
+| C02-R1 Example values typed in | Months_To_Pay | 360 | 360 | 0 | PASS |
+| C02-R1 Example values typed in | Total_Interest | 200,164.8389 | 200,164.8389 | -8.41e-09 | PASS |
+| C02-R1 Example values typed in | Final_Payment | 1,389.3468 | 1,389.3468 | -1.23e-08 | PASS |
+| C02-R1 Example values typed in | Total_Repaid | 500,164.8389 | 500,164.8389 | -8.38e-09 | PASS |
+| C02-R1 Example values typed in | New_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C02-R1 Example values typed in | Repayment_If_Changed | 1,389.3468 | 1,389.3468 | 7.28e-12 | PASS |
+| C02-R1 Example values typed in | Change_Per_Year | 0 | 0 | 0 | PASS |
+| C02-R1 Example values typed in | Plan_Goal_Amount | 33,333 | 33333 | 0 | PASS |
+| C02-R1 Example values typed in | Plan_Goal_Years | 3 | 3 | 0 | PASS |
+| C02-R1 Example values typed in | [shown] Months_To_Pay | 30 years | 30 years |  | PASS |
+| C02-R1 Example values typed in | Used_Loan_Amount | 300000 | 300000 | 0 | PASS |
+| C02-R1 Example values typed in | [shown] Used_Loan_Amount | Your figure | Your figure |  | PASS |
+| C02-R1 Example values typed in | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C02-R1 Example values typed in | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
+| C02-R1 Example values typed in | Used_Term_Years | 30 | 30 | 0 | PASS |
+| C02-R1 Example values typed in | [shown] Used_Term_Years | Your figure | Your figure |  | PASS |
+| C02-R1 Example values typed in | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
+| C02-R1 Example values typed in | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
+| C02-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C02-R2 Low / edge | Monthly_Rate | 0.0008 | 0.0008 | -4.34e-19 | PASS |
 | C02-R2 Low / edge | Formula_Repayment | 854.6874 | 854.6874 | -9.11e-11 | PASS |
 | C02-R2 Low / edge | Monthly_Repayment | 854.6874 | 854.6874 | -9.11e-11 | PASS |
@@ -1081,19 +1149,28 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C02-R13 Irish rules checks | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
 | C02-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C03 Deposit: 117/117 PASS
+### C03 Deposit: 126/126 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C03-R1 Defaults | Deposit_Needed | 35,000 | 35000 | 0 | PASS |
-| C03-R1 Defaults | Stamp_Duty | 3,500 | 3500 | 0 | PASS |
-| C03-R1 Defaults | Total_Needed | 41,500 | 41500 | 0 | PASS |
-| C03-R1 Defaults | Still_To_Save | 29,500 | 29500 | 0 | PASS |
-| C03-R1 Defaults | Months_To_Deposit | 37 | 37 | 0 | PASS |
-| C03-R1 Defaults | Plan_Goal_Amount | 41,500 | 41500 | 0 | PASS |
-| C03-R1 Defaults | Plan_Goal_Saved | 12000 | 12000 | 0 | PASS |
-| C03-R1 Defaults | Plan_Goal_Years | 4 | 4 | 0 | PASS |
-| C03-R1 Defaults | [shown] Months_To_Deposit | 3 years 1 month | 3 years 1 month |  | PASS |
+| C03-R0 Blank template, example values ON (Fill_Example = Yes) | Deposit_Needed | 35,000 | 35000 | 0 | PASS |
+| C03-R0 Blank template, example values ON (Fill_Example = Yes) | Stamp_Duty | 3,500 | 3500 | 0 | PASS |
+| C03-R0 Blank template, example values ON (Fill_Example = Yes) | Total_Needed | 41,500 | 41500 | 0 | PASS |
+| C03-R0 Blank template, example values ON (Fill_Example = Yes) | Still_To_Save | 29,500 | 29500 | 0 | PASS |
+| C03-R0 Blank template, example values ON (Fill_Example = Yes) | Months_To_Deposit | 37 | 37 | 0 | PASS |
+| C03-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Amount | 41,500 | 41500 | 0 | PASS |
+| C03-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Saved | 12000 | 12000 | 0 | PASS |
+| C03-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Years | 4 | 4 | 0 | PASS |
+| C03-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Months_To_Deposit | 3 years 1 month | 3 years 1 month |  | PASS |
+| C03-R1 Example values typed in | Deposit_Needed | 35,000 | 35000 | 0 | PASS |
+| C03-R1 Example values typed in | Stamp_Duty | 3,500 | 3500 | 0 | PASS |
+| C03-R1 Example values typed in | Total_Needed | 41,500 | 41500 | 0 | PASS |
+| C03-R1 Example values typed in | Still_To_Save | 29,500 | 29500 | 0 | PASS |
+| C03-R1 Example values typed in | Months_To_Deposit | 37 | 37 | 0 | PASS |
+| C03-R1 Example values typed in | Plan_Goal_Amount | 41,500 | 41500 | 0 | PASS |
+| C03-R1 Example values typed in | Plan_Goal_Saved | 12000 | 12000 | 0 | PASS |
+| C03-R1 Example values typed in | Plan_Goal_Years | 4 | 4 | 0 | PASS |
+| C03-R1 Example values typed in | [shown] Months_To_Deposit | 3 years 1 month | 3 years 1 month |  | PASS |
 | C03-R2 Low / edge | Deposit_Needed | 35,000 | 35000 | 0 | PASS |
 | C03-R2 Low / edge | Stamp_Duty | 3,500 | 3500 | 0 | PASS |
 | C03-R2 Low / edge | Total_Needed | 41,500 | 41500 | 0 | PASS |
@@ -1203,35 +1280,60 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C03-R13 Irish rules checks | Plan_Goal_Years | 14 | 14 | 0 | PASS |
 | C03-R13 Irish rules checks | [shown] Months_To_Deposit | 13 years 1 month | 13 years 1 month |  | PASS |
 
-### C04 Mortgage overpayment: 325/325 PASS
+### C04 Mortgage overpayment: 350/350 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C04-R1 Defaults | Monthly_Rate | 0.0031 | 0.0031 | 4.34e-19 | PASS |
-| C04-R1 Defaults | Repayment_Now | 1,285.328 | 1,285.328 | 1.25e-11 | PASS |
-| C04-R1 Defaults | Repayment_With_Extra | 1,485.328 | 1,485.328 | 1.25e-11 | PASS |
-| C04-R1 Defaults | Months_Now | 300 | 300 | 0 | PASS |
-| C04-R1 Defaults | Months_With_Extra | 240 | 240 | 0 | PASS |
-| C04-R1 Defaults | Interest_Now | 135,598.3997 | 135,598.3997 | -7.31e-09 | PASS |
-| C04-R1 Defaults | Interest_With_Extra | 105,370.5382 | 105,370.5382 | -6.29e-09 | PASS |
-| C04-R1 Defaults | Last_Payment_Now | 1,285.328 | 1,285.328 | -1.05e-08 | PASS |
-| C04-R1 Defaults | Last_Payment_With_Extra | 377.1464 | 377.1464 | -8.71e-09 | PASS |
-| C04-R1 Defaults | Months_Sooner | 60 | 60 | 0 | PASS |
-| C04-R1 Defaults | Interest_Saved | 30,227.8615 | 30,227.8615 | -1.12e-09 | PASS |
-| C04-R1 Defaults | Plan_Goal_Kind | Mortgage free (plan kind mfree, priced from your mortgage; no cash amount) | Mortgage free (plan kind mfree, priced from your mortgage; no cash amount) |  | PASS |
-| C04-R1 Defaults | Plan_Goal_Years | 20 | 20 | 0 | PASS |
-| C04-R1 Defaults | [shown] Months_Sooner | 5 years | 5 years |  | PASS |
-| C04-R1 Defaults | [shown] Months_Now | 25 years | 25 years |  | PASS |
-| C04-R1 Defaults | [shown] Months_With_Extra | 20 years | 20 years |  | PASS |
-| C04-R1 Defaults | Used_Mortgage_Balance | 250000 | 250000 | 0 | PASS |
-| C04-R1 Defaults | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
-| C04-R1 Defaults | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
-| C04-R1 Defaults | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
-| C04-R1 Defaults | Used_Years_Left | 25 | 25 | 0 | PASS |
-| C04-R1 Defaults | [shown] Used_Years_Left | Your figure | Your figure |  | PASS |
-| C04-R1 Defaults | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
-| C04-R1 Defaults | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
-| C04-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Rate | 0.0031 | 0.0031 | 4.34e-19 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Repayment_Now | 1,285.328 | 1,285.328 | 1.25e-11 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Repayment_With_Extra | 1,485.328 | 1,485.328 | 1.25e-11 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Months_Now | 300 | 300 | 0 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Months_With_Extra | 240 | 240 | 0 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Interest_Now | 135,598.3997 | 135,598.3997 | -7.31e-09 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Interest_With_Extra | 105,370.5382 | 105,370.5382 | -6.29e-09 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Last_Payment_Now | 1,285.328 | 1,285.328 | -1.05e-08 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Last_Payment_With_Extra | 377.1464 | 377.1464 | -8.71e-09 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Months_Sooner | 60 | 60 | 0 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Interest_Saved | 30,227.8615 | 30,227.8615 | -1.12e-09 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Kind | Mortgage free (plan kind mfree, priced from your mortgage; no cash amount) | Mortgage free (plan kind mfree, priced from your mortgage; no cash amount) |  | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Years | 20 | 20 | 0 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Months_Sooner | 5 years | 5 years |  | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Months_Now | 25 years | 25 years |  | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Months_With_Extra | 20 years | 20 years |  | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Mortgage_Balance | 250000 | 250000 | 0 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Years_Left | 25 | 25 | 0 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Years_Left | Your figure | Your figure |  | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
+| C04-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C04-R1 Example values typed in | Monthly_Rate | 0.0031 | 0.0031 | 4.34e-19 | PASS |
+| C04-R1 Example values typed in | Repayment_Now | 1,285.328 | 1,285.328 | 1.25e-11 | PASS |
+| C04-R1 Example values typed in | Repayment_With_Extra | 1,485.328 | 1,485.328 | 1.25e-11 | PASS |
+| C04-R1 Example values typed in | Months_Now | 300 | 300 | 0 | PASS |
+| C04-R1 Example values typed in | Months_With_Extra | 240 | 240 | 0 | PASS |
+| C04-R1 Example values typed in | Interest_Now | 135,598.3997 | 135,598.3997 | -7.31e-09 | PASS |
+| C04-R1 Example values typed in | Interest_With_Extra | 105,370.5382 | 105,370.5382 | -6.29e-09 | PASS |
+| C04-R1 Example values typed in | Last_Payment_Now | 1,285.328 | 1,285.328 | -1.05e-08 | PASS |
+| C04-R1 Example values typed in | Last_Payment_With_Extra | 377.1464 | 377.1464 | -8.71e-09 | PASS |
+| C04-R1 Example values typed in | Months_Sooner | 60 | 60 | 0 | PASS |
+| C04-R1 Example values typed in | Interest_Saved | 30,227.8615 | 30,227.8615 | -1.12e-09 | PASS |
+| C04-R1 Example values typed in | Plan_Goal_Kind | Mortgage free (plan kind mfree, priced from your mortgage; no cash amount) | Mortgage free (plan kind mfree, priced from your mortgage; no cash amount) |  | PASS |
+| C04-R1 Example values typed in | Plan_Goal_Years | 20 | 20 | 0 | PASS |
+| C04-R1 Example values typed in | [shown] Months_Sooner | 5 years | 5 years |  | PASS |
+| C04-R1 Example values typed in | [shown] Months_Now | 25 years | 25 years |  | PASS |
+| C04-R1 Example values typed in | [shown] Months_With_Extra | 20 years | 20 years |  | PASS |
+| C04-R1 Example values typed in | Used_Mortgage_Balance | 250000 | 250000 | 0 | PASS |
+| C04-R1 Example values typed in | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
+| C04-R1 Example values typed in | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C04-R1 Example values typed in | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
+| C04-R1 Example values typed in | Used_Years_Left | 25 | 25 | 0 | PASS |
+| C04-R1 Example values typed in | [shown] Used_Years_Left | Your figure | Your figure |  | PASS |
+| C04-R1 Example values typed in | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
+| C04-R1 Example values typed in | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
+| C04-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C04-R2 Low / edge | Monthly_Rate | 0.0008 | 0.0008 | -4.34e-19 | PASS |
 | C04-R2 Low / edge | Repayment_Now | 564.162 | 564.162 | -6.13e-11 | PASS |
 | C04-R2 Low / edge | Repayment_With_Extra | 564.162 | 564.162 | -6.13e-11 | PASS |
@@ -1533,26 +1635,42 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C04-R13 Irish rules checks | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
 | C04-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C05 Interest rate impact: 208/208 PASS
+### C05 Interest rate impact: 224/224 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C05-R1 Defaults | Formula_Now | 1,542.3936 | 1,542.3936 | 1.71e-11 | PASS |
-| C05-R1 Defaults | Repayment_Now | 1,542.3936 | 1,542.3936 | 1.71e-11 | PASS |
-| C05-R1 Defaults | New_Rate | 0.0475 | 0.0475 | 0 | PASS |
-| C05-R1 Defaults | Repayment_After | 1,710.3521 | 1,710.3521 | -7.73e-12 | PASS |
-| C05-R1 Defaults | Monthly_Change | 167.9585 | 167.9585 | -2.38e-11 | PASS |
-| C05-R1 Defaults | Yearly_Change | 2,015.5018 | 2,015.5018 | -2.88e-10 | PASS |
-| C05-R1 Defaults | [shown] Monthly_Change | +€168 | +€168 |  | PASS |
-| C05-R1 Defaults | Used_Mortgage_Balance | 300000 | 300000 | 0 | PASS |
-| C05-R1 Defaults | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
-| C05-R1 Defaults | Used_Current_Rate | 0.0375 | 0.0375 | 0 | PASS |
-| C05-R1 Defaults | [shown] Used_Current_Rate | Your figure | Your figure |  | PASS |
-| C05-R1 Defaults | Used_Years_Left | 25 | 25 | 0 | PASS |
-| C05-R1 Defaults | [shown] Used_Years_Left | Your figure | Your figure |  | PASS |
-| C05-R1 Defaults | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
-| C05-R1 Defaults | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
-| C05-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | Formula_Now | 1,542.3936 | 1,542.3936 | 1.71e-11 | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | Repayment_Now | 1,542.3936 | 1,542.3936 | 1.71e-11 | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | New_Rate | 0.0475 | 0.0475 | 0 | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | Repayment_After | 1,710.3521 | 1,710.3521 | -7.73e-12 | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Change | 167.9585 | 167.9585 | -2.38e-11 | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | Yearly_Change | 2,015.5018 | 2,015.5018 | -2.88e-10 | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Monthly_Change | +€168 | +€168 |  | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Mortgage_Balance | 300000 | 300000 | 0 | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Current_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Current_Rate | Your figure | Your figure |  | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Years_Left | 25 | 25 | 0 | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Years_Left | Your figure | Your figure |  | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
+| C05-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C05-R1 Example values typed in | Formula_Now | 1,542.3936 | 1,542.3936 | 1.71e-11 | PASS |
+| C05-R1 Example values typed in | Repayment_Now | 1,542.3936 | 1,542.3936 | 1.71e-11 | PASS |
+| C05-R1 Example values typed in | New_Rate | 0.0475 | 0.0475 | 0 | PASS |
+| C05-R1 Example values typed in | Repayment_After | 1,710.3521 | 1,710.3521 | -7.73e-12 | PASS |
+| C05-R1 Example values typed in | Monthly_Change | 167.9585 | 167.9585 | -2.38e-11 | PASS |
+| C05-R1 Example values typed in | Yearly_Change | 2,015.5018 | 2,015.5018 | -2.88e-10 | PASS |
+| C05-R1 Example values typed in | [shown] Monthly_Change | +€168 | +€168 |  | PASS |
+| C05-R1 Example values typed in | Used_Mortgage_Balance | 300000 | 300000 | 0 | PASS |
+| C05-R1 Example values typed in | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
+| C05-R1 Example values typed in | Used_Current_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C05-R1 Example values typed in | [shown] Used_Current_Rate | Your figure | Your figure |  | PASS |
+| C05-R1 Example values typed in | Used_Years_Left | 25 | 25 | 0 | PASS |
+| C05-R1 Example values typed in | [shown] Used_Years_Left | Your figure | Your figure |  | PASS |
+| C05-R1 Example values typed in | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
+| C05-R1 Example values typed in | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
+| C05-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C05-R2 Low / edge | Formula_Now | 1,130.6174 | 1,130.6174 | -1.13e-10 | PASS |
 | C05-R2 Low / edge | Repayment_Now | 1,130.6174 | 1,130.6174 | -1.13e-10 | PASS |
 | C05-R2 Low / edge | New_Rate | 0 | 0 | 0 | PASS |
@@ -1746,23 +1864,36 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C05-R13 Irish rules checks | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
 | C05-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C06 Term comparison: 169/169 PASS
+### C06 Term comparison: 182/182 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C06-R1 Defaults | Monthly_A | 1,542.3936 | 1,542.3936 | 1.71e-11 | PASS |
-| C06-R1 Defaults | Monthly_B | 1,283.715 | 1,283.715 | 1.09e-11 | PASS |
-| C06-R1 Defaults | Interest_A | 162,718.0796 | 162,718.0796 | -3.49e-09 | PASS |
-| C06-R1 Defaults | Interest_B | 239,160.3092 | 239,160.3092 | -2.44e-09 | PASS |
-| C06-R1 Defaults | Interest_Difference | 76,442.2296 | 76,442.2296 | 7.42e-10 | PASS |
-| C06-R1 Defaults | [shown] Interest_Difference | The 25-year term costs more each month but less interest overall. | The 25-year term costs more each month but less interest overall. |  | PASS |
-| C06-R1 Defaults | Used_Loan_Amount | 300000 | 300000 | 0 | PASS |
-| C06-R1 Defaults | [shown] Used_Loan_Amount | Your figure | Your figure |  | PASS |
-| C06-R1 Defaults | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
-| C06-R1 Defaults | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
-| C06-R1 Defaults | Used_Term_A | 25 | 25 | 0 | PASS |
-| C06-R1 Defaults | [shown] Used_Term_A | Your figure | Your figure |  | PASS |
-| C06-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_A | 1,542.3936 | 1,542.3936 | 1.71e-11 | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_B | 1,283.715 | 1,283.715 | 1.09e-11 | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | Interest_A | 162,718.0796 | 162,718.0796 | -3.49e-09 | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | Interest_B | 239,160.3092 | 239,160.3092 | -2.44e-09 | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | Interest_Difference | 76,442.2296 | 76,442.2296 | 7.42e-10 | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Interest_Difference | The 25-year term costs more each month but less interest overall. | The 25-year term costs more each month but less interest overall. |  | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Loan_Amount | 300000 | 300000 | 0 | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Loan_Amount | Your figure | Your figure |  | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Term_A | 25 | 25 | 0 | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Term_A | Your figure | Your figure |  | PASS |
+| C06-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C06-R1 Example values typed in | Monthly_A | 1,542.3936 | 1,542.3936 | 1.71e-11 | PASS |
+| C06-R1 Example values typed in | Monthly_B | 1,283.715 | 1,283.715 | 1.09e-11 | PASS |
+| C06-R1 Example values typed in | Interest_A | 162,718.0796 | 162,718.0796 | -3.49e-09 | PASS |
+| C06-R1 Example values typed in | Interest_B | 239,160.3092 | 239,160.3092 | -2.44e-09 | PASS |
+| C06-R1 Example values typed in | Interest_Difference | 76,442.2296 | 76,442.2296 | 7.42e-10 | PASS |
+| C06-R1 Example values typed in | [shown] Interest_Difference | The 25-year term costs more each month but less interest overall. | The 25-year term costs more each month but less interest overall. |  | PASS |
+| C06-R1 Example values typed in | Used_Loan_Amount | 300000 | 300000 | 0 | PASS |
+| C06-R1 Example values typed in | [shown] Used_Loan_Amount | Your figure | Your figure |  | PASS |
+| C06-R1 Example values typed in | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C06-R1 Example values typed in | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
+| C06-R1 Example values typed in | Used_Term_A | 25 | 25 | 0 | PASS |
+| C06-R1 Example values typed in | [shown] Used_Term_A | Your figure | Your figure |  | PASS |
+| C06-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C06-R2 Low / edge | Monthly_A | 854.6874 | 854.6874 | -9.11e-11 | PASS |
 | C06-R2 Low / edge | Monthly_B | 854.6874 | 854.6874 | -9.11e-11 | PASS |
 | C06-R2 Low / edge | Interest_A | 1,281.2423 | 1,281.2423 | 1.37e-10 | PASS |
@@ -1920,23 +2051,36 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C06-R13 Irish rules checks | [shown] Used_Term_A | Your figure | Your figure |  | PASS |
 | C06-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C07 Rent vs buy: 169/169 PASS
+### C07 Rent vs buy: 182/182 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C07-R1 Defaults | Loan | 315000 | 315000 | 0 | PASS |
-| C07-R1 Defaults | Monthly_Repayment | 1,458.8141 | 1,458.8141 | 8.64e-12 | PASS |
-| C07-R1 Defaults | Balance_After | 246,052.0939 | 246,052.0939 | 6.40e-10 | PASS |
-| C07-R1 Defaults | Interest_Paid | 106,109.7875 | 106,109.7875 | -6.55e-10 | PASS |
-| C07-R1 Defaults | Upkeep | 38,324.0235 | 38,324.0235 | 0 | PASS |
-| C07-R1 Defaults | Stamp_Duty | 3,500 | 3500 | 0 | PASS |
-| C07-R1 Defaults | Opportunity_Cost | 3,661.7744 | 3,661.7744 | 9.55e-12 | PASS |
-| C07-R1 Defaults | Buying_Costs | 154,595.5854 | 154,595.5854 | -2.91e-10 | PASS |
-| C07-R1 Defaults | Rent_Paid | 247,619.7931 | 247,619.7931 | 1.75e-10 | PASS |
-| C07-R1 Defaults | Home_Value | 426,648.047 | 426,648.047 | -5.82e-11 | PASS |
-| C07-R1 Defaults | Home_Equity | 180,595.9531 | 180,595.9531 | 2.62e-10 | PASS |
-| C07-R1 Defaults | Plan_Goal_Amount | 41,500 | 41500 | 0 | PASS |
-| C07-R1 Defaults | Plan_Goal_Years | 3 | 3 | 0 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Loan | 315000 | 315000 | 0 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Repayment | 1,458.8141 | 1,458.8141 | 8.64e-12 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Balance_After | 246,052.0939 | 246,052.0939 | 6.40e-10 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Interest_Paid | 106,109.7875 | 106,109.7875 | -6.55e-10 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Upkeep | 38,324.0235 | 38,324.0235 | 0 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Stamp_Duty | 3,500 | 3500 | 0 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Opportunity_Cost | 3,661.7744 | 3,661.7744 | 9.55e-12 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Buying_Costs | 154,595.5854 | 154,595.5854 | -2.91e-10 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Rent_Paid | 247,619.7931 | 247,619.7931 | 1.75e-10 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Home_Value | 426,648.047 | 426,648.047 | -5.82e-11 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Home_Equity | 180,595.9531 | 180,595.9531 | 2.62e-10 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Amount | 41,500 | 41500 | 0 | PASS |
+| C07-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Years | 3 | 3 | 0 | PASS |
+| C07-R1 Example values typed in | Loan | 315000 | 315000 | 0 | PASS |
+| C07-R1 Example values typed in | Monthly_Repayment | 1,458.8141 | 1,458.8141 | 8.64e-12 | PASS |
+| C07-R1 Example values typed in | Balance_After | 246,052.0939 | 246,052.0939 | 6.40e-10 | PASS |
+| C07-R1 Example values typed in | Interest_Paid | 106,109.7875 | 106,109.7875 | -6.55e-10 | PASS |
+| C07-R1 Example values typed in | Upkeep | 38,324.0235 | 38,324.0235 | 0 | PASS |
+| C07-R1 Example values typed in | Stamp_Duty | 3,500 | 3500 | 0 | PASS |
+| C07-R1 Example values typed in | Opportunity_Cost | 3,661.7744 | 3,661.7744 | 9.55e-12 | PASS |
+| C07-R1 Example values typed in | Buying_Costs | 154,595.5854 | 154,595.5854 | -2.91e-10 | PASS |
+| C07-R1 Example values typed in | Rent_Paid | 247,619.7931 | 247,619.7931 | 1.75e-10 | PASS |
+| C07-R1 Example values typed in | Home_Value | 426,648.047 | 426,648.047 | -5.82e-11 | PASS |
+| C07-R1 Example values typed in | Home_Equity | 180,595.9531 | 180,595.9531 | 2.62e-10 | PASS |
+| C07-R1 Example values typed in | Plan_Goal_Amount | 41,500 | 41500 | 0 | PASS |
+| C07-R1 Example values typed in | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 | C07-R2 Low / edge | Loan | 90000 | 90000 | 0 | PASS |
 | C07-R2 Low / edge | Monthly_Repayment | 289.4756 | 289.4756 | -2.73e-11 | PASS |
 | C07-R2 Low / edge | Balance_After | 87,414.4642 | 87,414.4642 | 4.95e-10 | PASS |
@@ -2094,19 +2238,28 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C07-R13 Irish rules checks | Plan_Goal_Amount | 453,000 | 453000 | 0 | PASS |
 | C07-R13 Irish rules checks | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 
-### C08 Goal planner: 117/117 PASS
+### C08 Goal planner: 126/126 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C08-R1 Defaults | Future_Cost | 15,918.12 | 15,918.12 | -1.82e-12 | PASS |
-| C08-R1 Defaults | Saved_Grows_To | 2,122.416 | 2,122.416 | 0 | PASS |
-| C08-R1 Defaults | Still_Needed | 13,795.704 | 13,795.704 | -1.82e-12 | PASS |
-| C08-R1 Defaults | Monthly_Growth | 0.0017 | 0.0017 | -4.12e-18 | PASS |
-| C08-R1 Defaults | Monthly_Saving | 372.2508 | 372.2508 | 3.41e-13 | PASS |
-| C08-R1 Defaults | Plan_Goal_Amount | 15000 | 15000 | 0 | PASS |
-| C08-R1 Defaults | Plan_Goal_Saved | 2000 | 2000 | 0 | PASS |
-| C08-R1 Defaults | Plan_Goal_Years | 3 | 3 | 0 | PASS |
-| C08-R1 Defaults | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
+| C08-R0 Blank template, example values ON (Fill_Example = Yes) | Future_Cost | 15,918.12 | 15,918.12 | -1.82e-12 | PASS |
+| C08-R0 Blank template, example values ON (Fill_Example = Yes) | Saved_Grows_To | 2,060.602 | 2,060.602 | -4.55e-13 | PASS |
+| C08-R0 Blank template, example values ON (Fill_Example = Yes) | Still_Needed | 13,857.518 | 13,857.518 | -1.82e-12 | PASS |
+| C08-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Growth | 0.0008 | 0.0008 | -2.17e-19 | PASS |
+| C08-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Saving | 379.3716 | 379.3716 | -2.84e-13 | PASS |
+| C08-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Amount | 15000 | 15000 | 0 | PASS |
+| C08-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Saved | 2000 | 2000 | 0 | PASS |
+| C08-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Years | 3 | 3 | 0 | PASS |
+| C08-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
+| C08-R1 Example values typed in | Future_Cost | 15,918.12 | 15,918.12 | -1.82e-12 | PASS |
+| C08-R1 Example values typed in | Saved_Grows_To | 2,060.602 | 2,060.602 | -4.55e-13 | PASS |
+| C08-R1 Example values typed in | Still_Needed | 13,857.518 | 13,857.518 | -1.82e-12 | PASS |
+| C08-R1 Example values typed in | Monthly_Growth | 0.0008 | 0.0008 | -2.17e-19 | PASS |
+| C08-R1 Example values typed in | Monthly_Saving | 379.3716 | 379.3716 | -2.84e-13 | PASS |
+| C08-R1 Example values typed in | Plan_Goal_Amount | 15000 | 15000 | 0 | PASS |
+| C08-R1 Example values typed in | Plan_Goal_Saved | 2000 | 2000 | 0 | PASS |
+| C08-R1 Example values typed in | Plan_Goal_Years | 3 | 3 | 0 | PASS |
+| C08-R1 Example values typed in | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
 | C08-R2 Low / edge | Future_Cost | 517.5 | 517.5 | 0 | PASS |
 | C08-R2 Low / edge | Saved_Grows_To | 200000 | 200000 | 0 | PASS |
 | C08-R2 Low / edge | Still_Needed | 0 | 0 | 0 | PASS |
@@ -2153,81 +2306,89 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C08-R6 Random (seed 2) | Plan_Goal_Years | 15 | 15 | 0 | PASS |
 | C08-R6 Random (seed 2) | Plan_Inflation | 0.035 | 0.035 | 0 | PASS |
 | C08-R7 Edge, 0% inflation | Future_Cost | 15,000 | 15000 | 0 | PASS |
-| C08-R7 Edge, 0% inflation | Saved_Grows_To | 2,122.416 | 2,122.416 | 0 | PASS |
-| C08-R7 Edge, 0% inflation | Still_Needed | 12,877.584 | 12,877.584 | 1.82e-12 | PASS |
-| C08-R7 Edge, 0% inflation | Monthly_Growth | 0.0017 | 0.0017 | -4.12e-18 | PASS |
-| C08-R7 Edge, 0% inflation | Monthly_Saving | 347.4771 | 347.4771 | 0 | PASS |
+| C08-R7 Edge, 0% inflation | Saved_Grows_To | 2,060.602 | 2,060.602 | -4.55e-13 | PASS |
+| C08-R7 Edge, 0% inflation | Still_Needed | 12,939.398 | 12,939.398 | 0 | PASS |
+| C08-R7 Edge, 0% inflation | Monthly_Growth | 0.0008 | 0.0008 | -2.17e-19 | PASS |
+| C08-R7 Edge, 0% inflation | Monthly_Saving | 354.2366 | 354.2366 | 1.71e-13 | PASS |
 | C08-R7 Edge, 0% inflation | Plan_Goal_Amount | 15000 | 15000 | 0 | PASS |
 | C08-R7 Edge, 0% inflation | Plan_Goal_Saved | 2000 | 2000 | 0 | PASS |
 | C08-R7 Edge, 0% inflation | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 | C08-R7 Edge, 0% inflation | Plan_Inflation | 0 | 0 | 0 | PASS |
-| C08-R8 Inflation left blank | Future_Cost | Enter your inflation rate | Enter your inflation rate |  | PASS |
-| C08-R8 Inflation left blank | Saved_Grows_To | 2,122.416 | 2,122.416 | 0 | PASS |
-| C08-R8 Inflation left blank | Still_Needed | Enter your inflation rate | Enter your inflation rate |  | PASS |
-| C08-R8 Inflation left blank | Monthly_Growth | 0.0017 | 0.0017 | -4.12e-18 | PASS |
-| C08-R8 Inflation left blank | Monthly_Saving | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C08-R8 Inflation left blank | Future_Cost | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
+| C08-R8 Inflation left blank | Saved_Grows_To | 2,060.602 | 2,060.602 | -4.55e-13 | PASS |
+| C08-R8 Inflation left blank | Still_Needed | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
+| C08-R8 Inflation left blank | Monthly_Growth | 0.0008 | 0.0008 | -2.17e-19 | PASS |
+| C08-R8 Inflation left blank | Monthly_Saving | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C08-R8 Inflation left blank | Plan_Goal_Amount | 15000 | 15000 | 0 | PASS |
 | C08-R8 Inflation left blank | Plan_Goal_Saved | 2000 | 2000 | 0 | PASS |
 | C08-R8 Inflation left blank | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 | C08-R8 Inflation left blank | Plan_Inflation | Choose an inflation rate first | Choose an inflation rate first |  | PASS |
 | C08-R9 Inflation 4% | Future_Cost | 16,872.96 | 16,872.96 | -3.64e-12 | PASS |
-| C08-R9 Inflation 4% | Saved_Grows_To | 2,122.416 | 2,122.416 | 0 | PASS |
-| C08-R9 Inflation 4% | Still_Needed | 14,750.544 | 14,750.544 | -1.82e-12 | PASS |
-| C08-R9 Inflation 4% | Monthly_Growth | 0.0017 | 0.0017 | -4.12e-18 | PASS |
-| C08-R9 Inflation 4% | Monthly_Saving | 398.0153 | 398.0153 | 4.55e-13 | PASS |
+| C08-R9 Inflation 4% | Saved_Grows_To | 2,060.602 | 2,060.602 | -4.55e-13 | PASS |
+| C08-R9 Inflation 4% | Still_Needed | 14,812.358 | 14,812.358 | -1.82e-12 | PASS |
+| C08-R9 Inflation 4% | Monthly_Growth | 0.0008 | 0.0008 | -2.17e-19 | PASS |
+| C08-R9 Inflation 4% | Monthly_Saving | 405.5119 | 405.5119 | 3.98e-13 | PASS |
 | C08-R9 Inflation 4% | Plan_Goal_Amount | 15000 | 15000 | 0 | PASS |
 | C08-R9 Inflation 4% | Plan_Goal_Saved | 2000 | 2000 | 0 | PASS |
 | C08-R9 Inflation 4% | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 | C08-R9 Inflation 4% | Plan_Inflation | 0.04 | 0.04 | 0 | PASS |
 | C08-R10 Statements A (recent; C12 projection in today's money) | Future_Cost | 15,918.12 | 15,918.12 | -1.82e-12 | PASS |
-| C08-R10 Statements A (recent; C12 projection in today's money) | Saved_Grows_To | 2,122.416 | 2,122.416 | 0 | PASS |
-| C08-R10 Statements A (recent; C12 projection in today's money) | Still_Needed | 13,795.704 | 13,795.704 | -1.82e-12 | PASS |
-| C08-R10 Statements A (recent; C12 projection in today's money) | Monthly_Growth | 0.0017 | 0.0017 | -4.12e-18 | PASS |
-| C08-R10 Statements A (recent; C12 projection in today's money) | Monthly_Saving | 372.2508 | 372.2508 | 3.41e-13 | PASS |
+| C08-R10 Statements A (recent; C12 projection in today's money) | Saved_Grows_To | 2,060.602 | 2,060.602 | -4.55e-13 | PASS |
+| C08-R10 Statements A (recent; C12 projection in today's money) | Still_Needed | 13,857.518 | 13,857.518 | -1.82e-12 | PASS |
+| C08-R10 Statements A (recent; C12 projection in today's money) | Monthly_Growth | 0.0008 | 0.0008 | -2.17e-19 | PASS |
+| C08-R10 Statements A (recent; C12 projection in today's money) | Monthly_Saving | 379.3716 | 379.3716 | -2.84e-13 | PASS |
 | C08-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Amount | 15000 | 15000 | 0 | PASS |
 | C08-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Saved | 2000 | 2000 | 0 | PASS |
 | C08-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 | C08-R10 Statements A (recent; C12 projection in today's money) | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
 | C08-R11 Statements B (old; C12 projection not in today's money) | Future_Cost | 16,630.7681 | 16,630.7681 | 3.64e-12 | PASS |
-| C08-R11 Statements B (old; C12 projection not in today's money) | Saved_Grows_To | 2,122.416 | 2,122.416 | 0 | PASS |
-| C08-R11 Statements B (old; C12 projection not in today's money) | Still_Needed | 14,508.3521 | 14,508.3521 | 5.46e-12 | PASS |
-| C08-R11 Statements B (old; C12 projection not in today's money) | Monthly_Growth | 0.0017 | 0.0017 | -4.12e-18 | PASS |
-| C08-R11 Statements B (old; C12 projection not in today's money) | Monthly_Saving | 391.4802 | 391.4802 | 5.12e-13 | PASS |
+| C08-R11 Statements B (old; C12 projection not in today's money) | Saved_Grows_To | 2,060.602 | 2,060.602 | -4.55e-13 | PASS |
+| C08-R11 Statements B (old; C12 projection not in today's money) | Still_Needed | 14,570.1661 | 14,570.1661 | 5.46e-12 | PASS |
+| C08-R11 Statements B (old; C12 projection not in today's money) | Monthly_Growth | 0.0008 | 0.0008 | -2.17e-19 | PASS |
+| C08-R11 Statements B (old; C12 projection not in today's money) | Monthly_Saving | 398.8815 | 398.8815 | 3.98e-13 | PASS |
 | C08-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Amount | 15000 | 15000 | 0 | PASS |
 | C08-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Saved | 2000 | 2000 | 0 | PASS |
 | C08-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 | C08-R11 Statements B (old; C12 projection not in today's money) | Plan_Inflation | 0.035 | 0.035 | 0 | PASS |
 | C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Future_Cost | 16,271.8432 | 16,271.8432 | -3.64e-12 | PASS |
-| C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Saved_Grows_To | 2,122.416 | 2,122.416 | 0 | PASS |
-| C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Still_Needed | 14,149.4272 | 14,149.4272 | -3.64e-12 | PASS |
-| C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Monthly_Growth | 0.0017 | 0.0017 | -4.12e-18 | PASS |
-| C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Monthly_Saving | 381.7953 | 381.7953 | 6.25e-13 | PASS |
+| C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Saved_Grows_To | 2,060.602 | 2,060.602 | -4.55e-13 | PASS |
+| C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Still_Needed | 14,211.2412 | 14,211.2412 | -1.82e-12 | PASS |
+| C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Monthly_Growth | 0.0008 | 0.0008 | -2.17e-19 | PASS |
+| C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Monthly_Saving | 389.0554 | 389.0554 | -5.68e-14 | PASS |
 | C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Amount | 15000 | 15000 | 0 | PASS |
 | C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Saved | 2000 | 2000 | 0 | PASS |
 | C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 | C08-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Inflation | 0.0275 | 0.0275 | 0 | PASS |
 | C08-R13 Irish rules checks | Future_Cost | 15,918.12 | 15,918.12 | -1.82e-12 | PASS |
-| C08-R13 Irish rules checks | Saved_Grows_To | 2,122.416 | 2,122.416 | 0 | PASS |
-| C08-R13 Irish rules checks | Still_Needed | 13,795.704 | 13,795.704 | -1.82e-12 | PASS |
-| C08-R13 Irish rules checks | Monthly_Growth | 0.0017 | 0.0017 | -4.12e-18 | PASS |
-| C08-R13 Irish rules checks | Monthly_Saving | 372.2508 | 372.2508 | 3.41e-13 | PASS |
+| C08-R13 Irish rules checks | Saved_Grows_To | 2,060.602 | 2,060.602 | -4.55e-13 | PASS |
+| C08-R13 Irish rules checks | Still_Needed | 13,857.518 | 13,857.518 | -1.82e-12 | PASS |
+| C08-R13 Irish rules checks | Monthly_Growth | 0.0008 | 0.0008 | -2.17e-19 | PASS |
+| C08-R13 Irish rules checks | Monthly_Saving | 379.3716 | 379.3716 | -2.84e-13 | PASS |
 | C08-R13 Irish rules checks | Plan_Goal_Amount | 15000 | 15000 | 0 | PASS |
 | C08-R13 Irish rules checks | Plan_Goal_Saved | 2000 | 2000 | 0 | PASS |
 | C08-R13 Irish rules checks | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 | C08-R13 Irish rules checks | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
 
-### C09 Compound growth: 104/104 PASS
+### C09 Compound growth: 112/112 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C09-R1 Defaults | Monthly_Growth | 0.0033 | 0.0033 | -4.34e-18 | PASS |
-| C09-R1 Defaults | Grows_To | 83,723.9615 | 83,723.9615 | -5.82e-11 | PASS |
-| C09-R1 Defaults | Paid_In | 53000 | 53000 | 0 | PASS |
-| C09-R1 Defaults | Growth_Earned | 30,723.9615 | 30,723.9615 | -5.46e-11 | PASS |
-| C09-R1 Defaults | Value_Today | 56,343.826 | 56,343.826 | 2.18e-11 | PASS |
-| C09-R1 Defaults | Plan_Goal_Amount | 56,344 | 56344 | 0 | PASS |
-| C09-R1 Defaults | Plan_Goal_Years | 20 | 20 | 0 | PASS |
-| C09-R1 Defaults | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
+| C09-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Growth | 0.0041 | 0.0041 | -3.47e-18 | PASS |
+| C09-R0 Blank template, example values ON (Fill_Example = Yes) | Grows_To | 94,427.3856 | 94,427.3856 | 1.46e-11 | PASS |
+| C09-R0 Blank template, example values ON (Fill_Example = Yes) | Paid_In | 53000 | 53000 | 0 | PASS |
+| C09-R0 Blank template, example values ON (Fill_Example = Yes) | Growth_Earned | 41,427.3856 | 41,427.3856 | 1.46e-11 | PASS |
+| C09-R0 Blank template, example values ON (Fill_Example = Yes) | Value_Today | 63,546.9236 | 63,546.9236 | 2.18e-11 | PASS |
+| C09-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Amount | 63,547 | 63547 | 0 | PASS |
+| C09-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Years | 20 | 20 | 0 | PASS |
+| C09-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
+| C09-R1 Example values typed in | Monthly_Growth | 0.0041 | 0.0041 | -3.47e-18 | PASS |
+| C09-R1 Example values typed in | Grows_To | 94,427.3856 | 94,427.3856 | 1.46e-11 | PASS |
+| C09-R1 Example values typed in | Paid_In | 53000 | 53000 | 0 | PASS |
+| C09-R1 Example values typed in | Growth_Earned | 41,427.3856 | 41,427.3856 | 1.46e-11 | PASS |
+| C09-R1 Example values typed in | Value_Today | 63,546.9236 | 63,546.9236 | 2.18e-11 | PASS |
+| C09-R1 Example values typed in | Plan_Goal_Amount | 63,547 | 63547 | 0 | PASS |
+| C09-R1 Example values typed in | Plan_Goal_Years | 20 | 20 | 0 | PASS |
+| C09-R1 Example values typed in | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
 | C09-R2 Low / edge | Monthly_Growth | 0 | 0 | 0 | PASS |
 | C09-R2 Low / edge | Grows_To | 0 | 0 | 0 | PASS |
 | C09-R2 Low / edge | Paid_In | 0 | 0 | 0 | PASS |
@@ -2268,84 +2429,101 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C09-R6 Random (seed 2) | Plan_Goal_Amount | 305,888 | 305888 | 0 | PASS |
 | C09-R6 Random (seed 2) | Plan_Goal_Years | 12 | 12 | 0 | PASS |
 | C09-R6 Random (seed 2) | Plan_Inflation | 0.035 | 0.035 | 0 | PASS |
-| C09-R7 Edge, 0% inflation | Monthly_Growth | 0.0033 | 0.0033 | -4.34e-18 | PASS |
-| C09-R7 Edge, 0% inflation | Grows_To | 83,723.9615 | 83,723.9615 | -5.82e-11 | PASS |
+| C09-R7 Edge, 0% inflation | Monthly_Growth | 0.0041 | 0.0041 | -3.47e-18 | PASS |
+| C09-R7 Edge, 0% inflation | Grows_To | 94,427.3856 | 94,427.3856 | 1.46e-11 | PASS |
 | C09-R7 Edge, 0% inflation | Paid_In | 53000 | 53000 | 0 | PASS |
-| C09-R7 Edge, 0% inflation | Growth_Earned | 30,723.9615 | 30,723.9615 | -5.46e-11 | PASS |
-| C09-R7 Edge, 0% inflation | Value_Today | 83,723.9615 | 83,723.9615 | -5.82e-11 | PASS |
-| C09-R7 Edge, 0% inflation | Plan_Goal_Amount | 83,724 | 83724 | 0 | PASS |
+| C09-R7 Edge, 0% inflation | Growth_Earned | 41,427.3856 | 41,427.3856 | 1.46e-11 | PASS |
+| C09-R7 Edge, 0% inflation | Value_Today | 94,427.3856 | 94,427.3856 | 1.46e-11 | PASS |
+| C09-R7 Edge, 0% inflation | Plan_Goal_Amount | 94,427 | 94427 | 0 | PASS |
 | C09-R7 Edge, 0% inflation | Plan_Goal_Years | 20 | 20 | 0 | PASS |
 | C09-R7 Edge, 0% inflation | Plan_Inflation | 0 | 0 | 0 | PASS |
-| C09-R8 Inflation left blank | Monthly_Growth | 0.0033 | 0.0033 | -4.34e-18 | PASS |
-| C09-R8 Inflation left blank | Grows_To | 83,723.9615 | 83,723.9615 | -5.82e-11 | PASS |
+| C09-R8 Inflation left blank | Monthly_Growth | 0.0041 | 0.0041 | -3.47e-18 | PASS |
+| C09-R8 Inflation left blank | Grows_To | 94,427.3856 | 94,427.3856 | 1.46e-11 | PASS |
 | C09-R8 Inflation left blank | Paid_In | 53000 | 53000 | 0 | PASS |
-| C09-R8 Inflation left blank | Growth_Earned | 30,723.9615 | 30,723.9615 | -5.46e-11 | PASS |
-| C09-R8 Inflation left blank | Value_Today | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C09-R8 Inflation left blank | Growth_Earned | 41,427.3856 | 41,427.3856 | 1.46e-11 | PASS |
+| C09-R8 Inflation left blank | Value_Today | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C09-R8 Inflation left blank | Plan_Goal_Amount | Choose an inflation rate first | Choose an inflation rate first |  | PASS |
 | C09-R8 Inflation left blank | Plan_Goal_Years | 20 | 20 | 0 | PASS |
 | C09-R8 Inflation left blank | Plan_Inflation | Choose an inflation rate first | Choose an inflation rate first |  | PASS |
-| C09-R9 Inflation 4% | Monthly_Growth | 0.0033 | 0.0033 | -4.34e-18 | PASS |
-| C09-R9 Inflation 4% | Grows_To | 83,723.9615 | 83,723.9615 | -5.82e-11 | PASS |
+| C09-R9 Inflation 4% | Monthly_Growth | 0.0041 | 0.0041 | -3.47e-18 | PASS |
+| C09-R9 Inflation 4% | Grows_To | 94,427.3856 | 94,427.3856 | 1.46e-11 | PASS |
 | C09-R9 Inflation 4% | Paid_In | 53000 | 53000 | 0 | PASS |
-| C09-R9 Inflation 4% | Growth_Earned | 30,723.9615 | 30,723.9615 | -5.46e-11 | PASS |
-| C09-R9 Inflation 4% | Value_Today | 38,210.5231 | 38,210.5231 | -4.37e-11 | PASS |
-| C09-R9 Inflation 4% | Plan_Goal_Amount | 38,211 | 38211 | 0 | PASS |
+| C09-R9 Inflation 4% | Growth_Earned | 41,427.3856 | 41,427.3856 | 1.46e-11 | PASS |
+| C09-R9 Inflation 4% | Value_Today | 43,095.4261 | 43,095.4261 | 7.28e-12 | PASS |
+| C09-R9 Inflation 4% | Plan_Goal_Amount | 43,095 | 43095 | 0 | PASS |
 | C09-R9 Inflation 4% | Plan_Goal_Years | 20 | 20 | 0 | PASS |
 | C09-R9 Inflation 4% | Plan_Inflation | 0.04 | 0.04 | 0 | PASS |
-| C09-R10 Statements A (recent; C12 projection in today's money) | Monthly_Growth | 0.0033 | 0.0033 | -4.34e-18 | PASS |
-| C09-R10 Statements A (recent; C12 projection in today's money) | Grows_To | 83,723.9615 | 83,723.9615 | -5.82e-11 | PASS |
+| C09-R10 Statements A (recent; C12 projection in today's money) | Monthly_Growth | 0.0041 | 0.0041 | -3.47e-18 | PASS |
+| C09-R10 Statements A (recent; C12 projection in today's money) | Grows_To | 94,427.3856 | 94,427.3856 | 1.46e-11 | PASS |
 | C09-R10 Statements A (recent; C12 projection in today's money) | Paid_In | 53000 | 53000 | 0 | PASS |
-| C09-R10 Statements A (recent; C12 projection in today's money) | Growth_Earned | 30,723.9615 | 30,723.9615 | -5.46e-11 | PASS |
-| C09-R10 Statements A (recent; C12 projection in today's money) | Value_Today | 56,343.826 | 56,343.826 | 2.18e-11 | PASS |
-| C09-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Amount | 56,344 | 56344 | 0 | PASS |
+| C09-R10 Statements A (recent; C12 projection in today's money) | Growth_Earned | 41,427.3856 | 41,427.3856 | 1.46e-11 | PASS |
+| C09-R10 Statements A (recent; C12 projection in today's money) | Value_Today | 63,546.9236 | 63,546.9236 | 2.18e-11 | PASS |
+| C09-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Amount | 63,547 | 63547 | 0 | PASS |
 | C09-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Years | 20 | 20 | 0 | PASS |
 | C09-R10 Statements A (recent; C12 projection in today's money) | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
-| C09-R11 Statements B (old; C12 projection not in today's money) | Monthly_Growth | 0.0033 | 0.0033 | -4.34e-18 | PASS |
-| C09-R11 Statements B (old; C12 projection not in today's money) | Grows_To | 83,723.9615 | 83,723.9615 | -5.82e-11 | PASS |
+| C09-R11 Statements B (old; C12 projection not in today's money) | Monthly_Growth | 0.0041 | 0.0041 | -3.47e-18 | PASS |
+| C09-R11 Statements B (old; C12 projection not in today's money) | Grows_To | 94,427.3856 | 94,427.3856 | 1.46e-11 | PASS |
 | C09-R11 Statements B (old; C12 projection not in today's money) | Paid_In | 53000 | 53000 | 0 | PASS |
-| C09-R11 Statements B (old; C12 projection not in today's money) | Growth_Earned | 30,723.9615 | 30,723.9615 | -5.46e-11 | PASS |
-| C09-R11 Statements B (old; C12 projection not in today's money) | Value_Today | 42,076.8068 | 42,076.8068 | -3.64e-11 | PASS |
-| C09-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Amount | 42,077 | 42077 | 0 | PASS |
+| C09-R11 Statements B (old; C12 projection not in today's money) | Growth_Earned | 41,427.3856 | 41,427.3856 | 1.46e-11 | PASS |
+| C09-R11 Statements B (old; C12 projection not in today's money) | Value_Today | 47,455.9826 | 47,455.9826 | -4.37e-11 | PASS |
+| C09-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Amount | 47,456 | 47456 | 0 | PASS |
 | C09-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Years | 20 | 20 | 0 | PASS |
 | C09-R11 Statements B (old; C12 projection not in today's money) | Plan_Inflation | 0.035 | 0.035 | 0 | PASS |
-| C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Monthly_Growth | 0.0033 | 0.0033 | -4.34e-18 | PASS |
-| C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Grows_To | 83,723.9615 | 83,723.9615 | -5.82e-11 | PASS |
+| C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Monthly_Growth | 0.0041 | 0.0041 | -3.47e-18 | PASS |
+| C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Grows_To | 94,427.3856 | 94,427.3856 | 1.46e-11 | PASS |
 | C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Paid_In | 53000 | 53000 | 0 | PASS |
-| C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Growth_Earned | 30,723.9615 | 30,723.9615 | -5.46e-11 | PASS |
-| C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Value_Today | 48,664.6001 | 48,664.6001 | 2.18e-11 | PASS |
-| C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Amount | 48,665 | 48665 | 0 | PASS |
+| C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Growth_Earned | 41,427.3856 | 41,427.3856 | 1.46e-11 | PASS |
+| C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Value_Today | 54,885.9713 | 54,885.9713 | -2.91e-11 | PASS |
+| C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Amount | 54,886 | 54886 | 0 | PASS |
 | C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Years | 20 | 20 | 0 | PASS |
 | C09-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Inflation | 0.0275 | 0.0275 | 0 | PASS |
-| C09-R13 Irish rules checks | Monthly_Growth | 0.0033 | 0.0033 | -4.34e-18 | PASS |
-| C09-R13 Irish rules checks | Grows_To | 83,723.9615 | 83,723.9615 | -5.82e-11 | PASS |
+| C09-R13 Irish rules checks | Monthly_Growth | 0.0041 | 0.0041 | -3.47e-18 | PASS |
+| C09-R13 Irish rules checks | Grows_To | 94,427.3856 | 94,427.3856 | 1.46e-11 | PASS |
 | C09-R13 Irish rules checks | Paid_In | 53000 | 53000 | 0 | PASS |
-| C09-R13 Irish rules checks | Growth_Earned | 30,723.9615 | 30,723.9615 | -5.46e-11 | PASS |
-| C09-R13 Irish rules checks | Value_Today | 56,343.826 | 56,343.826 | 2.18e-11 | PASS |
-| C09-R13 Irish rules checks | Plan_Goal_Amount | 56,344 | 56344 | 0 | PASS |
+| C09-R13 Irish rules checks | Growth_Earned | 41,427.3856 | 41,427.3856 | 1.46e-11 | PASS |
+| C09-R13 Irish rules checks | Value_Today | 63,546.9236 | 63,546.9236 | 2.18e-11 | PASS |
+| C09-R13 Irish rules checks | Plan_Goal_Amount | 63,547 | 63547 | 0 | PASS |
 | C09-R13 Irish rules checks | Plan_Goal_Years | 20 | 20 | 0 | PASS |
 | C09-R13 Irish rules checks | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
 
-### C10 Lump sum growth: 221/221 PASS
+### C10 Lump sum growth: 238/238 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C10-R1 Defaults | Growth_After_Fees | 0.04 | 0.04 | -3.47e-17 | PASS |
-| C10-R1 Defaults | Grows_To | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R1 Defaults | Value_Today | 13,381.2755 | 13,381.2755 | 1.64e-11 | PASS |
-| C10-R1 Defaults | Value_Start_Later | 14,802.4428 | 14,802.4428 | -4.55e-11 | PASS |
-| C10-R1 Defaults | Headline | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R1 Defaults | Cost_Of_Waiting | 3,206.9922 | 3,206.9922 | -9.09e-13 | PASS |
-| C10-R1 Defaults | Fees_Cost | -0 | 0 | 3.64e-12 | PASS |
-| C10-R1 Defaults | Real_Return | 0.0196 | 0.0196 | -3.12e-17 | PASS |
-| C10-R1 Defaults | Plan_Goal_Amount | 13,381 | 13381 | 0 | PASS |
-| C10-R1 Defaults | Plan_Goal_Years | 15 | 15 | 0 | PASS |
-| C10-R1 Defaults | Used_Amount | 10000 | 10000 | 0 | PASS |
-| C10-R1 Defaults | [shown] Used_Amount | Your figure | Your figure |  | PASS |
-| C10-R1 Defaults | Used_Yearly_Fees | 0 | 0 | 0 | PASS |
-| C10-R1 Defaults | [shown] Used_Yearly_Fees | Your figure | Your figure |  | PASS |
-| C10-R1 Defaults | Statement_Check |  |  |  | PASS |
-| C10-R1 Defaults | Statement_Uploaded | No | No |  | PASS |
-| C10-R1 Defaults | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Growth_After_Fees | 0.05 | 0.05 | -4.16e-17 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Grows_To | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Value_Today | 15,446.7426 | 15,446.7426 | -9.09e-12 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Value_Start_Later | 16,288.9463 | 16,288.9463 | -1.82e-11 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Headline | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Cost_Of_Waiting | 4,500.3355 | 4,500.3355 | 5.46e-12 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Fees_Cost | 0 | 0 | -7.28e-12 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Real_Return | 0.0294 | 0.0294 | 3.12e-17 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Amount | 15,447 | 15447 | 0 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Years | 15 | 15 | 0 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Amount | 10000 | 10000 | 0 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Amount | Your figure | Your figure |  | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Yearly_Fees | 0 | 0 | 0 | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Yearly_Fees | Your figure | Your figure |  | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Uploaded | No | No |  | PASS |
+| C10-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
+| C10-R1 Example values typed in | Growth_After_Fees | 0.05 | 0.05 | -4.16e-17 | PASS |
+| C10-R1 Example values typed in | Grows_To | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R1 Example values typed in | Value_Today | 15,446.7426 | 15,446.7426 | -9.09e-12 | PASS |
+| C10-R1 Example values typed in | Value_Start_Later | 16,288.9463 | 16,288.9463 | -1.82e-11 | PASS |
+| C10-R1 Example values typed in | Headline | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R1 Example values typed in | Cost_Of_Waiting | 4,500.3355 | 4,500.3355 | 5.46e-12 | PASS |
+| C10-R1 Example values typed in | Fees_Cost | 0 | 0 | -7.28e-12 | PASS |
+| C10-R1 Example values typed in | Real_Return | 0.0294 | 0.0294 | 3.12e-17 | PASS |
+| C10-R1 Example values typed in | Plan_Goal_Amount | 15,447 | 15447 | 0 | PASS |
+| C10-R1 Example values typed in | Plan_Goal_Years | 15 | 15 | 0 | PASS |
+| C10-R1 Example values typed in | Used_Amount | 10000 | 10000 | 0 | PASS |
+| C10-R1 Example values typed in | [shown] Used_Amount | Your figure | Your figure |  | PASS |
+| C10-R1 Example values typed in | Used_Yearly_Fees | 0 | 0 | 0 | PASS |
+| C10-R1 Example values typed in | [shown] Used_Yearly_Fees | Your figure | Your figure |  | PASS |
+| C10-R1 Example values typed in | Statement_Check |  |  |  | PASS |
+| C10-R1 Example values typed in | Statement_Uploaded | No | No |  | PASS |
+| C10-R1 Example values typed in | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
 | C10-R2 Low / edge | Growth_After_Fees | 0 | 0 | 0 | PASS |
 | C10-R2 Low / edge | Grows_To | 500 | 500 | 0 | PASS |
 | C10-R2 Low / edge | Value_Today | 483.0918 | 483.0918 | 4.55e-13 | PASS |
@@ -2380,15 +2558,15 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C10-R3 High / edge | Statement_Check |  |  |  | PASS |
 | C10-R3 High / edge | Statement_Uploaded | No | No |  | PASS |
 | C10-R3 High / edge | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
-| C10-R4 Branch / edge | Growth_After_Fees | 0.0348 | 0.0348 | -4.16e-17 | PASS |
-| C10-R4 Branch / edge | Grows_To | 11,080.7526 | 11,080.7526 | 1.82e-12 | PASS |
-| C10-R4 Branch / edge | Value_Today | 10,214.6565 | 10,214.6565 | 1.82e-12 | PASS |
+| C10-R4 Branch / edge | Growth_After_Fees | 0.0448 | 0.0448 | 3.47e-17 | PASS |
+| C10-R4 Branch / edge | Grows_To | 11,403.473 | 11,403.473 | 4.91e-11 | PASS |
+| C10-R4 Branch / edge | Value_Today | 10,512.1524 | 10,512.1524 | 3.64e-12 | PASS |
 | C10-R4 Branch / edge | Value_Start_Later | 10000 | 10000 | 0 | PASS |
-| C10-R4 Branch / edge | Headline | 11,080.7526 | 11,080.7526 | 1.82e-12 | PASS |
-| C10-R4 Branch / edge | Cost_Of_Waiting | 1,080.7526 | 1,080.7526 | 1.59e-12 | PASS |
-| C10-R4 Branch / edge | Fees_Cost | 167.8874 | 167.8874 | 2.25e-12 | PASS |
-| C10-R4 Branch / edge | Real_Return | 0.0071 | 0.0071 | -3.47e-18 | PASS |
-| C10-R4 Branch / edge | Plan_Goal_Amount | 10,215 | 10215 | 0 | PASS |
+| C10-R4 Branch / edge | Headline | 11,403.473 | 11,403.473 | 4.91e-11 | PASS |
+| C10-R4 Branch / edge | Cost_Of_Waiting | 1,403.473 | 1,403.473 | -1.59e-12 | PASS |
+| C10-R4 Branch / edge | Fees_Cost | 172.777 | 172.777 | -2.19e-12 | PASS |
+| C10-R4 Branch / edge | Real_Return | 0.0168 | 0.0168 | -3.47e-18 | PASS |
+| C10-R4 Branch / edge | Plan_Goal_Amount | 10,512 | 10512 | 0 | PASS |
 | C10-R4 Branch / edge | Plan_Goal_Years | 3 | 3 | 0 | PASS |
 | C10-R4 Branch / edge | Used_Amount | 10000 | 10000 | 0 | PASS |
 | C10-R4 Branch / edge | [shown] Used_Amount | Your figure | Your figure |  | PASS |
@@ -2431,15 +2609,15 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C10-R6 Random (seed 2) | Statement_Check |  |  |  | PASS |
 | C10-R6 Random (seed 2) | Statement_Uploaded | No | No |  | PASS |
 | C10-R6 Random (seed 2) | Plan_Inflation | 0.035 | 0.035 | 0 | PASS |
-| C10-R7 Edge, 0% inflation | Growth_After_Fees | 0.04 | 0.04 | -3.47e-17 | PASS |
-| C10-R7 Edge, 0% inflation | Grows_To | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R7 Edge, 0% inflation | Value_Today | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R7 Edge, 0% inflation | Value_Start_Later | 14,802.4428 | 14,802.4428 | -4.55e-11 | PASS |
-| C10-R7 Edge, 0% inflation | Headline | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R7 Edge, 0% inflation | Cost_Of_Waiting | 3,206.9922 | 3,206.9922 | -9.09e-13 | PASS |
-| C10-R7 Edge, 0% inflation | Fees_Cost | -0 | 0 | 3.64e-12 | PASS |
-| C10-R7 Edge, 0% inflation | Real_Return | 0.04 | 0.04 | -3.47e-17 | PASS |
-| C10-R7 Edge, 0% inflation | Plan_Goal_Amount | 18,009 | 18009 | 0 | PASS |
+| C10-R7 Edge, 0% inflation | Growth_After_Fees | 0.05 | 0.05 | -4.16e-17 | PASS |
+| C10-R7 Edge, 0% inflation | Grows_To | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R7 Edge, 0% inflation | Value_Today | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R7 Edge, 0% inflation | Value_Start_Later | 16,288.9463 | 16,288.9463 | -1.82e-11 | PASS |
+| C10-R7 Edge, 0% inflation | Headline | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R7 Edge, 0% inflation | Cost_Of_Waiting | 4,500.3355 | 4,500.3355 | 5.46e-12 | PASS |
+| C10-R7 Edge, 0% inflation | Fees_Cost | 0 | 0 | -7.28e-12 | PASS |
+| C10-R7 Edge, 0% inflation | Real_Return | 0.05 | 0.05 | -4.16e-17 | PASS |
+| C10-R7 Edge, 0% inflation | Plan_Goal_Amount | 20,789 | 20789 | 0 | PASS |
 | C10-R7 Edge, 0% inflation | Plan_Goal_Years | 15 | 15 | 0 | PASS |
 | C10-R7 Edge, 0% inflation | Used_Amount | 10000 | 10000 | 0 | PASS |
 | C10-R7 Edge, 0% inflation | [shown] Used_Amount | Your figure | Your figure |  | PASS |
@@ -2448,14 +2626,14 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C10-R7 Edge, 0% inflation | Statement_Check |  |  |  | PASS |
 | C10-R7 Edge, 0% inflation | Statement_Uploaded | No | No |  | PASS |
 | C10-R7 Edge, 0% inflation | Plan_Inflation | 0 | 0 | 0 | PASS |
-| C10-R8 Inflation left blank | Growth_After_Fees | 0.04 | 0.04 | -3.47e-17 | PASS |
-| C10-R8 Inflation left blank | Grows_To | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R8 Inflation left blank | Value_Today | Enter your inflation rate | Enter your inflation rate |  | PASS |
-| C10-R8 Inflation left blank | Value_Start_Later | 14,802.4428 | 14,802.4428 | -4.55e-11 | PASS |
-| C10-R8 Inflation left blank | Headline | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R8 Inflation left blank | Cost_Of_Waiting | 3,206.9922 | 3,206.9922 | -9.09e-13 | PASS |
-| C10-R8 Inflation left blank | Fees_Cost | -0 | 0 | 3.64e-12 | PASS |
-| C10-R8 Inflation left blank | Real_Return | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C10-R8 Inflation left blank | Growth_After_Fees | 0.05 | 0.05 | -4.16e-17 | PASS |
+| C10-R8 Inflation left blank | Grows_To | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R8 Inflation left blank | Value_Today | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
+| C10-R8 Inflation left blank | Value_Start_Later | 16,288.9463 | 16,288.9463 | -1.82e-11 | PASS |
+| C10-R8 Inflation left blank | Headline | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R8 Inflation left blank | Cost_Of_Waiting | 4,500.3355 | 4,500.3355 | 5.46e-12 | PASS |
+| C10-R8 Inflation left blank | Fees_Cost | 0 | 0 | -7.28e-12 | PASS |
+| C10-R8 Inflation left blank | Real_Return | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C10-R8 Inflation left blank | Plan_Goal_Amount | Choose an inflation rate first | Choose an inflation rate first |  | PASS |
 | C10-R8 Inflation left blank | Plan_Goal_Years | 15 | 15 | 0 | PASS |
 | C10-R8 Inflation left blank | Used_Amount | 10000 | 10000 | 0 | PASS |
@@ -2465,15 +2643,15 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C10-R8 Inflation left blank | Statement_Check |  |  |  | PASS |
 | C10-R8 Inflation left blank | Statement_Uploaded | No | No |  | PASS |
 | C10-R8 Inflation left blank | Plan_Inflation | Choose an inflation rate first | Choose an inflation rate first |  | PASS |
-| C10-R9 Inflation 4% | Growth_After_Fees | 0.04 | 0.04 | -3.47e-17 | PASS |
-| C10-R9 Inflation 4% | Grows_To | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R9 Inflation 4% | Value_Today | 10,000 | 10000 | -1.82e-12 | PASS |
-| C10-R9 Inflation 4% | Value_Start_Later | 14,802.4428 | 14,802.4428 | -4.55e-11 | PASS |
-| C10-R9 Inflation 4% | Headline | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R9 Inflation 4% | Cost_Of_Waiting | 3,206.9922 | 3,206.9922 | -9.09e-13 | PASS |
-| C10-R9 Inflation 4% | Fees_Cost | -0 | 0 | 3.64e-12 | PASS |
-| C10-R9 Inflation 4% | Real_Return | 0 | 0 | 0 | PASS |
-| C10-R9 Inflation 4% | Plan_Goal_Amount | 10,000 | 10000 | 0 | PASS |
+| C10-R9 Inflation 4% | Growth_After_Fees | 0.05 | 0.05 | -4.16e-17 | PASS |
+| C10-R9 Inflation 4% | Grows_To | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R9 Inflation 4% | Value_Today | 11,543.5502 | 11,543.5502 | 2.73e-11 | PASS |
+| C10-R9 Inflation 4% | Value_Start_Later | 16,288.9463 | 16,288.9463 | -1.82e-11 | PASS |
+| C10-R9 Inflation 4% | Headline | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R9 Inflation 4% | Cost_Of_Waiting | 4,500.3355 | 4,500.3355 | 5.46e-12 | PASS |
+| C10-R9 Inflation 4% | Fees_Cost | 0 | 0 | -7.28e-12 | PASS |
+| C10-R9 Inflation 4% | Real_Return | 0.0096 | 0.0096 | -1.73e-18 | PASS |
+| C10-R9 Inflation 4% | Plan_Goal_Amount | 11,544 | 11544 | 0 | PASS |
 | C10-R9 Inflation 4% | Plan_Goal_Years | 15 | 15 | 0 | PASS |
 | C10-R9 Inflation 4% | Used_Amount | 10000 | 10000 | 0 | PASS |
 | C10-R9 Inflation 4% | [shown] Used_Amount | Your figure | Your figure |  | PASS |
@@ -2482,15 +2660,15 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C10-R9 Inflation 4% | Statement_Check |  |  |  | PASS |
 | C10-R9 Inflation 4% | Statement_Uploaded | No | No |  | PASS |
 | C10-R9 Inflation 4% | Plan_Inflation | 0.04 | 0.04 | 0 | PASS |
-| C10-R10 Statements A (recent; C12 projection in today's money) | Growth_After_Fees | 0.0338 | 0.0338 | -1.39e-17 | PASS |
-| C10-R10 Statements A (recent; C12 projection in today's money) | Grows_To | 10,202.0523 | 10,202.0523 | 1.82e-11 | PASS |
-| C10-R10 Statements A (recent; C12 projection in today's money) | Value_Today | 7,580.2751 | 7,580.2751 | 9.09e-13 | PASS |
-| C10-R10 Statements A (recent; C12 projection in today's money) | Value_Start_Later | 8,641.4959 | 8,641.4959 | -3.64e-12 | PASS |
-| C10-R10 Statements A (recent; C12 projection in today's money) | Headline | 10,202.0523 | 10,202.0523 | 1.82e-11 | PASS |
-| C10-R10 Statements A (recent; C12 projection in today's money) | Cost_Of_Waiting | 1,560.5564 | 1,560.5564 | 2.05e-12 | PASS |
-| C10-R10 Statements A (recent; C12 projection in today's money) | Fees_Cost | 963.7974 | 963.7974 | -1.82e-12 | PASS |
-| C10-R10 Statements A (recent; C12 projection in today's money) | Real_Return | 0.0135 | 0.0135 | 2.95e-17 | PASS |
-| C10-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Amount | 7,580 | 7580 | 0 | PASS |
+| C10-R10 Statements A (recent; C12 projection in today's money) | Growth_After_Fees | 0.0437 | 0.0437 | 2.78e-17 | PASS |
+| C10-R10 Statements A (recent; C12 projection in today's money) | Grows_To | 11,776.7903 | 11,776.7903 | 3.27e-11 | PASS |
+| C10-R10 Statements A (recent; C12 projection in today's money) | Value_Today | 8,750.3287 | 8,750.3287 | 1.82e-12 | PASS |
+| C10-R10 Statements A (recent; C12 projection in today's money) | Value_Start_Later | 9,509.2995 | 9,509.2995 | 3.64e-12 | PASS |
+| C10-R10 Statements A (recent; C12 projection in today's money) | Headline | 11,776.7903 | 11,776.7903 | 3.27e-11 | PASS |
+| C10-R10 Statements A (recent; C12 projection in today's money) | Cost_Of_Waiting | 2,267.4908 | 2,267.4908 | -1.82e-12 | PASS |
+| C10-R10 Statements A (recent; C12 projection in today's money) | Fees_Cost | 1,112.5644 | 1,112.5644 | 4.55e-13 | PASS |
+| C10-R10 Statements A (recent; C12 projection in today's money) | Real_Return | 0.0232 | 0.0232 | -2.08e-17 | PASS |
+| C10-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Amount | 8,750 | 8750 | 0 | PASS |
 | C10-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Years | 15 | 15 | 0 | PASS |
 | C10-R10 Statements A (recent; C12 projection in today's money) | Used_Amount | 6200 | 6200 | 0 | PASS |
 | C10-R10 Statements A (recent; C12 projection in today's money) | [shown] Used_Amount | From your statement | From your statement |  | PASS |
@@ -2499,15 +2677,15 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C10-R10 Statements A (recent; C12 projection in today's money) | Statement_Check | Up to date | Up to date |  | PASS |
 | C10-R10 Statements A (recent; C12 projection in today's money) | Statement_Uploaded | Yes | Yes |  | PASS |
 | C10-R10 Statements A (recent; C12 projection in today's money) | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
-| C10-R11 Statements B (old; C12 projection not in today's money) | Growth_After_Fees | 0.04 | 0.04 | -3.47e-17 | PASS |
-| C10-R11 Statements B (old; C12 projection not in today's money) | Grows_To | 11,165.8497 | 11,165.8497 | 1.46e-11 | PASS |
-| C10-R11 Statements B (old; C12 projection not in today's money) | Value_Today | 6,664.791 | 6,664.791 | 0 | PASS |
-| C10-R11 Statements B (old; C12 projection not in today's money) | Value_Start_Later | 9,177.5146 | 9,177.5146 | 5.46e-12 | PASS |
-| C10-R11 Statements B (old; C12 projection not in today's money) | Headline | 11,165.8497 | 11,165.8497 | 1.46e-11 | PASS |
-| C10-R11 Statements B (old; C12 projection not in today's money) | Cost_Of_Waiting | 1,988.3352 | 1,988.3352 | 6.82e-13 | PASS |
-| C10-R11 Statements B (old; C12 projection not in today's money) | Fees_Cost | -0 | 0 | 1.82e-12 | PASS |
-| C10-R11 Statements B (old; C12 projection not in today's money) | Real_Return | 0.0048 | 0.0048 | 3.47e-18 | PASS |
-| C10-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Amount | 6,665 | 6665 | 0 | PASS |
+| C10-R11 Statements B (old; C12 projection not in today's money) | Growth_After_Fees | 0.05 | 0.05 | -4.16e-17 | PASS |
+| C10-R11 Statements B (old; C12 projection not in today's money) | Grows_To | 12,889.3547 | 12,889.3547 | 1.64e-11 | PASS |
+| C10-R11 Statements B (old; C12 projection not in today's money) | Value_Today | 7,693.5349 | 7,693.5349 | 5.46e-12 | PASS |
+| C10-R11 Statements B (old; C12 projection not in today's money) | Value_Start_Later | 10,099.1467 | 10,099.1467 | -4.00e-11 | PASS |
+| C10-R11 Statements B (old; C12 projection not in today's money) | Headline | 12,889.3547 | 12,889.3547 | 1.64e-11 | PASS |
+| C10-R11 Statements B (old; C12 projection not in today's money) | Cost_Of_Waiting | 2,790.208 | 2,790.208 | 6.82e-12 | PASS |
+| C10-R11 Statements B (old; C12 projection not in today's money) | Fees_Cost | 0 | 0 | -3.64e-12 | PASS |
+| C10-R11 Statements B (old; C12 projection not in today's money) | Real_Return | 0.0145 | 0.0145 | 2.95e-17 | PASS |
+| C10-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Amount | 7,694 | 7694 | 0 | PASS |
 | C10-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Years | 15 | 15 | 0 | PASS |
 | C10-R11 Statements B (old; C12 projection not in today's money) | Used_Amount | 6200 | 6200 | 0 | PASS |
 | C10-R11 Statements B (old; C12 projection not in today's money) | [shown] Used_Amount | From your statement | From your statement |  | PASS |
@@ -2516,15 +2694,15 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C10-R11 Statements B (old; C12 projection not in today's money) | Statement_Check |  |  |  | PASS |
 | C10-R11 Statements B (old; C12 projection not in today's money) | Statement_Uploaded | Yes | Yes |  | PASS |
 | C10-R11 Statements B (old; C12 projection not in today's money) | Plan_Inflation | 0.035 | 0.035 | 0 | PASS |
-| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Growth_After_Fees | 0.04 | 0.04 | -3.47e-17 | PASS |
-| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Grows_To | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Value_Today | 11,988.7149 | 11,988.7149 | -4.18e-11 | PASS |
-| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Value_Start_Later | 14,802.4428 | 14,802.4428 | -4.55e-11 | PASS |
-| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Headline | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Cost_Of_Waiting | 3,206.9922 | 3,206.9922 | -9.09e-13 | PASS |
-| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Fees_Cost | -0 | 0 | 3.64e-12 | PASS |
-| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Real_Return | 0.0122 | 0.0122 | 2.43e-17 | PASS |
-| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Amount | 11,989 | 11989 | 0 | PASS |
+| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Growth_After_Fees | 0.05 | 0.05 | -4.16e-17 | PASS |
+| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Grows_To | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Value_Today | 13,839.2332 | 13,839.2332 | -1.09e-11 | PASS |
+| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Value_Start_Later | 16,288.9463 | 16,288.9463 | -1.82e-11 | PASS |
+| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Headline | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Cost_Of_Waiting | 4,500.3355 | 4,500.3355 | 5.46e-12 | PASS |
+| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Fees_Cost | 0 | 0 | -7.28e-12 | PASS |
+| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Real_Return | 0.0219 | 0.0219 | 3.47e-17 | PASS |
+| C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Amount | 13,839 | 13839 | 0 | PASS |
 | C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Years | 15 | 15 | 0 | PASS |
 | C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Used_Amount | 10000 | 10000 | 0 | PASS |
 | C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | [shown] Used_Amount | Your figure | Your figure |  | PASS |
@@ -2533,15 +2711,15 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Statement_Check |  |  |  | PASS |
 | C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Statement_Uploaded | No | No |  | PASS |
 | C10-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Inflation | 0.0275 | 0.0275 | 0 | PASS |
-| C10-R13 Irish rules checks | Growth_After_Fees | 0.04 | 0.04 | -3.47e-17 | PASS |
-| C10-R13 Irish rules checks | Grows_To | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R13 Irish rules checks | Value_Today | 13,381.2755 | 13,381.2755 | 1.64e-11 | PASS |
-| C10-R13 Irish rules checks | Value_Start_Later | 14,802.4428 | 14,802.4428 | -4.55e-11 | PASS |
-| C10-R13 Irish rules checks | Headline | 18,009.4351 | 18,009.4351 | 3.27e-11 | PASS |
-| C10-R13 Irish rules checks | Cost_Of_Waiting | 3,206.9922 | 3,206.9922 | -9.09e-13 | PASS |
-| C10-R13 Irish rules checks | Fees_Cost | -0 | 0 | 3.64e-12 | PASS |
-| C10-R13 Irish rules checks | Real_Return | 0.0196 | 0.0196 | -3.12e-17 | PASS |
-| C10-R13 Irish rules checks | Plan_Goal_Amount | 13,381 | 13381 | 0 | PASS |
+| C10-R13 Irish rules checks | Growth_After_Fees | 0.05 | 0.05 | -4.16e-17 | PASS |
+| C10-R13 Irish rules checks | Grows_To | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R13 Irish rules checks | Value_Today | 15,446.7426 | 15,446.7426 | -9.09e-12 | PASS |
+| C10-R13 Irish rules checks | Value_Start_Later | 16,288.9463 | 16,288.9463 | -1.82e-11 | PASS |
+| C10-R13 Irish rules checks | Headline | 20,789.2818 | 20,789.2818 | 1.82e-11 | PASS |
+| C10-R13 Irish rules checks | Cost_Of_Waiting | 4,500.3355 | 4,500.3355 | 5.46e-12 | PASS |
+| C10-R13 Irish rules checks | Fees_Cost | 0 | 0 | -7.28e-12 | PASS |
+| C10-R13 Irish rules checks | Real_Return | 0.0294 | 0.0294 | 3.12e-17 | PASS |
+| C10-R13 Irish rules checks | Plan_Goal_Amount | 15,447 | 15447 | 0 | PASS |
 | C10-R13 Irish rules checks | Plan_Goal_Years | 15 | 15 | 0 | PASS |
 | C10-R13 Irish rules checks | Used_Amount | 10000 | 10000 | 0 | PASS |
 | C10-R13 Irish rules checks | [shown] Used_Amount | Your figure | Your figure |  | PASS |
@@ -2551,17 +2729,27 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C10-R13 Irish rules checks | Statement_Uploaded | No | No |  | PASS |
 | C10-R13 Irish rules checks | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
 
-### C11 Emergency fund: 91/91 PASS
+### C11 Emergency fund: 112/112 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C11-R1 Defaults | Months_Covered | 2.5 | 2.5 | 0 | PASS |
-| C11-R1 Defaults | Target | 15000 | 15000 | 0 | PASS |
-| C11-R1 Defaults | Still_To_Build | 8750 | 8750 | 0 | PASS |
-| C11-R1 Defaults | Plan_Goal_Kind | Safety net (plan kind safety: a reserve, not a spend) | Safety net (plan kind safety: a reserve, not a spend) |  | PASS |
-| C11-R1 Defaults | Plan_Goal_Amount | 15,000 | 15000 | 0 | PASS |
-| C11-R1 Defaults | Plan_Goal_Saved | 6250 | 6250 | 0 | PASS |
-| C11-R1 Defaults | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Months_Covered | 2.5 months | 2.5 months |  | PASS |
+| C11-R0 Blank template, example values ON (Fill_Example = Yes) | Months_Covered | 2.5 | 2.5 | 0 | PASS |
+| C11-R0 Blank template, example values ON (Fill_Example = Yes) | Target | 15000 | 15000 | 0 | PASS |
+| C11-R0 Blank template, example values ON (Fill_Example = Yes) | Still_To_Build | 8750 | 8750 | 0 | PASS |
+| C11-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Kind | Safety net (plan kind safety: a reserve, not a spend) | Safety net (plan kind safety: a reserve, not a spend) |  | PASS |
+| C11-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Amount | 15,000 | 15000 | 0 | PASS |
+| C11-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Saved | 6250 | 6250 | 0 | PASS |
+| C11-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R1 Example values typed in | [shown] Months_Covered | 2.5 months | 2.5 months |  | PASS |
+| C11-R1 Example values typed in | Months_Covered | 2.5 | 2.5 | 0 | PASS |
+| C11-R1 Example values typed in | Target | 15000 | 15000 | 0 | PASS |
+| C11-R1 Example values typed in | Still_To_Build | 8750 | 8750 | 0 | PASS |
+| C11-R1 Example values typed in | Plan_Goal_Kind | Safety net (plan kind safety: a reserve, not a spend) | Safety net (plan kind safety: a reserve, not a spend) |  | PASS |
+| C11-R1 Example values typed in | Plan_Goal_Amount | 15,000 | 15000 | 0 | PASS |
+| C11-R1 Example values typed in | Plan_Goal_Saved | 6250 | 6250 | 0 | PASS |
+| C11-R1 Example values typed in | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R2 Low / edge | [shown] Months_Covered | 0.0 months | 0.0 months |  | PASS |
 | C11-R2 Low / edge | Months_Covered | 0 | 0 | 0 | PASS |
 | C11-R2 Low / edge | Target | 500 | 500 | 0 | PASS |
 | C11-R2 Low / edge | Still_To_Build | 500 | 500 | 0 | PASS |
@@ -2569,6 +2757,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R2 Low / edge | Plan_Goal_Amount | 500 | 500 | 0 | PASS |
 | C11-R2 Low / edge | Plan_Goal_Saved | 0 | 0 | 0 | PASS |
 | C11-R2 Low / edge | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R3 High / edge | [shown] Months_Covered | 10.0 months | 10.0 months |  | PASS |
 | C11-R3 High / edge | Months_Covered | 10 | 10 | 0 | PASS |
 | C11-R3 High / edge | Target | 120000 | 120000 | 0 | PASS |
 | C11-R3 High / edge | Still_To_Build | 20000 | 20000 | 0 | PASS |
@@ -2576,6 +2765,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R3 High / edge | Plan_Goal_Amount | 120,000 | 120000 | 0 | PASS |
 | C11-R3 High / edge | Plan_Goal_Saved | 100000 | 100000 | 0 | PASS |
 | C11-R3 High / edge | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R4 Branch / edge | [shown] Months_Covered | 8.0 months | 8.0 months |  | PASS |
 | C11-R4 Branch / edge | Months_Covered | 8 | 8 | 0 | PASS |
 | C11-R4 Branch / edge | Target | 15000 | 15000 | 0 | PASS |
 | C11-R4 Branch / edge | Still_To_Build | 0 | 0 | 0 | PASS |
@@ -2583,6 +2773,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R4 Branch / edge | Plan_Goal_Amount | — | — |  | PASS |
 | C11-R4 Branch / edge | Plan_Goal_Saved | 20000 | 20000 | 0 | PASS |
 | C11-R4 Branch / edge | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R5 Random (seed 1) | [shown] Months_Covered | 9.2 months | 9.2 months |  | PASS |
 | C11-R5 Random (seed 1) | Months_Covered | 9.2424 | 9.2424 | -1.78e-15 | PASS |
 | C11-R5 Random (seed 1) | Target | 52800 | 52800 | 0 | PASS |
 | C11-R5 Random (seed 1) | Still_To_Build | 0 | 0 | 0 | PASS |
@@ -2590,6 +2781,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R5 Random (seed 1) | Plan_Goal_Amount | — | — |  | PASS |
 | C11-R5 Random (seed 1) | Plan_Goal_Saved | 61000 | 61000 | 0 | PASS |
 | C11-R5 Random (seed 1) | Plan_Goal_Years | 10 | 10 | 0 | PASS |
+| C11-R6 Random (seed 2) | [shown] Months_Covered | 18.0 months | 18.0 months |  | PASS |
 | C11-R6 Random (seed 2) | Months_Covered | 17.95 | 17.95 | 0 | PASS |
 | C11-R6 Random (seed 2) | Target | 15000 | 15000 | 0 | PASS |
 | C11-R6 Random (seed 2) | Still_To_Build | 0 | 0 | 0 | PASS |
@@ -2597,6 +2789,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R6 Random (seed 2) | Plan_Goal_Amount | — | — |  | PASS |
 | C11-R6 Random (seed 2) | Plan_Goal_Saved | 89750 | 89750 | 0 | PASS |
 | C11-R6 Random (seed 2) | Plan_Goal_Years | 1 | 1 | 0 | PASS |
+| C11-R7 Edge, 0% inflation | [shown] Months_Covered | 6.0 months | 6.0 months |  | PASS |
 | C11-R7 Edge, 0% inflation | Months_Covered | 6 | 6 | 0 | PASS |
 | C11-R7 Edge, 0% inflation | Target | 15000 | 15000 | 0 | PASS |
 | C11-R7 Edge, 0% inflation | Still_To_Build | 0 | 0 | 0 | PASS |
@@ -2604,6 +2797,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R7 Edge, 0% inflation | Plan_Goal_Amount | — | — |  | PASS |
 | C11-R7 Edge, 0% inflation | Plan_Goal_Saved | 15000 | 15000 | 0 | PASS |
 | C11-R7 Edge, 0% inflation | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R8 Inflation left blank | [shown] Months_Covered | 2.5 months | 2.5 months |  | PASS |
 | C11-R8 Inflation left blank | Months_Covered | 2.5 | 2.5 | 0 | PASS |
 | C11-R8 Inflation left blank | Target | 15000 | 15000 | 0 | PASS |
 | C11-R8 Inflation left blank | Still_To_Build | 8750 | 8750 | 0 | PASS |
@@ -2611,6 +2805,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R8 Inflation left blank | Plan_Goal_Amount | 15,000 | 15000 | 0 | PASS |
 | C11-R8 Inflation left blank | Plan_Goal_Saved | 6250 | 6250 | 0 | PASS |
 | C11-R8 Inflation left blank | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R9 Inflation 4% | [shown] Months_Covered | 2.5 months | 2.5 months |  | PASS |
 | C11-R9 Inflation 4% | Months_Covered | 2.5 | 2.5 | 0 | PASS |
 | C11-R9 Inflation 4% | Target | 15000 | 15000 | 0 | PASS |
 | C11-R9 Inflation 4% | Still_To_Build | 8750 | 8750 | 0 | PASS |
@@ -2618,6 +2813,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R9 Inflation 4% | Plan_Goal_Amount | 15,000 | 15000 | 0 | PASS |
 | C11-R9 Inflation 4% | Plan_Goal_Saved | 6250 | 6250 | 0 | PASS |
 | C11-R9 Inflation 4% | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R10 Statements A (recent; C12 projection in today's money) | [shown] Months_Covered | 2.5 months | 2.5 months |  | PASS |
 | C11-R10 Statements A (recent; C12 projection in today's money) | Months_Covered | 2.5 | 2.5 | 0 | PASS |
 | C11-R10 Statements A (recent; C12 projection in today's money) | Target | 15000 | 15000 | 0 | PASS |
 | C11-R10 Statements A (recent; C12 projection in today's money) | Still_To_Build | 8750 | 8750 | 0 | PASS |
@@ -2625,6 +2821,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Amount | 15,000 | 15000 | 0 | PASS |
 | C11-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Saved | 6250 | 6250 | 0 | PASS |
 | C11-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R11 Statements B (old; C12 projection not in today's money) | [shown] Months_Covered | 2.5 months | 2.5 months |  | PASS |
 | C11-R11 Statements B (old; C12 projection not in today's money) | Months_Covered | 2.5 | 2.5 | 0 | PASS |
 | C11-R11 Statements B (old; C12 projection not in today's money) | Target | 15000 | 15000 | 0 | PASS |
 | C11-R11 Statements B (old; C12 projection not in today's money) | Still_To_Build | 8750 | 8750 | 0 | PASS |
@@ -2632,6 +2829,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Amount | 15,000 | 15000 | 0 | PASS |
 | C11-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Saved | 6250 | 6250 | 0 | PASS |
 | C11-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R12 Statements C (C12 age mismatch; low mortgage repayment) | [shown] Months_Covered | 2.5 months | 2.5 months |  | PASS |
 | C11-R12 Statements C (C12 age mismatch; low mortgage repayment) | Months_Covered | 2.5 | 2.5 | 0 | PASS |
 | C11-R12 Statements C (C12 age mismatch; low mortgage repayment) | Target | 15000 | 15000 | 0 | PASS |
 | C11-R12 Statements C (C12 age mismatch; low mortgage repayment) | Still_To_Build | 8750 | 8750 | 0 | PASS |
@@ -2639,6 +2837,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Amount | 15,000 | 15000 | 0 | PASS |
 | C11-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Saved | 6250 | 6250 | 0 | PASS |
 | C11-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Years | 2 | 2 | 0 | PASS |
+| C11-R13 Irish rules checks | [shown] Months_Covered | 2.5 months | 2.5 months |  | PASS |
 | C11-R13 Irish rules checks | Months_Covered | 2.5 | 2.5 | 0 | PASS |
 | C11-R13 Irish rules checks | Target | 15000 | 15000 | 0 | PASS |
 | C11-R13 Irish rules checks | Still_To_Build | 8750 | 8750 | 0 | PASS |
@@ -2647,37 +2846,64 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C11-R13 Irish rules checks | Plan_Goal_Saved | 6250 | 6250 | 0 | PASS |
 | C11-R13 Irish rules checks | Plan_Goal_Years | 2 | 2 | 0 | PASS |
 
-### C12 Retirement projection: 351/351 PASS
+### C12 Retirement projection: 378/378 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C12-R1 Defaults | Bridge_Years | 1 | 1 | 0 | PASS |
-| C12-R1 Defaults | Lump_Sum | 136,247.1695 | 136,247.1695 | -7.57e-10 | PASS |
-| C12-R1 Defaults | Lump_Sum_Tax | 0 | 0 | 0 | PASS |
-| C12-R1 Defaults | Lump_Sum_Net | 136,247.1695 | 136,247.1695 | -7.57e-10 | PASS |
-| C12-R1 Defaults | Early_Warning |  |  |  | PASS |
-| C12-R1 Defaults | SFT_Warning |  |  |  | PASS |
-| C12-R1 Defaults | Years_To_Retirement | 25 | 25 | 0 | PASS |
-| C12-R1 Defaults | Contribution | 500 | 500 | 0 | PASS |
-| C12-R1 Defaults | Contributions_Grow_To | 364,662.6108 | 364,662.6108 | -2.44e-09 | PASS |
-| C12-R1 Defaults | Calculated_Fund | 544,988.6781 | 544,988.6781 | -2.10e-09 | PASS |
-| C12-R1 Defaults | Projected_Fund | 544,988.6781 | 544,988.6781 | -2.10e-09 | PASS |
-| C12-R1 Defaults | Fund_Today | 332,187.4234 | 332,187.4234 | -8.73e-10 | PASS |
-| C12-R1 Defaults | Target_Today | 626464 | 626464 | 0 | PASS |
-| C12-R1 Defaults | Gap_Today | 294,276.5766 | 294,276.5766 | 8.73e-10 | PASS |
-| C12-R1 Defaults | Use_Statement_Projection | No | No |  | PASS |
-| C12-R1 Defaults | Plan_Goal_Income | 40000 | 40000 | 0 | PASS |
-| C12-R1 Defaults | Plan_Goal_Age | 65 | 65 | 0 | PASS |
-| C12-R1 Defaults | [shown] Projected_Fund | Calculated | Calculated |  | PASS |
-| C12-R1 Defaults | [shown] Gap_Today | Gap of €294,277 in today's money | Gap of €294,277 in today's money |  | PASS |
-| C12-R1 Defaults | Used_Pension_Today | 60000 | 60000 | 0 | PASS |
-| C12-R1 Defaults | [shown] Used_Pension_Today | Your figure | Your figure |  | PASS |
-| C12-R1 Defaults | Used_Monthly_Contribution | 500 | 500 | 0 | PASS |
-| C12-R1 Defaults | [shown] Used_Monthly_Contribution | Your figure | Your figure |  | PASS |
-| C12-R1 Defaults | Used_Growth_Rate | 0.045 | 0.045 | 0 | PASS |
-| C12-R1 Defaults | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
-| C12-R1 Defaults | Statement_Check |  |  |  | PASS |
-| C12-R1 Defaults | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Bridge_Years | 1 | 1 | 0 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Lump_Sum | 136,247.1695 | 136,247.1695 | -7.57e-10 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Lump_Sum_Tax | 0 | 0 | 0 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Lump_Sum_Net | 136,247.1695 | 136,247.1695 | -7.57e-10 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Early_Warning |  |  |  | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | SFT_Warning |  |  |  | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Years_To_Retirement | 25 | 25 | 0 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Contribution | 500 | 500 | 0 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Contributions_Grow_To | 364,662.6108 | 364,662.6108 | -2.44e-09 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Calculated_Fund | 544,988.6781 | 544,988.6781 | -2.10e-09 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Projected_Fund | 544,988.6781 | 544,988.6781 | -2.10e-09 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Fund_Today | 332,187.4234 | 332,187.4234 | -8.73e-10 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Target_Today | 626464 | 626464 | 0 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Gap_Today | 294,276.5766 | 294,276.5766 | 8.73e-10 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Use_Statement_Projection | No | No |  | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Income | 40000 | 40000 | 0 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Age | 65 | 65 | 0 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Projected_Fund | Calculated | Calculated |  | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Gap_Today | Gap of €294,277 in today's money | Gap of €294,277 in today's money |  | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Pension_Today | 60000 | 60000 | 0 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Pension_Today | Your figure | Your figure |  | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Monthly_Contribution | 500 | 500 | 0 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Monthly_Contribution | Your figure | Your figure |  | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Growth_Rate | 0.045 | 0.045 | 0 | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C12-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
+| C12-R1 Example values typed in | Bridge_Years | 1 | 1 | 0 | PASS |
+| C12-R1 Example values typed in | Lump_Sum | 136,247.1695 | 136,247.1695 | -7.57e-10 | PASS |
+| C12-R1 Example values typed in | Lump_Sum_Tax | 0 | 0 | 0 | PASS |
+| C12-R1 Example values typed in | Lump_Sum_Net | 136,247.1695 | 136,247.1695 | -7.57e-10 | PASS |
+| C12-R1 Example values typed in | Early_Warning |  |  |  | PASS |
+| C12-R1 Example values typed in | SFT_Warning |  |  |  | PASS |
+| C12-R1 Example values typed in | Years_To_Retirement | 25 | 25 | 0 | PASS |
+| C12-R1 Example values typed in | Contribution | 500 | 500 | 0 | PASS |
+| C12-R1 Example values typed in | Contributions_Grow_To | 364,662.6108 | 364,662.6108 | -2.44e-09 | PASS |
+| C12-R1 Example values typed in | Calculated_Fund | 544,988.6781 | 544,988.6781 | -2.10e-09 | PASS |
+| C12-R1 Example values typed in | Projected_Fund | 544,988.6781 | 544,988.6781 | -2.10e-09 | PASS |
+| C12-R1 Example values typed in | Fund_Today | 332,187.4234 | 332,187.4234 | -8.73e-10 | PASS |
+| C12-R1 Example values typed in | Target_Today | 626464 | 626464 | 0 | PASS |
+| C12-R1 Example values typed in | Gap_Today | 294,276.5766 | 294,276.5766 | 8.73e-10 | PASS |
+| C12-R1 Example values typed in | Use_Statement_Projection | No | No |  | PASS |
+| C12-R1 Example values typed in | Plan_Goal_Income | 40000 | 40000 | 0 | PASS |
+| C12-R1 Example values typed in | Plan_Goal_Age | 65 | 65 | 0 | PASS |
+| C12-R1 Example values typed in | [shown] Projected_Fund | Calculated | Calculated |  | PASS |
+| C12-R1 Example values typed in | [shown] Gap_Today | Gap of €294,277 in today's money | Gap of €294,277 in today's money |  | PASS |
+| C12-R1 Example values typed in | Used_Pension_Today | 60000 | 60000 | 0 | PASS |
+| C12-R1 Example values typed in | [shown] Used_Pension_Today | Your figure | Your figure |  | PASS |
+| C12-R1 Example values typed in | Used_Monthly_Contribution | 500 | 500 | 0 | PASS |
+| C12-R1 Example values typed in | [shown] Used_Monthly_Contribution | Your figure | Your figure |  | PASS |
+| C12-R1 Example values typed in | Used_Growth_Rate | 0.045 | 0.045 | 0 | PASS |
+| C12-R1 Example values typed in | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
+| C12-R1 Example values typed in | Statement_Check |  |  |  | PASS |
+| C12-R1 Example values typed in | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
 | C12-R2 Low / edge | Bridge_Years | 16 | 16 | 0 | PASS |
 | C12-R2 Low / edge | Lump_Sum | 0 | 0 | 0 | PASS |
 | C12-R2 Low / edge | Lump_Sum_Tax | 0 | 0 | 0 | PASS |
@@ -2851,14 +3077,14 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C12-R8 Inflation left blank | Contributions_Grow_To | 364,662.6108 | 364,662.6108 | -2.44e-09 | PASS |
 | C12-R8 Inflation left blank | Calculated_Fund | 544,988.6781 | 544,988.6781 | -2.10e-09 | PASS |
 | C12-R8 Inflation left blank | Projected_Fund | 544,988.6781 | 544,988.6781 | -2.10e-09 | PASS |
-| C12-R8 Inflation left blank | Fund_Today | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C12-R8 Inflation left blank | Fund_Today | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C12-R8 Inflation left blank | Target_Today | 626464 | 626464 | 0 | PASS |
-| C12-R8 Inflation left blank | Gap_Today | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C12-R8 Inflation left blank | Gap_Today | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C12-R8 Inflation left blank | Use_Statement_Projection | No | No |  | PASS |
 | C12-R8 Inflation left blank | Plan_Goal_Income | 40000 | 40000 | 0 | PASS |
 | C12-R8 Inflation left blank | Plan_Goal_Age | 65 | 65 | 0 | PASS |
 | C12-R8 Inflation left blank | [shown] Projected_Fund | Calculated | Calculated |  | PASS |
-| C12-R8 Inflation left blank | [shown] Gap_Today | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C12-R8 Inflation left blank | [shown] Gap_Today | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C12-R8 Inflation left blank | Used_Pension_Today | 60000 | 60000 | 0 | PASS |
 | C12-R8 Inflation left blank | [shown] Used_Pension_Today | Your figure | Your figure |  | PASS |
 | C12-R8 Inflation left blank | Used_Monthly_Contribution | 500 | 500 | 0 | PASS |
@@ -3003,24 +3229,38 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C12-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 | C12-R13 Irish rules checks | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
 
-### C13 Contribution impact: 143/143 PASS
+### C13 Contribution impact: 168/168 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C13-R1 Defaults | Grows_To | 54,572.4754 | 54,572.4754 | -2.91e-11 | PASS |
-| C13-R1 Defaults | Value_Today | 33,263.6084 | 33,263.6084 | 3.64e-11 | PASS |
-| C13-R1 Defaults | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
-| C13-R1 Defaults | Relieved_Year | 1,200 | 1200 | 0 | PASS |
-| C13-R1 Defaults | Relief_Per_Month | 40 | 40 | 0 | PASS |
-| C13-R1 Defaults | Net_Cost_Per_Month | 60 | 60 | 0 | PASS |
-| C13-R1 Defaults | Plan_Goal_Contribution | 100 | 100 | 0 | PASS |
-| C13-R1 Defaults | Extra_Per_Month | 100 | 100 | 0 | PASS |
-| C13-R1 Defaults | Used_Growth_Rate | 0.045 | 0.045 | 0 | PASS |
-| C13-R1 Defaults | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
-| C13-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | Grows_To | 54,572.4754 | 54,572.4754 | -2.91e-11 | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | Value_Today | 33,263.6084 | 33,263.6084 | 3.64e-11 | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | Relieved_Year | 1,200 | 1200 | 0 | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | Relief_Per_Month | 40 | 40 | 0 | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | Net_Cost_Per_Month | 60 | 60 | 0 | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Contribution | 100 | 100 | 0 | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | Extra_Per_Month | 100 | 100 | 0 | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Growth_Rate | 0.045 | 0.045 | 0 | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
+| C13-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C13-R1 Example values typed in | Grows_To | 54,572.4754 | 54,572.4754 | -2.91e-11 | PASS |
+| C13-R1 Example values typed in | Value_Today | 33,263.6084 | 33,263.6084 | 3.64e-11 | PASS |
+| C13-R1 Example values typed in | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R1 Example values typed in | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R1 Example values typed in | Relieved_Year | 1,200 | 1200 | 0 | PASS |
+| C13-R1 Example values typed in | Relief_Per_Month | 40 | 40 | 0 | PASS |
+| C13-R1 Example values typed in | Net_Cost_Per_Month | 60 | 60 | 0 | PASS |
+| C13-R1 Example values typed in | Plan_Goal_Contribution | 100 | 100 | 0 | PASS |
+| C13-R1 Example values typed in | Extra_Per_Month | 100 | 100 | 0 | PASS |
+| C13-R1 Example values typed in | Used_Growth_Rate | 0.045 | 0.045 | 0 | PASS |
+| C13-R1 Example values typed in | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
+| C13-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C13-R2 Low / edge | Grows_To | 75.3431 | 75.3431 | 9.95e-14 | PASS |
 | C13-R2 Low / edge | Value_Today | 72.7953 | 72.7953 | 1.56e-13 | PASS |
 | C13-R2 Low / edge | Relief_Limit_Year | 3,750 | 3750 | 0 | PASS |
+| C13-R2 Low / edge | Relief_Room_Year | 3,750 | 3750 | 0 | PASS |
 | C13-R2 Low / edge | Relieved_Year | 75 | 75 | 0 | PASS |
 | C13-R2 Low / edge | Relief_Per_Month | 1.25 | 1.25 | 0 | PASS |
 | C13-R2 Low / edge | Net_Cost_Per_Month | 5 | 5 | 0 | PASS |
@@ -3032,6 +3272,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R3 High / edge | Grows_To | 7,370,127.8694 | 7,370,127.8694 | 1.02e-08 | PASS |
 | C13-R3 High / edge | Value_Today | 3,023,202.8861 | 3,023,202.8861 | 9.78e-09 | PASS |
 | C13-R3 High / edge | Relief_Limit_Year | 28,750 | 28750 | 0 | PASS |
+| C13-R3 High / edge | Relief_Room_Year | 28,750 | 28750 | 0 | PASS |
 | C13-R3 High / edge | Relieved_Year | 25,000 | 25000 | 0 | PASS |
 | C13-R3 High / edge | Relief_Per_Month | 833.3333 | 833.3333 | -3.41e-13 | PASS |
 | C13-R3 High / edge | Net_Cost_Per_Month | 1,250 | 1250 | 0 | PASS |
@@ -3043,6 +3284,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R4 Branch / edge | Grows_To | 33,138.9298 | 33,138.9298 | -2.18e-11 | PASS |
 | C13-R4 Branch / edge | Value_Today | 23,930.7612 | 23,930.7612 | -4.00e-11 | PASS |
 | C13-R4 Branch / edge | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R4 Branch / edge | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C13-R4 Branch / edge | Relieved_Year | 2,100 | 2100 | 0 | PASS |
 | C13-R4 Branch / edge | Relief_Per_Month | 70 | 70 | 0 | PASS |
 | C13-R4 Branch / edge | Net_Cost_Per_Month | 105 | 105 | 0 | PASS |
@@ -3054,6 +3296,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R5 Random (seed 1) | Grows_To | 92,153.924 | 92,153.924 | 2.91e-11 | PASS |
 | C13-R5 Random (seed 1) | Value_Today | 63,033.033 | 63,033.033 | 0 | PASS |
 | C13-R5 Random (seed 1) | Relief_Limit_Year | 28,750 | 28750 | 0 | PASS |
+| C13-R5 Random (seed 1) | Relief_Room_Year | 20,150 | 20150 | 0 | PASS |
 | C13-R5 Random (seed 1) | Relieved_Year | 4,770 | 4770 | 0 | PASS |
 | C13-R5 Random (seed 1) | Relief_Per_Month | 79.5 | 79.5 | 0 | PASS |
 | C13-R5 Random (seed 1) | Net_Cost_Per_Month | 318 | 318 | 0 | PASS |
@@ -3065,6 +3308,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R6 Random (seed 2) | Grows_To | 27,743.3598 | 27,743.3598 | -1.46e-11 | PASS |
 | C13-R6 Random (seed 2) | Value_Today | 12,150.4023 | 12,150.4023 | 4.73e-11 | PASS |
 | C13-R6 Random (seed 2) | Relief_Limit_Year | 46,000 | 46000 | 0 | PASS |
+| C13-R6 Random (seed 2) | Relief_Room_Year | 0 | 0 | 0 | PASS |
 | C13-R6 Random (seed 2) | Relieved_Year | 0 | 0 | 0 | PASS |
 | C13-R6 Random (seed 2) | Relief_Per_Month | 0 | 0 | 0 | PASS |
 | C13-R6 Random (seed 2) | Net_Cost_Per_Month | 66.25 | 66.25 | 0 | PASS |
@@ -3076,6 +3320,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R7 Edge, 0% inflation | Grows_To | 54,572.4754 | 54,572.4754 | -2.91e-11 | PASS |
 | C13-R7 Edge, 0% inflation | Value_Today | 54,572.4754 | 54,572.4754 | -2.91e-11 | PASS |
 | C13-R7 Edge, 0% inflation | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R7 Edge, 0% inflation | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C13-R7 Edge, 0% inflation | Relieved_Year | 1,200 | 1200 | 0 | PASS |
 | C13-R7 Edge, 0% inflation | Relief_Per_Month | 40 | 40 | 0 | PASS |
 | C13-R7 Edge, 0% inflation | Net_Cost_Per_Month | 60 | 60 | 0 | PASS |
@@ -3085,8 +3330,9 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R7 Edge, 0% inflation | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
 | C13-R7 Edge, 0% inflation | Statement_Check |  |  |  | PASS |
 | C13-R8 Inflation left blank | Grows_To | 54,572.4754 | 54,572.4754 | -2.91e-11 | PASS |
-| C13-R8 Inflation left blank | Value_Today | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C13-R8 Inflation left blank | Value_Today | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C13-R8 Inflation left blank | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R8 Inflation left blank | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C13-R8 Inflation left blank | Relieved_Year | 1,200 | 1200 | 0 | PASS |
 | C13-R8 Inflation left blank | Relief_Per_Month | 40 | 40 | 0 | PASS |
 | C13-R8 Inflation left blank | Net_Cost_Per_Month | 60 | 60 | 0 | PASS |
@@ -3098,6 +3344,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R9 Inflation 4% | Grows_To | 54,572.4754 | 54,572.4754 | -2.91e-11 | PASS |
 | C13-R9 Inflation 4% | Value_Today | 20,471.0525 | 20,471.0525 | 4.00e-11 | PASS |
 | C13-R9 Inflation 4% | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R9 Inflation 4% | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C13-R9 Inflation 4% | Relieved_Year | 1,200 | 1200 | 0 | PASS |
 | C13-R9 Inflation 4% | Relief_Per_Month | 40 | 40 | 0 | PASS |
 | C13-R9 Inflation 4% | Net_Cost_Per_Month | 60 | 60 | 0 | PASS |
@@ -3109,6 +3356,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R10 Statements A (recent; C12 projection in today's money) | Grows_To | 57,746.8928 | 57,746.8928 | -2.91e-11 | PASS |
 | C13-R10 Statements A (recent; C12 projection in today's money) | Value_Today | 35,198.5138 | 35,198.5138 | 0 | PASS |
 | C13-R10 Statements A (recent; C12 projection in today's money) | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R10 Statements A (recent; C12 projection in today's money) | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C13-R10 Statements A (recent; C12 projection in today's money) | Relieved_Year | 1,200 | 1200 | 0 | PASS |
 | C13-R10 Statements A (recent; C12 projection in today's money) | Relief_Per_Month | 40 | 40 | 0 | PASS |
 | C13-R10 Statements A (recent; C12 projection in today's money) | Net_Cost_Per_Month | 60 | 60 | 0 | PASS |
@@ -3120,6 +3368,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R11 Statements B (old; C12 projection not in today's money) | Grows_To | 54,572.4754 | 54,572.4754 | -2.91e-11 | PASS |
 | C13-R11 Statements B (old; C12 projection not in today's money) | Value_Today | 23,092.1787 | 23,092.1787 | -4.00e-11 | PASS |
 | C13-R11 Statements B (old; C12 projection not in today's money) | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R11 Statements B (old; C12 projection not in today's money) | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C13-R11 Statements B (old; C12 projection not in today's money) | Relieved_Year | 1,200 | 1200 | 0 | PASS |
 | C13-R11 Statements B (old; C12 projection not in today's money) | Relief_Per_Month | 40 | 40 | 0 | PASS |
 | C13-R11 Statements B (old; C12 projection not in today's money) | Net_Cost_Per_Month | 60 | 60 | 0 | PASS |
@@ -3131,6 +3380,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R12 Statements C (C12 age mismatch; low mortgage repayment) | Grows_To | 54,572.4754 | 54,572.4754 | -2.91e-11 | PASS |
 | C13-R12 Statements C (C12 age mismatch; low mortgage repayment) | Value_Today | 27,696.6913 | 27,696.6913 | -1.09e-11 | PASS |
 | C13-R12 Statements C (C12 age mismatch; low mortgage repayment) | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R12 Statements C (C12 age mismatch; low mortgage repayment) | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C13-R12 Statements C (C12 age mismatch; low mortgage repayment) | Relieved_Year | 1,200 | 1200 | 0 | PASS |
 | C13-R12 Statements C (C12 age mismatch; low mortgage repayment) | Relief_Per_Month | 40 | 40 | 0 | PASS |
 | C13-R12 Statements C (C12 age mismatch; low mortgage repayment) | Net_Cost_Per_Month | 60 | 60 | 0 | PASS |
@@ -3142,6 +3392,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R13 Irish rules checks | Grows_To | 54,572.4754 | 54,572.4754 | -2.91e-11 | PASS |
 | C13-R13 Irish rules checks | Value_Today | 33,263.6084 | 33,263.6084 | 3.64e-11 | PASS |
 | C13-R13 Irish rules checks | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C13-R13 Irish rules checks | Relief_Room_Year | 500 | 500 | 0 | PASS |
 | C13-R13 Irish rules checks | Relieved_Year | 500 | 500 | 0 | PASS |
 | C13-R13 Irish rules checks | Relief_Per_Month | 16.6667 | 16.6667 | 3.20e-14 | PASS |
 | C13-R13 Irish rules checks | Net_Cost_Per_Month | 83.3333 | 83.3333 | -2.84e-14 | PASS |
@@ -3151,25 +3402,40 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C13-R13 Irish rules checks | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
 | C13-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C14 AVC impact: 156/156 PASS
+### C14 AVC impact: 182/182 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C14-R1 Defaults | Grows_To | 50,902.3648 | 50,902.3648 | 2.18e-11 | PASS |
-| C14-R1 Defaults | Value_Today | 37,821.2068 | 37,821.2068 | -5.82e-11 | PASS |
-| C14-R1 Defaults | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
-| C14-R1 Defaults | Relieved_Year | 2400 | 2400 | 0 | PASS |
-| C14-R1 Defaults | Relief_Per_Month | 80 | 80 | 0 | PASS |
-| C14-R1 Defaults | Net_Cost_Per_Month | 120 | 120 | 0 | PASS |
-| C14-R1 Defaults | Plan_Goal_Contribution | 200 | 200 | 0 | PASS |
-| C14-R1 Defaults | Paid_In | 36000 | 36000 | 0 | PASS |
-| C14-R1 Defaults | Net_Cost | 21,600 | 21600 | 0 | PASS |
-| C14-R1 Defaults | Used_Growth_Rate | 0.045 | 0.045 | 0 | PASS |
-| C14-R1 Defaults | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
-| C14-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Grows_To | 50,902.3648 | 50,902.3648 | 2.18e-11 | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Value_Today | 37,821.2068 | 37,821.2068 | -5.82e-11 | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Relieved_Year | 2400 | 2400 | 0 | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Relief_Per_Month | 80 | 80 | 0 | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Net_Cost_Per_Month | 120 | 120 | 0 | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Contribution | 200 | 200 | 0 | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Paid_In | 36000 | 36000 | 0 | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Net_Cost | 21,600 | 21600 | 0 | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Growth_Rate | 0.045 | 0.045 | 0 | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
+| C14-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C14-R1 Example values typed in | Grows_To | 50,902.3648 | 50,902.3648 | 2.18e-11 | PASS |
+| C14-R1 Example values typed in | Value_Today | 37,821.2068 | 37,821.2068 | -5.82e-11 | PASS |
+| C14-R1 Example values typed in | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R1 Example values typed in | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R1 Example values typed in | Relieved_Year | 2400 | 2400 | 0 | PASS |
+| C14-R1 Example values typed in | Relief_Per_Month | 80 | 80 | 0 | PASS |
+| C14-R1 Example values typed in | Net_Cost_Per_Month | 120 | 120 | 0 | PASS |
+| C14-R1 Example values typed in | Plan_Goal_Contribution | 200 | 200 | 0 | PASS |
+| C14-R1 Example values typed in | Paid_In | 36000 | 36000 | 0 | PASS |
+| C14-R1 Example values typed in | Net_Cost | 21,600 | 21600 | 0 | PASS |
+| C14-R1 Example values typed in | Used_Growth_Rate | 0.045 | 0.045 | 0 | PASS |
+| C14-R1 Example values typed in | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
+| C14-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C14-R2 Low / edge | Grows_To | 301.3725 | 301.3725 | 7.96e-13 | PASS |
 | C14-R2 Low / edge | Value_Today | 291.1812 | 291.1812 | 6.25e-13 | PASS |
 | C14-R2 Low / edge | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R2 Low / edge | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C14-R2 Low / edge | Relieved_Year | 300 | 300 | 0 | PASS |
 | C14-R2 Low / edge | Relief_Per_Month | 5 | 5 | 0 | PASS |
 | C14-R2 Low / edge | Net_Cost_Per_Month | 20 | 20 | 0 | PASS |
@@ -3182,6 +3448,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R3 High / edge | Grows_To | 4,943,084.0142 | 4,943,084.0142 | -2.79e-09 | PASS |
 | C14-R3 High / edge | Value_Today | 2,238,675.3715 | 2,238,675.3715 | -2.79e-09 | PASS |
 | C14-R3 High / edge | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R3 High / edge | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C14-R3 High / edge | Relieved_Year | 15,000 | 15000 | 0 | PASS |
 | C14-R3 High / edge | Relief_Per_Month | 500 | 500 | 0 | PASS |
 | C14-R3 High / edge | Net_Cost_Per_Month | 1,500 | 1500 | 0 | PASS |
@@ -3194,6 +3461,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R4 Branch / edge | Grows_To | 95,441.934 | 95,441.934 | -2.91e-11 | PASS |
 | C14-R4 Branch / edge | Value_Today | 63,534.8155 | 63,534.8155 | 2.18e-11 | PASS |
 | C14-R4 Branch / edge | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R4 Branch / edge | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C14-R4 Branch / edge | Relieved_Year | 4500 | 4500 | 0 | PASS |
 | C14-R4 Branch / edge | Relief_Per_Month | 75 | 75 | 0 | PASS |
 | C14-R4 Branch / edge | Net_Cost_Per_Month | 300 | 300 | 0 | PASS |
@@ -3206,6 +3474,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R5 Random (seed 1) | Grows_To | 102,140.6938 | 102,140.6938 | 2.91e-11 | PASS |
 | C14-R5 Random (seed 1) | Value_Today | 51,838.5732 | 51,838.5732 | -3.64e-11 | PASS |
 | C14-R5 Random (seed 1) | Relief_Limit_Year | 46,000 | 46000 | 0 | PASS |
+| C14-R5 Random (seed 1) | Relief_Room_Year | 6,700 | 6700 | 0 | PASS |
 | C14-R5 Random (seed 1) | Relieved_Year | 3600 | 3600 | 0 | PASS |
 | C14-R5 Random (seed 1) | Relief_Per_Month | 120 | 120 | 0 | PASS |
 | C14-R5 Random (seed 1) | Net_Cost_Per_Month | 180 | 180 | 0 | PASS |
@@ -3218,6 +3487,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R6 Random (seed 2) | Grows_To | 1,762,092.7042 | 1,762,092.7042 | 1.86e-09 | PASS |
 | C14-R6 Random (seed 2) | Value_Today | 528,587.0394 | 528,587.0394 | 5.82e-10 | PASS |
 | C14-R6 Random (seed 2) | Relief_Limit_Year | 23,000 | 23000 | 0 | PASS |
+| C14-R6 Random (seed 2) | Relief_Room_Year | 0 | 0 | 0 | PASS |
 | C14-R6 Random (seed 2) | Relieved_Year | 0 | 0 | 0 | PASS |
 | C14-R6 Random (seed 2) | Relief_Per_Month | 0 | 0 | 0 | PASS |
 | C14-R6 Random (seed 2) | Net_Cost_Per_Month | 1,150 | 1150 | 0 | PASS |
@@ -3230,6 +3500,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R7 Edge, 0% inflation | Grows_To | 50,902.3648 | 50,902.3648 | 2.18e-11 | PASS |
 | C14-R7 Edge, 0% inflation | Value_Today | 50,902.3648 | 50,902.3648 | 2.18e-11 | PASS |
 | C14-R7 Edge, 0% inflation | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R7 Edge, 0% inflation | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C14-R7 Edge, 0% inflation | Relieved_Year | 2400 | 2400 | 0 | PASS |
 | C14-R7 Edge, 0% inflation | Relief_Per_Month | 80 | 80 | 0 | PASS |
 | C14-R7 Edge, 0% inflation | Net_Cost_Per_Month | 120 | 120 | 0 | PASS |
@@ -3240,8 +3511,9 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R7 Edge, 0% inflation | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
 | C14-R7 Edge, 0% inflation | Statement_Check |  |  |  | PASS |
 | C14-R8 Inflation left blank | Grows_To | 50,902.3648 | 50,902.3648 | 2.18e-11 | PASS |
-| C14-R8 Inflation left blank | Value_Today | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C14-R8 Inflation left blank | Value_Today | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C14-R8 Inflation left blank | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R8 Inflation left blank | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C14-R8 Inflation left blank | Relieved_Year | 2400 | 2400 | 0 | PASS |
 | C14-R8 Inflation left blank | Relief_Per_Month | 80 | 80 | 0 | PASS |
 | C14-R8 Inflation left blank | Net_Cost_Per_Month | 120 | 120 | 0 | PASS |
@@ -3254,6 +3526,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R9 Inflation 4% | Grows_To | 50,902.3648 | 50,902.3648 | 2.18e-11 | PASS |
 | C14-R9 Inflation 4% | Value_Today | 28,264.2763 | 28,264.2763 | -4.73e-11 | PASS |
 | C14-R9 Inflation 4% | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R9 Inflation 4% | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C14-R9 Inflation 4% | Relieved_Year | 2400 | 2400 | 0 | PASS |
 | C14-R9 Inflation 4% | Relief_Per_Month | 80 | 80 | 0 | PASS |
 | C14-R9 Inflation 4% | Net_Cost_Per_Month | 120 | 120 | 0 | PASS |
@@ -3266,6 +3539,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R10 Statements A (recent; C12 projection in today's money) | Grows_To | 52,544.8747 | 52,544.8747 | 1.46e-11 | PASS |
 | C14-R10 Statements A (recent; C12 projection in today's money) | Value_Today | 39,041.6159 | 39,041.6159 | -2.91e-11 | PASS |
 | C14-R10 Statements A (recent; C12 projection in today's money) | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R10 Statements A (recent; C12 projection in today's money) | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C14-R10 Statements A (recent; C12 projection in today's money) | Relieved_Year | 2400 | 2400 | 0 | PASS |
 | C14-R10 Statements A (recent; C12 projection in today's money) | Relief_Per_Month | 80 | 80 | 0 | PASS |
 | C14-R10 Statements A (recent; C12 projection in today's money) | Net_Cost_Per_Month | 120 | 120 | 0 | PASS |
@@ -3278,6 +3552,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R11 Statements B (old; C12 projection not in today's money) | Grows_To | 50,902.3648 | 50,902.3648 | 2.18e-11 | PASS |
 | C14-R11 Statements B (old; C12 projection not in today's money) | Value_Today | 30,383.144 | 30,383.144 | -3.64e-11 | PASS |
 | C14-R11 Statements B (old; C12 projection not in today's money) | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R11 Statements B (old; C12 projection not in today's money) | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C14-R11 Statements B (old; C12 projection not in today's money) | Relieved_Year | 2400 | 2400 | 0 | PASS |
 | C14-R11 Statements B (old; C12 projection not in today's money) | Relief_Per_Month | 80 | 80 | 0 | PASS |
 | C14-R11 Statements B (old; C12 projection not in today's money) | Net_Cost_Per_Month | 120 | 120 | 0 | PASS |
@@ -3290,6 +3565,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R12 Statements C (C12 age mismatch; low mortgage repayment) | Grows_To | 50,902.3648 | 50,902.3648 | 2.18e-11 | PASS |
 | C14-R12 Statements C (C12 age mismatch; low mortgage repayment) | Value_Today | 33,885.2349 | 33,885.2349 | 2.18e-11 | PASS |
 | C14-R12 Statements C (C12 age mismatch; low mortgage repayment) | Relief_Limit_Year | 15,000 | 15000 | 0 | PASS |
+| C14-R12 Statements C (C12 age mismatch; low mortgage repayment) | Relief_Room_Year | 15,000 | 15000 | 0 | PASS |
 | C14-R12 Statements C (C12 age mismatch; low mortgage repayment) | Relieved_Year | 2400 | 2400 | 0 | PASS |
 | C14-R12 Statements C (C12 age mismatch; low mortgage repayment) | Relief_Per_Month | 80 | 80 | 0 | PASS |
 | C14-R12 Statements C (C12 age mismatch; low mortgage repayment) | Net_Cost_Per_Month | 120 | 120 | 0 | PASS |
@@ -3302,6 +3578,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R13 Irish rules checks | Grows_To | 50,902.3648 | 50,902.3648 | 2.18e-11 | PASS |
 | C14-R13 Irish rules checks | Value_Today | 37,821.2068 | 37,821.2068 | -5.82e-11 | PASS |
 | C14-R13 Irish rules checks | Relief_Limit_Year | 5,000 | 5000 | 0 | PASS |
+| C14-R13 Irish rules checks | Relief_Room_Year | 0 | 0 | 0 | PASS |
 | C14-R13 Irish rules checks | Relieved_Year | 0 | 0 | 0 | PASS |
 | C14-R13 Irish rules checks | Relief_Per_Month | 0 | 0 | 0 | PASS |
 | C14-R13 Irish rules checks | Net_Cost_Per_Month | 200 | 200 | 0 | PASS |
@@ -3312,22 +3589,30 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C14-R13 Irish rules checks | [shown] Used_Growth_Rate | Your figure | Your figure |  | PASS |
 | C14-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C15 Will my money last: 104/104 PASS
+### C15 Will my money last: 112/112 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C15-R1 Defaults | Years_Lasting | 18 | 18 | 0 | PASS |
-| C15-R1 Defaults | Withdrawal_Rate | 0.06 | 0.06 | 0 | PASS |
-| C15-R1 Defaults | Lasts_To_Age | 84 | 84 | 0 | PASS |
-| C15-R1 Defaults | [shown] Lasts_To_Age | Runs out 6 years before your plan age | Runs out 6 years before your plan age |  | PASS |
-| C15-R1 Defaults | [shown] Years_Lasting | 18 years | 18 years |  | PASS |
-| C15-R1 Defaults | Used_Retirement_Savings | 400000 | 400000 | 0 | PASS |
-| C15-R1 Defaults | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
-| C15-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C15-R0 Blank template, example values ON (Fill_Example = Yes) | Years_Lasting | 18 | 18 | 0 | PASS |
+| C15-R0 Blank template, example values ON (Fill_Example = Yes) | Withdrawal_Rate | 0.06 | 0.06 | 0 | PASS |
+| C15-R0 Blank template, example values ON (Fill_Example = Yes) | Lasts_To_Age | 84 | 84 | 0 | PASS |
+| C15-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Lasts_To_Age | Runs out 6 years before your plan age | Runs out 6 years before your plan age |  | PASS |
+| C15-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Years_Lasting | 18 years | 18 years |  | PASS |
+| C15-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Retirement_Savings | 400000 | 400000 | 0 | PASS |
+| C15-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
+| C15-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C15-R1 Example values typed in | Years_Lasting | 18 | 18 | 0 | PASS |
+| C15-R1 Example values typed in | Withdrawal_Rate | 0.06 | 0.06 | 0 | PASS |
+| C15-R1 Example values typed in | Lasts_To_Age | 84 | 84 | 0 | PASS |
+| C15-R1 Example values typed in | [shown] Lasts_To_Age | Runs out 6 years before your plan age | Runs out 6 years before your plan age |  | PASS |
+| C15-R1 Example values typed in | [shown] Years_Lasting | 18 years | 18 years |  | PASS |
+| C15-R1 Example values typed in | Used_Retirement_Savings | 400000 | 400000 | 0 | PASS |
+| C15-R1 Example values typed in | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
+| C15-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C15-R2 Low / edge | Years_Lasting | 60 | 60 | 0 | PASS |
 | C15-R2 Low / edge | Withdrawal_Rate | 0.0003 | 0.0003 | -3.25e-19 | PASS |
-| C15-R2 Low / edge | Lasts_To_Age | 126 | 126 | 0 | PASS |
-| C15-R2 Low / edge | [shown] Lasts_To_Age | Beyond age 126 | Beyond age 126 |  | PASS |
+| C15-R2 Low / edge | Lasts_To_Age | 60+ years | 60+ years |  | PASS |
+| C15-R2 Low / edge | [shown] Lasts_To_Age | Lasts 60+ years: beyond your plan age (90) | Lasts 60+ years: beyond your plan age (90) |  | PASS |
 | C15-R2 Low / edge | [shown] Years_Lasting | 60+ years | 60+ years |  | PASS |
 | C15-R2 Low / edge | Used_Retirement_Savings | 3000000 | 3000000 | 0 | PASS |
 | C15-R2 Low / edge | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
@@ -3350,8 +3635,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C15-R4 Branch / edge | Statement_Check |  |  |  | PASS |
 | C15-R5 Random (seed 1) | Years_Lasting | 60 | 60 | 0 | PASS |
 | C15-R5 Random (seed 1) | Withdrawal_Rate | 0.0214 | 0.0214 | -1.04e-17 | PASS |
-| C15-R5 Random (seed 1) | Lasts_To_Age | 125 | 125 | 0 | PASS |
-| C15-R5 Random (seed 1) | [shown] Lasts_To_Age | Beyond age 125 | Beyond age 125 |  | PASS |
+| C15-R5 Random (seed 1) | Lasts_To_Age | 60+ years | 60+ years |  | PASS |
+| C15-R5 Random (seed 1) | [shown] Lasts_To_Age | Lasts 60+ years: beyond your plan age (91) | Lasts 60+ years: beyond your plan age (91) |  | PASS |
 | C15-R5 Random (seed 1) | [shown] Years_Lasting | 60+ years | 60+ years |  | PASS |
 | C15-R5 Random (seed 1) | Used_Retirement_Savings | 2430000 | 2430000 | 0 | PASS |
 | C15-R5 Random (seed 1) | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
@@ -3372,11 +3657,11 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C15-R7 Edge, 0% inflation | Used_Retirement_Savings | 100000 | 100000 | 0 | PASS |
 | C15-R7 Edge, 0% inflation | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
 | C15-R7 Edge, 0% inflation | Statement_Check |  |  |  | PASS |
-| C15-R8 Inflation left blank | Years_Lasting | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C15-R8 Inflation left blank | Years_Lasting | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C15-R8 Inflation left blank | Withdrawal_Rate | 0.06 | 0.06 | 0 | PASS |
-| C15-R8 Inflation left blank | Lasts_To_Age | Enter your inflation rate | Enter your inflation rate |  | PASS |
-| C15-R8 Inflation left blank | [shown] Lasts_To_Age | Enter your inflation rate | Enter your inflation rate |  | PASS |
-| C15-R8 Inflation left blank | [shown] Years_Lasting | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C15-R8 Inflation left blank | Lasts_To_Age | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
+| C15-R8 Inflation left blank | [shown] Lasts_To_Age | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
+| C15-R8 Inflation left blank | [shown] Years_Lasting | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C15-R8 Inflation left blank | Used_Retirement_Savings | 400000 | 400000 | 0 | PASS |
 | C15-R8 Inflation left blank | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
 | C15-R8 Inflation left blank | Statement_Check |  |  |  | PASS |
@@ -3421,19 +3706,28 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C15-R13 Irish rules checks | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
 | C15-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C16 Drawdown scenarios: 117/117 PASS
+### C16 Drawdown scenarios: 126/126 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C16-R1 Defaults | Years_Cautious | 20 | 20 | 0 | PASS |
-| C16-R1 Defaults | [shown] Years_Cautious | 20 years | 20 years |  | PASS |
-| C16-R1 Defaults | Years_Balanced | 25 | 25 | 0 | PASS |
-| C16-R1 Defaults | [shown] Years_Balanced | 25 years | 25 years |  | PASS |
-| C16-R1 Defaults | Years_Growth | 36 | 36 | 0 | PASS |
-| C16-R1 Defaults | [shown] Years_Growth | 36 years | 36 years |  | PASS |
-| C16-R1 Defaults | Used_Retirement_Savings | 400000 | 400000 | 0 | PASS |
-| C16-R1 Defaults | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
-| C16-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C16-R0 Blank template, example values ON (Fill_Example = Yes) | Years_Cautious | 20 | 20 | 0 | PASS |
+| C16-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Years_Cautious | 20 years | 20 years |  | PASS |
+| C16-R0 Blank template, example values ON (Fill_Example = Yes) | Years_Balanced | 25 | 25 | 0 | PASS |
+| C16-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Years_Balanced | 25 years | 25 years |  | PASS |
+| C16-R0 Blank template, example values ON (Fill_Example = Yes) | Years_Growth | 36 | 36 | 0 | PASS |
+| C16-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Years_Growth | 36 years | 36 years |  | PASS |
+| C16-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Retirement_Savings | 400000 | 400000 | 0 | PASS |
+| C16-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
+| C16-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C16-R1 Example values typed in | Years_Cautious | 20 | 20 | 0 | PASS |
+| C16-R1 Example values typed in | [shown] Years_Cautious | 20 years | 20 years |  | PASS |
+| C16-R1 Example values typed in | Years_Balanced | 25 | 25 | 0 | PASS |
+| C16-R1 Example values typed in | [shown] Years_Balanced | 25 years | 25 years |  | PASS |
+| C16-R1 Example values typed in | Years_Growth | 36 | 36 | 0 | PASS |
+| C16-R1 Example values typed in | [shown] Years_Growth | 36 years | 36 years |  | PASS |
+| C16-R1 Example values typed in | Used_Retirement_Savings | 400000 | 400000 | 0 | PASS |
+| C16-R1 Example values typed in | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
+| C16-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C16-R2 Low / edge | Years_Cautious | 60 | 60 | 0 | PASS |
 | C16-R2 Low / edge | [shown] Years_Cautious | 60+ years | 60+ years |  | PASS |
 | C16-R2 Low / edge | Years_Balanced | 60 | 60 | 0 | PASS |
@@ -3488,12 +3782,12 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C16-R7 Edge, 0% inflation | Used_Retirement_Savings | 400000 | 400000 | 0 | PASS |
 | C16-R7 Edge, 0% inflation | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
 | C16-R7 Edge, 0% inflation | Statement_Check |  |  |  | PASS |
-| C16-R8 Inflation left blank | Years_Cautious | Enter your inflation rate | Enter your inflation rate |  | PASS |
-| C16-R8 Inflation left blank | [shown] Years_Cautious | Enter your inflation rate | Enter your inflation rate |  | PASS |
-| C16-R8 Inflation left blank | Years_Balanced | Enter your inflation rate | Enter your inflation rate |  | PASS |
-| C16-R8 Inflation left blank | [shown] Years_Balanced | Enter your inflation rate | Enter your inflation rate |  | PASS |
-| C16-R8 Inflation left blank | Years_Growth | Enter your inflation rate | Enter your inflation rate |  | PASS |
-| C16-R8 Inflation left blank | [shown] Years_Growth | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C16-R8 Inflation left blank | Years_Cautious | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
+| C16-R8 Inflation left blank | [shown] Years_Cautious | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
+| C16-R8 Inflation left blank | Years_Balanced | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
+| C16-R8 Inflation left blank | [shown] Years_Balanced | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
+| C16-R8 Inflation left blank | Years_Growth | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
+| C16-R8 Inflation left blank | [shown] Years_Growth | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C16-R8 Inflation left blank | Used_Retirement_Savings | 400000 | 400000 | 0 | PASS |
 | C16-R8 Inflation left blank | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
 | C16-R8 Inflation left blank | Statement_Check |  |  |  | PASS |
@@ -3543,16 +3837,22 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C16-R13 Irish rules checks | [shown] Used_Retirement_Savings | Your figure | Your figure |  | PASS |
 | C16-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C17 Inflation adjusted return: 78/78 PASS
+### C17 Inflation adjusted return: 84/84 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C17-R1 Defaults | Future_Value | 41,578.5636 | 41,578.5636 | 2.18e-11 | PASS |
-| C17-R1 Defaults | Value_Today | 30,893.4852 | 30,893.4852 | -2.91e-11 | PASS |
-| C17-R1 Defaults | Real_Return | 0.0294 | 0.0294 | 3.12e-17 | PASS |
-| C17-R1 Defaults | Used_Amount | 20000 | 20000 | 0 | PASS |
-| C17-R1 Defaults | [shown] Used_Amount | Your figure | Your figure |  | PASS |
-| C17-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C17-R0 Blank template, example values ON (Fill_Example = Yes) | Future_Value | 41,578.5636 | 41,578.5636 | 2.18e-11 | PASS |
+| C17-R0 Blank template, example values ON (Fill_Example = Yes) | Value_Today | 30,893.4852 | 30,893.4852 | -2.91e-11 | PASS |
+| C17-R0 Blank template, example values ON (Fill_Example = Yes) | Real_Return | 0.0294 | 0.0294 | 3.12e-17 | PASS |
+| C17-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Amount | 20000 | 20000 | 0 | PASS |
+| C17-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Amount | Your figure | Your figure |  | PASS |
+| C17-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C17-R1 Example values typed in | Future_Value | 41,578.5636 | 41,578.5636 | 2.18e-11 | PASS |
+| C17-R1 Example values typed in | Value_Today | 30,893.4852 | 30,893.4852 | -2.91e-11 | PASS |
+| C17-R1 Example values typed in | Real_Return | 0.0294 | 0.0294 | 3.12e-17 | PASS |
+| C17-R1 Example values typed in | Used_Amount | 20000 | 20000 | 0 | PASS |
+| C17-R1 Example values typed in | [shown] Used_Amount | Your figure | Your figure |  | PASS |
+| C17-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C17-R2 Low / edge | Future_Value | 500 | 500 | 0 | PASS |
 | C17-R2 Low / edge | Value_Today | 483.0918 | 483.0918 | 4.55e-13 | PASS |
 | C17-R2 Low / edge | Real_Return | -0.0338 | -0.0338 | -2.78e-17 | PASS |
@@ -3590,8 +3890,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C17-R7 Edge, 0% inflation | [shown] Used_Amount | Your figure | Your figure |  | PASS |
 | C17-R7 Edge, 0% inflation | Statement_Check |  |  |  | PASS |
 | C17-R8 Inflation left blank | Future_Value | 41,578.5636 | 41,578.5636 | 2.18e-11 | PASS |
-| C17-R8 Inflation left blank | Value_Today | Enter your inflation rate | Enter your inflation rate |  | PASS |
-| C17-R8 Inflation left blank | Real_Return | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C17-R8 Inflation left blank | Value_Today | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
+| C17-R8 Inflation left blank | Real_Return | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C17-R8 Inflation left blank | Used_Amount | 20000 | 20000 | 0 | PASS |
 | C17-R8 Inflation left blank | [shown] Used_Amount | Your figure | Your figure |  | PASS |
 | C17-R8 Inflation left blank | Statement_Check |  |  |  | PASS |
@@ -3626,27 +3926,44 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C17-R13 Irish rules checks | [shown] Used_Amount | Your figure | Your figure |  | PASS |
 | C17-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C18 Regular investing: 221/221 PASS
+### C18 Regular investing: 238/238 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C18-R1 Defaults | Value_After_Fees | 73,108.7854 | 73,108.7854 | 3.93e-10 | PASS |
-| C18-R1 Defaults | Value_Before_Fees | 79,447.3784 | 79,447.3784 | 0 | PASS |
-| C18-R1 Defaults | Fees_Cost | 6,338.5929 | 6,338.5929 | -4.37e-10 | PASS |
-| C18-R1 Defaults | Paid_In | 54000 | 54000 | 0 | PASS |
-| C18-R1 Defaults | Value_Today | 54,320.9045 | 54,320.9045 | 2.98e-10 | PASS |
-| C18-R1 Defaults | Growth_After_Fees | 0.0395 | 0.0395 | 6.94e-18 | PASS |
-| C18-R1 Defaults | Real_Return | 0.0191 | 0.0191 | 1.73e-17 | PASS |
-| C18-R1 Defaults | Headline | 73,108.7854 | 73,108.7854 | 3.93e-10 | PASS |
-| C18-R1 Defaults | Plan_Goal_Amount | 54,321 | 54321 | 0 | PASS |
-| C18-R1 Defaults | Plan_Goal_Years | 15 | 15 | 0 | PASS |
-| C18-R1 Defaults | Used_Monthly_Amount | 300 | 300 | 0 | PASS |
-| C18-R1 Defaults | [shown] Used_Monthly_Amount | Your figure | Your figure |  | PASS |
-| C18-R1 Defaults | Used_Yearly_Fees | 0.01 | 0.01 | 0 | PASS |
-| C18-R1 Defaults | [shown] Used_Yearly_Fees | Your figure | Your figure |  | PASS |
-| C18-R1 Defaults | Statement_Check |  |  |  | PASS |
-| C18-R1 Defaults | Statement_Uploaded | No | No |  | PASS |
-| C18-R1 Defaults | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Value_After_Fees | 73,108.7854 | 73,108.7854 | 3.93e-10 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Value_Before_Fees | 79,447.3784 | 79,447.3784 | 0 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Fees_Cost | 6,338.5929 | 6,338.5929 | -4.37e-10 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Paid_In | 54000 | 54000 | 0 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Value_Today | 54,320.9045 | 54,320.9045 | 2.98e-10 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Growth_After_Fees | 0.0395 | 0.0395 | 6.94e-18 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Real_Return | 0.0191 | 0.0191 | 1.73e-17 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Headline | 73,108.7854 | 73,108.7854 | 3.93e-10 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Amount | 54,321 | 54321 | 0 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Years | 15 | 15 | 0 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Monthly_Amount | 300 | 300 | 0 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Monthly_Amount | Your figure | Your figure |  | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Yearly_Fees | 0.01 | 0.01 | 0 | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Yearly_Fees | Your figure | Your figure |  | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Uploaded | No | No |  | PASS |
+| C18-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
+| C18-R1 Example values typed in | Value_After_Fees | 73,108.7854 | 73,108.7854 | 3.93e-10 | PASS |
+| C18-R1 Example values typed in | Value_Before_Fees | 79,447.3784 | 79,447.3784 | 0 | PASS |
+| C18-R1 Example values typed in | Fees_Cost | 6,338.5929 | 6,338.5929 | -4.37e-10 | PASS |
+| C18-R1 Example values typed in | Paid_In | 54000 | 54000 | 0 | PASS |
+| C18-R1 Example values typed in | Value_Today | 54,320.9045 | 54,320.9045 | 2.98e-10 | PASS |
+| C18-R1 Example values typed in | Growth_After_Fees | 0.0395 | 0.0395 | 6.94e-18 | PASS |
+| C18-R1 Example values typed in | Real_Return | 0.0191 | 0.0191 | 1.73e-17 | PASS |
+| C18-R1 Example values typed in | Headline | 73,108.7854 | 73,108.7854 | 3.93e-10 | PASS |
+| C18-R1 Example values typed in | Plan_Goal_Amount | 54,321 | 54321 | 0 | PASS |
+| C18-R1 Example values typed in | Plan_Goal_Years | 15 | 15 | 0 | PASS |
+| C18-R1 Example values typed in | Used_Monthly_Amount | 300 | 300 | 0 | PASS |
+| C18-R1 Example values typed in | [shown] Used_Monthly_Amount | Your figure | Your figure |  | PASS |
+| C18-R1 Example values typed in | Used_Yearly_Fees | 0.01 | 0.01 | 0 | PASS |
+| C18-R1 Example values typed in | [shown] Used_Yearly_Fees | Your figure | Your figure |  | PASS |
+| C18-R1 Example values typed in | Statement_Check |  |  |  | PASS |
+| C18-R1 Example values typed in | Statement_Uploaded | No | No |  | PASS |
+| C18-R1 Example values typed in | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
 | C18-R2 Low / edge | Value_After_Fees | 300 | 300 | 0 | PASS |
 | C18-R2 Low / edge | Value_Before_Fees | 300 | 300 | 0 | PASS |
 | C18-R2 Low / edge | Fees_Cost | 0 | 0 | 0 | PASS |
@@ -3753,9 +4070,9 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C18-R8 Inflation left blank | Value_Before_Fees | 79,447.3784 | 79,447.3784 | 0 | PASS |
 | C18-R8 Inflation left blank | Fees_Cost | 6,338.5929 | 6,338.5929 | -4.37e-10 | PASS |
 | C18-R8 Inflation left blank | Paid_In | 54000 | 54000 | 0 | PASS |
-| C18-R8 Inflation left blank | Value_Today | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C18-R8 Inflation left blank | Value_Today | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C18-R8 Inflation left blank | Growth_After_Fees | 0.0395 | 0.0395 | 6.94e-18 | PASS |
-| C18-R8 Inflation left blank | Real_Return | Enter your inflation rate | Enter your inflation rate |  | PASS |
+| C18-R8 Inflation left blank | Real_Return | Choose your inflation rate to see this | Choose your inflation rate to see this |  | PASS |
 | C18-R8 Inflation left blank | Headline | 73,108.7854 | 73,108.7854 | 3.93e-10 | PASS |
 | C18-R8 Inflation left blank | Plan_Goal_Amount | Choose an inflation rate first | Choose an inflation rate first |  | PASS |
 | C18-R8 Inflation left blank | Plan_Goal_Years | 15 | 15 | 0 | PASS |
@@ -3852,20 +4169,30 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C18-R13 Irish rules checks | Statement_Uploaded | No | No |  | PASS |
 | C18-R13 Irish rules checks | Plan_Inflation | 0.02 | 0.02 | 0 | PASS |
 
-### C19 Fees impact: 130/130 PASS
+### C19 Fees impact: 140/140 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C19-R1 Defaults | Value_With_Fee_A | 120,010.0456 | 120,010.0456 | 1.31e-10 | PASS |
-| C19-R1 Defaults | Value_With_Fee_B | 98,057.4501 | 98,057.4501 | 7.28e-11 | PASS |
-| C19-R1 Defaults | Difference | 21,952.5954 | 21,952.5954 | 7.28e-11 | PASS |
-| C19-R1 Defaults | Fee_Gap | 0.01 | 0.01 | 1.73e-18 | PASS |
-| C19-R1 Defaults | Used_Amount_Invested | 50000 | 50000 | 0 | PASS |
-| C19-R1 Defaults | [shown] Used_Amount_Invested | Your figure | Your figure |  | PASS |
-| C19-R1 Defaults | Used_Fee_A | 0.005 | 0.005 | 0 | PASS |
-| C19-R1 Defaults | [shown] Used_Fee_A | Your figure | Your figure |  | PASS |
-| C19-R1 Defaults | Statement_Check |  |  |  | PASS |
-| C19-R1 Defaults | Statement_Uploaded | No | No |  | PASS |
+| C19-R0 Blank template, example values ON (Fill_Example = Yes) | Value_With_Fee_A | 120,010.0456 | 120,010.0456 | 1.31e-10 | PASS |
+| C19-R0 Blank template, example values ON (Fill_Example = Yes) | Value_With_Fee_B | 98,057.4501 | 98,057.4501 | 7.28e-11 | PASS |
+| C19-R0 Blank template, example values ON (Fill_Example = Yes) | Difference | 21,952.5954 | 21,952.5954 | 7.28e-11 | PASS |
+| C19-R0 Blank template, example values ON (Fill_Example = Yes) | Fee_Gap | 0.01 | 0.01 | 1.73e-18 | PASS |
+| C19-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Amount_Invested | 50000 | 50000 | 0 | PASS |
+| C19-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Amount_Invested | Your figure | Your figure |  | PASS |
+| C19-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Fee_A | 0.005 | 0.005 | 0 | PASS |
+| C19-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Fee_A | Your figure | Your figure |  | PASS |
+| C19-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C19-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Uploaded | No | No |  | PASS |
+| C19-R1 Example values typed in | Value_With_Fee_A | 120,010.0456 | 120,010.0456 | 1.31e-10 | PASS |
+| C19-R1 Example values typed in | Value_With_Fee_B | 98,057.4501 | 98,057.4501 | 7.28e-11 | PASS |
+| C19-R1 Example values typed in | Difference | 21,952.5954 | 21,952.5954 | 7.28e-11 | PASS |
+| C19-R1 Example values typed in | Fee_Gap | 0.01 | 0.01 | 1.73e-18 | PASS |
+| C19-R1 Example values typed in | Used_Amount_Invested | 50000 | 50000 | 0 | PASS |
+| C19-R1 Example values typed in | [shown] Used_Amount_Invested | Your figure | Your figure |  | PASS |
+| C19-R1 Example values typed in | Used_Fee_A | 0.005 | 0.005 | 0 | PASS |
+| C19-R1 Example values typed in | [shown] Used_Fee_A | Your figure | Your figure |  | PASS |
+| C19-R1 Example values typed in | Statement_Check |  |  |  | PASS |
+| C19-R1 Example values typed in | Statement_Uploaded | No | No |  | PASS |
 | C19-R2 Low / edge | Value_With_Fee_A | 1000 | 1000 | 0 | PASS |
 | C19-R2 Low / edge | Value_With_Fee_B | 1000 | 1000 | 0 | PASS |
 | C19-R2 Low / edge | Difference | 0 | 0 | 0 | PASS |
@@ -3987,24 +4314,38 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C19-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 | C19-R13 Irish rules checks | Statement_Uploaded | No | No |  | PASS |
 
-### C20 Risk and return: 182/182 PASS
+### C20 Risk and return: 196/196 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C20-R1 Defaults | Style_Name | Balanced | Balanced |  | PASS |
-| C20-R1 Defaults | Middle_Growth | 0.04 | 0.04 | 0 | PASS |
-| C20-R1 Defaults | Volatility | 0.1 | 0.1 | 0 | PASS |
-| C20-R1 Defaults | Spread | 0.0316 | 0.0316 | 6.94e-18 | PASS |
-| C20-R1 Defaults | Middle | 29,604.8857 | 29,604.8857 | 1.09e-11 | PASS |
-| C20-R1 Defaults | Weaker | 21,740.0366 | 21,740.0366 | -1.46e-11 | PASS |
-| C20-R1 Defaults | Stronger | 39,943.7976 | 39,943.7976 | 4.37e-11 | PASS |
-| C20-R1 Defaults | Difficult_Year_Fall | 0.12 | 0.12 | 0 | PASS |
-| C20-R1 Defaults | [shown] Middle | Balanced · middle outcome | Balanced · middle outcome |  | PASS |
-| C20-R1 Defaults | Used_Amount | 20000 | 20000 | 0 | PASS |
-| C20-R1 Defaults | [shown] Used_Amount | Your figure | Your figure |  | PASS |
-| C20-R1 Defaults | Used_Style | 2 | 2 | 0 | PASS |
-| C20-R1 Defaults | [shown] Used_Style | Your figure | Your figure |  | PASS |
-| C20-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | Style_Name | Balanced | Balanced |  | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | Middle_Growth | 0.04 | 0.04 | 0 | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | Volatility | 0.1 | 0.1 | 0 | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | Spread | 0.0316 | 0.0316 | 6.94e-18 | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | Middle | 29,604.8857 | 29,604.8857 | 1.09e-11 | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | Weaker | 21,740.0366 | 21,740.0366 | -1.46e-11 | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | Stronger | 39,943.7976 | 39,943.7976 | 4.37e-11 | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | Difficult_Year_Fall | 0.12 | 0.12 | 0 | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Middle | Balanced · middle outcome | Balanced · middle outcome |  | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Amount | 20000 | 20000 | 0 | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Amount | Your figure | Your figure |  | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Style | 2 | 2 | 0 | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Style | Your figure | Your figure |  | PASS |
+| C20-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C20-R1 Example values typed in | Style_Name | Balanced | Balanced |  | PASS |
+| C20-R1 Example values typed in | Middle_Growth | 0.04 | 0.04 | 0 | PASS |
+| C20-R1 Example values typed in | Volatility | 0.1 | 0.1 | 0 | PASS |
+| C20-R1 Example values typed in | Spread | 0.0316 | 0.0316 | 6.94e-18 | PASS |
+| C20-R1 Example values typed in | Middle | 29,604.8857 | 29,604.8857 | 1.09e-11 | PASS |
+| C20-R1 Example values typed in | Weaker | 21,740.0366 | 21,740.0366 | -1.46e-11 | PASS |
+| C20-R1 Example values typed in | Stronger | 39,943.7976 | 39,943.7976 | 4.37e-11 | PASS |
+| C20-R1 Example values typed in | Difficult_Year_Fall | 0.12 | 0.12 | 0 | PASS |
+| C20-R1 Example values typed in | [shown] Middle | Balanced · middle outcome | Balanced · middle outcome |  | PASS |
+| C20-R1 Example values typed in | Used_Amount | 20000 | 20000 | 0 | PASS |
+| C20-R1 Example values typed in | [shown] Used_Amount | Your figure | Your figure |  | PASS |
+| C20-R1 Example values typed in | Used_Style | 2 | 2 | 0 | PASS |
+| C20-R1 Example values typed in | [shown] Used_Style | Your figure | Your figure |  | PASS |
+| C20-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C20-R2 Low / edge | Style_Name | Cautious | Cautious |  | PASS |
 | C20-R2 Low / edge | Middle_Growth | 0.02 | 0.02 | 0 | PASS |
 | C20-R2 Low / edge | Volatility | 0.05 | 0.05 | 0 | PASS |
@@ -4174,19 +4515,28 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C20-R13 Irish rules checks | [shown] Used_Style | Your figure | Your figure |  | PASS |
 | C20-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C21 Life cover: 117/117 PASS
+### C21 Life cover: 126/126 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C21-R1 Defaults | Income_Need | 337,590 | 337590 | 0 | PASS |
-| C21-R1 Defaults | Debts_To_Clear | 10000 | 10000 | 0 | PASS |
-| C21-R1 Defaults | Already_Have | 120000 | 120000 | 0 | PASS |
-| C21-R1 Defaults | Cover_Gap | 227,590 | 227590 | 0 | PASS |
-| C21-R1 Defaults | Income_Replacement | 540,000 | 540000 | 0 | PASS |
-| C21-R1 Defaults | Plan_Goal_Need | 227,590 | 227590 | 0 | PASS |
-| C21-R1 Defaults | Used_Mortgage_Balance | 250000 | 250000 | 0 | PASS |
-| C21-R1 Defaults | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
-| C21-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C21-R0 Blank template, example values ON (Fill_Example = Yes) | Income_Need | 337,590 | 337590 | 0 | PASS |
+| C21-R0 Blank template, example values ON (Fill_Example = Yes) | Debts_To_Clear | 10000 | 10000 | 0 | PASS |
+| C21-R0 Blank template, example values ON (Fill_Example = Yes) | Already_Have | 120000 | 120000 | 0 | PASS |
+| C21-R0 Blank template, example values ON (Fill_Example = Yes) | Cover_Gap | 227,590 | 227590 | 0 | PASS |
+| C21-R0 Blank template, example values ON (Fill_Example = Yes) | Income_Replacement | 540,000 | 540000 | 0 | PASS |
+| C21-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Need | 227,590 | 227590 | 0 | PASS |
+| C21-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Mortgage_Balance | 250000 | 250000 | 0 | PASS |
+| C21-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
+| C21-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C21-R1 Example values typed in | Income_Need | 337,590 | 337590 | 0 | PASS |
+| C21-R1 Example values typed in | Debts_To_Clear | 10000 | 10000 | 0 | PASS |
+| C21-R1 Example values typed in | Already_Have | 120000 | 120000 | 0 | PASS |
+| C21-R1 Example values typed in | Cover_Gap | 227,590 | 227590 | 0 | PASS |
+| C21-R1 Example values typed in | Income_Replacement | 540,000 | 540000 | 0 | PASS |
+| C21-R1 Example values typed in | Plan_Goal_Need | 227,590 | 227590 | 0 | PASS |
+| C21-R1 Example values typed in | Used_Mortgage_Balance | 250000 | 250000 | 0 | PASS |
+| C21-R1 Example values typed in | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
+| C21-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C21-R2 Low / edge | Income_Need | 0 | 0 | 0 | PASS |
 | C21-R2 Low / edge | Debts_To_Clear | 0 | 0 | 0 | PASS |
 | C21-R2 Low / edge | Already_Have | 3000000 | 3000000 | 0 | PASS |
@@ -4296,17 +4646,28 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C21-R13 Irish rules checks | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
 | C21-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C22 Income protection gap: 91/91 PASS
+### C22 Income protection gap: 126/126 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C22-R1 Defaults | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
-| C22-R1 Defaults | Monthly_Gap | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
-| C22-R1 Defaults | Savings_Months | 5.717 | 5.717 | 1.78e-15 | PASS |
-| C22-R1 Defaults | Months_Coping | 8.717 | 8.717 | 1.78e-15 | PASS |
-| C22-R1 Defaults | IP_Max | 2,649.3333 | 2,649.3333 | -3.18e-12 | PASS |
-| C22-R1 Defaults | IP_Needed | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
-| C22-R1 Defaults | Plan_Goal_Need | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R0 Blank template, example values ON (Fill_Example = Yes) | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
+| C22-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Gap | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R0 Blank template, example values ON (Fill_Example = Yes) | Savings_Months | 5.717 | 5.717 | 1.78e-15 | PASS |
+| C22-R0 Blank template, example values ON (Fill_Example = Yes) | Months_Coping | 8.717 | 8.717 | 1.78e-15 | PASS |
+| C22-R0 Blank template, example values ON (Fill_Example = Yes) | IP_Max | 2,649.3333 | 2,649.3333 | -3.18e-12 | PASS |
+| C22-R0 Blank template, example values ON (Fill_Example = Yes) | IP_Needed | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Need | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Months_Coping | 8.7 months | 8.7 months |  | PASS |
+| C22-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Savings_Months | 5.7 months | 5.7 months |  | PASS |
+| C22-R1 Example values typed in | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
+| C22-R1 Example values typed in | Monthly_Gap | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R1 Example values typed in | Savings_Months | 5.717 | 5.717 | 1.78e-15 | PASS |
+| C22-R1 Example values typed in | Months_Coping | 8.717 | 8.717 | 1.78e-15 | PASS |
+| C22-R1 Example values typed in | IP_Max | 2,649.3333 | 2,649.3333 | -3.18e-12 | PASS |
+| C22-R1 Example values typed in | IP_Needed | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R1 Example values typed in | Plan_Goal_Need | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R1 Example values typed in | [shown] Months_Coping | 8.7 months | 8.7 months |  | PASS |
+| C22-R1 Example values typed in | [shown] Savings_Months | 5.7 months | 5.7 months |  | PASS |
 | C22-R2 Low / edge | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
 | C22-R2 Low / edge | Monthly_Gap | 0 | 0 | 0 | PASS |
 | C22-R2 Low / edge | Savings_Months | Indefinitely | Indefinitely |  | PASS |
@@ -4314,6 +4675,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R2 Low / edge | IP_Max | 2,649.3333 | 2,649.3333 | -3.18e-12 | PASS |
 | C22-R2 Low / edge | IP_Needed | 0 | 0 | 0 | PASS |
 | C22-R2 Low / edge | Plan_Goal_Need | 0 | 0 | 0 | PASS |
+| C22-R2 Low / edge | [shown] Months_Coping | Indefinitely | Indefinitely |  | PASS |
+| C22-R2 Low / edge | [shown] Savings_Months | Indefinitely | Indefinitely |  | PASS |
 | C22-R3 High / edge | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
 | C22-R3 High / edge | Monthly_Gap | 8,899.3333 | 8,899.3333 | -3.64e-12 | PASS |
 | C22-R3 High / edge | Savings_Months | 22.4736 | 22.4736 | 3.91e-14 | PASS |
@@ -4321,6 +4684,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R3 High / edge | IP_Max | 17,649.3333 | 17,649.3333 | -3.27e-11 | PASS |
 | C22-R3 High / edge | IP_Needed | 8,899.3333 | 8,899.3333 | -3.64e-12 | PASS |
 | C22-R3 High / edge | Plan_Goal_Need | 8,899.3333 | 8,899.3333 | -3.64e-12 | PASS |
+| C22-R3 High / edge | [shown] Months_Coping | 34.5 months | 34.5 months |  | PASS |
+| C22-R3 High / edge | [shown] Savings_Months | 22.5 months | 22.5 months |  | PASS |
 | C22-R4 Branch / edge | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
 | C22-R4 Branch / edge | Monthly_Gap | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
 | C22-R4 Branch / edge | Savings_Months | 5.717 | 5.717 | 1.78e-15 | PASS |
@@ -4328,6 +4693,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R4 Branch / edge | IP_Max | 149.3333 | 149.3333 | -2.56e-13 | PASS |
 | C22-R4 Branch / edge | IP_Needed | 149.3333 | 149.3333 | -2.56e-13 | PASS |
 | C22-R4 Branch / edge | Plan_Goal_Need | 149.3333 | 149.3333 | -2.56e-13 | PASS |
+| C22-R4 Branch / edge | [shown] Months_Coping | 8.7 months | 8.7 months |  | PASS |
+| C22-R4 Branch / edge | [shown] Savings_Months | 5.7 months | 5.7 months |  | PASS |
 | C22-R5 Random (seed 1) | Illness_Benefit_Month | 158.1667 | 158.1667 | 3.41e-13 | PASS |
 | C22-R5 Random (seed 1) | Monthly_Gap | 741.8333 | 741.8333 | -3.41e-13 | PASS |
 | C22-R5 Random (seed 1) | Savings_Months | 86.9468 | 86.9468 | 4.26e-14 | PASS |
@@ -4335,6 +4702,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R5 Random (seed 1) | IP_Max | 16,591.8333 | 16,591.8333 | -3.27e-11 | PASS |
 | C22-R5 Random (seed 1) | IP_Needed | 741.8333 | 741.8333 | -3.41e-13 | PASS |
 | C22-R5 Random (seed 1) | Plan_Goal_Need | 741.8333 | 741.8333 | -3.41e-13 | PASS |
+| C22-R5 Random (seed 1) | [shown] Months_Coping | 90.9 months | 90.9 months |  | PASS |
+| C22-R5 Random (seed 1) | [shown] Savings_Months | 86.9 months | 86.9 months |  | PASS |
 | C22-R6 Random (seed 2) | Illness_Benefit_Month | 1,135.3333 | 1,135.3333 | -3.18e-12 | PASS |
 | C22-R6 Random (seed 2) | Monthly_Gap | 564.6667 | 564.6667 | 2.27e-13 | PASS |
 | C22-R6 Random (seed 2) | Savings_Months | 179.7521 | 179.7521 | -4.55e-13 | PASS |
@@ -4342,6 +4711,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R6 Random (seed 2) | IP_Max | 15,677.1667 | 15,677.1667 | 3.46e-11 | PASS |
 | C22-R6 Random (seed 2) | IP_Needed | 564.6667 | 564.6667 | 2.27e-13 | PASS |
 | C22-R6 Random (seed 2) | Plan_Goal_Need | 564.6667 | 564.6667 | 2.27e-13 | PASS |
+| C22-R6 Random (seed 2) | [shown] Months_Coping | 185.8 months | 185.8 months |  | PASS |
+| C22-R6 Random (seed 2) | [shown] Savings_Months | 179.8 months | 179.8 months |  | PASS |
 | C22-R7 Edge, 0% inflation | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
 | C22-R7 Edge, 0% inflation | Monthly_Gap | 1,899.3333 | 1,899.3333 | -3.18e-12 | PASS |
 | C22-R7 Edge, 0% inflation | Savings_Months | 7.8975 | 7.8975 | 2.66e-15 | PASS |
@@ -4349,6 +4720,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R7 Edge, 0% inflation | IP_Max | 2,649.3333 | 2,649.3333 | -3.18e-12 | PASS |
 | C22-R7 Edge, 0% inflation | IP_Needed | 1,899.3333 | 1,899.3333 | -3.18e-12 | PASS |
 | C22-R7 Edge, 0% inflation | Plan_Goal_Need | 1,899.3333 | 1,899.3333 | -3.18e-12 | PASS |
+| C22-R7 Edge, 0% inflation | [shown] Months_Coping | 13.9 months | 13.9 months |  | PASS |
+| C22-R7 Edge, 0% inflation | [shown] Savings_Months | 7.9 months | 7.9 months |  | PASS |
 | C22-R8 Inflation left blank | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
 | C22-R8 Inflation left blank | Monthly_Gap | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
 | C22-R8 Inflation left blank | Savings_Months | 5.717 | 5.717 | 1.78e-15 | PASS |
@@ -4356,6 +4729,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R8 Inflation left blank | IP_Max | 2,649.3333 | 2,649.3333 | -3.18e-12 | PASS |
 | C22-R8 Inflation left blank | IP_Needed | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
 | C22-R8 Inflation left blank | Plan_Goal_Need | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R8 Inflation left blank | [shown] Months_Coping | 8.7 months | 8.7 months |  | PASS |
+| C22-R8 Inflation left blank | [shown] Savings_Months | 5.7 months | 5.7 months |  | PASS |
 | C22-R9 Inflation 4% | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
 | C22-R9 Inflation 4% | Monthly_Gap | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
 | C22-R9 Inflation 4% | Savings_Months | 5.717 | 5.717 | 1.78e-15 | PASS |
@@ -4363,6 +4738,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R9 Inflation 4% | IP_Max | 2,649.3333 | 2,649.3333 | -3.18e-12 | PASS |
 | C22-R9 Inflation 4% | IP_Needed | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
 | C22-R9 Inflation 4% | Plan_Goal_Need | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R9 Inflation 4% | [shown] Months_Coping | 8.7 months | 8.7 months |  | PASS |
+| C22-R9 Inflation 4% | [shown] Savings_Months | 5.7 months | 5.7 months |  | PASS |
 | C22-R10 Statements A (recent; C12 projection in today's money) | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
 | C22-R10 Statements A (recent; C12 projection in today's money) | Monthly_Gap | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
 | C22-R10 Statements A (recent; C12 projection in today's money) | Savings_Months | 5.717 | 5.717 | 1.78e-15 | PASS |
@@ -4370,6 +4747,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R10 Statements A (recent; C12 projection in today's money) | IP_Max | 2,649.3333 | 2,649.3333 | -3.18e-12 | PASS |
 | C22-R10 Statements A (recent; C12 projection in today's money) | IP_Needed | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
 | C22-R10 Statements A (recent; C12 projection in today's money) | Plan_Goal_Need | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R10 Statements A (recent; C12 projection in today's money) | [shown] Months_Coping | 8.7 months | 8.7 months |  | PASS |
+| C22-R10 Statements A (recent; C12 projection in today's money) | [shown] Savings_Months | 5.7 months | 5.7 months |  | PASS |
 | C22-R11 Statements B (old; C12 projection not in today's money) | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
 | C22-R11 Statements B (old; C12 projection not in today's money) | Monthly_Gap | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
 | C22-R11 Statements B (old; C12 projection not in today's money) | Savings_Months | 5.717 | 5.717 | 1.78e-15 | PASS |
@@ -4377,6 +4756,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R11 Statements B (old; C12 projection not in today's money) | IP_Max | 2,649.3333 | 2,649.3333 | -3.18e-12 | PASS |
 | C22-R11 Statements B (old; C12 projection not in today's money) | IP_Needed | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
 | C22-R11 Statements B (old; C12 projection not in today's money) | Plan_Goal_Need | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R11 Statements B (old; C12 projection not in today's money) | [shown] Months_Coping | 8.7 months | 8.7 months |  | PASS |
+| C22-R11 Statements B (old; C12 projection not in today's money) | [shown] Savings_Months | 5.7 months | 5.7 months |  | PASS |
 | C22-R12 Statements C (C12 age mismatch; low mortgage repayment) | Illness_Benefit_Month | 1,100.6667 | 1,100.6667 | 3.18e-12 | PASS |
 | C22-R12 Statements C (C12 age mismatch; low mortgage repayment) | Monthly_Gap | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
 | C22-R12 Statements C (C12 age mismatch; low mortgage repayment) | Savings_Months | 5.717 | 5.717 | 1.78e-15 | PASS |
@@ -4384,6 +4765,8 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R12 Statements C (C12 age mismatch; low mortgage repayment) | IP_Max | 2,649.3333 | 2,649.3333 | -3.18e-12 | PASS |
 | C22-R12 Statements C (C12 age mismatch; low mortgage repayment) | IP_Needed | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
 | C22-R12 Statements C (C12 age mismatch; low mortgage repayment) | Plan_Goal_Need | 1,399.3333 | 1,399.3333 | -3.18e-12 | PASS |
+| C22-R12 Statements C (C12 age mismatch; low mortgage repayment) | [shown] Months_Coping | 8.7 months | 8.7 months |  | PASS |
+| C22-R12 Statements C (C12 age mismatch; low mortgage repayment) | [shown] Savings_Months | 5.7 months | 5.7 months |  | PASS |
 | C22-R13 Irish rules checks | Illness_Benefit_Month | 866.6667 | 866.6667 | 3.41e-13 | PASS |
 | C22-R13 Irish rules checks | Monthly_Gap | 1,633.3333 | 1,633.3333 | -3.41e-12 | PASS |
 | C22-R13 Irish rules checks | Savings_Months | 4.898 | 4.898 | 1.78e-15 | PASS |
@@ -4391,27 +4774,45 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C22-R13 Irish rules checks | IP_Max | 2,883.3333 | 2,883.3333 | -3.64e-12 | PASS |
 | C22-R13 Irish rules checks | IP_Needed | 1,633.3333 | 1,633.3333 | -3.41e-12 | PASS |
 | C22-R13 Irish rules checks | Plan_Goal_Need | 1,633.3333 | 1,633.3333 | -3.41e-12 | PASS |
+| C22-R13 Irish rules checks | [shown] Months_Coping | 7.9 months | 7.9 months |  | PASS |
+| C22-R13 Irish rules checks | [shown] Savings_Months | 4.9 months | 4.9 months |  | PASS |
 
-### C23 Mortgage protection: 208/208 PASS
+### C23 Mortgage protection: 224/224 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C23-R1 Defaults | Monthly_Rate | 0.0031 | 0.0031 | 4.34e-19 | PASS |
-| C23-R1 Defaults | Repayment | 1,285.328 | 1,285.328 | 1.25e-11 | PASS |
-| C23-R1 Defaults | Cover_Today | 250000 | 250000 | 0 | PASS |
-| C23-R1 Defaults | Warning |  |  |  | PASS |
-| C23-R1 Defaults | Balance_Year_1 | 216,790.9143 | 216,790.9143 | -2.04e-09 | PASS |
-| C23-R1 Defaults | Balance_Year_2 | 176,744.8202 | 176,744.8202 | -3.96e-09 | PASS |
-| C23-R1 Defaults | Balance_Year_3 | 128,454.1305 | 128,454.1305 | -6.98e-09 | PASS |
-| C23-R1 Defaults | Used_Mortgage_Balance | 250000 | 250000 | 0 | PASS |
-| C23-R1 Defaults | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
-| C23-R1 Defaults | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
-| C23-R1 Defaults | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
-| C23-R1 Defaults | Used_Years_Left | 25 | 25 | 0 | PASS |
-| C23-R1 Defaults | [shown] Used_Years_Left | Your figure | Your figure |  | PASS |
-| C23-R1 Defaults | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
-| C23-R1 Defaults | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
-| C23-R1 Defaults | Statement_Check |  |  |  | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Rate | 0.0031 | 0.0031 | 4.34e-19 | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Repayment | 1,285.328 | 1,285.328 | 1.25e-11 | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Cover_Today | 250000 | 250000 | 0 | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Warning |  |  |  | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Balance_Year_1 | 216,790.9143 | 216,790.9143 | -2.04e-09 | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Balance_Year_2 | 176,744.8202 | 176,744.8202 | -3.96e-09 | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Balance_Year_3 | 128,454.1305 | 128,454.1305 | -6.98e-09 | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Mortgage_Balance | 250000 | 250000 | 0 | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Years_Left | 25 | 25 | 0 | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Years_Left | Your figure | Your figure |  | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
+| C23-R0 Blank template, example values ON (Fill_Example = Yes) | Statement_Check |  |  |  | PASS |
+| C23-R1 Example values typed in | Monthly_Rate | 0.0031 | 0.0031 | 4.34e-19 | PASS |
+| C23-R1 Example values typed in | Repayment | 1,285.328 | 1,285.328 | 1.25e-11 | PASS |
+| C23-R1 Example values typed in | Cover_Today | 250000 | 250000 | 0 | PASS |
+| C23-R1 Example values typed in | Warning |  |  |  | PASS |
+| C23-R1 Example values typed in | Balance_Year_1 | 216,790.9143 | 216,790.9143 | -2.04e-09 | PASS |
+| C23-R1 Example values typed in | Balance_Year_2 | 176,744.8202 | 176,744.8202 | -3.96e-09 | PASS |
+| C23-R1 Example values typed in | Balance_Year_3 | 128,454.1305 | 128,454.1305 | -6.98e-09 | PASS |
+| C23-R1 Example values typed in | Used_Mortgage_Balance | 250000 | 250000 | 0 | PASS |
+| C23-R1 Example values typed in | [shown] Used_Mortgage_Balance | Your figure | Your figure |  | PASS |
+| C23-R1 Example values typed in | Used_Interest_Rate | 0.0375 | 0.0375 | 0 | PASS |
+| C23-R1 Example values typed in | [shown] Used_Interest_Rate | Your figure | Your figure |  | PASS |
+| C23-R1 Example values typed in | Used_Years_Left | 25 | 25 | 0 | PASS |
+| C23-R1 Example values typed in | [shown] Used_Years_Left | Your figure | Your figure |  | PASS |
+| C23-R1 Example values typed in | Used_Actual_Repayment | 0 | 0 | 0 | PASS |
+| C23-R1 Example values typed in | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
+| C23-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C23-R2 Low / edge | Monthly_Rate | 0.0008 | 0.0008 | -4.34e-19 | PASS |
 | C23-R2 Low / edge | Repayment | 341.8749 | 341.8749 | -3.58e-11 | PASS |
 | C23-R2 Low / edge | Cover_Today | 20000 | 20000 | 0 | PASS |
@@ -4605,21 +5006,32 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C23-R13 Irish rules checks | [shown] Used_Actual_Repayment | Your figure | Your figure |  | PASS |
 | C23-R13 Irish rules checks | Statement_Check |  |  |  | PASS |
 
-### C24 Net worth: 143/143 PASS
+### C24 Net worth: 154/154 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C24-R1 Defaults | You_Own | 435000 | 435000 | 0 | PASS |
-| C24-R1 Defaults | You_Owe | 258000 | 258000 | 0 | PASS |
-| C24-R1 Defaults | Net_Worth | 177000 | 177000 | 0 | PASS |
-| C24-R1 Defaults | Used_Mortgage | 250000 | 250000 | 0 | PASS |
-| C24-R1 Defaults | [shown] Used_Mortgage | Your figure | Your figure |  | PASS |
-| C24-R1 Defaults | Used_Property | 350000 | 350000 | 0 | PASS |
-| C24-R1 Defaults | [shown] Used_Property | Your figure | Your figure |  | PASS |
-| C24-R1 Defaults | Used_Pensions | 60000 | 60000 | 0 | PASS |
-| C24-R1 Defaults | [shown] Used_Pensions | Your figure | Your figure |  | PASS |
-| C24-R1 Defaults | Used_Investments | 10000 | 10000 | 0 | PASS |
-| C24-R1 Defaults | [shown] Used_Investments | Your figure | Your figure |  | PASS |
+| C24-R0 Blank template, example values ON (Fill_Example = Yes) | You_Own | 435000 | 435000 | 0 | PASS |
+| C24-R0 Blank template, example values ON (Fill_Example = Yes) | You_Owe | 258000 | 258000 | 0 | PASS |
+| C24-R0 Blank template, example values ON (Fill_Example = Yes) | Net_Worth | 177000 | 177000 | 0 | PASS |
+| C24-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Mortgage | 250000 | 250000 | 0 | PASS |
+| C24-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Mortgage | Your figure | Your figure |  | PASS |
+| C24-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Property | 350000 | 350000 | 0 | PASS |
+| C24-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Property | Your figure | Your figure |  | PASS |
+| C24-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Pensions | 60000 | 60000 | 0 | PASS |
+| C24-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Pensions | Your figure | Your figure |  | PASS |
+| C24-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Investments | 10000 | 10000 | 0 | PASS |
+| C24-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Investments | Your figure | Your figure |  | PASS |
+| C24-R1 Example values typed in | You_Own | 435000 | 435000 | 0 | PASS |
+| C24-R1 Example values typed in | You_Owe | 258000 | 258000 | 0 | PASS |
+| C24-R1 Example values typed in | Net_Worth | 177000 | 177000 | 0 | PASS |
+| C24-R1 Example values typed in | Used_Mortgage | 250000 | 250000 | 0 | PASS |
+| C24-R1 Example values typed in | [shown] Used_Mortgage | Your figure | Your figure |  | PASS |
+| C24-R1 Example values typed in | Used_Property | 350000 | 350000 | 0 | PASS |
+| C24-R1 Example values typed in | [shown] Used_Property | Your figure | Your figure |  | PASS |
+| C24-R1 Example values typed in | Used_Pensions | 60000 | 60000 | 0 | PASS |
+| C24-R1 Example values typed in | [shown] Used_Pensions | Your figure | Your figure |  | PASS |
+| C24-R1 Example values typed in | Used_Investments | 10000 | 10000 | 0 | PASS |
+| C24-R1 Example values typed in | [shown] Used_Investments | Your figure | Your figure |  | PASS |
 | C24-R2 Low / edge | You_Own | 0 | 0 | 0 | PASS |
 | C24-R2 Low / edge | You_Owe | 0 | 0 | 0 | PASS |
 | C24-R2 Low / edge | Net_Worth | 0 | 0 | 0 | PASS |
@@ -4753,18 +5165,26 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C24-R13 Irish rules checks | Used_Investments | 10000 | 10000 | 0 | PASS |
 | C24-R13 Irish rules checks | [shown] Used_Investments | Your figure | Your figure |  | PASS |
 
-### C25 Monthly surplus: 104/104 PASS
+### C25 Monthly surplus: 112/112 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C25-R1 Defaults | Surplus | 738.0983 | 738.0983 | -3.41e-13 | PASS |
-| C25-R1 Defaults | Going_Out | 3000 | 3000 | 0 | PASS |
-| C25-R1 Defaults | Plan_Goal_Kind | Save my surplus (plan kind pot) | Save my surplus (plan kind pot) |  | PASS |
-| C25-R1 Defaults | Plan_Goal_Amount | 8,857 | 8857 | 0 | PASS |
-| C25-R1 Defaults | Plan_Goal_Years | 1 | 1 | 0 | PASS |
-| C25-R1 Defaults | [shown] Surplus | About 20% of take-home is free for goals | About 20% of take-home is free for goals |  | PASS |
-| C25-R1 Defaults | Used_Take_Home | 3,738.0983 | 3,738.0983 | -3.18e-12 | PASS |
-| C25-R1 Defaults | [shown] Used_Take_Home | From the Tax engine | From the Tax engine |  | PASS |
+| C25-R0 Blank template, example values ON (Fill_Example = Yes) | Surplus | 738.0983 | 738.0983 | -3.41e-13 | PASS |
+| C25-R0 Blank template, example values ON (Fill_Example = Yes) | Going_Out | 3000 | 3000 | 0 | PASS |
+| C25-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Kind | Save my surplus (plan kind pot) | Save my surplus (plan kind pot) |  | PASS |
+| C25-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Amount | 8,857 | 8857 | 0 | PASS |
+| C25-R0 Blank template, example values ON (Fill_Example = Yes) | Plan_Goal_Years | 1 | 1 | 0 | PASS |
+| C25-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Surplus | About 20% of take-home is free for goals | About 20% of take-home is free for goals |  | PASS |
+| C25-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Take_Home | 3,738.0983 | 3,738.0983 | -3.18e-12 | PASS |
+| C25-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Take_Home | From the Tax engine | From the Tax engine |  | PASS |
+| C25-R1 Example values typed in | Surplus | 738.0983 | 738.0983 | -3.41e-13 | PASS |
+| C25-R1 Example values typed in | Going_Out | 3000 | 3000 | 0 | PASS |
+| C25-R1 Example values typed in | Plan_Goal_Kind | Save my surplus (plan kind pot) | Save my surplus (plan kind pot) |  | PASS |
+| C25-R1 Example values typed in | Plan_Goal_Amount | 8,857 | 8857 | 0 | PASS |
+| C25-R1 Example values typed in | Plan_Goal_Years | 1 | 1 | 0 | PASS |
+| C25-R1 Example values typed in | [shown] Surplus | About 20% of take-home is free for goals | About 20% of take-home is free for goals |  | PASS |
+| C25-R1 Example values typed in | Used_Take_Home | 3,738.0983 | 3,738.0983 | -3.18e-12 | PASS |
+| C25-R1 Example values typed in | [shown] Used_Take_Home | From the Tax engine | From the Tax engine |  | PASS |
 | C25-R2 Low / edge | Surplus | -2500 | -2500 | 0 | PASS |
 | C25-R2 Low / edge | Going_Out | 3000 | 3000 | 0 | PASS |
 | C25-R2 Low / edge | Plan_Goal_Kind | No goal | No goal |  | PASS |
@@ -4862,16 +5282,22 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C25-R13 Irish rules checks | Used_Take_Home | 3,524.3483 | 3,524.3483 | -3.18e-12 | PASS |
 | C25-R13 Irish rules checks | [shown] Used_Take_Home | From the Tax engine | From the Tax engine |  | PASS |
 
-### C26 Budget 50 30 20: 78/78 PASS
+### C26 Budget 50 30 20: 84/84 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C26-R1 Defaults | Needs | 1,869.0492 | 1,869.0492 | 3.41e-12 | PASS |
-| C26-R1 Defaults | Wants | 1,121.4295 | 1,121.4295 | 0 | PASS |
-| C26-R1 Defaults | Save | 747.6197 | 747.6197 | 2.27e-13 | PASS |
-| C26-R1 Defaults | Split_Check |  |  |  | PASS |
-| C26-R1 Defaults | Used_Take_Home | 3,738.0983 | 3,738.0983 | -3.18e-12 | PASS |
-| C26-R1 Defaults | [shown] Used_Take_Home | From the Tax engine | From the Tax engine |  | PASS |
+| C26-R0 Blank template, example values ON (Fill_Example = Yes) | Needs | 1,869.0492 | 1,869.0492 | 3.41e-12 | PASS |
+| C26-R0 Blank template, example values ON (Fill_Example = Yes) | Wants | 1,121.4295 | 1,121.4295 | 0 | PASS |
+| C26-R0 Blank template, example values ON (Fill_Example = Yes) | Save | 747.6197 | 747.6197 | 2.27e-13 | PASS |
+| C26-R0 Blank template, example values ON (Fill_Example = Yes) | Split_Check |  |  |  | PASS |
+| C26-R0 Blank template, example values ON (Fill_Example = Yes) | Used_Take_Home | 3,738.0983 | 3,738.0983 | -3.18e-12 | PASS |
+| C26-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Used_Take_Home | From the Tax engine | From the Tax engine |  | PASS |
+| C26-R1 Example values typed in | Needs | 1,869.0492 | 1,869.0492 | 3.41e-12 | PASS |
+| C26-R1 Example values typed in | Wants | 1,121.4295 | 1,121.4295 | 0 | PASS |
+| C26-R1 Example values typed in | Save | 747.6197 | 747.6197 | 2.27e-13 | PASS |
+| C26-R1 Example values typed in | Split_Check |  |  |  | PASS |
+| C26-R1 Example values typed in | Used_Take_Home | 3,738.0983 | 3,738.0983 | -3.18e-12 | PASS |
+| C26-R1 Example values typed in | [shown] Used_Take_Home | From the Tax engine | From the Tax engine |  | PASS |
 | C26-R2 Low / edge | Needs | 250 | 250 | 0 | PASS |
 | C26-R2 Low / edge | Wants | 150 | 150 | 0 | PASS |
 | C26-R2 Low / edge | Save | 100 | 100 | 0 | PASS |
@@ -4945,16 +5371,22 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C26-R13 Irish rules checks | Used_Take_Home | 3,524.3483 | 3,524.3483 | -3.18e-12 | PASS |
 | C26-R13 Irish rules checks | [shown] Used_Take_Home | From the Tax engine | From the Tax engine |  | PASS |
 
-### C27 Debt repayment: 78/78 PASS
+### C27 Debt repayment: 84/84 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C27-R1 Defaults | Monthly_Rate | 0.0153 | 0.0153 | 6.94e-18 | PASS |
-| C27-R1 Defaults | Payment | 250 | 250 | 0 | PASS |
-| C27-R1 Defaults | Months_To_Clear | 25 | 25 | 0 | PASS |
-| C27-R1 Defaults | Total_Interest | 1,015.1332 | 1,015.1332 | -2.39e-12 | PASS |
-| C27-R1 Defaults | Final_Payment | 15.1332 | 15.1332 | 1.30e-12 | PASS |
-| C27-R1 Defaults | [shown] Months_To_Clear | 2 years 1 month | 2 years 1 month |  | PASS |
+| C27-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Rate | 0.0153 | 0.0153 | 6.94e-18 | PASS |
+| C27-R0 Blank template, example values ON (Fill_Example = Yes) | Payment | 250 | 250 | 0 | PASS |
+| C27-R0 Blank template, example values ON (Fill_Example = Yes) | Months_To_Clear | 25 | 25 | 0 | PASS |
+| C27-R0 Blank template, example values ON (Fill_Example = Yes) | Total_Interest | 1,015.1332 | 1,015.1332 | -2.39e-12 | PASS |
+| C27-R0 Blank template, example values ON (Fill_Example = Yes) | Final_Payment | 15.1332 | 15.1332 | 1.30e-12 | PASS |
+| C27-R0 Blank template, example values ON (Fill_Example = Yes) | [shown] Months_To_Clear | 2 years 1 month | 2 years 1 month |  | PASS |
+| C27-R1 Example values typed in | Monthly_Rate | 0.0153 | 0.0153 | 6.94e-18 | PASS |
+| C27-R1 Example values typed in | Payment | 250 | 250 | 0 | PASS |
+| C27-R1 Example values typed in | Months_To_Clear | 25 | 25 | 0 | PASS |
+| C27-R1 Example values typed in | Total_Interest | 1,015.1332 | 1,015.1332 | -2.39e-12 | PASS |
+| C27-R1 Example values typed in | Final_Payment | 15.1332 | 15.1332 | 1.30e-12 | PASS |
+| C27-R1 Example values typed in | [shown] Months_To_Clear | 2 years 1 month | 2 years 1 month |  | PASS |
 | C27-R2 Low / edge | Monthly_Rate | 0.0253 | 0.0253 | 1.39e-17 | PASS |
 | C27-R2 Low / edge | Payment | 10 | 10 | 0 | PASS |
 | C27-R2 Low / edge | Months_To_Clear | Never | Never |  | PASS |
@@ -5028,14 +5460,18 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C27-R13 Irish rules checks | Final_Payment | 15.1332 | 15.1332 | 1.30e-12 | PASS |
 | C27-R13 Irish rules checks | [shown] Months_To_Clear | 2 years 1 month | 2 years 1 month |  | PASS |
 
-### C28 Loan repayment: 52/52 PASS
+### C28 Loan repayment: 56/56 PASS
 
 | Case | Output | Reference | Excel | Difference | Result |
 |---|---|---|---|---|---|
-| C28-R1 Defaults | Monthly_Rate | 0.0064 | 0.0064 | 0 | PASS |
-| C28-R1 Defaults | Monthly_Repayment | 302.1458 | 302.1458 | 1.71e-13 | PASS |
-| C28-R1 Defaults | Total_Repaid | 18,128.7492 | 18,128.7492 | 5.09e-11 | PASS |
-| C28-R1 Defaults | Total_Interest | 3,128.7492 | 3,128.7492 | 1.00e-11 | PASS |
+| C28-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Rate | 0.0064 | 0.0064 | 0 | PASS |
+| C28-R0 Blank template, example values ON (Fill_Example = Yes) | Monthly_Repayment | 302.1458 | 302.1458 | 1.71e-13 | PASS |
+| C28-R0 Blank template, example values ON (Fill_Example = Yes) | Total_Repaid | 18,128.7492 | 18,128.7492 | 5.09e-11 | PASS |
+| C28-R0 Blank template, example values ON (Fill_Example = Yes) | Total_Interest | 3,128.7492 | 3,128.7492 | 1.00e-11 | PASS |
+| C28-R1 Example values typed in | Monthly_Rate | 0.0064 | 0.0064 | 0 | PASS |
+| C28-R1 Example values typed in | Monthly_Repayment | 302.1458 | 302.1458 | 1.71e-13 | PASS |
+| C28-R1 Example values typed in | Total_Repaid | 18,128.7492 | 18,128.7492 | 5.09e-11 | PASS |
+| C28-R1 Example values typed in | Total_Interest | 3,128.7492 | 3,128.7492 | 1.00e-11 | PASS |
 | C28-R2 Low / edge | Monthly_Rate | 0 | 0 | 0 | PASS |
 | C28-R2 Low / edge | Monthly_Repayment | 41.6667 | 41.6667 | 3.55e-14 | PASS |
 | C28-R2 Low / edge | Total_Repaid | 500 | 500 | 0 | PASS |
