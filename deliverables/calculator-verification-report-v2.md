@@ -29,9 +29,9 @@ Workbook: `deliverables/LifeGoals-Calculators.xlsx` (v2.3, 2 Oct 2026). v2.3 app
 - **Types:** type 1 (set by Government · 2026) values sit only on Assumptions: grey, no data validation, not inputs. Calculator inputs: type 2 range 24; type 3 your choice 45; type 3 retirement age / plan-until age with §14 guidance only (no standard) 3; type 3 your own figure 90; type 3 optional (blank = none) 16; statement-reader cells 62. Tax engine: 6 inputs (4 your figure, 2 optional).
 - **Blank template:** every input cell is empty; the "Value used" column applies IF(ISBLANK(input), IF(Fill_Example="Yes", example, ""), input). Results that need a blank input show "Choose your … to see this" (helper rows "CHOICES STILL NEEDED" at the bottom of each sheet list the inputs each result needs); results that don't need it still calculate. Retirement age and plan-until age are blank too and carry only the §14 guidance ("You can usually draw a pension from 60 (some schemes from 50); State Pension is paid from 66." / "At 65, average life expectancy in Ireland is about 83 for men and 86 for women (CSO); many people plan to 90–95."), never a "standard" (prototype cross-check fix, v2.3.1).
 - **Fill example values? (README, default No):** with Yes every blank input uses its grey "Example only" figure: the standard for type 3 choices, the sample customer's figure for type 2 and your-own-figure inputs.
-- **Unchanged values give unchanged results:** with Fill_Example = Yes the blank template equals typing the examples in (named test), and against the previous version (v2.2) 328 of 345 R1 outputs are identical. Differences only where an example value changed: C08 (4), C09 (5), C10 (8). The example changes: C08 growth 1% (the cash standard after DIRT; was 2%); C09 and C10 growth 5% (one investment standard before charges and tax; was 4%); C13/C14 add the "room left" row; C15 at the 60-year cap shows "Beyond [plan-until age] (your plan-until age)", as the prototype.
+- **Unchanged values give unchanged results:** with Fill_Example = Yes the blank template equals typing the examples in (named test), and against the previous version (v2.2) 328 of 345 R1 outputs are identical. Differences only where an example value changed: C08 (4), C09 (5), C10 (8). The example changes: C08 growth 1% (the cash standard after DIRT; was 2%); C09 and C10 growth 5% (one investment standard before charges and tax; was 4%); C13/C14 add the "room left" row; C15 at the 60-year cap: the age field reads "Beyond [plan-until age]" (e.g. "Beyond 90"), identical to the prototype; the shown-as text keeps "(your plan-until age)".
 - **One figure everywhere:** "Ireland today" inflation = 3.9%, CSO HICP flash estimate, September 2026 (published 1 Oct 2026), the same value, month and index as the prototype's RULES_IE_2026.infl.ie (checked in the HTML on 2 Oct 2026). Other repeated guidance uses the prototype's values: ECB target 2%; pay rises 3%; cash 1% after DIRT; pension 4.5% working / 3.15% retired; mortgage rates 3.5%–4.5% (new mortgages averaged 3.49%, June 2026); cards 13%–23% APR; fund charges 0.5%–1.5%; State Pension €299.30 a week; life expectancy at 65 about 83 (men) / 86 (women), CSO.
-- **UI/UX Appendix B fixes:** "an income protection need" (the workbook already had "an"; the wording is in the spec sheet copy); "1.0 months" → "1 month" (C11, C22); C15 at the cap reads "Beyond 90 (your plan-until age)" like the prototype, not "age 126" or "60+ years" in an age field; C13/C14 add "Room left for relief after what you already pay in".
+- **UI/UX Appendix B fixes:** "an income protection need" (the workbook already had "an"; the wording is in the spec sheet copy); "1.0 months" → "1 month" (C11, C22); C15 at the cap: the age field reads "Beyond 90", identical to the prototype (shown-as text "Beyond 90 (your plan-until age)"), not "age 126" or "60+ years"; C13/C14 add "Room left for relief after what you already pay in".
 
 ## What changed (Irish rules audit) and why
 
@@ -3614,7 +3614,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C15-R1 Example values typed in | Statement_Check |  |  |  | PASS |
 | C15-R2 Low / edge | Years_Lasting | 60 | 60 | 0 | PASS |
 | C15-R2 Low / edge | Withdrawal_Rate | 0.0003 | 0.0003 | -3.25e-19 | PASS |
-| C15-R2 Low / edge | Lasts_To_Age | Beyond 90 (your plan-until age) | Beyond 90 (your plan-until age) |  | PASS |
+| C15-R2 Low / edge | Lasts_To_Age | Beyond 90 | Beyond 90 |  | PASS |
 | C15-R2 Low / edge | [shown] Lasts_To_Age | Beyond 90 (your plan-until age) | Beyond 90 (your plan-until age) |  | PASS |
 | C15-R2 Low / edge | [shown] Years_Lasting | 60+ years | 60+ years |  | PASS |
 | C15-R2 Low / edge | Used_Retirement_Savings | 3000000 | 3000000 | 0 | PASS |
@@ -3638,7 +3638,7 @@ The workbook now differs from the prototype in these places, on purpose. Align t
 | C15-R4 Branch / edge | Statement_Check |  |  |  | PASS |
 | C15-R5 Random (seed 1) | Years_Lasting | 60 | 60 | 0 | PASS |
 | C15-R5 Random (seed 1) | Withdrawal_Rate | 0.0214 | 0.0214 | -1.04e-17 | PASS |
-| C15-R5 Random (seed 1) | Lasts_To_Age | Beyond 91 (your plan-until age) | Beyond 91 (your plan-until age) |  | PASS |
+| C15-R5 Random (seed 1) | Lasts_To_Age | Beyond 91 | Beyond 91 |  | PASS |
 | C15-R5 Random (seed 1) | [shown] Lasts_To_Age | Beyond 91 (your plan-until age) | Beyond 91 (your plan-until age) |  | PASS |
 | C15-R5 Random (seed 1) | [shown] Years_Lasting | 60+ years | 60+ years |  | PASS |
 | C15-R5 Random (seed 1) | Used_Retirement_Savings | 2430000 | 2430000 | 0 | PASS |
