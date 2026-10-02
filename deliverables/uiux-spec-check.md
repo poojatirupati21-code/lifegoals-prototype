@@ -1,101 +1,104 @@
-# UI/UX calculator spec: automated check (rebuild, 2 Oct 2026)
+# UI/UX calculator spec: automated check (§14 rebuild, 2 Oct 2026)
 
-Document: deliverables/LifeGoals-Calculators-UIUX-Spec.docx. A4, **226 pages**, 28 calculators (C01 to C28), rebuilt from the current prototype (commit 1d81b6f, Irish rules 2026 · checked 2 Oct 2026). Maths reference: deliverables/LifeGoals-Calculators.xlsx (sheets "C01 Borrowing" … "C28 Loan repayment").
-I converted it to PDF with LibreOffice and looked at sample pages: cover, contents, design system, inflation chips, rules register, Your assumptions, C01, C12 and the appendices. Layout, tables and images are fine.
+Document: deliverables/LifeGoals-Calculators-UIUX-Spec.docx. A4, **257 pages**, 28 calculators (C01 to C28), rebuilt from:
+- prototype commit 3f913c2 (journey-spec §14 applied; the HTML is unchanged since)
+- workbook commit 812bbf3
+
+I converted it to PDF with LibreOffice and looked at sample pages: design system (inflation chips, tags), section 3 (value types, register, Your assumptions, step 7, What your plan assumes), C01, C15 and Appendix B. Layout, tables and images are fine.
 
 ## Result
 
-**6310 checks passed, 0 failed. Browser console errors: 0.**
+**6865 checks passed, 0 failed. Browser console errors: 0.**
 
-**Planted-error test.** I made a copy of the docx with 6 deliberate one-string edits and ran the same check on it. It found all 6, which showed up as 38 failed checks. The 6 edits:
+**Planted-error test.** I made a copy of the docx with 7 deliberate one-string edits and ran the same check on it. It found all 7, which showed up as 38 failed checks. The 7 edits:
 1. C01 result label
 2. C11 result line
 3. C01 unit
 4. C04 result label
-5. Your assumptions guidance text (upkeep)
-6. The "3.9% · Ireland now" inflation chip
+5. A usual-range guidance line in Your assumptions (card APR)
+6. The "3.9% · Ireland now (CSO HICP flash, Sep 2026)" chip
+7. The C01 "Choose your … to see this" gate text
 
-## Method
+## What is checked
 
-Headless Chromium (Playwright, 390×844, deviceScaleFactor 2) opens the prototype in a fresh run, separate from the screenshot run. It rebuilds every documented state:
-- default (before a plan, inflation blank)
-- inflation 2%
-- Adjust for inflation on, with and without a rate
-- the sample customer
-- pension, mortgage and investment statements (including one with a corrected repayment)
-- all 28 edge cases
+A fresh headless Chromium run (390×844, scale 2), separate from the screenshot run, rebuilds every documented state for every calculator:
+- **Default:** nothing chosen.
+- **Choices made:** the standards, plus the example values typed into the remaining blanks.
+- **No inflation yet.**
+- **Adjust for inflation** on, with and without a rate.
+- **Sample customer.**
+- **Statements:** pension, mortgage and investment.
+- **Edge cases:** all 28.
 
-For every calculator it compares the live DOM with the docx XML:
-- **Static text:** title, question, tip, eyebrow, back button, switch and inflation strings, buttons, disclaimer.
-- **Inputs tables:** unit, CALCS default, on-screen default, min, max, step, keyboard and labelling for every input. Choice chips are checked for their labels and that each one selects.
-- **Screen-value tables and verbatim result lines:** every input value, tag, result label, headline, row and inflation line, for every screenshot.
-- **Result templates:** every live label, headline, line and row must match a template in the doc. The templates are compiled with the doc's own placeholder table.
-- **Limits:** every numeric input is typed above its maximum and below its minimum. The hint, clamp and result must match the doc. € inputs typed at 1.5× the slider top must widen the slider.
-- **Workbook pointer:** every output name the screen computes must be a defined name in the matching sheet. The doc's workbook value tables must equal the live values (default and 2% states).
+It compares the live DOM with the docx XML:
+- **Gate:** the "Choose your … to see this" text, and that no numbers show before a choice.
+- **Blank inputs:** each "Not chosen yet" input, with its guidance line verbatim ("Usually between X and Y (source)." / "Generally the standard is X (source). Choose what you want to use." / the retirement-age text) and its "Use the standard (X)" chip.
+- **Assumptions this tool uses:** the card on each calculator that has one.
+- **Inputs tables:** units, CALCS defaults, on-screen defaults (blank or value), min/max/step, keyboard, labelling and slider aria-valuetext.
+- **Screen-value tables and verbatim result lines:** for every screenshot.
+- **Result templates:** every label, headline, line and row, matched using the doc's placeholder tables.
+- **Limits:** above-max and below-min hints and clamps for every numeric input, € widening, and "Whole numbers only" for year, month and age inputs. Every choice chip is checked too.
+- **Workbook:** every output name is a defined name in the matching "Cnn …" sheet, and the values in the doc equal the live values.
 
-The check also covers the shared parts:
-- **Inflation chips in their 3 states:** CSO label 3.9%, chips not pressed, card collapses to "Prices rising 2% a year (your choice) · Change", chosen chip pressed after Change, Other with "My own rate (0–10%)".
-- **Rules version:** "Irish rules 2026 · checked 2 Oct 2026" plus the Budget 2027 (6 Oct 2026) note. All 81 register keys and their effective dates.
-- **Your assumptions:** all 45 inputs in 4 groups: label, control, range/options, suggested value as shown, status line, guidance; plus the footer.
-- **Explore:** groups and topics, statement cards, confirm screens, and all 11 Add to my plan sheet variants.
+It also checks the shared parts:
+- **Inflation chips in their 3 states:** "Use the standard (2%)" and "3.9% · Ireland now (CSO HICP flash, Sep 2026)" (one "Ireland today" figure everywhere); tags "Not chosen yet" and "Your choice"; Other keeps the card open.
+- **Rules version:** "Irish rules 2026 · checked 2 Oct 2026" plus the Budget 2027 note. All 123 register keys.
+- **Your assumptions:** all 46 inputs and the retirement age: label, value type, control, chips, blank by default, and guidance verbatim with the standard chip.
+- **Set by Government · 2026 card:** 13 rows.
+- **"Use the standard for all of these":** it sets 2% inflation but never the retirement age or the plan-until age.
+- **Step 7 "Your assumptions" card.**
+- **"What your plan assumes":** every row with its tag (Set by Government · 2026 / Usually X–Y / Your choice / How the plan works).
+- **Explore:** groups, topics, statement cards, confirm screens, and the Add to my plan sheets.
 
-Note: the screen-value tables were filled from the screenshot run. This check rebuilds the states in a fresh run and compares. The templates, limits, hint rules, workbook pointers and Your assumptions tables are checked against the live screen.
+Note: the screen-value tables were filled from the screenshot run. This check rebuilds the states in a fresh run and compares.
 
 ## Per calculator
 
 | Cnn | Calculator | Checks passed | Failed | Screenshots |
 |---|---|---|---|---|
-| C01 | How much could I borrow? | 298 | 0 | 4 |
-| C02 | Monthly mortgage repayment | 215 | 0 | 7 |
-| C03 | Deposit calculator | 187 | 0 | 3 |
-| C04 | Mortgage overpayment | 201 | 0 | 5 |
-| C05 | Interest-rate impact | 192 | 0 | 5 |
-| C06 | Mortgage term comparison | 203 | 0 | 5 |
-| C07 | Rent vs buy | 245 | 0 | 3 |
-| C08 | Goal planner | 195 | 0 | 4 |
-| C09 | Compound growth | 167 | 0 | 3 |
-| C10 | Lump-sum growth | 274 | 0 | 7 |
-| C11 | Emergency fund | 133 | 0 | 5 |
-| C12 | Retirement projection | 529 | 0 | 8 |
-| C13 | Contribution impact | 333 | 0 | 5 |
-| C14 | AVC impact | 340 | 0 | 5 |
-| C15 | Will my money last? | 191 | 0 | 6 |
-| C16 | Retirement drawdown scenarios | 154 | 0 | 6 |
-| C17 | Inflation-adjusted return | 173 | 0 | 5 |
-| C18 | Regular investing | 230 | 0 | 5 |
-| C19 | Fees impact | 186 | 0 | 4 |
-| C20 | Risk & return simulator | 170 | 0 | 5 |
-| C21 | Life cover estimator | 297 | 0 | 5 |
-| C22 | Income protection gap | 211 | 0 | 4 |
-| C23 | Mortgage protection | 133 | 0 | 3 |
-| C24 | Net worth | 194 | 0 | 4 |
-| C25 | Monthly surplus | 152 | 0 | 5 |
-| C26 | Budget (50/30/20) | 77 | 0 | 3 |
-| C27 | Debt repayment | 138 | 0 | 5 |
-| C28 | Loan repayment | 105 | 0 | 3 |
-| Components | Inflation chips, rules register, Your assumptions | 316 | 0 |  |
+| C01 | How much could I borrow? | 296 | 0 | 5 |
+| C02 | Monthly mortgage repayment | 231 | 0 | 8 |
+| C03 | Deposit calculator | 205 | 0 | 4 |
+| C04 | Mortgage overpayment | 217 | 0 | 6 |
+| C05 | Interest-rate impact | 208 | 0 | 6 |
+| C06 | Mortgage term comparison | 220 | 0 | 6 |
+| C07 | Rent vs buy | 285 | 0 | 5 |
+| C08 | Goal planner | 211 | 0 | 5 |
+| C09 | Compound growth | 183 | 0 | 4 |
+| C10 | Lump-sum growth | 261 | 0 | 8 |
+| C11 | Emergency fund | 147 | 0 | 6 |
+| C12 | Retirement projection | 565 | 0 | 9 |
+| C13 | Contribution impact | 355 | 0 | 6 |
+| C14 | AVC impact | 362 | 0 | 6 |
+| C15 | Will my money last? | 210 | 0 | 7 |
+| C16 | Retirement drawdown scenarios | 169 | 0 | 7 |
+| C17 | Inflation-adjusted return | 187 | 0 | 6 |
+| C18 | Regular investing | 255 | 0 | 7 |
+| C19 | Fees impact | 184 | 0 | 5 |
+| C20 | Risk & return simulator | 175 | 0 | 6 |
+| C21 | Life cover estimator | 306 | 0 | 6 |
+| C22 | Income protection gap | 224 | 0 | 5 |
+| C23 | Mortgage protection | 147 | 0 | 4 |
+| C24 | Net worth | 222 | 0 | 5 |
+| C25 | Monthly surplus | 176 | 0 | 6 |
+| C26 | Budget (50/30/20) | 89 | 0 | 4 |
+| C27 | Debt repayment | 153 | 0 | 6 |
+| C28 | Loan repayment | 119 | 0 | 4 |
+| Components | Inflation chips, rules register, Your assumptions | 432 | 0 |  |
 | Explore | Explore structure, statement cards, Add to my plan sheets | 71 | 0 |  |
 
-## Mismatches found and fixed during this rebuild
+## Fixed during this rebuild
 
-- Your assumptions, "How many years of PRSI…": the doc said "Not set", but the box shows "0" when blank. The doc now records what the screen shows, and the issue is listed in Appendix B as a prototype issue.
-- Your assumptions, State survivor's pension: the suggested value is written as €260 in the text, but the box shows €259.5. The doc now gives both.
-- Two templates had a space in the wrong place around an optional sentence (C02 what-if, C03 deposit saved). Both fixed.
+- Workbook inputs are now "…_Entry" (customer entry) and "Used_…" (value used). The doc maps each screen input to both.
+- The check had read the wrong inputs table once the new "Choices on this screen" table was added. Fixed.
+- One planted error was first applied after the file had been written, so it wasn't tested. I re-ran it and it was caught.
 
-## Still open (Appendix B of the spec)
+## Open points (Appendix B of the spec)
 
-- Budget 2027 update
-- C22 sheet says "a income protection need"
-- C22 headline says "1.0 months"
-- C15 at the 60-year cap shows "age 126"
-- C13 relief-limit wording
-- Inflation "Other" closes the chips straight away
-- Enter then leaving a value box clears the hint
-- Year and month boxes accept decimals
-- PRSI years box shows 0 when blank
-- Explore note still says "29 calculators"
-- Sliders have no aria-valuetext, and the emoji in screen titles is read aloud
-- journey-spec K6 says Explore is removed
+- Budget 2027 (6 Oct 2026) update.
+- **Prototype defect:** typing a value into a blank input, or into a Your assumptions box, and tapping away without Enter applies the value but leaves the field looking blank ("Not chosen yet", no slider) until the next redraw.
+- **Sample customer still gated:** for the sample customer, 9 tools still show "Choose your … to see this": C01, C03, C07, C10, C18, C19, C20, C21, C22.
+- The emoji in screen titles is read aloud by screen readers.
 
 ## Failures
 
