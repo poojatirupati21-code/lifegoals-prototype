@@ -2073,7 +2073,7 @@ function calcPre(c){ applyAssume(); const p = {}, f = S.fin, has = k => S.src[k]
   }
   Object.assign(p, (S.calcDoc || {})[c.id] || {}); return p; }
 function calcVals(c){ S.calcV[c.id] = S.calcV[c.id] || {}; S.calcT = S.calcT || {}; const v = S.calcV[c.id], T = S.calcT[c.id] || {}, pre = calcPre(c);
-  c.inputs.concat(c.wi || []).forEach(i => { if (T[i.k] && v[i.k] != null) return; const s = calcA(c.id, i.k), x = pre[i.k] != null ? pre[i.k] : s ? (s.a ? aCalc(s.a, asmGet(s.a)) : null) : i.v; v[i.k] = x == null ? null : clamp(+(+x).toFixed(4), i.min, i.max); });   // stated figures are not rounded to the slider step
+  c.inputs.concat(c.wi || []).forEach(i => { if (T[i.k] && v[i.k] != null) return; const s = calcA(c.id, i.k), tp = ((S.toolPick || {})[c.id] || {})[i.k], x = pre[i.k] != null ? pre[i.k] : s ? (s.a ? aCalc(s.a, asmGet(s.a)) : tp != null ? tp : null) : i.v; v[i.k] = x == null ? null : clamp(+(+x).toFixed(4), i.min, i.max); });   // stated figures are not rounded to the slider step
   return v; }
 /* ================= Editable value boxes beside every slider (Pooja, 1 Oct) =================
    Type a figure instead of dragging. Commits live while typing (once valid) and on Enter / blur. Typed values keep their precision;
@@ -2109,9 +2109,9 @@ function nbCommit(inp, final){ const [kind, key] = inp.dataset.nb.split('|'), K 
   let v = n, msg = ''; if (v > L.max){ v = L.max; msg = L.maxMsg || 'Max ' + (L.u === '€' ? eur(L.max) : nbFmt(L.max) + (L.u === '%' ? '%' : nbParts(L.u)[1] ? ' ' + nbParts(L.u)[1] : '')); } else if (v < L.min){ v = L.min; msg = 'Min ' + (L.u === '€' ? eur(L.min) : nbFmt(L.min)); }
   if (L.int && v !== Math.round(v)){ v = Math.round(v); msg = msg || 'Whole numbers only'; }
   K.apply(key, v); inp.dataset.last = (kind === 'wi' && key === 'm' && v > 0 ? '+' : '') + nbFmt(v);
-  S.nbH = S.nbH || {}; if (msg) S.nbH[kind + '-' + key] = msg; else delete S.nbH[kind + '-' + key]; if (h) h.textContent = msg; if (final){ inp.value = inp.dataset.last; inp.style.width = nbW(inp.value); if (kind === 'save' || kind === 'age' || kind === 'infl' || kind === 'asm' || kind === 'ret' || (kind === 'ck' && !document.getElementById('c-' + key))) render(); } }
+  S.nbH = S.nbH || {}; if (msg) S.nbH[kind + '-' + key] = msg; else delete S.nbH[kind + '-' + key]; if (h) h.textContent = msg; if (final){ inp.value = inp.dataset.last; inp.dataset.fin = inp.value; inp.style.width = nbW(inp.value); if (kind === 'save' || kind === 'age' || kind === 'infl' || kind === 'asm' || kind === 'ret' || (kind === 'ck' && !document.getElementById('c-' + key))) render(); } }
 function bindNB(ph){ ph.querySelectorAll('input[data-nb]').forEach(i => { if (i._nb) return; i._nb = 1;
-  i.addEventListener('input', () => { i.style.width = nbW(i.value); nbCommit(i, false); }); i.addEventListener('change', () => { if (i.dataset.last != null && i.value === i.dataset.last) return; nbCommit(i, true); });   // Enter, then leaving the box, keeps the max / min hint
+  i.addEventListener('input', () => { i.style.width = nbW(i.value); nbCommit(i, false); }); i.addEventListener('change', () => { if (i.dataset.fin != null && i.value === i.dataset.fin) return; nbCommit(i, true); });   // Enter, then leaving the box, keeps the max / min hint
   i.addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); nbCommit(i, true); } });
   i.addEventListener('focus', () => i.select()); }); }
 const fmtIn = (i, v) => i.u === '€' ? eur(v) : i.u === '%' ? v + '%' : i.u === 'y' ? v + ' yrs' : i.u === 'm' ? v + ' mo' : i.u === 'age' ? 'age ' + v : String(v);
@@ -2738,7 +2738,8 @@ function loadSample(){
   put('life', 'Yes', 'doc', 95); put('ip', 'No', 'typed'); put('ci', 'Not sure', 'typed'); put('workCover', 'Yes', 'doc', 90); put('health', 'Yes', 'typed');
   put('pension', 72000, 'doc', 95); put('pensionM', 520, 'doc', 91); put('sp', 'Expect full', 'typed'); S.look.pension = 'Statement is over 12 months old';
   S.partner = {mode:'manual', email:'', sent:false, name:'Cian'};
-  S.retireSet = true; S.infl = INFL_STD; useAllStd(); Object.assign(S.asm, {planEnd:95, cardRate:0.20, loanRate:0.08, pSpWeek:239.44}); applyAssume();   // Aoife chose the standards, plans to 95, and typed her card / loan APRs and Cian's State Pension
+  S.retireSet = true; S.infl = INFL_STD; useAllStd(); Object.assign(S.asm, {planEnd:95, cardRate:0.20, loanRate:0.08, pSpWeek:239.44, mortRate:0.0375, buyFees:3000, depEarn:0.01, survivor:RI.sp.survivor}); applyAssume();
+  S.toolPick = {lumpsum:{f:0, wait:WAIT_YEARS}, regularinvest:{f:1}, fees:{a:0.5, b:1.5}, riskreturn:{s:2}, incomegap:{ib:RI.sp.illness}};   // Aoife's tool choices (§14: the sample has every choice made)   // Aoife chose the standards, plans to 95, and typed her card / loan APRs and Cian's State Pension
   S.checked = true; S.app = true; S.shell = true; S.pb = false; S.tab = 'plan'; S.planSeg = 'main'; S.versions = [{note:'LifeMap confirmed', date:'29 Sep 2026'}, {note:'First results', date:'29 Sep 2026'}];
 }
 function J(fn){ return () => { fn(); lastId = null; render(); }; }
