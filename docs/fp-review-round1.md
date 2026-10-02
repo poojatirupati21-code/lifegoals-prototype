@@ -831,3 +831,103 @@ Source: `deliverables/irish-rules-and-rates-audit.md` (register values used exac
    - the survivor-age switch.
 6. PRSI on rental and other unearned income uses the €5k threshold. It needs checking against Class K.
 7. Another agent's WIP commit 1d58f47 sits under these uncommitted edits.
+
+## Round 8: §14 defaults vs customer choice applied (prototype)
+
+Binding source: `docs/journey-spec.md` §14 (Pooja, 2 Oct 2026). The workbook is checked at its frozen §14 layout (2 Oct 2026, 12:43:53Z). Prototype only; nothing committed.
+
+### 1. Every value has a type
+- **Type 1, set by law.** These live in `RULES_IE_2026`: tax, USC, PRSI, pension relief, earnings cap, lump-sum bands, SFT, ARF minimum, auto-enrolment, DIRT, exit tax, Central Bank limits, stamp duty, and the full State Pension, Illness Benefit and survivor's pension rates.
+  - The Your assumptions screen shows them read-only in a "Set by Government · 2026" group (13 rows). They are tagged the same way in "What your plan assumes".
+  - Copy that quotes a law figure is built from the register (`LAW` strings), never typed in.
+- **Type 2, usual range.** The customer enters their own value, shown with "Usually between X and Y (source)". There is no default and no chip.
+  - Items: mortgage rate (3.5%–4.5%), credit-card APR (13%–23%), loan APR (6%–10%) and pension and fund charges (0.5%–1.5%).
+  - Also the customer's own State Pension a week (€0–€299.30), their partner's, buying fees (€2,500–€3,500), what a deposit could earn after DIRT (1.3%–1.5%), the survivor's pension, Illness Benefit (€0–€254) and PRSI years.
+  - The old hidden "Partly = 60%, Not sure = 80%" State Pension shares are gone. The customer gives their PRSI years, says they expect the full rate, or types their weekly amount.
+- **Type 3, personal judgement.** Blank until chosen, with "Generally the standard is X (source). Choose what you want to use." and a "Use the standard (X)" chip. That covers 36 items, including inflation, growth, pay rises, safety-net months, lump sum, drawdown, budget split, risk styles, C10 waiting years and the C20 style.
+  - "Use the standard for all of these" fills only items not yet chosen.
+  - It never sets the retirement age or the plan-until age. Each is asked on its own, with the §14 guidance.
+- **Standards and ranges live in the register too**, in two new groups: `RULES_IE_2026.std` and `.guide`. Each figure is quoted once, from there.
+  - "Ireland now" inflation is one figure everywhere: **3.9%, CSO HICP flash estimate, Sep 2026** (published 1 Oct 2026).
+  - The 3.7% in the screenshot is the CSO **CPI** for Aug 2026, an older release on a different index. No "3.7%" is left.
+
+### 2. Where choices are made, and what shows until then
+- Step 7, Check your details, now has a **Your assumptions** step next to the inflation choice. It contains:
+  - inflation;
+  - retirement age;
+  - plan-until age;
+  - any type-2 figures the plan needs;
+  - "Use the standard for all of these" for the rest.
+- "See my results" stays locked, with "Choose your [item] above to see your results".
+- Results need every choice made. Until then, My Plan, Home, the goal strip and the report show "Choose your [item] to see this", never a hidden number. For example, adding a mortgage with no rate brings that message back.
+- Explore calculators: type-2 and type-3 inputs start blank. Type-3 inputs have the standard chip. Retirement-age inputs carry guidance only.
+  - A tool's other assumptions appear in an "Assumptions this tool uses" block.
+  - The result reads "Choose your … to see this", and "Add to my plan" is blocked until the choices are made.
+- The sample customer has every choice made. Cian's State Pension is typed as €239.44 a week (the old 80% figure), so demo results are unchanged.
+- "What your plan assumes" (the screen in the screenshot) tags every row "Set by Government · 2026", "Usually X–Y", "Your choice" or "How the plan works". There is no default concept anywhere.
+- The engine keeps an internal fallback so the maths never breaks. The fallback is the standard, a mid-range figure, or the chosen Standard/Cautious set. It is never shown, because `planMissing()` gates every result.
+
+### 3. Polish
+- "an income protection need".
+- "1 month" and the other singular/plural forms.
+- C15 at the 60-year cap: "money lasts beyond age [plan-until age]".
+- Clearer C13/C14 relief-limit wording: the limit, what you already pay and the room left.
+- Inflation "Other" opens an empty % box. It no longer sets a hidden 2.5% or closes the card.
+- Pressing Enter and then leaving a box keeps the max/min hint.
+- Year, month and age boxes accept whole numbers only.
+- The PRSI-years box is blank, not 0, when empty, and can be cleared.
+- The Explore note says 28 calculators.
+- Every slider has `aria-valuetext`.
+- The side panel says "Prototype for demonstration. Figures are illustrative, not financial advice."
+- Journey-spec K6 is updated: Explore is kept.
+
+### 4. Tests (all 0 FAILS, 0 ERRORS)
+- New: `choices.js` 47/47.
+  - Type-3 items are blank on a fresh customer.
+  - "Choose your …" is shown on step 7, results, Home and all 28 calculators.
+  - The standard chip fills its item.
+  - "Use all" skips retirement age, plan-until age and type 2.
+  - Type 1 is not editable.
+  - The sample is complete, the table has the three tags, and there is one 3.9%.
+  - The polish items above are covered.
+- e2e 390 / 1280 / 844, precedence 57/57, chart, fp4, fp/mono (4,200), road, landfit, noret and v5–v11 all pass. So do v12 35/35, rules.js 67/67 and asm.js 35/35.
+- Round-4 harness, rebuilt from the live file (`fp/build8.sh`): 6,192 cases, 0 failures.
+- `calc-vs-xlsx.js` (run last) against the frozen workbook: **144/145 within €0.50**, and 62 constants the same. The one difference is C15 at the 60-year cap: the workbook gives "60+ years" for `Lasts_To_Age`, the prototype "Beyond [plan-until age]" (see open item 1).
+
+**Changed expectations and why**
+- **e2e.js:**
+  - The Explore retirement tool makes its choices first: use all, retirement age 66, State Pension €15,564.
+  - Step 7 types the retirement age and the plan-until age, uses "use all", and types the type-2 values at the round-7 figures.
+  - Goal results are identical to round 7. Only section offsets move, by 17px, because the prelim link text is longer.
+- **chart.js and v12.js pyramid:** the customer builders mark every choice made at the round-7 values. Output is identical.
+- **v12.js and v11.js:**
+  - The lump-sum and regular-investing tests type growth, fees and waiting years.
+  - "Pick an inflation rate" is now "Choose your inflation rate".
+  - The report regex follows the new "(Your choice)" format.
+- **v10.js:**
+  - The lump-sum fee is a blank type-2 box, with its range shown.
+  - The borrow live-typing test types a rate and chooses buying fees.
+- **asm.js:**
+  - The chip wording is "Use the standard (2%)".
+  - There is a fifth, Government group, and a retirement-age field.
+  - There are no "Suggested" tags.
+  - "Use the standard" replaces "Use suggested".
+  - An unchosen loan rate stays blank.
+  - The hand-off tests make their choices first.
+- **calc-vs-xlsx.js and xlsx_cases.py:**
+  - Inputs are written to the frozen `*_Entry` cells, with `Fill_Example` = No.
+  - Home and safety goal years and C23's actual repayment are fed from the prototype's constants.
+  - Case-1 assumptions are the standards or mid-range figures.
+
+### 5. Open
+1. **C15 cap wording.** The workbook's `Lasts_To_Age` says "60+ years", a duration in an age field. The prototype says "Beyond [plan-until age]", as requested. The workbook should match.
+2. **Workbook retirement-age wording.** C12 "Target retirement age" and C15 "Your age when withdrawals start" say "Generally the standard is 66". §14 says retirement age is never defaulted, so the prototype gives guidance only.
+3. **Facts in Explore.** Income, balances and terms keep visible example figures in prototype Explore. The workbook leaves them blank unless "Fill example values?" is Yes. Pooja should decide.
+4. **Illness Benefit** follows the workbook: the rate is type 1, but the customer's amount is type 2, like the State Pension. This is a reading of §14, which lists the rate under type 1.
+5. **Sources to verify.**
+   - The 2%–2.3% deposit range is quoted from §14, but the CBI average was 1.86% in Jun 2026.
+   - The workbook's loan copy says "credit unions often charge less", yet credit unions average about 10.4%.
+   - Fund charges and buying fees have no primary source yet.
+   - 104 of 123 register entries are flagged "verify".
+6. **C13/C14 tax rate.** It is type 2 in the workbook ("20% or 40%"). The prototype fills it from the income band, with 40% as the Explore example.
+7. A fresh customer has about 20 choices at step 7. "Use the standard for all of these" brings that down to the retirement age, the plan-until age and any type-2 figures.
