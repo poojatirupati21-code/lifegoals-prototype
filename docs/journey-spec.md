@@ -445,3 +445,25 @@ Notes
 - Scoring: keep the Financial Planner's logic; option order = score 1→4 for u9, u10, u12, u11, u14. u14 joins capacity (with Q6, Q7, u10, u12). u4: option 4 adds the trait "Procrastination · Status quo bias". u11 option 4 adds the trait "Overconfidence bias" but keeps the experience score 4.
 - Screen copy bug: the step header said "2 quick questions" while 7 were shown. The header must say "7 quick questions · your first 6 answers are filled in" or "N of 7 left".
 - What the full 13 now covers: money mindset (Q2, Q12) · behavioural biases (Q4 herd/FOMO, Q9 loss aversion/panic selling/anchoring, u4 procrastination/status quo, u11 overconfidence) · risk appetite (Q8) · capacity and resilience (Q6, Q7, u10, u12, u14) · time horizon (u9) · knowledge & experience (u11).
+
+## 14. Defaults vs customer choice (Pooja, 2 Oct 2026; binding for prototype, workbook and spec)
+Every number the plan or a calculator uses falls into exactly one of three types:
+
+1. **Fixed by law, the same for everyone** → set automatically, shown as "Set by Government · 2026" and not editable. Examples: income tax bands and credits, USC, PRSI, pension relief %, the earnings cap, lump-sum tax bands, DIRT 33%, exit tax, CGT, Central Bank lending limits, the full State Pension rate, Illness Benefit and survivor's pension rates.
+2. **Set by Government or the market but varies within a known range** → the customer chooses, with the range stated. The wording is: "Usually between X and Y (source)". Examples:
+   - State Pension: the full rate is €299.30 a week, but it depends on contributions (partial rates are lower), so the customer enters theirs;
+   - mortgage rate, typically 3.5%–4.5%;
+   - deposit rates, about 2%–2.3%;
+   - credit card APR, typically 13%–23%;
+   - fund charges, about 0.5%–1.5%.
+3. **Personal judgement** → **no default. Blank until the customer chooses.** The wording is: "Generally the standard is X (source). Choose what you want to use."
+   - A one-tap "Use the standard (X)" chip fills it. Choosing that chip counts as the customer's decision.
+   - Examples: inflation, pay rises, cash growth, investment growth, pension growth, retirement-phase growth, share of the pension contribution paid by you, saving towards goals, emergency fund months, drawdown timing, retirement multiple.
+   - An optional "Use the standard for all of these" button applies the standard to every type-3 item at once (an explicit choice), **except retirement age and life expectancy**.
+   - **Retirement age and life expectancy (plan-until age)** must each be chosen individually; they are never defaulted and not part of "use all".
+     - Retirement age guidance: "You can usually draw a pension from 60 (some schemes from 50); State Pension is paid from 66."
+     - Life expectancy guidance: "At 65, average life expectancy in Ireland is about 83 for men and 86 for women (CSO); many people plan to 90–95."
+
+Until a required choice is made, results that depend on it show "Choose your [item] to see this", never a hidden number. The sample customer has all choices made, so demos still work.
+
+Every guidance figure is quoted once, from the single rules register, so the prototype, workbook and spec always say the same thing. For example, "Ireland today" inflation must be ONE figure everywhere: the latest CSO release, named with its month and index.
