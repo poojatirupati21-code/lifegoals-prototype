@@ -219,8 +219,8 @@ Research sources:
 - One **smart upload** at the top accepts anything and sorts it into sections (Step 5 A14). The customer then confirms the extracted fields. Fields under the confidence threshold show "Check this".
 - **If an upload fails**, the customer is sent to "Type it" and the missing document stays on the checklist (CJ D10).
 - Every manual field offers:
-  - **Not sure? Estimate for me**: a typical Irish figure, tagged *Estimated*.
-  - **I don't have this**: sets the value to €0, tagged *Confirmed none*.
+  - **Not sure? See an example**: opens an example card (§15). Superseded: "Estimate for me" removed.
+  - ~~I don't have this~~ removed (§15): the example card says "Nothing to add? Enter 0."
 - Sliders or ranges are fine. Figures are rounded.
 
 | Section | Upload (Step 4 sheet) | Manual fields (minimum) | Pre-filled from |
@@ -467,3 +467,20 @@ Every number the plan or a calculator uses falls into exactly one of three types
 Until a required choice is made, results that depend on it show "Choose your [item] to see this", never a hidden number. The sample customer has all choices made, so demos still work.
 
 Every guidance figure is quoted once, from the single rules register, so the prototype, workbook and spec always say the same thing. For example, "Ireland today" inflation must be ONE figure everywhere: the latest CSO release, named with its month and index.
+
+## 15. "Not sure? See an example" replaces "Estimate for me" and "I don't have this" (Pooja, 6 Oct 2026; binding, replaces those parts of §5 and §11)
+Every customer's money is different, so we never fill in a figure for them.
+
+- **Link wording** on every Your finances field: **Not sure? See an example**. Remove "Not sure? Estimate for me" and "I don't have this" everywhere.
+- Tapping the link opens a small **example card**. The card never fills anything in. It has:
+  1. Title: "Example: [field name]".
+  2. One short sentence from the sample customers Aoife and Cian, using their real sample figures, ending with what they enter. E.g. "Aoife and Cian have €6,000 in their bank accounts and €3,000 in the credit union. They enter **€9,000**."
+  3. **📍 Where to find yours:** one line naming the document or app (payslip, banking app, annual pension statement, mortgage statement, MyWelfare…).
+  4. **Nothing to add? Enter 0.**
+  5. Small print: "Example only. Not a typical or recommended amount."
+  6. Button: **Got it**.
+  Choice fields (e.g. Your home, Your work, State Pension) get the same card: what each option means, and which one Aoife picked as the example.
+- Statuses: **Your figure** (typed, including 0) · **From document** · **❓ Missing** (left blank; counts as €0 and stays on the "To sharpen your plan" checklist). The "≈ Estimated" and "Confirmed none" tags are removed.
+- Data precedence becomes: document > customer-typed > (nothing: Missing).
+- Figures the engine **works out from the customer's own figures** stay, labelled "Worked out from your figures" with the reason: the mortgage repayment from balance, rate and years left; a 5-year repayment for a loan or card with no (or too small) stated repayment. These are calculations, not guesses about the person.
+- All the old made-up estimate figures (€45,000 income, €8,000 cash, €380,000 home, etc.) are deleted.
