@@ -476,7 +476,7 @@ Every customer's money is different, so we never fill in a figure for them.
   1. Title: "Example: [field name]".
   2. One short sentence from the sample customers Aoife and Cian, using their real sample figures, ending with what they enter. E.g. "Aoife and Cian have €6,000 in their bank accounts and €3,000 in the credit union. They enter **€9,000**."
   3. **📍 Where to find yours:** one line naming the document or app (payslip, banking app, annual pension statement, mortgage statement, MyWelfare…).
-  4. **Nothing to add? Enter 0.**
+  4. **Nothing to add? Enter 0.** (euro fields only; not on ages, years or choices)
   5. Small print: "Example only. Not a typical or recommended amount."
   6. Button: **Got it**.
   Choice fields (e.g. Your home, Your work, State Pension) get the same card: what each option means, and which one Aoife picked as the example.
