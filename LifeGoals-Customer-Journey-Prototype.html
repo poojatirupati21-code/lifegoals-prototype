@@ -294,6 +294,7 @@ input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 .term{display:flex;flex-direction:column;gap:1px;padding:6px 0;border-top:1px dashed var(--line)}.term:first-of-type{border-top:0}
 .term .tg{font-size:12px;font-weight:800;color:var(--storm-t);letter-spacing:.01em}.term .tm{font-size:13.5px;color:var(--ink);line-height:1.4}
 .tsec{margin-top:10px}.tsec:first-child{margin-top:4px}
+.opt.row1 .rcol{display:flex;flex-direction:column;align-items:flex-start;gap:6px;flex:1;min-width:0}.opt.row1 .rcol svg{width:100%;max-width:220px;height:24px}
 .opt .otag{font-size:11.5px;font-weight:800;color:var(--storm-t);background:var(--storm-l);border-radius:999px;padding:2px 8px;line-height:1.3}
 /* §12 plan builder + Explore (ported from Lifecast, restyled in our tokens) */
 .pbbar{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin:10px 0 2px}.pbbar i{height:5px;border-radius:3px;background:rgba(11,37,69,.12)}.pbbar i.done{background:var(--sea-d)}.pbbar i.on{background:var(--sun)}.pbbar i.skip{background:repeating-linear-gradient(90deg,var(--sea-d) 0 3px,transparent 3px 6px)}
@@ -546,9 +547,9 @@ const DQ = [
     {e:'🪙', tag:'Starter capacity', t:'Under €100', s:1}, {e:'💶', tag:'Moderate capacity', t:'€100 to €300', s:2}, {e:'💰', tag:'Good capacity', t:'€300 to €750', s:3}, {e:'🏦', tag:'High capacity', t:'Over €750', s:4}, {e:'🎢', tag:'Variable income', t:'It changes month to month', s:2}]},
   {id:'7', act:3, q:'A €1,000 bill arrives tomorrow. How do you pay it?', sub:'', type:'cards', o:[
     {e:'✅', tag:'Emergency fund', t:'From my emergency savings', s:4}, {e:'🐷', tag:'Thin buffer', t:'From money saved for something else', s:2}, {e:'💳', tag:'Relies on credit', t:'Credit card or a loan', s:1}, {e:'😬', tag:'No safety net', t:"I'm not sure", s:1}]},
-  {id:'8', act:4, q:'Pick a road for your long-term money.', sub:'A flat road is steady but slower. A hilly road has bigger ups and downs, with more growth potential.', type:'ride', o:[
-    {e:'🛣️', tag:'Low risk', t:'Flat and steady', s:1, path:'M0 40 L140 28'}, {e:'🏞️', tag:'Cautious', t:'Gentle hills', s:2, path:'M0 42 L20 36 L40 40 L60 30 L80 34 L100 26 L120 28 L140 20'},
-    {e:'⛰️', tag:'Balanced', t:'Hills and dips', s:3, path:'M0 44 L20 26 L40 44 L60 18 L80 36 L100 12 L120 28 L140 8'}, {e:'🏔️', tag:'High risk', t:'Mountain road, but exciting', s:4, path:'M0 46 L20 20 L40 48 L60 10 L80 42 L100 4 L120 30 L140 2'}]},
+  {id:'8', act:4, q:'Pick your road for your long-term money.', sub:'The motorway is steady but slower. The mountain pass has more twists and turns, and more room to grow.', type:'ride', o:[
+    {e:'🛣️', tag:'Low risk', t:'Straight up the motorway', s:1, path:'M0 40 L140 28'}, {e:'🏞️', tag:'Cautious', t:'A quiet country road', s:2, path:'M0 42 L20 36 L40 40 L60 30 L80 34 L100 26 L120 28 L140 20'},
+    {e:'🌿', tag:'Balanced', t:'Up and down the boreens', s:3, path:'M0 44 L20 26 L40 44 L60 18 L80 36 L100 12 L120 28 L140 8'}, {e:'🏔️', tag:'High risk', t:'Over the Healy Pass, hairpins and all', s:4, path:'M0 46 L20 20 L40 48 L60 10 L80 42 L100 4 L120 30 L140 2'}]},
   {id:'9', act:4, q:'Your €10,000 investment drops to €8,500. What do you do?', sub:'', type:'scenario', from:10000, to:8500, o:[
     {e:'😱', tag:'Panic selling', t:'Sell before it drops more', s:1}, {e:'😬', tag:'Anchoring', t:"Wait until it's back to €10,000, then sell", s:2}, {e:'😌', tag:'Long-term investor', t:'Stay calm and hold on', s:3}, {e:'🛒', tag:'Buy the dip', t:"Buy more while it's cheaper", s:4}]},
   {id:'12', act:5, q:'How do you feel about your financial future?', sub:'Every answer is normal.', type:'cards', o:[
@@ -783,7 +784,7 @@ const PW = {
   '2':  [{A:2}, {B:2}, {E:2}, {C:2}],                       // Sticking to a budget · Checking your balance · Trying something new · Relaxed about money
   '4':  [{E:1}, {A:1}, {B:1}, {B:.5, C:.5}],                // Buy in quickly · Research it · Ask an expert · Stay away
   '7':  [{A:.5}, {}, {}, {C:.5}],                           // Emergency savings · Other savings · Credit/loan · Not sure
-  '8':  [{B:.5, C:.5}, {A:.5, B:.5}, {A:.5, E:.5}, {E:1}],  // Flat and steady · Gentle hills · Hills and dips · Mountain road
+  '8':  [{B:.5, C:.5}, {A:.5, B:.5}, {A:.5, E:.5}, {E:1}],  // Motorway · Quiet country road · Boreens · Healy Pass
   '9':  [{B:1}, {B:.5}, {A:.5, C:.5}, {E:1}],               // Sell · Wait until back, then sell · Stay calm · Buy more
   '12': [{B:1}, {E:.5}, {A:1}, {C:1}],                      // Worried · Hopeful · Confident · Avoid thinking about it
   u4:   [{A:.5, E:.5}, {A:.5, B:.5}, {B:1}, {C:1}]          // §13: Self-directed · Validator · Delegator · Procrastination (same order and weights)
@@ -1316,8 +1317,8 @@ V.DQ = () => { const q = DISC6[S.di], v = S.ans[q.id];
   let body = '';
   if (q.type === 'scenario') body += '<div class="panel"><div class="scn"><div><small>You put in</small><b>' + eur(q.from) + '</b></div><div style="text-align:right"><small>A month later</small><b style="color:var(--gap-t)">' + eur(q.to) + '</b></div></div><div class="pbar" style="margin-top:10px"><i style="width:85%;background:var(--sun)"></i></div></div>';
   const long = q.o.some(o => o.t.length > 30) || q.o.length === 5;
-  body += '<div class="opts' + (long ? '' : ' two') + '" role="group" aria-label="Answers">' + q.o.map((o, k) => '<button class="opt' + (long ? ' row1' : '') + (v === k ? ' sel' : '') + '" aria-pressed="' + (v === k) + '" data-a="dpick" data-p="' + k + '"><span class="em" style="background:' + ['var(--sun-l)','var(--sky-l)','var(--sea-l)','var(--storm-l)','#FDE3DC'][k % 5] + '" aria-hidden="true">' + o.e + '</span><span class="tx">' + esc(o.t) + '</span>' + (o.tag ? '<span class="otag">◆ ' + esc(o.tag) + '</span>' : '') +
-    (q.type === 'ride' ? '<svg width="100%" height="30" viewBox="0 0 140 50" preserveAspectRatio="none" aria-hidden="true"><path d="' + o.path + '" fill="none" stroke="var(--sea-d)" stroke-width="3" stroke-linecap="round"/></svg>' : '') + '</button>').join('') + '</div>';
+  body += '<div class="opts' + (long ? '' : ' two') + '" role="group" aria-label="Answers">' + q.o.map((o, k) => '<button class="opt' + (long ? ' row1' : '') + (v === k ? ' sel' : '') + '" aria-pressed="' + (v === k) + '" data-a="dpick" data-p="' + k + '"><span class="em" style="background:' + ['var(--sun-l)','var(--sky-l)','var(--sea-l)','var(--storm-l)','#FDE3DC'][k % 5] + '" aria-hidden="true">' + o.e + '</span>' + (long && q.type === 'ride' ? '<span class="rcol">' : '') + '<span class="tx">' + esc(o.t) + '</span>' + (o.tag ? '<span class="otag">◆ ' + esc(o.tag) + '</span>' : '') +
+    (q.type === 'ride' ? '<svg width="100%" height="30" viewBox="0 0 140 50" preserveAspectRatio="none" aria-hidden="true"><path d="' + o.path + '" fill="none" stroke="var(--sea-d)" stroke-width="3" stroke-linecap="round"/></svg>' : '') + (long && q.type === 'ride' ? '</span>' : '') + '</button>').join('') + '</div>';
   return {id:'D' + (S.di + 2), note:'Discover question ' + (S.di + 1) + ' of 6 (DISC Q' + q.id + ', verbatim). One tap advances. Lifecast term shown as a tag on each answer (§12).', kind:'quiz', html:
     '<div class="qtop">' + chapBar() + '<button class="qx" data-a="go" data-p="D0" aria-label="Close and go to start">✕</button></div><div class="qbody"><div class="qeye">Chapter ' + q.act + ' · ' + CHAPTERS[q.act] + ' · ' + (S.di + 1) + ' of 6</div><h2 tabindex="-1">' + esc(q.q) + '</h2><p class="qsub">' + esc(q.sub) + '</p>' + body + '</div>' +
     '<div class="qfoot"><button class="qback" data-a="dprev">← Back</button><button class="qback" data-a="dnext">Skip</button></div>'};
@@ -2252,11 +2253,11 @@ const TOPICS = [['🏡','Mortgages','Buying, switching and paying off faster','m
 const xTop = () => S.xs[S.xs.length - 1];
 function exploreScreen(){ const t = xTop(); if (!t) return V.XPL(); return V[t.v](t.p); }
 V.XPL = () => { const P = S.app ? project() : null, slip = P ? S.goals.filter(g => P.pct[g.id] < 95) : [];
-  return {id:'XPL-01', note:'Explore (from Lifecast): what-ifs for slipping goals first (after a plan), tools by life need (6 groups, 28 calculators), tools for you, short videos + live sessions, topics that lead to the right expert. Works before a plan.', head:appHead('Explore', 'Tools, calculators and short videos. Try anything, no plan needed.'),
+  return {id:'XPL-01', note:'Explore (journey-spec §17 order): what-ifs for slipping goals first (after a plan), Focus on one area (topics that lead to the right expert), tools for you, short videos + live sessions, then Calculators: 6 groups as list rows, 28 calculators. Works before a plan.', head:appHead('Explore', 'Tools, calculators and short videos. Try anything, no plan needed.'),
   html:(slip.length ? '<div class="sec"><h3>What-ifs for your goals</h3></div>' + slip.map(g => '<button class="goal" data-a="gowi" data-p="' + g.id + '"><span class="ic" style="background:var(--' + band(P.pct[g.id]) + '-l)" aria-hidden="true">' + g.e + '</span><span style="flex:1"><b>Try a what-if for ' + esc(g.name.toLowerCase()) + '</b><br><span class="small">' + P.pct[g.id] + '% covered now</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') : '') +
-   '<div class="sec"><h3>Calculators</h3></div><div class="grid2">' + CATS.map(c => '<button class="tile ctile" style="background:' + c.color + '" data-a="cat" data-p="' + c.id + '"><span class="e" aria-hidden="true">' + c.em + '</span><span>' + esc(c.name) + '<br><small style="opacity:.92;font-weight:600">' + CALCS.filter(x => x.cat === c.id).length + ' tools</small></span></button>').join('') + '</div>' +
-   '<div class="sec"><h3>Tools for you</h3></div><div class="hstrip">' + toolsForYou().map(toolTile).join('') + '</div>' + watchHTML() +
    '<div class="sec"><h3>Focus on one area</h3></div>' + TOPICS.map(t => '<button class="goal" data-a="topic" data-p="' + t[1] + '"><span class="ic" aria-hidden="true">' + t[0] + '</span><span style="flex:1"><b>' + t[1] + '</b><br><span class="small">' + t[2] + '</span></span><span class="chev" aria-hidden="true">›</span></button>').join('') +
+   '<div class="sec"><h3>Tools for you</h3></div><div class="hstrip">' + toolsForYou().map(toolTile).join('') + '</div>' + watchHTML() +
+   '<div class="sec"><h3>Calculators</h3></div>' + CATS.map(c => { const n = CALCS.filter(x => x.cat === c.id).length; return '<button class="goal" data-a="cat" data-p="' + c.id + '"><span class="ic" aria-hidden="true">' + c.em + '</span><span style="flex:1"><b>' + esc(c.name) + '</b><br><span class="small">' + esc(c.blurb) + ' · ' + n + ' tools</span></span><span class="chev" aria-hidden="true">›</span></button>'; }).join('') +
    '<p class="disc">Calculators and videos explain general topics. Figures are illustrative, not a guarantee and not advice.</p>'}; };
 /* ================= STATEMENT UPLOADS in Explore (Pensions & Retirement · Home & Mortgage · Investments; Pooja, 1 Oct) =================
    One pattern: card on the category page → verified-account gate (xlsx MASTER D8) → mock reader → "We read these values" (confidence, editable)
@@ -2543,7 +2544,7 @@ function openReport(){ if (!planReady()){ toast(chooseTxt(planMissing()[0]).repl
     '<section><h2>7. Your money personality' + (um ? ' and indicative risk profile' : '') + '</h2>' + (discEnough() ? '<p><b>' + per.e + ' ' + per.name + '</b>: ' + per.strap + '</p><div style="max-width:520px"><b>Your money terms</b>' + termsHTML() + '</div>' : '<p>Not enough answers yet to show a money personality.</p>') + (um ? '<p>Indicative risk profile: <b>' + riskLabelText(rp) + '</b>' + (rp.limit ? ' (set by ' + RISK_SETBY[rp.limit] + ')' : '') + '. ' + (rp.mis ? esc(rp.mis) : '') + (rp.keNote ? ' ' + KE_NOTE : '') + ' Your adviser confirms your risk profile with you.</p>' : (discEnough() && riskRead(false).label ? '<p>Risk profile, first read: <b>' + riskRead(false).label + '</b> · finish your profile to confirm. A first read is never shown above Balanced.</p>' : '') + '<p>Complete <i>Understand me</i> to add your indicative risk profile.</p>') + '</section>' +
     '<section><h2>8. Your questions for an adviser</h2>' + (S.advQs.length ? '<ul>' + S.advQs.map(q => '<li>' + esc(q) + '</li>').join('') + '</ul>' : '<p>None yet.</p>') + '</section>' +
     '<section><h2>9. What your plan assumes</h2><p>' + assumeRows().map(x => esc(x[0]) + ': ' + esc(x[1]) + ' (' + esc(x[2]) + ')').join(' · ') + '. Investments can fall as well as rise. All projections are illustrative and not guaranteed. This is preliminary guidance, not financial advice. Only an authorised adviser can give advice. ' + DISC_FORMAL + '</p></section></article>';
-  const R = document.getElementById('report'); R.innerHTML = h; R.classList.add('on'); R.scrollTop = 0; R.querySelector('[data-r="print"]').focus();
+  const R = document.getElementById('report'); R.innerHTML = h; hideEmoji(R); R.classList.add('on'); R.scrollTop = 0; R.querySelector('[data-r="print"]').focus();
   if (!S.versions.some(v => /report/.test(v.note))) S.versions.push({note:'Report downloaded', date:'29 Sep 2026'});
 }
 /* ================= RENDER ================= */
@@ -2557,6 +2558,20 @@ function current(){
   return (V[S.scr] || V.D0)();
 }
 function finScreen(){ return S.upl ? V.PU() : S.fsec != null ? V.P3() : V.P2(); }
+/* ================= Emoji are decoration, never read aloud (journey-spec §17) =================
+   In every title, heading, card title, tile, list row, chip, button and link, emoji runs are wrapped in aria-hidden spans,
+   so the accessible name is words only. Runs on every render, the report, and any later partial update (MutationObserver). */
+const EMO_RUN = /(?:\p{Extended_Pictographic}|\p{Regional_Indicator})(?:\uFE0F|\u20E3|[\u{1F3FB}-\u{1F3FF}]|\u200D(?:\p{Extended_Pictographic}|\p{Regional_Indicator})\uFE0F?|\p{Regional_Indicator})*/gu;
+const EMO_NAMED = 'h1,h2,h3,h4,h5,h6,[role=heading],.card > b,.card > div > b,.ck b,.mini > span:first-child,.mini > b,button,a,summary,label,.tag,.pill,.eyebrow,.otag';
+function hideEmoji(root){ if (!root) return; const els = root.matches && root.matches(EMO_NAMED) ? [root] : []; root.querySelectorAll && els.push(...root.querySelectorAll(EMO_NAMED));
+  els.forEach(el => { if (el.hasAttribute('aria-label') || el.closest('[aria-hidden="true"]')) return;
+    const words = (() => { const c = el.cloneNode(true); c.querySelectorAll('[aria-hidden="true"]').forEach(x => x.remove()); return c.textContent.replace(EMO_RUN, '').trim(); })(); if (!words) return;   // never leave a control with no name
+    const tw = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {acceptNode:n => n.parentElement.closest('[aria-hidden="true"]') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT}), nodes = [];
+    while (tw.nextNode()) { EMO_RUN.lastIndex = 0; if (EMO_RUN.test(tw.currentNode.nodeValue)) nodes.push(tw.currentNode); }
+    nodes.forEach(n => { const f = document.createDocumentFragment(); let last = 0; const v = n.nodeValue; EMO_RUN.lastIndex = 0; let m;
+      while ((m = EMO_RUN.exec(v))) { if (m.index > last) f.appendChild(document.createTextNode(v.slice(last, m.index))); const sp = document.createElement('span'); sp.setAttribute('aria-hidden', 'true'); sp.textContent = m[0]; f.appendChild(sp); last = m.index + m[0].length; }
+      if (last < v.length) f.appendChild(document.createTextNode(v.slice(last))); n.parentNode.replaceChild(f, n); }); }); }
+const emoObs = new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) hideEmoji(n.closest && n.closest(EMO_NAMED) ? n.closest(EMO_NAMED) : n); else if (n.nodeType === 3 && n.parentElement && !n.parentElement.closest('[aria-hidden="true"]')) { const h = n.parentElement.closest(EMO_NAMED); if (h) hideEmoji(h); } })));
 let lastId = null, focusKey = null;
 function render(){ syncSafety();
   const scr = document.getElementById('screen'), sc0 = scr.querySelector('.scroll,.qbody'), top0 = sc0 ? sc0.scrollTop : 0;
@@ -2566,9 +2581,10 @@ function render(){ syncSafety();
   else html = (phoneLandscape() ? '<div class="app"><div class="scroll" id="main"><header class="sky">' + (s.head || '') + '</header>' + s.html + '</div>'
     : '<div class="app"><header class="sky">' + (s.head || '') + '</header><div class="scroll" id="main">' + s.html + '</div>') + (s.foot ? '<div class="foot">' + s.foot + '</div>' : '') +
     (S.app || S.shell ? '<nav class="tabs" aria-label="Main">' + [['home','Home'],['explore','Explore'],['plan','My Plan'],['me','Me'],['exp','Experts']].map(([k, l]) => k === 'plan' ? '<button class="center' + (S.tab === k ? ' on' : '') + '" data-a="tab" data-p="plan" aria-current="' + (S.tab === k ? 'page' : 'false') + '"><span class="fab">' + ICON.plan + '</span>' + l + '</button>' : '<button class="' + (S.tab === k ? 'on' : '') + '" data-a="tab" data-p="' + k + '" aria-current="' + (S.tab === k ? 'page' : 'false') + '">' + ICON[k] + l + '<span class="dot"></span></button>').join('') + '</nav>' : '') + '</div>';
-  html += '<button class="askfab" data-a="ask" aria-label="Ask: help and plain-English explanations"><span aria-hidden="true">💬</span>Ask</button>';
+  const onboarding = /^D([0-7]|R|S)$/.test(s.id);   // journey-spec §17: Ask appears once the customer enters the app
+  if (!onboarding) html += '<button class="askfab" data-a="ask" aria-label="Ask: help and plain-English explanations"><span aria-hidden="true">💬</span>Ask</button>';
   html += sheetHTML(s.id);
-  scr.innerHTML = html;
+  scr.innerHTML = html; hideEmoji(scr);
   const sc = scr.querySelector('.scroll,.qbody'); if (sc && same) sc.scrollTop = top0;
   lastId = s.id;
   bind();
@@ -2874,4 +2890,5 @@ function tlOnScreen(){ const t = document.querySelector('.tl-board'), m = docume
 function showTL(){ const t = document.querySelector('.tl-board'); if (t) t.scrollIntoView({block:'start', behavior:'instant'}); }
 addEventListener('resize', () => { fit(); const l = phoneLandscape(); if (wasLand !== null && l !== wasLand && S && (S.app || S.shell)){ const vis = S.app && roadOnScreen(), tlv = tlOnScreen(); render(); if (document.getElementById('tl')) layoutTL(); if (vis && l) showRoad(); else if (tlv) showTL(); } else if (document.getElementById('tl')) layoutTL(); wasLand = l; });
 S = fresh(); side(); fit(); render();
+['screen', 'report'].forEach(id => emoObs.observe(document.getElementById(id), {childList:true, subtree:true, characterData:false}));
 </script></body></html>
