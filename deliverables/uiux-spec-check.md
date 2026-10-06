@@ -1,16 +1,16 @@
-# UI/UX calculator spec: automated check (prototype fc0d2ae, 6 Oct 2026)
+# UI/UX calculator spec: automated check (prototype b98e767, 6 Oct 2026)
 
-Document: deliverables/LifeGoals-Calculators-UIUX-Spec.docx (file name unchanged; the product is LifeMap). A4, **320 pages, 13.5 MB**, 28 calculators (C01 to C28), rebuilt from:
-- prototype commit fc0d2ae: journey-spec §14 to §20 (the §19 feedback items and the §20 copy pass, 26 reworded blocks)
+Document: deliverables/LifeGoals-Calculators-UIUX-Spec.docx (file name unchanged; the product is LifeMap). A4, **336 pages, 14.3 MB**, 28 calculators (C01 to C28), rebuilt from:
+- prototype commit b98e767: journey-spec §14 to §22 (the §19 feedback items, the §20 copy pass, §21 Experts specialist boxes and illustrated Focus on one area tiles, §22 skippable Step 7 and the results banner)
 - the workbook as committed (new sheets "Settings" and "Your lists", their named cells, the new guidance texts)
 
 The screenshots are palette-quantised PNGs (256 colours, no dithering) to keep the file small; the text was not touched. I converted the docx to PDF with LibreOffice and looked at sample pages: 3.7 (Settings: standards table, partner override, admin view, workbook sheet), 4.8 (the item block, Liabilities, Protection, Pension, per-item upload), 4.9 (complete on save), 4.10 (workbook Your lists and the calculators that use it), 6.1 and 6.2 (months, goal order). Layout, tables and images are fine. LibreOffice's PDF font has no glyphs for a few newer emoji; they are in the .docx text.
 
 ## Result
 
-**7444 checks passed, 0 failed. Browser console errors: 0.**
+**7473 checks passed, 0 failed. Browser console errors: 0.**
 
-**Planted-error test.** I made a copy of the docx with 16 deliberate edits and ran the same check on it. It found all 16, which showed up as 61 failed checks. The 14 edits:
+**Planted-error test.** I made a copy of the docx with 20 deliberate edits and ran the same check on it. It found all 20, which showed up as 70 failed checks. The 20 edits:
 1. C01 result label
 2. C11 result line
 3. C01 unit
@@ -27,12 +27,16 @@ The screenshots are palette-quantised PNGs (256 colours, no dithering) to keep t
 14. The ranking heading ("Which goal first?" changed to "Which goal comes first?", every occurrence)
 15. A copy-pass wording: the Emergency fund months note ("use the same number." changed to "use the same value.", every occurrence)
 16. A copy-pass wording: the Known limits row ("stay at the 2026 rates." changed to "stay at the 2027 rates.", every occurrence)
+17. A specialist box blurb ("Life cover, income protection, serious illness" changed to "… income cover …", 2.5)
+18. A Focus on one area tile blurb ("Budget, surplus and debt" changed to "Budget, spare cash and debt", 2.2)
+19. The Step 7 button ("Use the standards for the rest" changed to "Use the standard for the rest", 3.5)
+20. The results banner ("3 details missing" changed to "3 details left", 3.5.1)
 
 ## What is checked
 
 A fresh headless Chromium run (390×844, scale 2), separate from the screenshot run, rebuilds every documented state for every calculator and compares the live DOM with the docx XML (gates, blank inputs and guidance, suggested-rate chips, "Assumptions this tool uses", inputs tables, screen values, result templates, limits and hints, choice chips, workbook output names and values). Shared parts: inflation chips, the rules register (82 keys), every Your assumptions input, Set by Government card, step 7, "What your plan assumes", Explore, statement cards and Add to my plan sheets.
 
-**§15 and §16 (487 checks):** all 47 reachable example cards (opened from their links, compared with section 4.4 by title and "shown on", Escape closes, focus returns, field and lists unchanged; the 7 old single-total cards must have no link); status tags; checklist rows; gates and worked-out lines; the cover, D1, Emergency fund tile.
+**§15 and §16 (516 checks):** all 47 reachable example cards (opened from their links, compared with section 4.4 by title and "shown on", Escape closes, focus returns, field and lists unchanged; the 7 old single-total cards must have no link); status tags; checklist rows; gates and worked-out lines; the cover, D1, Emergency fund tile.
 
 **§17 to §19 (248 checks):**
 - **Explore, emoji, Ask** (as last round): section order and the six Calculators rows; emoji in aria-hidden spans for all 28 titles; Ask hidden in onboarding and shown in the app.
@@ -43,6 +47,8 @@ A fresh headless Chromium run (390×844, scale 2), separate from the screenshot 
 - **Workbook Your lists:** every named total (13 of them) is in 4.10 and the intro text matches; exactly C12, C13, C14, C21, C24 and C25 fall back to the totals (each cell, label and name equals the workbook formulas); C27 and C28 are not fed.
 - **Emergency fund months:** calculator 3, goal 4, step 7 shows 4 (tag "Your choice"); one fresh run proves the goal value reaches the calculator; every string in 6.1 equals the live screen; the edge (typed in C11, later changed in the goal) is in the doc.
 - **Goal order:** the Emergency fund is first by default, movable, reset restores it; heading, help, aria-labels, messages, version notes and the results order in 6.2 equal the live card.
+
+**§21 and §22 (29 checks):** the six Focus on one area tiles (emoji, name, blurb and --art slot equal the live tiles in 2.2; the grid, honesty and contrast lines); the five specialist boxes on the Experts tab, C0 and C1 equal 2.5 and the old chip row is gone; Step 7 (3.5): the "Choose 3 things" card, counter, "Everything else" card, the standards button and its note, both buttons disabled before the 3 choices, no tick, the standards button leaves the 3 unchosen; Skip opens results with a banner; the 1 and 3 missing banner texts equal 3.5.1.
 
 ## Per calculator
 
@@ -79,12 +85,15 @@ A fresh headless Chromium run (390×844, scale 2), separate from the screenshot 
 | Components | Inflation chips, rules register, Your assumptions | 391 | 0 |  |
 | Explore | Explore structure, statement cards, Add to my plan sheets | 71 | 0 |  |
 | §17 / §19 | Explore order and rows, emoji accessible names, Ask visibility, Settings block, admin view, partner override, workbook Settings | 248 | 0 |  |
-| §15 / §16 | Example cards, statuses, checklist, gaps in calculators; LifeMap cover, Q8, tile | 487 | 0 |  |
+| §21 / §22 | Focus on one area tiles, Experts specialist boxes, Step 7 skippable, results banner | 29 | 0 |  |
+| §15 / §16 | Example cards, statuses, checklist, gaps in calculators; LifeMap cover, Q8, tile | 516 | 0 |  |
 
 ## Changed in this rebuild
 
+- **§21 and §22:** new 2.2 (illustrated square tiles, art slots, scrim, reduced motion), new 2.5 (Talk to a specialist), rewritten 3.5 (Step 7: Choose 3 things, standards for the rest, Skip) and new 3.5.1 (results banner). Screenshots were recaptured and palette-quantised. All tile and box text is checked against the live prototype.
+
 - **Copy pass (§20):** the doc follows the reworded prototype text: the step 7 and Your assumptions intros, the What your plan assumes intro and its "How the plan works" and "Known limits" rows, the Emergency fund months note (6.1 and Appendix A), the "For the rest we show a suggestion or the standard" line in Appendix A. The change list is in docs/copy-audit.md.
-- The workbook README lines that were reworded are not quoted in this document, so nothing else moved. Page count and file size are unchanged (320 pages, 13.5 MB).
+- The workbook README lines that were reworded are not quoted in this document, so nothing else moved. Page count and file size are unchanged (336 pages, 14.3 MB).
 
 ## Open points (Appendix B of the spec)
 
