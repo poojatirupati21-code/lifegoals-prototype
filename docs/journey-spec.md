@@ -490,9 +490,9 @@ Every customer's money is different, so we never fill in a figure for them.
 - **Cover (D0)**, short and human, no AI-sounding copy:
   - Full-bleed real photo (a winding road through Irish countryside), dark gradient at the bottom for legible text. Photo to be supplied/licensed; until then a clearly marked photo slot.
   - Logo: **LifeMap**
-  - Headline: **Where do you want life to take you?**
-  - Line: **Your goals and your money, on one simple map.**
-  - Button: **Let's start**
+  - Headline: **The life you'd like, mapped out.**
+  - Line: **A life map that guides you, step by step.**
+  - Button: **Let's start**, with the line under it: **An easy tool, built for you.**
   - Small: **Free · About a minute · Nothing saved unless you say so** · "Why we ask" link · **Guidance, not advice.** · "I have an invite" stays.
 - **D1:** "What brings you to LifeMap today?" Only the name changes; the chips stay exactly as they are (🛟 "Building a safety net for emergencies" unchanged). No "rainy day" wording (Pooja, 6 Oct 2026).
 - **Goal tile:** "Build a safety net" becomes **"Emergency fund"** (no helper line, no "rainy day").
