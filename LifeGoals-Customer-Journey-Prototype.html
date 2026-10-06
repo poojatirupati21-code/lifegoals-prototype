@@ -474,44 +474,12 @@ const RULES_IE_2026 = {
   },
   infl:{
     ie:RV_(0.039, 'https://www.cso.ie/en/csolatestnews/pressreleases/2026pressreleases/pressstatementflashestimatefortheharmonisedindexofconsumerpricesseptember2026/', 'CSO HICP flash, Sep 2026 (published 1 Oct 2026)'),
-    ieSrc:RV_('CSO HICP flash, Sep 2026', 'https://www.cso.ie', '1 Oct 2026'),
-    ecb:RV_(0.02, 'https://www.bundesbank.de/en/tasks/topics/european-central-bank-updates-monetary-policy-strategy-970824', '2025 strategy')
+    ieSrc:RV_('CSO HICP flash, Sep 2026', 'https://www.cso.ie', '1 Oct 2026')
   },
-  // §14 type 2: set by Government or the market but varies within a known range → the customer enters theirs ("Usually between X and Y (source)").
-  // Also the other guidance facts the copy quotes. Each figure is quoted once, from here.
+  // Regulatory facts quoted in copy (law: fixed for everyone). The standards and guidance figures are in SETTINGS below.
   guide:{
     cardCap:RV_(0.23, 'https://www.centralbank.ie/news/article/central-bank-review-finds-over-400-000-credit-cards-are-on-historic-high-interest-rates', '2022', true, 'Central Bank of Ireland'),
-    lifeMen65:RV_(83, 'https://www.cso.ie/en/releasesandpublications/er/ilt/irishlifetablesno172015-2017/', '2015–2017 (latest edition; 65 + 18.3 years)', true, 'CSO, Irish Life Tables No. 17, 2015–2017'),
-    lifeWomen65:RV_(86, 'https://www.cso.ie/en/releasesandpublications/er/ilt/irishlifetablesno172015-2017/', '2015–2017 (latest edition; 65 + 21.0 years)', true, 'CSO, Irish Life Tables No. 17, 2015–2017'),
     schemeEarliest:RV_(50, 'https://www.revenue.ie/en/tax-professionals/tdm/pensions/index.aspx', 'Law', true, 'some occupational schemes')
-  },
-  // §14 type 3: personal judgement → no default. Blank until the customer chooses; "Generally the standard is X (source)" and a one-tap "Use the standard (X)" chip.
-  std:{
-    infl:RV_(0.02, 'https://www.bundesbank.de/en/tasks/topics/european-central-bank-updates-monetary-policy-strategy-970824', '2025 strategy', true, 'the ECB target for the long term'),
-    wage:RV_(0.03, 'https://www.cso.ie/en/statistics/earnings/', '2026', true, 'Irish pay has grown about 3%–4% a year recently (CSO)'),
-    cash:RV_(0.01, 'https://centralbank.ie/statistics/data-and-analysis/credit-and-banking-statistics/retail-interest-rates', 'Jun 2026', true, 'Irish deposit rates after 33% DIRT'),
-    inv:RV_(0.035, 'deliverables/irish-rules-and-rates-audit.md §3 B3', '2026', true, 'a typical mixed fund after about 1% charges and 38% exit tax'),
-    invGross:RV_(0.05, 'deliverables/irish-rules-and-rates-audit.md §3 B3', '2026', true, 'LifeMap standard, not a forecast'),
-    pen:RV_(0.045, 'deliverables/irish-rules-and-rates-audit.md §3 B5', '2026', true, 'a typical pension fund after charges'),
-    penRet:RV_(0.0315, 'deliverables/irish-rules-and-rates-audit.md §3 B5', '2026', true, 'a lower-risk fund once retired, after charges'),
-    ownShare:RV_(0.5, 'deliverables/irish-rules-and-rates-audit.md §3 B1', '2026', false, 'a common 5% + 5% split with your employer; 100% if self-employed'),
-    safetyMonths:RV_(6, 'deliverables/irish-rules-and-rates-audit.md §3 B16', '2026', false, '6 months for a single income or self-employed, 3 for two secure incomes'),
-    safetyMonthsTwo:RV_(3, 'deliverables/irish-rules-and-rates-audit.md §3 B16', '2026', false, 'two secure incomes'),
-    retireMult:RV_(25, 'deliverables/irish-rules-and-rates-audit.md §3 B17', '2026', false, 'a common rule of thumb, about 4% a year'),
-    retireSpend:RV_(0.8, 'deliverables/irish-rules-and-rates-audit.md §3 B18', '2026', false, 'most people spend a bit less once work costs and the mortgage stop'),
-    lumpSum:RV_(0.25, 'deliverables/irish-rules-and-rates-audit.md §3 B19', 'Law limit 25%', false, 'most people take the full tax-free amount'),
-    cashYears:RV_(5, 'deliverables/irish-rules-and-rates-audit.md §3 B21', '2026', false, 'money needed within 5 years is usually kept as cash'),
-    investShare:RV_(0.4, 'deliverables/irish-rules-and-rates-audit.md §3 B21', '2026', false, 'a balanced cash and invested mix'),
-    saveShare:RV_(0.5, 'deliverables/irish-rules-and-rates-audit.md §3 B22', '2026', false, 'half of your spare money'),
-    noAnswer:RV_(300, 'deliverables/irish-rules-and-rates-audit.md §3 B22', '2026', false, 'a modest regular amount'),
-    lifeShare:RV_(0.6, 'deliverables/irish-rules-and-rates-audit.md §3 B24', '2026', false, 'families usually need less than full pay'),
-    lifeYears:RV_(15, 'deliverables/irish-rules-and-rates-audit.md §3 B24', '2026', false, 'often until your youngest child is 23'),
-    rentRise:RV_(0.03, 'deliverables/irish-rules-and-rates-audit.md §3 B25', '2026', true, 'a long-run planning figure'),
-    houseGrow:RV_(0.02, 'deliverables/irish-rules-and-rates-audit.md §3 B25', '2026', true, 'a long-run planning figure; prices can fall'),
-    upkeep:RV_(0.01, 'deliverables/irish-rules-and-rates-audit.md §3 B25', '2026', false, 'repairs, insurance and maintenance'),
-    riskMu:RV_([0.02, 0.04, 0.06], 'deliverables/irish-rules-and-rates-audit.md §3 B26', '2026', false, 'illustrations, not forecasts'),
-    riskVol:RV_([0.05, 0.10, 0.16], 'deliverables/irish-rules-and-rates-audit.md §3 B26', '2026', false, 'illustrations, not forecasts'),
-    budget:RV_([0.5, 0.3, 0.2], 'deliverables/irish-rules-and-rates-audit.md §3 B27', '2026', false, 'the 50/30/20 rule')
   }
 };
 // RI: plain values read by every function (RI.it.band = 44000 …)
@@ -522,18 +490,65 @@ const LAW = {ls:'up to ' + '€' + RI.pen.lsTaxFree.toLocaleString('en-IE') + ' 
   sp:'A full State Pension needs ' + RI.sp.fullYears + ' years (' + (RI.sp.fullYears * 52).toLocaleString('en-IE') + ' weeks) of PRSI contributions and credits. You need at least ' + RI.sp.minYears + ' years of paid contributions to qualify.',
   ae:'Employees aged ' + RI.ae.ageMin + '–' + RI.ae.ageMax + ' earning over €' + RI.ae.earnMin.toLocaleString('en-IE') + ' with no pension are enrolled from ' + RI.ae.start + ': you pay ' + RI.ae.ee * 100 + '% of pay, your employer ' + RI.ae.er * 100 + '% and the State ' + RI.ae.state * 100 + '%.',
   stamp:Math.round(RI.home.stamp[0][1] * 100) + '% up to €' + (RI.home.stamp[0][0] / 1e6) + 'm'};
-/* ---------- Suggested market rates (journey-spec §18): ONE partner-configurable block ----------
-   Never pre-filled: shown as a chip "Use the suggested rate (X) · source, month". By default the Central Bank of Ireland's published averages
-   (re-checked 6 Oct 2026: latest release, July 2026). A partner (credit union, adviser firm, company) replaces the figures and sets its name:
-   every suggestion then reads "Suggested by [partner]". v:null = no suggestion. Law values are not here and can't be changed. */
+/* ================= SETTINGS (journey-spec §19.6, option C) =================
+   ONE block, controlled by LifeMap or a partner (a credit union, adviser firm, company or agent), holding every STANDARD the app suggests with its
+   wording, source and label. The same block is the "Settings" sheet in the workbook. A customer can change any of them for their own plan
+   ("Use the standard (X)" is the one-tap chip, still their own choice, so §14 holds). Not here, and fixed for everyone: law values (RULES_IE_2026).
+   Never given a standard, anywhere: retirement age and life expectancy (plan-until age): those are only guidance.
+   v = the LifeMap standard · pv = the partner's figure (blank = none; every overridden figure then reads "Suggested by [partner]")
+   by = source wording after "Generally the standard is X (…)" · label = chip suffix for market rates · guide = the guidance sentence
+   src / asat / verify = where it comes from, as at when, and whether to open the page before release. v:null = no published figure, so no suggestion. */
 const CBI_RATES = 'https://www.centralbank.ie/statistics/data-and-analysis/credit-and-banking-statistics/retail-interest-rates';
-const PARTNER_RATES = {name:'',
-  mortRate:{v:0.0348, label:'Central Bank of Ireland: average rate on new mortgages, Jul 2026', src:CBI_RATES},
-  loanRate:{v:0.0672, label:'Central Bank of Ireland: average rate on new consumer loans, Jul 2026', src:CBI_RATES},
-  cardRate:{v:null, label:'No published average', src:CBI_RATES},
-  depRate:{v:0.0192, label:'Central Bank of Ireland: average rate on new fixed-term household deposits, Jul 2026', src:CBI_RATES},
-  buyFees:{v:null, label:'No published figure', src:''},
-  fundChg:{v:0.01, label:'Pensions Authority pension calculator assumption', note:'Usually between 0.5% and 2% a year (CCPC)', src:'https://pensionsauthority.ie/scheme-members-and-prsa-contributors/pension-calculator/assumptions/ · https://www.ccpc.ie/consumers/money/pensions/fees-and-charges/'}};
+const SETTINGS = {partner:'', s:{
+  infl:{n:'Inflation: prices rise (a year)', u:'pct', grp:'Prices & growth', v:0.02, by:'the ECB target for the long term', src:'https://www.bundesbank.de/en/tasks/topics/european-central-bank-updates-monetary-policy-strategy-970824', asat:'2025 strategy', verify:true},
+  wage:{n:'Pay rises (a year)', u:'pct', grp:'Prices & growth', v:0.03, by:'Irish pay has grown about 3%–4% a year recently (CSO)', src:'https://www.cso.ie/en/statistics/earnings/', asat:'2026', verify:true, vc:0.025, guide:'Pick lower if your pay is fixed or you expect to work part-time.'},
+  cash:{n:'Cash savings earn (a year, after DIRT)', u:'pct', grp:'Prices & growth', v:0.01, by:'Irish deposit rates after 33% DIRT', src:'https://centralbank.ie/statistics/data-and-analysis/credit-and-banking-statistics/retail-interest-rates', asat:'Jun 2026', verify:true, vc:0.007},
+  inv:{n:'Investments grow (a year, after charges and tax)', u:'pct', grp:'Prices & growth', v:0.035, by:'a typical mixed fund after about 1% charges and 38% exit tax', src:'deliverables/irish-rules-and-rates-audit.md §3 B3', asat:'2026', verify:true, vc:0.025, guide:'Growth is never guaranteed.'},
+  invGross:{n:'Investments grow before fees and tax (a year; growth and fees tools)', u:'pct', grp:'Prices & growth', v:0.05, by:'LifeMap standard, not a forecast', src:'deliverables/irish-rules-and-rates-audit.md §3 B3', asat:'2026', verify:true, guide:'Used by the lump sum, regular investing, fees and real return tools. Growth is never guaranteed.'},
+  pen:{n:'Pension grows while you work (a year, after charges)', u:'pct', grp:'Prices & growth', v:0.045, by:'a typical pension fund after charges', src:'deliverables/irish-rules-and-rates-audit.md §3 B5', asat:'2026', verify:true, vc:0.04, guide:'Pension growth is tax-free inside the fund.'},
+  penRet:{n:'Pension grows once retired (a year, after charges)', u:'pct', grp:'Prices & growth', v:0.0315, by:'a lower-risk fund once retired, after charges', src:'deliverables/irish-rules-and-rates-audit.md §3 B5', asat:'2026', verify:true, vc:0.028, guide:'Most people take less risk once retired, so growth is usually lower.'},
+  rentRise:{n:'Rent vs buy: rent rises (a year)', u:'pct', grp:'Home', v:0.03, by:'a long-run planning figure', src:'deliverables/irish-rules-and-rates-audit.md §3 B25', asat:'2026', verify:true, guide:'Renting has rent rises. Buying has costs that don\'t build equity: interest, stamp duty, fees, LPT and repairs.'},
+  houseGrow:{n:'Rent vs buy: house prices rise (a year)', u:'pct', grp:'Home', v:0.02, by:'a long-run planning figure; prices can fall', src:'deliverables/irish-rules-and-rates-audit.md §3 B25', asat:'2026', verify:true, guide:'House prices can fall as well as rise.'},
+  upkeep:{n:'Rent vs buy: upkeep a year (share of home value)', u:'pct', grp:'Home', v:0.01, by:'repairs, insurance and maintenance', src:'deliverables/irish-rules-and-rates-audit.md §3 B25', asat:'2026', verify:false},
+  ownShare:{n:'Share of pension contributions you pay yourself', u:'pct', grp:'Retirement', v:0.5, by:'a common 5% + 5% split with your employer; 100% if self-employed', src:'deliverables/irish-rules-and-rates-audit.md §3 B1', asat:'2026', verify:false, guide:'Your payslip shows what comes out of your pay. Only your own share gets tax relief. If you type your own amount in Your finances, we use that.'},
+  retireMult:{n:'Retirement savings target: times the yearly income needed', u:'num', grp:'Retirement', v:25, by:'a common rule of thumb, about 4% a year', src:'deliverables/irish-rules-and-rates-audit.md §3 B17', asat:'2026', verify:false, guide:'Retiring early or planning to 95 needs more.'},
+  retireSpend:{n:'Retirement spending if no goal (share of today\'s spending)', u:'pct', grp:'Retirement', v:0.8, by:'most people spend a bit less once work costs and the mortgage stop', src:'deliverables/irish-rules-and-rates-audit.md §3 B18', asat:'2026', verify:false},
+  lumpSum:{n:'Tax-free lump sum to take (share of pension; law limit 25%)', u:'pct', grp:'Retirement', v:0.25, by:'most people take the full tax-free amount', src:'deliverables/irish-rules-and-rates-audit.md §3 B19', asat:'Law limit 25%', verify:false},
+  safetyMonths:{n:'Emergency fund: months of essential spending', u:'num', grp:'Emergency fund & saving', v:6, by:'6 months for a single income or self-employed, 3 for two secure incomes', src:'deliverables/irish-rules-and-rates-audit.md §3 B16', asat:'2026', verify:false, guide:'Easy-access cash for surprises or a gap in pay. Essential spending = living costs + mortgage + loan repayments.'},
+  safetyMonthsTwo:{n:'Emergency fund: months with two secure incomes', u:'num', grp:'Emergency fund & saving', v:3, by:'two secure incomes', src:'deliverables/irish-rules-and-rates-audit.md §3 B16', asat:'2026', verify:false},
+  cashYears:{n:'Money for goals sooner than this is kept as cash (years)', u:'yrs', grp:'Emergency fund & saving', v:5, by:'money needed within 5 years is usually kept as cash', src:'deliverables/irish-rules-and-rates-audit.md §3 B21', asat:'2026', verify:false, guide:'Longer-term money has more time to ride out ups and downs.'},
+  investShare:{n:'Spare savings: share invested', u:'pct', grp:'Emergency fund & saving', v:0.4, by:'a balanced cash and invested mix', src:'deliverables/irish-rules-and-rates-audit.md §3 B21', asat:'2026', verify:false},
+  saveShare:{n:'Share of spare money saved, at most', u:'pct', grp:'Emergency fund & saving', v:0.5, by:'half of your spare money', src:'deliverables/irish-rules-and-rates-audit.md §3 B22', asat:'2026', verify:false, guide:'We never count more than this share of your spare money as saved, unless you set your own monthly saving.'},
+  noAnswer:{n:'Monthly saving if not answered', u:'eur', grp:'Emergency fund & saving', v:300, by:'a modest regular amount', src:'deliverables/irish-rules-and-rates-audit.md §3 B22', asat:'2026', verify:false, guide:'Used until you answer "How much could you comfortably invest each month?".'},
+  lifeShare:{n:'Life cover: share of income the family needs', u:'pct', grp:'Protection', v:0.6, by:'families usually need less than full pay', src:'deliverables/irish-rules-and-rates-audit.md §3 B24', asat:'2026', verify:false},
+  lifeYears:{n:'Life cover: years of support', u:'yrs', grp:'Protection', v:15, by:'often until your youngest child is 23', src:'deliverables/irish-rules-and-rates-audit.md §3 B24', asat:'2026', verify:false},
+  riskMu:{n:'Risk and return: growth a year, Cautious / Balanced / Growth', u:'pct3', grp:'Risk and budget', v:[0.02, 0.04, 0.06], by:'illustrations, not forecasts', src:'deliverables/irish-rules-and-rates-audit.md §3 B26', asat:'2026', verify:false, guide:'Your adviser uses the fund\'s own risk rating (SRI 1–7).'},
+  riskVol:{n:'Risk and return: ups and downs (volatility), Cautious / Balanced / Growth', u:'pct3', grp:'Risk and budget', v:[0.05, 0.10, 0.16], by:'illustrations, not forecasts', src:'deliverables/irish-rules-and-rates-audit.md §3 B26', asat:'2026', verify:false, guide:'How much a year can swing.'},
+  budget:{n:'Budget split: needs / wants / savings and debt', u:'pct3', grp:'Risk and budget', v:[0.5, 0.3, 0.2], by:'the 50/30/20 rule', src:'deliverables/irish-rules-and-rates-audit.md §3 B27', asat:'2026', verify:false},
+  bands:{n:'Tax bands in future', u:'choice', grp:'Choices', v:'prices', by:'Budgets have broadly kept pace over time', src:'deliverables/irish-rules-and-rates-audit.md §3 B10', asat:'2026', verify:false, guide:'Irish tax bands are set each Budget and don\'t rise automatically. "Stay as today" is the cautious view (more tax later).'},
+  spGrow:{n:'State Pension in future', u:'choice', grp:'Choices', v:'prices', by:'it has broadly kept pace with prices over time', src:'deliverables/irish-rules-and-rates-audit.md §3 B11', asat:'2026', verify:false, guide:'The State Pension is set each Budget.'},
+  drawRule:{n:'How you draw your pension', u:'choice', grp:'Choices', v:'spread', by:'spread over your plan, at least the legal minimum', src:'deliverables/irish-rules-and-rates-audit.md §3 B20', asat:'2026', verify:false},
+  ddTiming:{n:'Drawdown tools: withdrawals taken at the', u:'choice', grp:'Choices', v:'start', by:'the prudent choice: the money has less time to grow before you take it', src:'deliverables/irish-rules-and-rates-audit.md §3 B20', asat:'2026', verify:false},
+  waitYears:{n:'Lump sum tool: years you might wait before investing', u:'yrs', grp:'Choices', v:5, by:'an illustration of the cost of waiting', src:'deliverables/LifeGoals-Calculators.xlsx C10', asat:'2026', verify:false},
+  style:{n:'Risk and return tool: investment style (1 Cautious, 2 Balanced, 3 Growth)', u:'num', grp:'Choices', v:2, by:'Balanced; an adviser checks your attitude to risk', src:'deliverables/LifeGoals-Calculators.xlsx C20', asat:'2026', verify:false},
+  // market rates: never pre-filled; shown as the chip "Use the suggested rate (X) · label". v:null = no published figure, so no suggestion.
+  mortRate:{n:'Suggested mortgage rate', u:'pct', grp:'Market rates', v:0.0348, by:'Central Bank of Ireland: average rate on new mortgages, Jul 2026', label:'Central Bank of Ireland: average rate on new mortgages, Jul 2026', src:CBI_RATES, asat:'Jul 2026', verify:true, guide:'Your mortgage statement shows your rate. Typing it is fine: no upload needed.'},
+  loanRate:{n:'Suggested personal and car loan rate (APR)', u:'pct', grp:'Market rates', v:0.0672, by:'Central Bank of Ireland: average rate on new consumer loans, Jul 2026', label:'Central Bank of Ireland: average rate on new consumer loans, Jul 2026', src:CBI_RATES, asat:'Jul 2026', verify:true, guide:'Your loan agreement shows your APR.'},
+  cardRate:{n:'Suggested credit card rate (APR)', u:'pct', grp:'Market rates', v:null, by:'No published average', label:'No published average', src:CBI_RATES, asat:'—', verify:true, guide:'Your card statement shows your APR.'},
+  depRate:{n:'Suggested deposit rate (fixed term, before 33% DIRT)', u:'pct', grp:'Market rates', v:0.0192, by:'Central Bank of Ireland: average rate on new fixed-term household deposits, Jul 2026', label:'Central Bank of Ireland: average rate on new fixed-term household deposits, Jul 2026', src:CBI_RATES, asat:'Jul 2026', verify:true, guide:'If you rent, your deposit stays in savings. Optional: leave it blank to leave it out.'},
+  buyFees:{n:'Suggested buying fees (legal and survey)', u:'eur', grp:'Market rates', v:null, by:'No published figure', label:'No published figure', src:'', asat:'—', verify:false},
+  fundChg:{n:'Suggested fund and pension charges (a year)', u:'pct', grp:'Market rates', v:0.01, by:'Pensions Authority pension calculator assumption', label:'Pensions Authority pension calculator assumption', note:'Usually between 0.5% and 2% a year (CCPC)', src:'https://pensionsauthority.ie/scheme-members-and-prsa-contributors/pension-calculator/assumptions/ · https://www.ccpc.ie/consumers/money/pensions/fees-and-charges/', asat:'2026', verify:true, guide:'When your statement shows your own charges, we use them instead of this.'},
+}, g:{   // guidance facts quoted in copy (no standard: life expectancy is never defaulted)
+  lifeMen65:{n:'Life expectancy at 65, men (years): guidance only', u:'num', v:83, by:'CSO, Irish Life Tables No. 17, 2015–2017', src:'https://www.cso.ie/en/releasesandpublications/er/ilt/irishlifetablesno172015-2017/', asat:'2015–2017 (latest edition; 65 + 18.3 years)', verify:true},
+  lifeWomen65:{n:'Life expectancy at 65, women (years): guidance only', u:'num', v:86, by:'CSO, Irish Life Tables No. 17, 2015–2017', src:'https://www.cso.ie/en/releasesandpublications/er/ilt/irishlifetablesno172015-2017/', asat:'2015–2017 (latest edition; 65 + 21.0 years)', verify:true}}};
+const SET = SETTINGS.s;
+const SV = k => { const s = SET[k]; return s ? (s.pv != null ? s.pv : s.v) : undefined; };   // the figure in use (partner's if set, else the standard)
+const SOV = k => !!SET[k] && SET[k].pv != null;
+const SPN = () => SETTINGS.partner || 'your provider';
+const SB = k => !SET[k] ? '' : SOV(k) ? 'Suggested by ' + SPN() : SET[k].by;          // the (source) shown with "Generally the standard is X (…)"
+const SL = k => !SET[k] ? '' : SOV(k) ? 'Suggested by ' + SPN() : SET[k].label || SET[k].by;   // the chip suffix for market rates
+const SGK = {riskMu1:'riskMu', riskMu2:'riskMu', riskMu3:'riskMu', riskVol1:'riskVol', riskVol2:'riskVol', riskVol3:'riskVol', budgetNeeds:'budget', budgetWants:'budget', budgetSave:'budget', penChg:'fundChg', depEarn:'depRate'};
+const SG = k => (SET[SGK[k] || k] || {}).guide || '';   // the guidance wording
 const ruleCount = () => { let n = 0, vf = 0; const walk = o => Object.values(o).forEach(x => { if (x && typeof x === 'object' && 'v' in x && 'src' in x){ n++; if (x.verify) vf++; } else if (x && typeof x === 'object') walk(x); }); walk(RULES_IE_2026); return {n, vf}; };
 /* ================= DATA (Discover wording verbatim from Lifecast DISC) ================= */
 const CHAPTERS = {1:'Your money mindset', 2:'How you decide', 3:'Your investment capacity', 4:'Your risk appetite', 5:'Your next chapter'};
@@ -638,7 +653,7 @@ const FSEC = [
   {id:'income', t:'Income and expenses', e:'💶', docs:[['🧾','Payslips (last 3)'],['🏛️','Employment Detail Summary'],['🏦','Current-account statements'],['📑','Form 11 / Notice of Assessment']], f:['work','income','pIncome','otherM','costsM','oneOffY']},
   {id:'assets', t:'Assets', e:'🏠', docs:[['🐷','Savings or credit-union statement'],['📈','Investment statement'],['🪙','Share scheme or crypto statement'],['🏡','Property valuation or LPT record']], f:['home','homeValue','cash','invest','propValue','rentM']},
   {id:'liab', t:'Liabilities', e:'💳', docs:[['🏠','Mortgage statement'],['📄','Loan statement'],['💳','Credit-card statement'],['🗂️','Central Credit Register report']], f:['mortBal','mortPayM','mortYears','cardBal','cardPayM','loanBal','loanPayM']},
-  {id:'prot', t:'Protection', e:'🛡️', docs:[['📜','Life or income protection policy'],['🏢','Employer benefits statement'],['🩺','Health or home insurance policy']], f:['life','ip','ci','workCover','health']},
+  {id:'prot', t:'Protection', e:'🛡️', docs:[], f:['life','ip','ci','workCover','health']},
   {id:'pension', t:'Pension', e:'🌅', docs:[['📊','Pension statement'],['🏢','Employer scheme details'],['🏛️','State Pension record (MyWelfare)']], f:['pension','pensionM','pensionOwnM','ae','sp','pSp']}
 ];
 const own = () => /^Own/.test(S.fin.home || ''), mort = () => S.fin.home === 'Own with mortgage';
@@ -662,14 +677,14 @@ const FF = {
   mortBal:{l:'Mortgage left', type:'eur', show:mort},
   mortPayM:{l:'Monthly repayment', type:'eur', show:mort},
   mortYears:{l:'Years left', type:'num', min:1, max:40, show:mort},
-  cardBal:{l:'Credit cards: total owed', type:'eur'},
-  cardPayM:{l:'Credit cards: monthly repayment', type:'eur'},
-  loanBal:{l:'Other loans (car, personal, credit union): total owed', type:'eur'},
-  loanPayM:{l:'Other loans: monthly repayment', type:'eur'},
+  cardBal:{l:'Credit cards: total owed', type:'eur', list:1},
+  cardPayM:{l:'Credit cards: monthly repayment', type:'eur', list:1},
+  loanBal:{l:'Other loans (car, personal, credit union): total owed', type:'eur', list:1},
+  loanPayM:{l:'Other loans: monthly repayment', type:'eur', list:1},
   life:{l:'Life cover', type:'ynn'}, ip:{l:'Income protection', type:'ynn'}, ci:{l:'Serious illness cover', type:'ynn'}, workCover:{l:'Cover through work', type:'ynn'}, health:{l:'Health insurance', type:'ynn'},
-  pension:{l:'Pension value today', type:'eur', hint:'All pots together'},
-  pensionM:{l:'Paid in each month', type:'eur', hint:'Including your employer'},
-  pensionOwnM:{l:'Of that, paid by you each month', type:'eur', opt:1, hint:'Optional. Only your own share gets tax relief. If you leave it blank, you choose your share in Your assumptions', show:() => +S.fin.pensionM > 0 && S.fin.work !== 'Not working'},
+  pension:{l:'Pension value today', type:'eur', hint:'All pots together', list:1},
+  pensionM:{l:'Paid in each month', type:'eur', hint:'Including your employer', list:1},
+  pensionOwnM:{l:'Of that, paid by you each month', type:'eur', opt:1, hint:'Optional. Only your own share gets tax relief. If you leave it blank, you choose your share in Your assumptions', show:() => +S.fin.pensionM > 0 && S.fin.work !== 'Not working', list:1},
   ae:{l:'Have you been auto-enrolled in My Future Fund?', type:'choice', o:['Yes','No','Not sure'], opt:1, hint:LAW.ae + ' Set by law, so we count you in unless you say no', show:() => S.fin.work === 'Employed' && S.about.age >= RI.ae.ageMin && S.about.age <= RI.ae.ageMax && +S.fin.income > RI.ae.earnMin && !(+S.fin.pensionM > 0)},
   sp:{l:'State Pension', type:'choice', o:['Expect full','Partly','Not sure'], hint:LAW.sp + ' Check your record on MyWelfare'},
   pSp:{l:'Your partner\'s State Pension', type:'choice', o:['Own full','Own partial','Qualified adult increase','None','Not sure'], opt:1, show:() => !!S.about.partner, hint:'Optional. A partner without their own State Pension may get a Qualified Adult increase on yours (means-tested)'}
@@ -722,8 +737,8 @@ const EXAMPLES = {
   sp:{o:[['Expect full', 'about ' + RI.sp.fullYears + ' years of PRSI by ' + RI.sp.age], ['Partly', 'fewer years'], ['Not sure', 'check first']], t:() => 'Aoife expects the full rate, so she picks ' + sf('sp') + '.', w:'your PRSI record and State Pension statement on MyWelfare.ie.'},
   pSp:{o:[['Own full', 'their own full rate'], ['Own partial', 'a reduced rate'], ['Qualified adult increase', 'an addition to yours'], ['None', ''], ['Not sure', '']], t:() => 'Cian isn\'t sure of his rate yet, so Aoife picks Not sure.', w:'your partner\'s MyWelfare.ie record.'}
 };
-const exChoice = k => FF[k].type === 'choice' || FF[k].type === 'ynn';
-function exHTML(k){ const d = FF[k], x = EXAMPLES[k]; if (!d || !x) return '';
+const exChoice = k => (FF[k] || FFI[k]).type === 'choice' || (FF[k] || FFI[k]).type === 'ynn';
+function exHTML(k){ const d = FF[k] || FFI[k], x = EXAMPLES[k]; if (!d || !x) return '';
   return '<h2 class="t" id="ex-t">Example: ' + esc(d.l) + '</h2>' + (x.o ? '<ul class="small" style="margin:0 0 8px;padding-left:18px">' + x.o.map(([o, m]) => '<li><b>' + esc(o) + '</b>' + (m ? ': ' + esc(m) : '') + '</li>').join('') + '</ul>' : '') +
     '<p class="sub" style="margin:0 0 8px" id="ex-s">' + esc(x.t()) + '</p><p class="small" style="margin:0 0 8px"><span aria-hidden="true">📍</span> <b>Where to find yours:</b> ' + esc(x.w) + '</p>' +
     (d.type === 'eur' ? '<p class="small" style="margin:0 0 8px"><b>Nothing to add? Enter 0.</b></p>' : '') + '<p class="small" style="margin:0 0 12px;color:var(--muted)">Example only. Not a typical or recommended amount.</p><button class="btn" data-a="closesheet">Got it</button>'; }
@@ -736,6 +751,122 @@ function workedNote(k){ const F = finNums();
     return 'Worked out from your figures: ' + eur(card ? F.cardPayM : F.loanPayM) + ' a month clears it in 5 years, because ' + payWhy(k) + '. Type yours to replace it.'; }
   return ''; }
 const workedList = () => ['mortPayM', 'cardPayM', 'loanPayM'].map(k => [k, workedNote(k)]).filter(x => x[1]);
+/* ================= LISTS: loans, cards, pensions, insurance policies (journey-spec §19.2, §19.4, §19.5) =================
+   Each loan, credit card, pension and policy is added on its own with "＋". The plan engine still reads ONE total per group
+   (S.fin.cardBal, loanBal, pension, pensionM, …): syncLists() keeps those totals in step with the items (sum of the items; the card and
+   other-loan split is kept). A statement attaches to one item (document > typed, the typed figure is kept for "Remove statement").
+   Groups with no items leave S.fin alone (so figures set directly still work). */
+const FFI = {
+  'cards.owed':{l:'Owed on this card', type:'eur'}, 'cards.pay':{l:'Monthly repayment on this card', type:'eur'}, 'cards.lender':{l:'Lender (optional)', type:'text', opt:1}, 'cards.rate':{l:'Interest rate, APR % (optional)', type:'pct', opt:1},
+  'loans.owed':{l:'Owed on this loan', type:'eur'}, 'loans.pay':{l:'Monthly repayment on this loan', type:'eur'}, 'loans.lender':{l:'Lender (optional)', type:'text', opt:1}, 'loans.rate':{l:'Interest rate, APR % (optional)', type:'pct', opt:1},
+  'pens.name':{l:'Name or provider (optional)', type:'text', opt:1}, 'pens.value':{l:'Value today', type:'eur'}, 'pens.monthly':{l:'Paid in each month, including your employer', type:'eur'}, 'pens.own':{l:'Of that, paid by you each month (optional)', type:'eur', opt:1, hint:'Only your own share gets tax relief. If you leave it blank, you choose your share in Your assumptions.'},
+  'life.amount':{l:'Amount covered', type:'eur'}, 'life.term':{l:'Years left on the policy', type:'num', opt:1}, 'ip.amount':{l:'Monthly benefit', type:'eur'}, 'ip.term':{l:'Years left on the policy', type:'num', opt:1},
+  'ci.amount':{l:'Amount covered', type:'eur'}, 'ci.term':{l:'Years left on the policy', type:'num', opt:1}, 'workCover.amount':{l:'Death-in-service: lump sum', type:'eur', opt:1}, 'workCover.mult':{l:'Or: how many times your salary', type:'num', opt:1},
+  'health.amount':{l:'Yearly cost (optional)', type:'eur', opt:1}};
+const LDEF = {
+  cards:{sec:'liab', em:'💳', t:'Credit cards', one:'credit card', add:'＋ Add a credit card', f:['owed','pay','lender','rate'], tot:{owed:'cardBal', pay:'cardPayM', rate:'cardRate'}, up:'Upload this card\'s statement (optional)'},
+  loans:{sec:'liab', em:'📄', t:'Other loans (car, personal, credit union)', one:'loan', add:'＋ Add a loan', f:['owed','pay','lender','rate'], tot:{owed:'loanBal', pay:'loanPayM', rate:'loanRate'}, up:'Upload this loan\'s statement (optional)'},
+  pens:{sec:'pension', em:'🌅', t:'Your pensions', one:'pension', add:'＋ Add another pension', f:['name','value','monthly','own'], tot:{value:'pension', monthly:'pensionM', own:'pensionOwnM'}, up:'Upload this pension\'s statement (optional)'},
+  life:{sec:'prot', pol:1, one:'life cover policy', add:'＋ Add another life cover policy', f:['amount','term'], up:'Upload this policy (optional)'},
+  ip:{sec:'prot', pol:1, one:'income protection policy', add:'＋ Add another income protection policy', f:['amount','term'], up:'Upload this policy (optional)'},
+  ci:{sec:'prot', pol:1, one:'serious illness policy', add:'＋ Add another serious illness policy', f:['amount','term'], up:'Upload this policy (optional)'},
+  workCover:{sec:'prot', pol:1, one:'cover through work', add:'＋ Add other cover through work', f:['amount','mult'], up:'Upload your employer benefits statement (optional)'},
+  health:{sec:'prot', pol:1, one:'health insurance plan', add:'＋ Add another health insurance plan', f:['amount'], up:'Upload this policy (optional)'}};
+const LISTKEY = {cardBal:['cards','owed'], cardPayM:['cards','pay'], loanBal:['loans','owed'], loanPayM:['loans','pay'], pension:['pens','value'], pensionM:['pens','monthly'], pensionOwnM:['pens','own']};
+// a sample statement for one item (mock document reader): [field, value, confidence]
+const ITEMDOC = {
+  cards:{title:'Credit-card statement · Sep 2026', f:[['owed',400,86], ['pay',40,80]], txt:[['lender','Demo Bank B']]}, loans:{title:'Car loan statement · Aug 2026', f:[['owed',3500,88], ['pay',100,84]], txt:[['lender','Demo Credit Union']]},
+  pens:{title:'Pension statement · Jul 2025', f:[['value',72000,95], ['monthly',520,91], ['own',260,91]], old:'Statement is over 12 months old'},
+  life:{title:'Life cover policy · 2021', f:[['amount',250000,95], ['term',21,90]]}, ip:{title:'Income protection policy · 2022', f:[['amount',1800,90], ['term',20,88]]}, ci:{title:'Serious illness policy · 2022', f:[['amount',50000,90], ['term',15,88]]},
+  workCover:{title:'Employer benefits statement · 2026', f:[['amount',174000,90]]}, health:{title:'Health insurance policy · 2026', f:[['amount',2400,92]]}};
+// The sample customers' insurance (Aoife and Cian), used by the sample and by the example cards
+const SAMPLE_POL = {life:[{amount:250000, term:21}], workCover:[{mult:3}], health:[{amount:2400}]};
+const LI = lk => { S.lists = S.lists || {}; return S.lists[lk] = S.lists[lk] || []; };
+const hasVal = v => v != null && v !== '' && !(typeof v === 'number' && isNaN(v));
+const newItem = lk => ({id:S.iid = (S.iid || 0) + 1, f:{}, src:{}, conf:{}, man:{}, fix:{}, docFrom:null});
+const itemHasDoc = it => Object.values(it.src).includes('doc');
+const itemEmpty = it => !Object.keys(it.f).some(f => hasVal(it.f[f]));
+const itemById = (lk, id) => LI(lk).find(x => x.id === +id);
+function itemSet(it, fld, v){ const empty = !hasVal(v);
+  if (it.src[fld] === 'doc'){ if (empty) delete it.man[fld]; else it.man[fld] = {v, src:'typed'}; return false; }   // a statement figure is not overwritten: the entry is kept
+  if (empty){ delete it.f[fld]; delete it.src[fld]; } else { it.f[fld] = v; it.src[fld] = 'typed'; } return true; }
+function itemDoc(it, fld, v, conf, fixed, from){ if (it.src[fld] !== 'doc' && hasVal(it.f[fld])) it.man[fld] = {v:it.f[fld], src:it.src[fld]};
+  it.f[fld] = v; it.src[fld] = 'doc'; if (conf != null && !fixed) it.conf[fld] = conf; else delete it.conf[fld]; if (fixed) it.fix[fld] = true; else delete it.fix[fld]; it.docFrom = from || it.docFrom || 'upl'; }
+function itemRemoveDoc(it){ Object.keys(it.src).filter(f => it.src[f] === 'doc').forEach(f => { const m = it.man[f]; if (m){ it.f[f] = m.v; it.src[f] = m.src || 'typed'; } else { delete it.f[f]; delete it.src[f]; } delete it.conf[f]; delete it.fix[f]; delete it.man[f]; }); it.docFrom = null; }
+// An older total typed or read before the lists existed becomes the first item (same figures, same source)
+function migrateLegacy(lk){ const D = LDEF[lk]; if (!D.tot || LI(lk).length) return; const any = Object.values(D.tot).some(k => S.src[k] && hasVal(S.fin[k])); if (!any) return;
+  const it = newItem(lk); Object.entries(D.tot).forEach(([fld, k]) => { if (S.src[k] && hasVal(S.fin[k])){ it.f[fld] = +S.fin[k]; it.src[fld] = S.src[k] === 'doc' ? 'doc' : 'typed';
+    if (S.src[k] === 'doc'){ if (S.conf[k] != null) it.conf[fld] = S.conf[k]; if (S.fix && S.fix[k]) it.fix[fld] = true; if (S.man && S.man[k]) it.man[fld] = S.man[k]; it.docFrom = (S.docOf || {})[k] || it.docFrom || 'upl:earlier'; } } });
+  LI(lk).push(it); }
+function syncLists(){ if (!S || !S.lists) return; S.dv = S.dv || {};
+  ['cards','loans','pens'].forEach(lk => { const D = LDEF[lk], L = LI(lk), keys = Object.values(D.tot);
+    if (!L.length){ if (S.dv[lk]){ keys.forEach(k => { delete S.fin[k]; delete S.src[k]; delete S.conf[k]; if (S.fix) delete S.fix[k]; }); S.dv[lk] = false; } return; }
+    S.dv[lk] = true;
+    const sum = fld => { let n = 0, any = false; const srcs = [], cf = []; L.forEach(it => { const v = it.f[fld]; if (hasVal(v) && !isNaN(+v)){ n += +v; any = true; srcs.push(it.src[fld] || 'typed'); if (it.src[fld] === 'doc' && it.conf[fld] != null) cf.push(it.conf[fld]); } }); return {n, any, srcs, cf, fix:L.some(it => it.src[fld] === 'doc' && it.fix[fld])}; };
+    const put = (k, s, val) => { if (!s.any || val == null){ delete S.fin[k]; delete S.src[k]; delete S.conf[k]; if (S.fix) delete S.fix[k]; return; } S.fin[k] = val; const dc = s.srcs.every(x => x === 'doc'); S.src[k] = dc ? 'doc' : 'typed'; if (dc && s.cf.length === s.srcs.length) S.conf[k] = Math.min(...s.cf); else delete S.conf[k]; S.fix = S.fix || {}; if (dc && s.fix) S.fix[k] = true; else delete S.fix[k]; };
+    if (lk === 'pens'){ const v = sum('value'), m = sum('monthly'), o = sum('own'); put(D.tot.value, v, v.n); put(D.tot.monthly, m, m.n);
+      // own share: typed per pension; a blank one uses the share chosen in Your assumptions. Nothing typed at all: the share applies to the total.
+      const withM = L.filter(it => hasVal(it.f.monthly) && +it.f.monthly > 0), typed = withM.filter(it => hasVal(it.f.own)), blank = withM.filter(it => !hasVal(it.f.own)); let own = null;
+      if (typed.length && !blank.length) own = typed.reduce((s, it) => s + Math.min(+it.f.own, +it.f.monthly), 0); else if (typed.length && asmMine('ownShare')) own = typed.reduce((s, it) => s + Math.min(+it.f.own, +it.f.monthly), 0) + blank.reduce((s, it) => s + +it.f.monthly * +asmGet('ownShare'), 0);
+      put(D.tot.own, o.any && own != null ? Object.assign({}, o, {any:true}) : {any:false}, own); return; }
+    const o = sum('owed'), p = sum('pay'); put(D.tot.owed, o, o.n); put(D.tot.pay, p, p.n);
+    const rated = L.filter(it => hasVal(it.f.rate) && +it.f.rate > 0); if (rated.length){ const w = rated.reduce((s, it) => s + (+it.f.owed > 0 ? +it.f.owed : 1), 0); S.fin[D.tot.rate] = +(rated.reduce((s, it) => s + +it.f.rate * (+it.f.owed > 0 ? +it.f.owed : 1), 0) / w).toFixed(4); S.src[D.tot.rate] = 'typed'; } else if (S.src[D.tot.rate] === 'typed' && S.dv[lk]){ delete S.fin[D.tot.rate]; delete S.src[D.tot.rate]; } });
+}
+function listDoc(k, v, conf, fixed, from){ const [lk, fld] = LISTKEY[k]; migrateLegacy(lk); const L = LI(lk);
+  let it = L.find(x => x.docFrom === from) || L.find(x => !itemHasDoc(x) && !itemEmpty(x)) || L.find(x => !itemHasDoc(x)) || L[0];
+  if (!it){ it = newItem(lk); it.fromDoc = true; L.push(it); }
+  itemDoc(it, fld, v, conf, fixed, from); S.docOf = S.docOf || {}; S.docOf[k] = from; syncLists(); }
+function listRemoveDoc(k){ const [lk] = LISTKEY[k], from = (S.docOf || {})[k]; LI(lk).forEach(it => { if (itemHasDoc(it) && (!from || it.docFrom === from)) itemRemoveDoc(it); });
+  S.lists[lk] = LI(lk).filter(it => !(it.fromDoc && itemEmpty(it))); syncLists(); delete S.look[k]; delete S.ack[k]; ['fix', 'man', 'docOf'].forEach(x => { if (S[x]) delete S[x][k]; }); delete S.conf[k]; }
+const coverTotal = t => S.fin[t] !== 'Yes' ? 0 : LI(t).reduce((s, it) => s + (hasVal(it.f.amount) ? +it.f.amount : t === 'workCover' && hasVal(it.f.mult) && finN('income') > 0 ? +it.f.mult * finN('income') : 0), 0);
+// ---- screens ----
+const capF = s => s.charAt(0).toUpperCase() + s.slice(1);
+function itemTag(it, fld){ const s = it.src[fld]; return s === 'doc' ? '<span class="tag doc">✅ ' + (it.fix[fld] ? 'From your statement (corrected)' : 'From document' + (it.conf[fld] != null ? ' · ' + it.conf[fld] + '%' : '')) + '</span>' : s === 'typed' ? '<span class="tag typed">✏️ Your figure</span>' : ''; }
+function itemNote(lk, it, fld){ const m = it.man[fld]; if (it.src[fld] !== 'doc' || !m || String(m.v) === String(it.f[fld])) return ''; const d = FFI[lk + '.' + fld], f = x => d.type === 'eur' ? eur(+x) : esc(String(x)); return 'You typed ' + f(m.v) + '. Your statement says ' + f(it.f[fld]) + '; we\'re using that.'; }
+const itemId = (lk, it, fld) => 'i-' + lk + '-' + it.id + '-' + fld;
+function itemField(lk, it, fld){ const key = lk + '.' + fld, d = FFI[key], id = itemId(lk, it, fld), v = it.f[fld]; if (fld === 'own' && S.fin.work === 'Not working') return '';
+  const dat = 'data-it="' + lk + '|' + it.id + '|' + fld + '"', inp = d.type === 'text' ? '<input class="in" id="' + id + '" ' + dat + ' value="' + esc(v == null ? '' : v) + '" autocomplete="off"' + (d.hint ? ' aria-describedby="' + id + '-h"' : '') + '>'
+    : '<div class="inw">' + (d.type === 'eur' ? '<span class="cur" aria-hidden="true">€</span>' : '') + '<input class="in' + (d.type === 'eur' ? ' eur' : '') + '" id="' + id + '" ' + dat + ' inputmode="' + (d.type === 'pct' ? 'decimal' : 'numeric') + '" value="' + (v == null ? '' : d.type === 'pct' ? v : Math.round(+v)) + '"' + (d.hint ? ' aria-describedby="' + id + '-h"' : '') + '>' + (d.type === 'pct' ? '<span class="cur" aria-hidden="true">%</span>' : '') + '</div>';
+  return '<div class="field"><label for="' + id + '">' + esc(d.l) + ' <span id="' + id + '-t">' + itemTag(it, fld) + '</span></label>' + inp + '<span class="small dnote" id="' + id + '-n" role="status" style="display:block;color:var(--acc-d)">' + itemNote(lk, it, fld) + '</span>' + (d.hint ? '<span class="small" id="' + id + '-h">' + esc(d.hint) + '</span>' : '') +
+    (EXAMPLES[key] ? '<div class="fhelp"><button class="link" data-a="fex" data-p="' + key + '" aria-haspopup="dialog">Not sure? See an example</button></div>' : '') + '</div>'; }
+function itemBlock(lk, it, n){ const D = LDEF[lk], title = lk === 'pens' && hasVal(it.f.name) ? it.f.name : capF(D.one) + ' ' + n, T = ITEMDOC[lk];
+  const up = itemHasDoc(it) ? '<div class="mini" style="align-items:center"><span>✅ From <b>' + esc(T.title) + '</b></span><span class="row" style="gap:12px"><button class="link" data-a="iupl" data-p="' + lk + '|' + it.id + '">Replace statement</button><button class="link" data-a="irem" data-p="' + lk + '|' + it.id + '">Remove statement</button></span></div>'
+    : '<button class="link" data-a="iupl" data-p="' + lk + '|' + it.id + '">📄 ' + esc(D.up) + '</button>';
+  return '<div class="card" id="item-' + lk + '-' + it.id + '" style="box-shadow:none;border:1.5px solid #D5E0EA;margin-top:10px"><div class="row" style="justify-content:space-between"><b>' + esc(title) + '</b><button class="link" data-a="idel" data-p="' + lk + '|' + it.id + '" aria-label="Remove ' + esc(title) + '">Remove</button></div>' +
+    D.f.map(f => itemField(lk, it, f)).join('') + up + '</div>'; }
+function ensureItem(lk){ S.lt = S.lt || {}; if (!LI(lk).length && !S.lt[lk]) LI(lk).push(newItem(lk)); }
+function listBlock(lk){ migrateLegacy(lk); ensureItem(lk); const D = LDEF[lk], L = LI(lk), wo = lk === 'cards' ? workedNote('cardPayM') : lk === 'loans' ? workedNote('loanPayM') : '';
+  return '<div class="card" data-list="' + lk + '"><b style="font-size:16px">' + D.em + ' ' + esc(D.t) + '</b>' + L.map((it, i) => itemBlock(lk, it, i + 1)).join('') + (wo ? '<span class="small" id="wo-' + (lk === 'cards' ? 'cardPayM' : 'loanPayM') + '" style="display:block;margin-top:8px;color:var(--sea-d)">' + esc(wo) + '</span>' : '') +
+    '<button class="btn ghost sm" style="width:100%;margin-top:10px" data-a="iadd" data-p="' + lk + '">' + esc(D.add) + '</button></div>'; }
+const PROT_HINT = {workCover:'How to find out: ask HR, or look in your employer benefits booklet. Death-in-service is usually a multiple of your salary. Enter what you know; leave the rest blank.'};
+function policyBlock(t){ const f = S.fin[t]; if (!(f === 'Yes' || (t === 'workCover' && f === 'Not sure'))) return ''; let h = PROT_HINT[t] ? '<p class="small" style="margin:-4px 0 8px" id="ph-' + t + '">' + esc(PROT_HINT[t]) + '</p>' : '';
+  if (f !== 'Yes') return h; ensureItem(t); const D = LDEF[t], L = LI(t);
+  return h + '<div data-list="' + t + '" style="margin:0 0 14px">' + L.map((it, i) => itemBlock(t, it, i + 1)).join('') + '<button class="btn ghost sm" style="width:100%;margin-top:10px" data-a="iadd" data-p="' + t + '">' + esc(D.add) + '</button></div>'; }
+
+// Example cards for the new per-item fields (same sample customers as above; §15)
+const SAMPLE_RATES = {cardRate:0.20, loanRate:0.08};   // the rates Aoife and Cian chose in Your assumptions (also used by the sample)
+Object.assign(EXAMPLES, {
+  'cards.owed':{t:() => 'Aoife and Cian owe ' + se('cardBal') + ' on their credit card. They enter ' + se('cardBal') + '.', w:'your latest credit-card statement or banking app.'},
+  'cards.pay':{t:() => 'They pay ' + se('cardPayM') + ' a month off the card. They enter ' + se('cardPayM') + '.', w:'your card statement or banking app: what you actually pay.'},
+  'cards.lender':{t:() => 'Their card statement names the lender: ' + ITEMDOC.cards.txt[0][1] + '. They enter ' + ITEMDOC.cards.txt[0][1] + '.', w:'the top of your credit-card statement.'},
+  'cards.rate':{t:() => 'Their card statement shows ' + +(SAMPLE_RATES.cardRate * 100).toFixed(2) + '% APR. They enter ' + +(SAMPLE_RATES.cardRate * 100).toFixed(2) + '.', w:'the interest rate (APR) on your credit-card statement.'},
+  'loans.owed':{t:() => 'Aoife and Cian owe ' + se('loanBal') + ' on a car loan. They enter ' + se('loanBal') + '.', w:'your loan statement, credit union app or Central Credit Register report.'},
+  'loans.pay':{t:() => 'They repay ' + se('loanPayM') + ' a month on the car loan. They enter ' + se('loanPayM') + '.', w:'your loan agreement, or the payment on your bank statement.'},
+  'loans.lender':{t:() => 'Their car loan is with ' + ITEMDOC.loans.txt[0][1] + '. They enter ' + ITEMDOC.loans.txt[0][1] + '.', w:'your loan agreement or statement.'},
+  'loans.rate':{t:() => 'Their car loan charges ' + +(SAMPLE_RATES.loanRate * 100).toFixed(2) + '% APR. They enter ' + +(SAMPLE_RATES.loanRate * 100).toFixed(2) + '.', w:'the APR on your loan agreement.'},
+  'pens.name':{t:() => 'Aoife has one pension, through her job. She enters Work pension.', w:'your annual pension benefit statement or the provider\'s app.'},
+  'pens.value':{t:() => 'Aoife\'s pension statement shows ' + se('pension') + '. She enters ' + se('pension') + '.', w:'your annual pension benefit statement or the provider\'s app.'},
+  'pens.monthly':{t:() => se('pensionM') + ' goes into Aoife\'s pension each month, including her employer\'s share. She enters ' + se('pensionM') + '.', w:'your payslip (your share) and annual benefit statement (your employer\'s).'},
+  'pens.own':{t:() => 'Of the ' + se('pensionM') + ', Aoife pays ' + eur(sf('pensionM') * SAMPLE_OWN_SHARE) + ' herself. She enters ' + eur(sf('pensionM') * SAMPLE_OWN_SHARE) + '.', w:'the pension deduction on your payslip.'},
+  'life.amount':{t:() => 'Aoife and Cian\'s life cover pays out ' + eur(SAMPLE_POL.life[0].amount) + '. They enter ' + eur(SAMPLE_POL.life[0].amount) + '.', w:'your policy schedule, or your insurer\'s online account.'},
+  'life.term':{t:() => 'Their policy has ' + SAMPLE_POL.life[0].term + ' years to run, to match the mortgage. They enter ' + SAMPLE_POL.life[0].term + '.', w:'the end date on your policy schedule.'},
+  'ip.amount':{t:() => 'Aoife has no income protection. With a policy paying ' + eur(ITEMDOC.ip.f[0][1]) + ' a month, she would enter ' + eur(ITEMDOC.ip.f[0][1]) + '.', w:'your policy schedule or your insurer\'s online account.'},
+  'ip.term':{t:() => 'Aoife has no income protection. With a policy with ' + ITEMDOC.ip.f[1][1] + ' years to run, she would enter ' + ITEMDOC.ip.f[1][1] + '.', w:'the end date on your policy schedule.'},
+  'ci.amount':{t:() => 'Aoife isn\'t sure she has serious illness cover. With a policy covering ' + eur(ITEMDOC.ci.f[0][1]) + ', she would enter ' + eur(ITEMDOC.ci.f[0][1]) + '.', w:'your policy schedule, or ask your insurer.'},
+  'ci.term':{t:() => 'Aoife isn\'t sure she has serious illness cover. With a policy with ' + ITEMDOC.ci.f[1][1] + ' years to run, she would enter ' + ITEMDOC.ci.f[1][1] + '.', w:'the end date on your policy schedule.'},
+  'workCover.amount':{t:() => 'Aoife\'s benefits booklet says her death-in-service is ' + SAMPLE_POL.workCover[0].mult + ' times her ' + se('income') + ' salary. She enters ' + eur(SAMPLE_POL.workCover[0].mult * sf('income')) + '.', w:'your employer benefits booklet, or ask HR.'},
+  'workCover.mult':{t:() => 'Aoife\'s benefits booklet says death-in-service is ' + SAMPLE_POL.workCover[0].mult + ' times salary. She enters ' + SAMPLE_POL.workCover[0].mult + '.', w:'your employer benefits booklet, or ask HR.'},
+  'health.amount':{t:() => 'Aoife and Cian\'s health insurance costs ' + eur(SAMPLE_POL.health[0].amount) + ' a year. They enter ' + eur(SAMPLE_POL.health[0].amount) + '.', w:'your health insurer\'s renewal letter or app.'}});
 /* mocked document reader output */
 const UPL = {
   income:{v:{work:['Employed',99], income:[58000,98], costsM:[3100,74], oneOffY:[1800,81]}, docs:['Payslip · Aug 2026','Current-account statement · Jun–Aug 2026']},
@@ -757,7 +888,7 @@ const ADV_QS = ['Can I retire earlier?','Am I saving enough?','How do I protect 
 let S = null;
 function fresh(){
   return {scr:'D0', app:false, tab:'plan', planSeg:'main', planGo:null, planEdit:false, me:'home', exp:'home', entry:'direct',
-    why:[], whyNote:'', di:0, ans:{}, about:{age:38, partner:null, deps:null, married:null}, goals:[], gid:1, retireAge:66, retireSet:false, asm:{},
+    why:[], whyNote:'', di:0, ans:{}, about:{age:38, partner:null, deps:null, married:null}, goals:[], gid:1, retireAge:66, retireSet:false, asm:{}, saved:{}, rank:null, lists:{},
     save:{email:'', comms:false, done:false, asked:false}, tlOpen:{}, tlHl:null,
     acct:{name:'', email:'', mobile:'', c1:false, c2:false, ev:false, sv:false, pk:false},
     fin:{}, src:{}, conf:{}, look:{}, ack:{}, man:{}, fix:{}, docOf:{}, calcT:{}, calcDoc:{}, fsec:null, fmode:{}, upl:null, checked:false, from:null,
@@ -892,6 +1023,9 @@ function mkGoal(k, custom){
 }
 const retireGoal = () => S.goals.find(g => g.kind === 'retire');
 // A safety-net goal the customer hasn't edited follows their essential spending once their costs are known (never an invented figure)
+// §19.7: the months the customer sets in the Emergency fund goal or in the Emergency fund calculator ARE the plan-wide setting (Your assumptions, step 7)
+function setSafetyMonths(n){ n = clamp(Math.round(+n), 1, 12); S.asm = Object.assign({}, S.asm, {safetyMonths:n}); applyAssume(); syncSafety(); return n; }
+function calcSync(cid, k, v){ if (cid === 'emergency' && k === 'mt' && v != null && isFinite(+v)) setSafetyMonths(v); }
 function syncSafety(only){ if (!S || !S.src || !S.src.costsM) return; (only ? [only] : S.goals.filter(g => g.k === 'safety' && g.auto)).forEach(g => { applyAssume(); g.amount = Math.round(essM(finNums()) * SAVE.buffer / 1000) * 1000; }); }
 function setRetireAge(a){ S.retireAge = a; S.retireSet = true; const r = retireGoal(); if (r) r.age = a; S.fin.retireAge = a; S.src.retireAge = S.src.retireAge || 'pre'; }
 
@@ -899,7 +1033,7 @@ function setRetireAge(a){ S.retireAge = a; S.retireSet = true; const r = retireG
 /* FP round 7: statutory values come from RULES_IE_2026 (RI); judgement values from the customer's assumptions (asmV, "Your assumptions"). */
 const AS = {infl:0.02, wage:0.03, cash:0.01, inv:0.035, pen:0.045, penRet:0.0315, sp:RI.sp.week * 52, spAge:RI.sp.age, end:90, mortRate:0.0375, cardRate:0.20, loanRate:0.08};
 // Growth assumption sets (audit B2–B5, B8): Standard is the default; Cautious is lower on every rate, incl. pay rises (the old set had Cautious pay rises higher).
-const AS_SETS = {standard:{wage:RI.std.wage, cash:RI.std.cash, inv:RI.std.inv, pen:RI.std.pen, penRet:RI.std.penRet}, cautious:{wage:0.025, cash:0.007, inv:0.025, pen:0.04, penRet:0.028}};
+const AS_SETS = {get standard(){ return {wage:SV('wage'), cash:SV('cash'), inv:SV('inv'), pen:SV('pen'), penRet:SV('penRet')}; }, get cautious(){ return {wage:SET.wage.vc, cash:SET.cash.vc, inv:SET.inv.vc, pen:SET.pen.vc, penRet:SET.penRet.vc}; }};   // Standard follows SETTINGS; Cautious is lower on every rate
 const AS_NAME = {standard:'Standard', cautious:'Cautious'};
 let YEAR0 = 2026;   // first plan year: the customer's choice (B23), set in applyAssume()
 /* ---------- "Your assumptions": every judgement value is a visible, editable input (audit §3, B1–B27) ---------- */
@@ -913,62 +1047,63 @@ const pcs = x => +(x * 100).toFixed(2) + '%';
    while planMissing() is not empty: the screens show "Choose your [item] to see this" instead. */
 const twoSecure = () => !!(S && S.about.partner && +S.fin.income > 0 && +S.fin.pIncome > 0 && S.fin.work === 'Employed');
 const curSet = () => AS_SETS[(S && S.assume) || 'standard'];
-const ST = RI.std, GD = RI.guide, STB = RULES_IE_2026.std, GDB = RULES_IE_2026.guide;
+const ST = new Proxy({}, {get:(_, k) => SV(k)}), STB = new Proxy({}, {get:(_, k) => ({by:SB(k)})});   // the standards and their source wording (SETTINGS)
+const GD = new Proxy({}, {get:(_, k) => k in RI.guide ? RI.guide[k] : (SETTINGS.g[k] || {}).v}), GDB = new Proxy({}, {get:(_, k) => ({by:k in RI.guide ? RULES_IE_2026.guide[k].by : (SETTINGS.g[k] || {}).by})});
 const eurW = n => '€' + (Math.abs(n % 1) > 1e-9 ? (+n).toFixed(2) : String(Math.round(n)));   // weekly DSP rates keep their cents (€299.30, €254)
 const ASM_GRP = [['prices', 'Prices & growth'], ['retire', 'Retirement'], ['safety', 'Safety net & debt'], ['length', 'Plan length']];
 const finN = k => { const v = S && S.fin ? S.fin[k] : null; return v != null && v !== '' && !isNaN(+v) ? +v : 0; };
 const spOwnOpt = () => (S.fin.sp || 'Not sure'), spYearsKnown = () => (S.fin.spYears != null && S.fin.spYears !== '') || asmGet('spYears') != null;
 const ASM = {
-  inv:{g:'prices', b:'B3', ty:3, n:'investment growth', l:'Investments grow (a year, after charges and tax)', t:'pct', min:0, max:7, step:0.25, sug:() => ST.inv, by:STB.inv.by, need:() => true, help:'Growth is never guaranteed.'},
-  invGross:{g:'prices', b:'B3', ty:3, n:'growth before fees', l:'Investments grow before fees and tax (a year; the growth and fees tools)', t:'pct', min:0, max:10, step:0.25, sug:() => ST.invGross, by:STB.invGross.by, need:() => false, help:'Used by the lump sum, regular investing, fees and real return tools. Growth is never guaranteed.'},
-  cash:{g:'prices', b:'B4', ty:3, n:'cash growth', l:'Cash savings earn (a year, after DIRT)', t:'pct', min:0, max:4, step:0.05, sug:() => ST.cash, by:STB.cash.by, need:() => true, help:PARTNER_RATES.depRate.v != null ? 'New fixed-term household deposits averaged ' + pcs(PARTNER_RATES.depRate.v) + ' before 33% DIRT (' + PARTNER_RATES.depRate.label.replace(/: average rate on new fixed-term household deposits/, '') + '). Demand accounts pay less.' : 'Demand accounts pay less than fixed-term deposits.'},
-  pen:{g:'prices', b:'B5', ty:3, n:'pension growth', l:'Pension grows while you work (a year, after charges)', t:'pct', min:0, max:7, step:0.05, sug:() => ST.pen, by:STB.pen.by, need:() => true, help:'Pension growth is tax-free inside the fund.'},
-  penRet:{g:'prices', b:'B5', ty:3, n:'pension growth once retired', l:'Pension grows once you retire (a year, after charges)', t:'pct', min:0, max:7, step:0.05, sug:() => ST.penRet, by:STB.penRet.by, need:() => true, help:'Most people take less risk once retired, so growth is usually lower.'},
-  penChg:{g:'prices', b:'B6', ty:2, n:'typical pension charges', l:'Typical pension charges already allowed for in the pension growth above', t:'pct', min:0, max:2.5, step:0.05, mk:'fundChg', by:'pension charges; your statement shows yours', fb:() => 0.01, need:() => !!(S.fin && S.fin.penChg != null && S.fin.penChg !== ''), help:'When your statement shows your own charges, we use them instead of this. ' + PARTNER_RATES.fundChg.note + '.'},
-  wage:{g:'prices', b:'B8', ty:3, n:'pay rises', l:'Pay rises (a year)', t:'pct', min:0, max:6, step:0.1, sug:() => ST.wage, by:STB.wage.by, need:() => true, help:'Pick lower if your pay is fixed or you expect to work part-time.'},
-  bands:{g:'prices', b:'B10', ty:3, n:'tax bands in future', l:'Tax bands in future', t:'choice', o:[['prices', 'Rise with prices'], ['flat', 'Stay as today']], sug:() => 'prices', by:'Budgets have broadly kept pace over time', need:() => true, help:'Irish tax bands are set each Budget and don\'t rise automatically. "Stay as today" is the cautious view (more tax later).'},
-  rentRise:{g:'prices', b:'B25', ty:3, n:'rent rises', l:'Rent vs buy: rent rises (a year)', t:'pct', min:0, max:8, step:0.5, sug:() => ST.rentRise, by:STB.rentRise.by, need:() => false, help:'Renting has rent rises. Buying has costs that don\'t build equity: interest, stamp duty, fees, LPT and repairs.'},
-  houseGrow:{g:'prices', b:'B25', ty:3, n:'house price growth', l:'Rent vs buy: house prices rise (a year)', t:'pct', min:0, max:6, step:0.5, sug:() => ST.houseGrow, by:STB.houseGrow.by, need:() => false, help:'House prices can fall as well as rise.'},
-  upkeep:{g:'prices', b:'B25', ty:3, n:'upkeep', l:'Rent vs buy: upkeep a year (share of the home value)', t:'pct', min:0, max:3, step:0.1, sug:() => ST.upkeep, by:STB.upkeep.by, need:() => false, help:''},
+  inv:{g:'prices', b:'B3', ty:3, n:'investment growth', l:'Investments grow (a year, after charges and tax)', t:'pct', min:0, max:7, step:0.25, sug:() => ST.inv, get by(){ return STB.inv.by; }, need:() => true, get help(){ return SG('inv'); }},
+  invGross:{g:'prices', b:'B3', ty:3, n:'growth before fees', l:'Investments grow before fees and tax (a year; the growth and fees tools)', t:'pct', min:0, max:10, step:0.25, sug:() => ST.invGross, get by(){ return STB.invGross.by; }, need:() => false, get help(){ return SG('invGross'); }},
+  cash:{g:'prices', b:'B4', ty:3, n:'cash growth', l:'Cash savings earn (a year, after DIRT)', t:'pct', min:0, max:4, step:0.05, sug:() => ST.cash, get by(){ return STB.cash.by; }, need:() => true, get help(){ return SV('depRate') != null ? 'New fixed-term household deposits averaged ' + pcs(SV('depRate')) + ' before 33% DIRT (' + SL('depRate').replace(/: average rate on new fixed-term household deposits/, '') + '). Demand accounts pay less.' : 'Demand accounts pay less than fixed-term deposits.'}},
+  pen:{g:'prices', b:'B5', ty:3, n:'pension growth', l:'Pension grows while you work (a year, after charges)', t:'pct', min:0, max:7, step:0.05, sug:() => ST.pen, get by(){ return STB.pen.by; }, need:() => true, get help(){ return SG('pen'); }},
+  penRet:{g:'prices', b:'B5', ty:3, n:'pension growth once retired', l:'Pension grows once you retire (a year, after charges)', t:'pct', min:0, max:7, step:0.05, sug:() => ST.penRet, get by(){ return STB.penRet.by; }, need:() => true, get help(){ return SG('penRet'); }},
+  penChg:{g:'prices', b:'B6', ty:2, n:'typical pension charges', l:'Typical pension charges already allowed for in the pension growth above', t:'pct', min:0, max:2.5, step:0.05, mk:'fundChg', by:'pension charges; your statement shows yours', fb:() => 0.01, need:() => !!(S.fin && S.fin.penChg != null && S.fin.penChg !== ''), get help(){ return SG('penChg') + ' ' + SET.fundChg.note + '.'}},
+  wage:{g:'prices', b:'B8', ty:3, n:'pay rises', l:'Pay rises (a year)', t:'pct', min:0, max:6, step:0.1, sug:() => ST.wage, get by(){ return STB.wage.by; }, need:() => true, get help(){ return SG('wage'); }},
+  bands:{g:'prices', b:'B10', ty:3, n:'tax bands in future', l:'Tax bands in future', t:'choice', o:[['prices', 'Rise with prices'], ['flat', 'Stay as today']], sug:() => SV('bands'), get by(){ return SB('bands'); }, need:() => true, get help(){ return SG('bands'); }},
+  rentRise:{g:'prices', b:'B25', ty:3, n:'rent rises', l:'Rent vs buy: rent rises (a year)', t:'pct', min:0, max:8, step:0.5, sug:() => ST.rentRise, get by(){ return STB.rentRise.by; }, need:() => false, get help(){ return SG('rentRise'); }},
+  houseGrow:{g:'prices', b:'B25', ty:3, n:'house price growth', l:'Rent vs buy: house prices rise (a year)', t:'pct', min:0, max:6, step:0.5, sug:() => ST.houseGrow, get by(){ return STB.houseGrow.by; }, need:() => false, get help(){ return SG('houseGrow'); }},
+  upkeep:{g:'prices', b:'B25', ty:3, n:'upkeep', l:'Rent vs buy: upkeep a year (share of the home value)', t:'pct', min:0, max:3, step:0.1, sug:() => ST.upkeep, get by(){ return STB.upkeep.by; }, need:() => false, get help(){ return SG('upkeep'); }},
   buyFees:{g:'prices', b:'B25', ty:2, n:'buying fees', l:'Buying fees (legal and survey), plus stamp duty', t:'eur', min:0, max:10000, step:250, mk:'buyFees', opt:true, fb:() => 0, need:() => false, help:'Stamp duty is set by law and added on top: ' + LAW.stamp + '.'},
-  depEarn:{g:'prices', b:'B25', ty:2, mk:'depRate', afterDirt:true, opt:true, n:'the deposit\'s earning rate', l:'Rent vs buy: what the deposit could earn instead (a year, after tax)', t:'pct', min:0, max:6, step:0.25, fb:() => 0, need:() => false, help:'If you rent, your deposit stays in savings. Optional: leave it blank to leave it out.'},
-  riskMu1:{g:'prices', b:'B26', ty:3, n:'the Cautious style growth', l:'Risk & return: Cautious style growth (a year)', t:'pct', min:0, max:8, step:0.5, sug:() => ST.riskMu[0], by:STB.riskMu.by, need:() => false, help:'Your adviser uses the fund\'s own risk rating (SRI 1–7).'},
-  riskMu2:{g:'prices', b:'B26', ty:3, n:'the Balanced style growth', l:'Risk & return: Balanced style growth (a year)', t:'pct', min:0, max:8, step:0.5, sug:() => ST.riskMu[1], by:STB.riskMu.by, need:() => false, help:''},
-  riskMu3:{g:'prices', b:'B26', ty:3, n:'the Growth style growth', l:'Risk & return: Growth style growth (a year)', t:'pct', min:0, max:8, step:0.5, sug:() => ST.riskMu[2], by:STB.riskMu.by, need:() => false, help:''},
-  riskVol1:{g:'prices', b:'B26', ty:3, n:'the Cautious style ups and downs', l:'Risk & return: Cautious style ups and downs (volatility)', t:'pct', min:0, max:25, step:1, sug:() => ST.riskVol[0], by:STB.riskVol.by, need:() => false, help:'How much a year can swing.'},
-  riskVol2:{g:'prices', b:'B26', ty:3, n:'the Balanced style ups and downs', l:'Risk & return: Balanced style ups and downs (volatility)', t:'pct', min:0, max:25, step:1, sug:() => ST.riskVol[1], by:STB.riskVol.by, need:() => false, help:''},
-  riskVol3:{g:'prices', b:'B26', ty:3, n:'the Growth style ups and downs', l:'Risk & return: Growth style ups and downs (volatility)', t:'pct', min:0, max:25, step:1, sug:() => ST.riskVol[2], by:STB.riskVol.by, need:() => false, help:''},
-  spGrow:{g:'retire', b:'B11', ty:3, n:'State Pension in future', l:'State Pension in future', t:'choice', o:[['prices', 'Rises with prices'], ['pay', 'Rises with pay'], ['flat', 'Stays flat']], sug:() => 'prices', by:'it has broadly kept pace with prices over time', need:() => true, help:'The State Pension is set each Budget.'},
+  depEarn:{g:'prices', b:'B25', ty:2, mk:'depRate', afterDirt:true, opt:true, n:'the deposit\'s earning rate', l:'Rent vs buy: what the deposit could earn instead (a year, after tax)', t:'pct', min:0, max:6, step:0.25, fb:() => 0, need:() => false, get help(){ return SG('depEarn'); }},
+  riskMu1:{g:'prices', b:'B26', ty:3, n:'the Cautious style growth', l:'Risk & return: Cautious style growth (a year)', t:'pct', min:0, max:8, step:0.5, sug:() => ST.riskMu[0], get by(){ return STB.riskMu.by; }, need:() => false, get help(){ return SG('riskMu1'); }},
+  riskMu2:{g:'prices', b:'B26', ty:3, n:'the Balanced style growth', l:'Risk & return: Balanced style growth (a year)', t:'pct', min:0, max:8, step:0.5, sug:() => ST.riskMu[1], get by(){ return STB.riskMu.by; }, need:() => false, get help(){ return SG('riskMu2'); }},
+  riskMu3:{g:'prices', b:'B26', ty:3, n:'the Growth style growth', l:'Risk & return: Growth style growth (a year)', t:'pct', min:0, max:8, step:0.5, sug:() => ST.riskMu[2], get by(){ return STB.riskMu.by; }, need:() => false, get help(){ return SG('riskMu3'); }},
+  riskVol1:{g:'prices', b:'B26', ty:3, n:'the Cautious style ups and downs', l:'Risk & return: Cautious style ups and downs (volatility)', t:'pct', min:0, max:25, step:1, sug:() => ST.riskVol[0], get by(){ return STB.riskVol.by; }, need:() => false, get help(){ return SG('riskVol1'); }},
+  riskVol2:{g:'prices', b:'B26', ty:3, n:'the Balanced style ups and downs', l:'Risk & return: Balanced style ups and downs (volatility)', t:'pct', min:0, max:25, step:1, sug:() => ST.riskVol[1], get by(){ return STB.riskVol.by; }, need:() => false, get help(){ return SG('riskVol2'); }},
+  riskVol3:{g:'prices', b:'B26', ty:3, n:'the Growth style ups and downs', l:'Risk & return: Growth style ups and downs (volatility)', t:'pct', min:0, max:25, step:1, sug:() => ST.riskVol[2], get by(){ return STB.riskVol.by; }, need:() => false, get help(){ return SG('riskVol3'); }},
+  spGrow:{g:'retire', b:'B11', ty:3, n:'State Pension in future', l:'State Pension in future', t:'choice', o:[['prices', 'Rises with prices'], ['pay', 'Rises with pay'], ['flat', 'Stays flat']], sug:() => SV('spGrow'), get by(){ return SB('spGrow'); }, need:() => true, get help(){ return SG('spGrow'); }},
   spYears:{g:'retire', b:'B9', ty:2, n:'PRSI years', l:'How many years of PRSI will you have at 66? (leave blank if you don\'t know)', t:'yrs', min:0, max:45, step:1, rng:() => [RI.sp.minYears, RI.sp.fullYears], by:'DSP: ' + RI.sp.fullYears + ' for the full rate, at least ' + RI.sp.minYears + ' to qualify', opt:true, fb:() => null, need:() => false, help:'Check your record on MyWelfare. If you give your years, we work out your State Pension from them (set by law).'},
   spWeek:{g:'retire', b:'B9', ty:2, n:'State Pension', l:'Your State Pension a week at 66', t:'eurw', min:0, max:RI.sp.week, step:0.1, rng:() => [0, RI.sp.week], by:'DSP 2026: the full rate needs ' + RI.sp.fullYears + ' years of PRSI; partial rates are lower', fb:() => RI.sp.week * (spOwnOpt() === 'Partly' ? 0.6 : 0.8),
     need:() => ['Partly', 'Not sure'].includes(spOwnOpt()) && !spYearsKnown(), help:'Your State Pension statement on MyWelfare shows your expected rate. Or tell us your PRSI years.'},
   pSpWeek:{g:'retire', b:'B9', ty:2, n:'partner\'s State Pension', l:'Your partner\'s State Pension a week at 66', t:'eurw', min:0, max:RI.sp.week, step:0.1, rng:() => [0, RI.sp.week], by:'DSP 2026', fb:() => RI.sp.week * ((S.fin.pSp || 'Not sure') === 'Own partial' ? 0.6 : 0.8),
     need:() => !!S.about.partner && ['Own partial', 'Not sure'].includes(S.fin.pSp || 'Not sure'), help:'Their MyWelfare statement shows it.'},
-  ownShare:{g:'retire', b:'B1', ty:3, n:'share of your pension you pay', l:'Of the money paid into your pension each month, the share you pay yourself (the rest is your employer)', t:'pct', min:0, max:100, step:5, sug:() => S && S.fin.work === 'Self-employed' ? 1 : ST.ownShare, by:STB.ownShare.by,
-    need:() => finN('pensionM') > 0 && S.fin.work !== 'Not working' && !(S.fin.pensionOwnM != null && S.fin.pensionOwnM !== ''), help:'Your payslip shows what comes out of your pay. Only your own share gets tax relief. If you type your own amount in Your finances, we use that.'},
-  retireMult:{g:'retire', b:'B17', ty:3, n:'retirement savings target', l:'Retirement savings target: times the yearly income you need', t:'num', min:20, max:33, step:1, sug:() => ST.retireMult, by:STB.retireMult.by, need:() => false, help:'Retiring early or planning to 95 needs more.'},
-  retireSpend:{g:'retire', b:'B18', ty:3, n:'retirement spending', l:'Retirement spending if you haven\'t set a goal (share of today\'s spending)', t:'pct', min:50, max:120, step:5, sug:() => ST.retireSpend, by:STB.retireSpend.by, need:() => !retireGoal(), help:''},
-  lumpSum:{g:'retire', b:'B19', ty:3, n:'retirement lump sum', l:'Tax-free lump sum to take at retirement (share of your pension, 0% = none)', t:'pct', min:0, max:25, step:1, sug:() => ST.lumpSum, by:STB.lumpSum.by, need:() => true, help:'Set by law: ' + LAW.ls + '. Your adviser can compare it with leaving it invested.'},
-  drawRule:{g:'retire', b:'B20', ty:3, n:'how you draw your pension', l:'How you draw your pension', t:'choice', o:[['spread', 'Spread to plan end'], ['min', 'Minimum only (4% / 5%)'], ['fixed', 'Fixed amount']], sug:() => 'spread', by:'spread over your plan, at least the legal minimum', need:() => true, help:'Set by law: ' + LAW.arf + ' from an ARF.'},
-  ddTiming:{g:'retire', b:'B20', ty:3, n:'withdrawal timing', l:'Drawdown tools: withdrawals taken at the', t:'choice', o:[['start', 'Start of the year'], ['end', 'End of the year']], sug:() => 'start', by:'the prudent choice: the money has less time to grow before you take it', need:() => false, help:''},
+  ownShare:{g:'retire', b:'B1', ty:3, n:'share of your pension you pay', l:'Of the money paid into your pension each month, the share you pay yourself (the rest is your employer)', t:'pct', min:0, max:100, step:5, sug:() => S && S.fin.work === 'Self-employed' ? 1 : ST.ownShare, get by(){ return STB.ownShare.by; },
+    need:() => finN('pensionM') > 0 && S.fin.work !== 'Not working' && !(S.fin.pensionOwnM != null && S.fin.pensionOwnM !== ''), get help(){ return SG('ownShare'); }},
+  retireMult:{g:'retire', b:'B17', ty:3, n:'retirement savings target', l:'Retirement savings target: times the yearly income you need', t:'num', min:20, max:33, step:1, sug:() => ST.retireMult, get by(){ return STB.retireMult.by; }, need:() => false, get help(){ return SG('retireMult'); }},
+  retireSpend:{g:'retire', b:'B18', ty:3, n:'retirement spending', l:'Retirement spending if you haven\'t set a goal (share of today\'s spending)', t:'pct', min:50, max:120, step:5, sug:() => ST.retireSpend, get by(){ return STB.retireSpend.by; }, need:() => !retireGoal(), get help(){ return SG('retireSpend'); }},
+  lumpSum:{g:'retire', b:'B19', ty:3, n:'retirement lump sum', l:'Tax-free lump sum to take at retirement (share of your pension, 0% = none)', t:'pct', min:0, max:25, step:1, sug:() => ST.lumpSum, get by(){ return STB.lumpSum.by; }, need:() => true, help:'Set by law: ' + LAW.ls + '. Your adviser can compare it with leaving it invested.'},
+  drawRule:{g:'retire', b:'B20', ty:3, n:'how you draw your pension', l:'How you draw your pension', t:'choice', o:[['spread', 'Spread to plan end'], ['min', 'Minimum only (4% / 5%)'], ['fixed', 'Fixed amount']], sug:() => SV('drawRule'), get by(){ return SB('drawRule'); }, need:() => true, help:'Set by law: ' + LAW.arf + ' from an ARF.'},
+  ddTiming:{g:'retire', b:'B20', ty:3, n:'withdrawal timing', l:'Drawdown tools: withdrawals taken at the', t:'choice', o:[['start', 'Start of the year'], ['end', 'End of the year']], sug:() => SV('ddTiming'), get by(){ return SB('ddTiming'); }, need:() => false, help:''},
   drawFixed:{g:'retire', b:'B20', ty:3, own:true, n:'fixed yearly amount', l:'Fixed amount a year (today\'s money), if you chose "Fixed amount"', t:'eur', min:0, max:200000, step:500, fb:() => 20000, need:() => asmGet('drawRule') === 'fixed', help:'Never less than the legal minimum once you are 61.'},
-  safetyMonths:{g:'safety', b:'B16', ty:3, n:'safety-net months', l:'Safety net: months of essential spending', t:'num', min:3, max:12, step:1, sug:() => twoSecure() ? ST.safetyMonthsTwo : ST.safetyMonths, by:STB.safetyMonths.by, need:() => true, help:'Easy-access cash for surprises or a gap in pay. Essential spending = living costs + mortgage + loan repayments.'},
+  safetyMonths:{g:'safety', b:'B16', ty:3, n:'safety-net months', l:'Safety net: months of essential spending', t:'num', min:1, max:12, step:1, sug:() => twoSecure() ? ST.safetyMonthsTwo : ST.safetyMonths, get by(){ return STB.safetyMonths.by; }, need:() => true, get help(){ return SG('safetyMonths'); }},
   mortRate:{g:'safety', b:'B13', ty:2, n:'mortgage rate', l:'Your mortgage rate (if your statement doesn\'t say)', t:'pct', min:1, max:8, step:0.05, mk:'mortRate', fb:() => 0.0375,
-    need:() => S.fin.home === 'Own with mortgage' && finN('mortBal') > 0 && !(finN('mortRate') > 0), help:'Your mortgage statement shows your rate. Typing it is fine: no upload needed.'},
+    need:() => S.fin.home === 'Own with mortgage' && finN('mortBal') > 0 && !(finN('mortRate') > 0), get help(){ return SG('mortRate'); }},
   cardRate:{g:'safety', b:'B14', ty:2, n:'credit-card rate', l:'Your credit-card rate, APR (if your statement doesn\'t say)', t:'pct', min:0, max:35, step:0.5, mk:'cardRate', fb:() => 0.20,
     need:() => finN('cardBal') > 0 && !(finN('cardRate') > 0), help:'Your card statement shows your APR. New credit cards can\'t charge more than ' + pcs(GD.cardCap) + ' APR (' + GDB.cardCap.by + '); some older cards are higher.'},
   loanRate:{g:'safety', b:'B15', ty:2, n:'loan rate', l:'Your other loans rate, APR (if your statement doesn\'t say)', t:'pct', min:0, max:25, step:0.25, mk:'loanRate', fb:() => 0.08,
-    need:() => finN('loanBal') + finN('debt') > 0 && !(finN('loanRate') > 0), help:'Your loan agreement shows your APR.'},
-  cashYears:{g:'safety', b:'B21', ty:3, n:'years kept as cash', l:'Money for goals sooner than this is kept as cash (years)', t:'yrs', min:1, max:10, step:1, sug:() => ST.cashYears, by:STB.cashYears.by, need:() => true, help:'Longer-term money has more time to ride out ups and downs.'},
-  investShare:{g:'safety', b:'B21', ty:3, n:'share of spare savings invested', l:'Spare savings: share invested (the rest stays in cash)', t:'pct', min:0, max:100, step:5, sug:() => ST.investShare, by:STB.investShare.by, need:() => true, help:''},
-  saveShare:{g:'safety', b:'B22', ty:3, n:'share of spare money saved', l:'Share of your spare money you save, at most', t:'pct', min:0, max:100, step:5, sug:() => ST.saveShare, by:STB.saveShare.by, need:() => S.saveM == null, help:'We never count more than this share of your spare money as saved, unless you set your own monthly saving.'},
-  noAnswer:{g:'safety', b:'B22', ty:3, n:'monthly saving', l:'Monthly saving if you haven\'t told us how much you could invest', t:'eur', min:0, max:5000, step:25, sug:() => ST.noAnswer, by:STB.noAnswer.by, need:() => S.saveM == null && typeof S.ans['6'] !== 'number', help:'Used until you answer "How much could you comfortably invest each month?".'},
-  lifeShare:{g:'safety', b:'B24', ty:3, n:'share of income your family would need', l:'Life cover: share of your income your family would need', t:'pct', min:30, max:100, step:5, sug:() => ST.lifeShare, by:STB.lifeShare.by, need:() => false, help:''},
-  lifeYears:{g:'safety', b:'B24', ty:3, n:'years of support', l:'Life cover: years your family would need support', t:'yrs', min:1, max:30, step:1, sug:() => ST.lifeYears, by:STB.lifeYears.by, need:() => false, help:''},
+    need:() => finN('loanBal') + finN('debt') > 0 && !(finN('loanRate') > 0), get help(){ return SG('loanRate'); }},
+  cashYears:{g:'safety', b:'B21', ty:3, n:'years kept as cash', l:'Money for goals sooner than this is kept as cash (years)', t:'yrs', min:1, max:10, step:1, sug:() => ST.cashYears, get by(){ return STB.cashYears.by; }, need:() => true, get help(){ return SG('cashYears'); }},
+  investShare:{g:'safety', b:'B21', ty:3, n:'share of spare savings invested', l:'Spare savings: share invested (the rest stays in cash)', t:'pct', min:0, max:100, step:5, sug:() => ST.investShare, get by(){ return STB.investShare.by; }, need:() => true, get help(){ return SG('investShare'); }},
+  saveShare:{g:'safety', b:'B22', ty:3, n:'share of spare money saved', l:'Share of your spare money you save, at most', t:'pct', min:0, max:100, step:5, sug:() => ST.saveShare, get by(){ return STB.saveShare.by; }, need:() => S.saveM == null, get help(){ return SG('saveShare'); }},
+  noAnswer:{g:'safety', b:'B22', ty:3, n:'monthly saving', l:'Monthly saving if you haven\'t told us how much you could invest', t:'eur', min:0, max:5000, step:25, sug:() => ST.noAnswer, get by(){ return STB.noAnswer.by; }, need:() => S.saveM == null && typeof S.ans['6'] !== 'number', get help(){ return SG('noAnswer'); }},
+  lifeShare:{g:'safety', b:'B24', ty:3, n:'share of income your family would need', l:'Life cover: share of your income your family would need', t:'pct', min:30, max:100, step:5, sug:() => ST.lifeShare, get by(){ return STB.lifeShare.by; }, need:() => false, get help(){ return SG('lifeShare'); }},
+  lifeYears:{g:'safety', b:'B24', ty:3, n:'years of support', l:'Life cover: years your family would need support', t:'yrs', min:1, max:30, step:1, sug:() => ST.lifeYears, get by(){ return STB.lifeYears.by; }, need:() => false, get help(){ return SG('lifeYears'); }},
   survivor:{g:'safety', b:'B24', ty:2, n:'survivor\'s pension', l:'Life cover: State survivor\'s pension a week', t:'eurw', min:0, max:400, step:0.5, rng:() => [0, RI.sp.survivor66], by:'DSP 2026: ' + eurW(RI.sp.survivor) + ' under 66, ' + eurW(RI.sp.survivor66) + ' at 66+, nothing if not eligible', fb:() => RI.sp.survivor, need:() => false, help:'Cohabiting partners can now qualify (Bereaved Partner\'s Pension).'},
-  budgetNeeds:{g:'safety', b:'B27', ty:3, n:'budget split', l:'Budget split: needs', t:'pct', min:0, max:100, step:5, sug:() => ST.budget[0], by:STB.budget.by, need:() => false, help:''},
-  budgetWants:{g:'safety', b:'B27', ty:3, n:'budget split', l:'Budget split: wants', t:'pct', min:0, max:100, step:5, sug:() => ST.budget[1], by:STB.budget.by, need:() => false, help:''},
-  budgetSave:{g:'safety', b:'B27', ty:3, n:'budget split', l:'Budget split: savings and debt', t:'pct', min:0, max:100, step:5, sug:() => ST.budget[2], by:STB.budget.by, need:() => false, help:''},
+  budgetNeeds:{g:'safety', b:'B27', ty:3, n:'budget split', l:'Budget split: needs', t:'pct', min:0, max:100, step:5, sug:() => ST.budget[0], get by(){ return STB.budget.by; }, need:() => false, get help(){ return SG('budgetNeeds'); }},
+  budgetWants:{g:'safety', b:'B27', ty:3, n:'budget split', l:'Budget split: wants', t:'pct', min:0, max:100, step:5, sug:() => ST.budget[1], get by(){ return STB.budget.by; }, need:() => false, get help(){ return SG('budgetWants'); }},
+  budgetSave:{g:'safety', b:'B27', ty:3, n:'budget split', l:'Budget split: savings and debt', t:'pct', min:0, max:100, step:5, sug:() => ST.budget[2], get by(){ return STB.budget.by; }, need:() => false, get help(){ return SG('budgetSave'); }},
   planEnd:{g:'length', b:'B12', ty:3, own:true, n:'plan-until age', l:'Plan until age (life expectancy)', t:'age', min:80, max:105, step:1, fb:() => S && S.about.partner ? 95 : 90, need:() => true,   // internal fallback only, never shown (planMissing gates results)
     help:'At 65, average life expectancy in Ireland is about ' + GD.lifeMen65 + ' for men and ' + GD.lifeWomen65 + ' for women (' + GDB.lifeMen65.by + '). Choose the age you want to plan to.'},
   startYear:{g:'length', b:'B23', ty:3, n:'plan start year', l:'Start the plan in', t:'choice', o:[[2026, '2026'], [2027, '2027']], sug:() => (new Date() > new Date('2026-09-30T23:59:59') ? 2027 : 2026), by:'from October most of this year has passed', need:() => true, help:''}
@@ -994,15 +1129,15 @@ const chooseTxt = m => (m.add ? 'Add ' : 'Choose ') + (/^the /.test(m.n) ? m.n :
 // "Use the standard for all of these": every type-3 item not chosen yet, incl. inflation. Never retirement age or plan-until age; never type 2.
 function useAllStd(){ S.asm = Object.assign({}, S.asm); let n = 0; ASM_KEYS().filter(k => asmStd(k) && !asmMine(k)).forEach(k => { S.asm[k] = ASM[k].sug(); n++; });
   if (!inflSet()){ S.infl = ST.infl; S.inflOther = false; n++; } applyAssume(); return n; }
-function applyAssume(){ Object.assign(AS, curSet()); AS.infl = S && S.infl != null ? S.infl : INFL_STD;   // inflation is the client's own choice (S.infl); INFL_STD is only an internal fallback before they choose
+function applyAssume(){ Object.assign(AS, curSet()); AS.infl = S && S.infl != null ? S.infl : SV('infl');   // inflation is the client's own choice (S.infl); SV('infl') is only an internal fallback before they choose
   ['wage', 'cash', 'inv', 'pen', 'penRet', 'mortRate', 'cardRate', 'loanRate'].forEach(k => { AS[k] = +asmV(k); });
   AS.end = +asmV('planEnd'); AS.sp = RI.sp.week * RI.sp.weeks; AS.spAge = RI.sp.age; YEAR0 = +asmV('startYear');
   SAVE.buffer = +asmV('safetyMonths'); SAVE.longYrs = +asmV('cashYears'); SAVE.share = +asmV('saveShare'); SAVE.noAnswer = +asmV('noAnswer'); }
-const INFL_STD = RI.infl.ecb, INFL_IE = RI.infl.ie, INFL_SRC = RI.infl.ieSrc;
+const INFL_IE = RI.infl.ie, INFL_SRC = RI.infl.ieSrc;
 const inflSet = () => !!S && S.infl != null;
-function inflChoice(ctx){ const v = S.infl, std = v === INFL_STD && !S.inflOther, ie = v === INFL_IE && !S.inflOther, oth = !!S.inflOther || (v != null && !std && !ie);
-  return '<div class="infl" id="infl-' + ctx + '"><b style="font-size:14px" id="infl-l-' + ctx + '">Prices rising (inflation)</b> ' + asmTag(inflSet(), true) + '<p class="small" style="margin:2px 0 6px">Generally the standard is ' + pcs(INFL_STD) + ' (' + STB.infl.by + '). Prices in Ireland are rising ' + pcs(INFL_IE) + ' a year right now (' + INFL_SRC + '), mostly because of energy. Choose what you want to use.</p>' +
-    '<div class="chips" role="group" aria-labelledby="infl-l-' + ctx + '"><button class="chip sm' + (std ? ' sel' : '') + '" aria-pressed="' + std + '" data-a="infl" data-p="' + INFL_STD + '">Use the standard (' + pcs(INFL_STD) + ')</button><button class="chip sm' + (ie ? ' sel' : '') + '" aria-pressed="' + ie + '" data-a="infl" data-p="' + INFL_IE + '">' + pcs(INFL_IE) + ' · Ireland now (' + INFL_SRC + ')</button><button class="chip sm' + (oth ? ' sel' : '') + '" aria-pressed="' + oth + '" data-a="infl" data-p="other">Other</button></div>' +
+function inflChoice(ctx){ const v = S.infl, std = v === SV('infl') && !S.inflOther, ie = v === INFL_IE && !S.inflOther, oth = !!S.inflOther || (v != null && !std && !ie);
+  return '<div class="infl" id="infl-' + ctx + '"><b style="font-size:14px" id="infl-l-' + ctx + '">Prices rising (inflation)</b> ' + asmTag(inflSet(), true) + '<p class="small" style="margin:2px 0 6px">Generally the standard is ' + pcs(SV('infl')) + ' (' + STB.infl.by + '). Prices in Ireland are rising ' + pcs(INFL_IE) + ' a year right now (' + INFL_SRC + '), mostly because of energy. Choose what you want to use.</p>' +
+    '<div class="chips" role="group" aria-labelledby="infl-l-' + ctx + '"><button class="chip sm' + (std ? ' sel' : '') + '" aria-pressed="' + std + '" data-a="infl" data-p="' + SV('infl') + '">Use the standard (' + pcs(SV('infl')) + ')</button><button class="chip sm' + (ie ? ' sel' : '') + '" aria-pressed="' + ie + '" data-a="infl" data-p="' + INFL_IE + '">' + pcs(INFL_IE) + ' · Ireland now (' + INFL_SRC + ')</button><button class="chip sm' + (oth ? ' sel' : '') + '" aria-pressed="' + oth + '" data-a="infl" data-p="other">Other</button></div>' +
     (oth ? '<div class="flabel" style="margin-top:6px"><span id="infl-o-' + ctx + '">My own rate (0–10%)</span>' + nbox('infl', 'r', v != null ? +(v * 100).toFixed(2) : '', '%', 'infl-o-' + ctx, {id:'infl-v-' + ctx, dec:true}) + '</div>' + nbHint('infl', 'r') : '') + '</div>'; }
 const inflTxt = () => pc(AS.infl) + ' a year';
 function assumeToggle(){ const a = (S && S.assume) || 'standard';
@@ -1057,7 +1192,7 @@ const iAPR = apr => Math.pow(1 + apr, 1 / 12) - 1;
 const TAG_CLS = t => t === T_GOV ? 'none' : t === T_MINE ? 'doc' : t === T_HOW ? 'typed' : 'pre';
 function assumeRows(){ applyAssume(); const F = finNums(), mine = k => asmMine(k), ch = k => asmFmt(ASM[k], asmGet(k)), NC = 'Not chosen yet', ready = planReady(), P = ready ? project() : null, k6 = S.ans['6'], q6 = DQ_BY('6');
   const R = [['Rules', RULES_VERSION, T_GOV]].concat(govRows().map(x => [x[0], x[1], T_GOV]));
-  R.push(['Prices rise (inflation)', inflSet() ? pc(AS.infl) + ' a year (ECB target ' + pcs(INFL_STD) + '; Ireland now ' + pcs(INFL_IE) + ', ' + INFL_SRC + ')' : NC, T_MINE]);
+  R.push(['Prices rise (inflation)', inflSet() ? pc(AS.infl) + ' a year (ECB target ' + pcs(SV('infl')) + '; Ireland now ' + pcs(INFL_IE) + ', ' + INFL_SRC + ')' : NC, T_MINE]);
   [['Pay rises', 'wage'], ['Cash savings grow (after DIRT)', 'cash'], ['Investments grow (after charges and exit tax)', 'inv'], ['Pensions grow while you work (after charges)', 'pen'], ['Pensions grow once retired (after charges)', 'penRet']].forEach(([l, k]) => R.push([l, mine(k) ? ch(k) + ' a year' : NC, T_MINE]));
   const yrsSP = S.fin.spYears != null && S.fin.spYears !== '' ? +S.fin.spYears : asmGet('spYears');
   R.push(['Your State Pension', F.spKnown ? eur(AS.sp * F.sp) + ' a year from ' + AS.spAge + ' (' + (yrsSP != null ? 'from your ' + yrsSP + ' years of PRSI' : S.fin.sp === 'Expect full' ? 'you expect the full rate' : 'your figure: ' + eurW(asmV('spWeek')) + ' a week') + '); taxable, no USC' : 'Not given yet', tRange(ASM.spWeek) + ' a week']);
@@ -1086,7 +1221,7 @@ function assumeSheet(){ const R = assumeRows(), gov = R.filter(x => x[2] === T_G
 function debtNums(n){ const cR = n('cardRate') > 0 ? n('cardRate') / 100 : AS.cardRate, lR = n('loanRate') > 0 ? n('loanRate') / 100 : AS.loanRate, c = n('cardBal'), l = n('loanBal') + n('debt'), lp = n('loanPayM') + n('debtPayM'), cp = n('cardPayM');
   const ok = (b, p, r) => b > 0 && p > b * iAPR(r), pay = (b, p, r) => ok(b, p, r) ? p : pmtM(b, iAPR(r), 60), cardPayM = c > 0 ? pay(c, cp, cR) : 0, loanPayM = l > 0 ? pay(l, lp, lR) : 0;
   return {cardRateKnown:n('cardRate') > 0 || asmMine('cardRate'), loanRateKnown:n('loanRate') > 0 || asmMine('loanRate'), cardBal:c, cardRate:cR, cardPayM, cardPayEst:c > 0 && !ok(c, cp, cR), loanBal:l, loanRate:lR, loanPayM, loanPayEst:l > 0 && !ok(l, lp, lR), debt:c + l, debtPayM:cardPayM + loanPayM, debtPayEst:(c > 0 && !ok(c, cp, cR)) || (l > 0 && !ok(l, lp, lR))}; }
-function finNums(){
+function finNums(){ syncLists();
   // Skipped figures count as €0 and show as ❓ Missing. We never fill in a figure for the customer (spec §15).
   const f = S.fin, n = k => { const v = f[k]; return v != null && v !== '' && !isNaN(+v) ? +v : 0; };
   const mortOn = f.home === 'Own with mortgage', mR = n('mortRate') > 0 ? n('mortRate') / 100 : AS.mortRate, mStated = mortOn ? n('mortPayM') : 0, inc = f.work === 'Not working' ? 0 : n('income');
@@ -1124,9 +1259,15 @@ const SAVE = {
   buffer:6,                          // B16: months of essential spending kept back as an emergency buffer when there is no safety-net goal (set from the customer's assumptions)
   longYrs:5                          // goals 5+ years away grow at the investment rate, sooner ones at the cash rate
 };
-const GOAL_ORDER = (a, b) => (a.k === 'safety' ? 0 : 1) - (b.k === 'safety' ? 0 : 1)       // safety net first, always
-  || (a.prio === 'Nice to have' ? 1 : 0) - (b.prio === 'Nice to have' ? 1 : 0)            // then Must have before Nice to have
-  || a.age - b.age || a.id - b.id;                                                          // then by date
+// §19.8: the customer ranks their goals ("which first?"); funding follows the ranking. Until they rank, the order is the old one:
+// Emergency fund first, then Must have before Nice to have, then soonest. A new Emergency fund goal goes first unless it was moved.
+const GOAL_ORDER_DEFAULT = (a, b) => (a.k === 'safety' ? 0 : 1) - (b.k === 'safety' ? 0 : 1)
+  || (a.prio === 'Nice to have' ? 1 : 0) - (b.prio === 'Nice to have' ? 1 : 0)
+  || a.age - b.age || a.id - b.id;
+const rankIdx = g => { const i = S && S.rank ? S.rank.indexOf(g.id) : -1; return i >= 0 ? i : g.k === 'safety' ? -1 : 1e6; };
+const GOAL_ORDER = (a, b) => (S && S.rank ? rankIdx(a) - rankIdx(b) : 0) || GOAL_ORDER_DEFAULT(a, b);
+const rankList = () => S.goals.slice().sort(GOAL_ORDER);   // all goals, in the order they are funded / shown
+const resultOrder = () => S.rank ? rankList() : S.goals.slice().sort((a, b) => a.age - b.age);
 // Saving that grows with pay (w) into a pot growing at r: value after n years of 1 a year (paid at the start of each year)
 const annF = (n, r, w) => { let s = 0; for (let t = 0; t < n; t++) s += Math.pow(1 + w, t) * Math.pow(1 + r, n - t); return s; };
 function saveAuto(surplusM){                                 // the Q6 rule: monthly saving, today's money, before what-if
@@ -1265,7 +1406,7 @@ function secStatus(sec){
   const fs = sec.f.filter(fieldVisible), req = fs.filter(k => !FF[k].opt);
   if (fs.some(k => S.look[k] && !S.ack[k])) return 'look';
   const got = req.filter(k => S.src[k]).length;
-  return got === req.length ? 'done' : (fs.some(k => S.src[k] && S.src[k] !== 'pre') ? 'part' : 'none');
+  return got === req.length || (S.saved && S.saved[sec.id]) ? 'done' : (fs.some(k => S.src[k] && S.src[k] !== 'pre') ? 'part' : 'none');   // §19.3: saved = complete; blanks count €0 and stay on the checklist as optional
 }
 const secDone = id => ['done','look'].includes(secStatus(FSEC.find(s => s.id === id)));
 const minOK = () => secDone('about') && secDone('income') && (secDone('assets') || secDone('pension'));
@@ -1281,10 +1422,10 @@ const isDoc = k => !!S.src && S.src[k] === 'doc';
 function setManual(k, v, src){ S.man = S.man || {}; const empty = v == null || v === '';
   if (isDoc(k)){ if (empty) delete S.man[k]; else S.man[k] = {v, src}; return false; }
   if (empty){ delete S.fin[k]; delete S.src[k]; } else { S.fin[k] = v; S.src[k] = src; } delete S.look[k]; return true; }
-function setDoc(k, v, conf, fixed, from){ S.man = S.man || {}; S.fix = S.fix || {}; S.docOf = S.docOf || {};
+function setDoc(k, v, conf, fixed, from){ if (LISTKEY[k]) return listDoc(k, v, conf, fixed, from); S.man = S.man || {}; S.fix = S.fix || {}; S.docOf = S.docOf || {};
   if (!isDoc(k) && S.src[k] && S.fin[k] != null && S.fin[k] !== '') S.man[k] = {v:S.fin[k], src:S.src[k]};   // kept, so "Remove statement" can go back to it
   S.fin[k] = v; S.src[k] = 'doc'; if (conf != null && !fixed) S.conf[k] = conf; else delete S.conf[k]; if (fixed) S.fix[k] = true; else delete S.fix[k]; if (from) S.docOf[k] = from; }
-function removeDoc(keys){ (keys || []).forEach(k => { if (!isDoc(k)) return; const m = (S.man || {})[k];
+function removeDoc(keys){ (keys || []).forEach(k => { if (LISTKEY[k]){ listRemoveDoc(k); return; } if (!isDoc(k)) return; const m = (S.man || {})[k];
   if (m){ S.fin[k] = m.v; S.src[k] = m.src; } else { delete S.fin[k]; delete S.src[k]; }
   delete S.conf[k]; delete S.look[k]; delete S.ack[k]; ['fix', 'man', 'docOf'].forEach(x => { if (S[x]) delete S[x][k]; }); }); }
 function docNote(k){ const m = (S.man || {})[k]; if (!isDoc(k) || !m || String(m.v) === String(S.fin[k])) return '';
@@ -1296,7 +1437,7 @@ function fmtField(k){ const v = S.fin[k], d = FF[k]; if (v == null || v === '') 
 const gById = id => S.goals.find(g => g.id === +id);
 function statusWord(st){ return st === 'done' ? 'Done' : st === 'look' ? 'Needs a look' : st === 'part' ? 'In progress' : 'Not started'; }
 function statIcon(st){ return '<span class="stat ' + (st === 'done' ? 'done' : st === 'look' ? 'look' : '') + '" aria-hidden="true">' + (st === 'done' ? '✓' : st === 'look' ? '!' : st === 'part' ? '…' : '') + '</span>'; }
-function secSummary(sec){ const fs = sec.f.filter(fieldVisible).filter(k => S.src[k]); if (!fs.length) return sec.docs.length ? 'Upload or type it · about 1 min' : 'Name, age, retirement age'; return fs.slice(0, 3).map(k => FF[k].l.replace(/^Your /, '') + ': ' + fmtField(k)).join(' · '); }
+function secSummary(sec){ const fs = sec.f.filter(fieldVisible).filter(k => S.src[k]); if (!fs.length) return sec.id === 'about' ? 'Name, age, retirement age' : sec.id === 'prot' ? 'Yes or no for each · about 1 min' : 'Upload or type it · about 1 min'; return fs.slice(0, 3).map(k => FF[k].l.replace(/^Your /, '') + ': ' + fmtField(k)).join(' · '); }
 
 /* ================= DISCOVER (quiz style) ================= */
 const V = {};
@@ -1377,7 +1518,8 @@ function gRows(only){
     return '<div class="grow' + (S.tlHl === g.id ? ' hl' : '') + '" id="row-' + g.id + '"><div class="hd"><span class="e" aria-hidden="true">' + g.e + '</span><input value="' + esc(g.name) + '" data-gname="' + g.id + '" aria-label="Goal name"' + (ret ? ' readonly' : '') + '>' + (ret ? '' : '<button class="link" style="font-size:12.5px" data-a="gdel" data-p="' + g.id + '" aria-label="Remove ' + esc(g.name) + '">Remove</button>') + '</div>' +
       '<div class="flds"><div class="full"><span class="fl">' + (ret ? 'Retire at' : 'When') + '</span>' + stepper('gyr', g.id, '<span id="when-' + g.id + '">' + whenTxt(g) + '</span>', 'When') + '</div>' +
       '<label><span class="fl">' + (ret ? 'Income a year €' : g.kind === 'mfree' ? 'Mortgage left €' : 'Amount €') + '</span><input class="in" inputmode="numeric" value="' + Math.round(g.amount) + '" data-gamt="' + g.id + '"></label>' +
-      (ret ? '<div><span class="fl">Pension</span><span class="small">From Your finances</span></div>' : '<label><span class="fl">Saved so far €</span><input class="in" inputmode="numeric" value="' + Math.round(g.saved || 0) + '" data-gsaved="' + g.id + '"></label>') + '</div>' +
+      (ret ? '<div><span class="fl">Pension</span><span class="small">From Your finances</span></div>' : '<label><span class="fl">Saved so far €</span><input class="in" inputmode="numeric" value="' + Math.round(g.saved || 0) + '" data-gsaved="' + g.id + '"></label>') +
+      (g.k === 'safety' ? '<label class="full"><span class="fl">Months of essential spending to keep</span><input class="in" inputmode="numeric" value="' + (asmMine('safetyMonths') ? asmGet('safetyMonths') : '') + '" data-gmonths="' + g.id + '" placeholder="e.g. ' + ASM.safetyMonths.sug() + '"><span class="small" style="display:block">Your amount follows this once we know your spending. The same setting is used in Your assumptions and the Emergency fund calculator.</span></label>' : '') + '</div>' +
       '<div class="small" style="margin-top:4px">Today\'s money' + (g.kind === 'mfree' && S.fin.mortBal ? ' · from your Liabilities' : '') + '</div>' +
       (ret ? '' : '<button class="link" data-a="gmore" data-p="' + g.id + '" aria-expanded="' + !!open + '">' + (open ? '▲ Fewer details' : '▼ More details (optional)') + '</button>' + (open ? '<div class="more">' + [['who','For whom',['Me','Partner','Child','Family']],['flex','Flexible on timing?',['Can move','Fixed date']]].map(([k, l, os]) => '<div class="fl" style="margin-top:6px">' + l + '</div><div class="chips">' + os.map(o => '<button class="chip sm' + (g[k] === o ? ' sel' : '') + '" aria-pressed="' + (g[k] === o) + '" data-a="gset" data-p="' + g.id + '|' + k + '|' + o + '">' + o + '</button>').join('') + '</div>').join('') + '</div>' : '')) + '</div>'; }).join('');
 }
@@ -1385,8 +1527,8 @@ V.F2 = () => ({id:'F2', note:'Timeline: drag chips (touch, mouse, keyboard), sna
   html:saveBanner() + tlBoard() + '<div class="sec"><h3>Your goals</h3><button class="link" data-a="go" data-p="F1">＋ Add a goal</button></div>' + gRows(),
   foot:'<button class="btn" data-a="f2next">Next</button>'});
 V.F4 = () => { const ok = S.goals.some(g => g.age && g.amount > 0);
-  return {id:'F4', note:'Confirm my LifeMap: recap, priority chips (default Must have). Needs ≥1 goal with a when and an amount.', head:flowHead(2, 'Step 2 · Define', 'Your LifeMap', 'A quick check before we add your money.', 'go|F2'),
-  html:'<div class="card">' + S.goals.slice().sort((a, b) => a.age - b.age).map(g => '<div class="mini" style="flex-wrap:wrap"><span><span aria-hidden="true">' + g.e + '</span> <b>' + esc(g.name) + '</b><br><span class="small">' + whenTxt(g) + ' · ' + eur(g.amount) + (g.kind === 'retire' ? ' a year' : '') + '</span></span>' + (g.kind === 'retire' ? '' : '<span class="chips">' + ['Must have','Nice to have'].map(o => '<button class="chip sm' + (g.prio === o ? ' sel' : '') + '" aria-pressed="' + (g.prio === o) + '" data-a="gset" data-p="' + g.id + '|prio|' + o + '">' + o + '</button>').join('') + '</span>') + '</div>').join('') + '</div>' +
+  return {id:'F4', note:'Confirm my LifeMap: recap, and "Which goal first?" ranking (journey-spec §19.8; Emergency fund first by default). Needs ≥1 goal with a when and an amount.', head:flowHead(2, 'Step 2 · Define', 'Your LifeMap', 'A quick check before we add your money.', 'go|F2'),
+  html:'<div class="card">' + S.goals.slice().sort((a, b) => a.age - b.age).map(g => '<div class="mini" style="flex-wrap:wrap"><span><span aria-hidden="true">' + g.e + '</span> <b>' + esc(g.name) + '</b><br><span class="small">' + whenTxt(g) + ' · ' + eur(g.amount) + (g.kind === 'retire' ? ' a year' : '') + '</span></span></div>').join('') + '</div>' + rankHTML('f4') +
     (ok ? '' : '<p class="note" style="margin-top:12px">Add an amount to at least one goal.</p>') + '<p class="disc">Next: your money profile, a few quick questions about risk.</p>',
   foot:'<button class="btn" data-a="f4ok"' + (ok ? '' : ' disabled') + '>This looks right</button>'};
 };
@@ -1440,14 +1582,16 @@ function partnerBlock(noMoney){ const pt = S.partner, m = pt.mode;
   if (!m) h += '<p class="small" style="margin:10px 0 0">Pick one. You can change it later in <b>Me</b>.</p>';
   return h; }
 V.P3 = () => { const sec = FSEC[S.fsec], mode = sec.docs.length ? (S.fmode[sec.id] || 'type') : 'type';
-  const nDoc = sec.f.filter(k => isDoc(k)).length, docBar = nDoc ? '<div class="card" id="docbar" style="background:var(--ok-l);box-shadow:none"><b>📄 ' + nDoc + ' figure' + (nDoc > 1 ? 's' : '') + ' from your statement</b><p class="small" style="margin:4px 0 6px;color:var(--ink)">Statement figures are used ahead of anything typed. To use your own figures instead, remove the statement.</p><div class="row" style="gap:16px"><button class="link" data-a="docrep" data-p="' + S.fsec + '">Replace statement</button><button class="link" data-a="docrem" data-p="' + S.fsec + '">Remove statement</button></div></div>' : '';
-  const body = mode === 'upload' ? uploadPick(sec) : docBar + '<div class="card">' + sec.f.filter(fieldVisible).filter(k => !(sec.id === 'about' && k === 'pAge')).map(fieldHTML).join('') +
-    (sec.id === 'income' && S.about.partner && S.partner.mode === 'invite' ? '<p class="note">💌 Your partner adds their own income' + (S.partner.sent ? ' (invite sent to ' + esc(S.partner.email) + ')' : '') + '. Until then it counts as €0 in your plan.</p>' : '') + '</div>' +
+  const nDoc = sec.id === 'prot' ? 0 : sec.f.filter(k => isDoc(k)).length, docBar = nDoc ? '<div class="card" id="docbar" style="background:var(--ok-l);box-shadow:none"><b>📄 ' + nDoc + ' figure' + (nDoc > 1 ? 's' : '') + ' from your statement</b><p class="small" style="margin:4px 0 6px;color:var(--ink)">Statement figures are used ahead of anything typed. To use your own figures instead, remove the statement.</p><div class="row" style="gap:16px"><button class="link" data-a="docrep" data-p="' + S.fsec + '">Replace statement</button><button class="link" data-a="docrem" data-p="' + S.fsec + '">Remove statement</button></div></div>' : '';
+  const fl = sec.f.filter(fieldVisible).filter(k => !(sec.id === 'about' && k === 'pAge')).filter(k => !FF[k].list), lead = sec.id === 'prot' ? '<p style="margin:0 0 10px"><b>Do you have any of the following?</b></p><p class="small" style="margin:-4px 0 12px">Say Yes to add the details, and a policy if you like. Add more than one of each if you have them.</p>' : '';
+  const body = mode === 'upload' ? uploadPick(sec) : docBar + (sec.id === 'pension' ? listBlock('pens') : '') + (fl.length ? '<div class="card">' + lead + fl.map(k => fieldHTML(k) + (LDEF[k] && LDEF[k].pol ? policyBlock(k) : '')).join('') : '') +
+    (sec.id === 'income' && S.about.partner && S.partner.mode === 'invite' ? '<p class="note">💌 Your partner adds their own income' + (S.partner.sent ? ' (invite sent to ' + esc(S.partner.email) + ')' : '') + '. Until then it counts as €0 in your plan.</p>' : '') + (fl.length ? '</div>' : '') + (sec.id === 'liab' ? listBlock('cards') + listBlock('loans') : '') +
     (sec.id === 'about' ? '<div class="card"><div class="field"><span class="flabel">Planning with a partner? <span class="tag pre">From your answers</span></span><div class="seg" role="group" style="margin:0" aria-label="Planning with a partner">' + ['Yes','No'].map(x => { const on = (x === 'Yes') === !!S.about.partner; return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-a="partner" data-p="' + x + '">' + x + '</button>'; }).join('') + '</div></div>' +
       '<div class="field" style="margin:0"><span class="flabel">Children or others who rely on you <span class="tag pre">From your answers</span></span><div class="seg" role="group" style="margin:0" aria-label="Dependants">' + ['0','1','2','3+'].map((x, k) => '<button class="' + (S.about.deps === k ? 'on' : '') + '" aria-pressed="' + (S.about.deps === k) + '" data-a="deps" data-p="' + k + '">' + x + '</button>').join('') + '</div></div>' +
       (S.about.partner ? '<div style="border-top:1px dashed var(--line);margin-top:14px;padding-top:12px"><b>Your partner</b>' + partnerBlock() + '</div>' : '') + credChips() + '</div>' : '');
-  return {id:'P3-' + (S.fsec + 1), note:'Section ' + (S.fsec + 1) + ' of 6 · ' + sec.t + '. Upload vs Type it; every field has "Not sure? See an example" (§15), which never fills the field.', head:flowHead(3, 'Your finances · ' + (S.fsec + 1) + ' of 6', sec.e + ' ' + sec.t, sec.id === 'about' ? 'Mostly filled in from your answers. Just check it.' : 'Upload a document or type it in. Round figures are fine.', 'fback'),
-  html:(sec.docs.length ? '<div class="seg" role="group" aria-label="How to add">' + [['upload','📄 Upload'],['type','⌨️ Type it']].map(([m, l]) => '<button class="' + (mode === m ? 'on' : '') + '" aria-pressed="' + (mode === m) + '" data-a="fmode" data-p="' + m + '">' + l + '</button>').join('') + '</div>' : '<p class="small">No documents needed here. ID and proof of address are handled by your adviser later.</p>') + body,
+  const blankNote = sec.id === 'about' ? '' : '<p class="small" style="margin:0 2px 10px">Leave blank anything you don\'t have. It counts as €0 and stays on your list as optional. You never need to type 0.</p>';
+  return {id:'P3-' + (S.fsec + 1), note:'Section ' + (S.fsec + 1) + ' of 6 · ' + sec.t + '. Upload vs Type it; every field has "Not sure? See an example" (§15), which never fills the field.', head:flowHead(3, 'Your finances · ' + (S.fsec + 1) + ' of 6', sec.e + ' ' + sec.t, sec.id === 'about' ? 'Mostly filled in from your answers. Just check it.' : sec.id === 'prot' ? 'Say Yes or No for each type. Add the details if you like.' : 'Upload a document or type it in. Round figures are fine.', 'fback'),
+  html:(sec.docs.length ? '<div class="seg" role="group" aria-label="How to add">' + [['upload','📄 Upload'],['type','⌨️ Type it']].map(([m, l]) => '<button class="' + (mode === m ? 'on' : '') + '" aria-pressed="' + (mode === m) + '" data-a="fmode" data-p="' + m + '">' + l + '</button>').join('') + '</div>' : '<p class="small">' + (sec.id === 'prot' ? 'Add a policy under each type if you like. No other documents needed.' : 'No documents needed here. ID and proof of address are handled by your adviser later.') + '</p>') + blankNote + body,
   foot:'<button class="btn" data-a="fsave">Save this section</button>'};
 };
 function uploadPick(sec){ return '<div class="card"><b>What we can read</b><div class="upl" style="margin-top:10px">' + sec.docs.map(d => '<div class="tile"><span class="e" aria-hidden="true">' + d[0] + '</span>' + esc(d[1]) + '</div>').join('') + '</div>' +
@@ -1457,6 +1601,10 @@ V.PU = () => { const u = S.upl, sm = u.sec === 'smart';
   if (u.stage === 'scan') return {id:'PU-scan', note:'Reading documents (mock IDP).', head:flowHead(3, 'Your finances', 'Reading your documents…', esc(u.files.join(', ')), ''), html:'<div class="scan" aria-hidden="true">📄</div><p class="sub" style="text-align:center;margin-top:14px" role="status">Finding the figures we need</p>'};
   if (u.stage === 'fail') return {id:'PU-fail', note:'Upload failed → Type it; missing doc stays on the checklist (CJ D10).', head:flowHead(3, 'Your finances', "We couldn't read that one", 'No problem. You can type the figures instead. We\'ll keep the document on your checklist.', 'uplx'),
     html:'<div class="card" style="text-align:center"><div style="font-size:44px" aria-hidden="true">📄❓</div><p class="small">' + esc(u.files.join(', ')) + '</p></div>', foot:'<button class="btn" data-a="uplfail">Type it instead</button>'};
+  if (u.item){ const lk = u.item.lk, T = ITEMDOC[lk];
+    return {id:'PU-confirm', note:'"We read these values, please confirm" for ONE ' + LDEF[lk].one + ' (journey-spec §19). Under 80% confidence = Check this.', head:flowHead(3, 'Your finances', 'We read these values', 'Please confirm. Change anything that looks wrong.', 'uplx'),
+      html:'<div class="card"><b>' + esc(T.title) + '</b>' + T.f.map(([fld, v, c]) => '<div class="mini" style="align-items:center"><span style="flex:1"><b style="font-size:14px">' + esc(FFI[lk + '.' + fld].l) + '</b><br>' + (c < 80 ? '<span class="tag look">⚠️ Check this · ' + c + '% sure</span>' : '<span class="tag doc">✓ ' + c + '% sure</span>') + '</span><input class="in" style="width:120px;min-height:42px" inputmode="numeric" data-uv="' + fld + '" value="' + (u.edit[fld] != null ? u.edit[fld] : v) + '" aria-label="' + esc(FFI[lk + '.' + fld].l) + '"></div>').join('') + (T.txt || []).map(([fld, v]) => '<div class="mini"><span><b style="font-size:14px">' + esc(FFI[lk + '.' + fld].l.replace(' (optional)', '')) + '</b></span><b>' + esc(v) + '</b></div>').join('') + '</div>',
+      foot:'<button class="btn" data-a="uplok">Looks right, add them</button><button class="btn ghost" data-a="uplx">Cancel</button>'}; }
   const secs = sm ? ['income','assets','liab','pension'] : [u.sec];
   return {id:'PU-confirm', note:'"We read these values — please confirm". Under 80% confidence = Check this.', head:flowHead(3, 'Your finances', 'We read these values', 'Please confirm. Change anything that looks wrong.', 'uplx'),
     html:secs.map(sid => { const U = UPL[sid], sec = FSEC.find(s => s.id === sid); return '<div class="card"><b>' + sec.e + ' ' + sec.t + '</b><div class="small">' + U.docs.map(esc).join(' · ') + '</div>' +
@@ -1468,7 +1616,7 @@ const MORT_LOW = "This repayment wouldn't clear the mortgage in the years left";
 function checkItems(){ const out = [], fN = finNums(); if (fN.mortPayLow && !S.look.mortPayM) S.look.mortPayM = MORT_LOW; else if (!fN.mortPayLow && S.look.mortPayM === MORT_LOW) delete S.look.mortPayM; /* FP round 4 F4 */ FSEC.forEach(s => s.f.filter(fieldVisible).filter(k => k !== 'retireAge').forEach(k => { const src = S.src[k], look = S.look[k];
   const st = look ? 'look' : !src ? (FF[k].opt ? null : 'miss') : src === 'doc' ? 'ok' : 'typed'; if (st) out.push({k, s, st}); })); return out; }
 V.P4 = () => { const it = checkItems(), flag = it.filter(x => ['look','miss'].includes(x.st)), good = it.filter(x => !['look','miss'].includes(x.st));
-  const ic = {look:'⚠️', miss:'❓'}, lb = {look:'Needs a look', miss:'Missing'};
+  const ic = {look:'⚠️', miss:'❓'}, lb = {look:'Needs a look', miss:'Missing · optional, counts as €0'};
   // #21: a skipped section (nothing entered at all) is one row, not one row per field
   const skipped = FSEC.filter(sec => { const fs = sec.f.filter(fieldVisible); return fs.length && fs.every(k => !S.src[k] && !S.look[k]); });
   const one = flag.filter(x => !skipped.includes(x.s));
@@ -1494,7 +1642,7 @@ function goalLine(P, g){ const x = P.goal && P.goal[g.id]; if (!x) return '';
   const ex = extraTo100(g), need = ex != null ? x.avgM + ex : Math.max(x.needM || 0, x.avgM + 5);
   if (ex == null || (P.save && need > P.save.surplusM)) return 'Needs about ' + eur(need) + ' a month, more than your spare money · on average you\'ll put ' + eur(x.avgM) + ' a month';
   return 'Needs about ' + eur(need) + ' a month · on average you\'ll put ' + eur(x.avgM) + ' a month'; }
-function goalsBox(P){ return S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const p = P.pct[g.id], b = band(p);
+function goalsBox(P){ return resultOrder().map(g => { const p = P.pct[g.id], b = band(p);
   return '<div class="gs"><span class="e" aria-hidden="true">' + g.e + '</span><div class="m"><div class="nm">' + esc(g.name) + ' <span>· ' + yearsTxt(g) + '</span></div><div class="bar" role="img" aria-label="' + p + '% covered"><i style="width:' + p + '%;background:var(--' + b + ')"></i></div>' + (goalLine(P, g) ? '<div class="gl">' + goalLine(P, g) + '</div>' : '') + '</div><div class="p" style="color:var(--' + b + '-t)">' + p + '%<small><span aria-hidden="true">' + BANDE[b] + '</span> ' + BANDW[b] + '</small></div></div>'; }).join(''); }
 function findings(P){
   const gs = S.goals.slice(), best = gs.slice().sort((a, b) => P.pct[b.id] - P.pct[a.id] || a.age - b.age)[0], worst = gs.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id] || a.age - b.age)[0];
@@ -1690,7 +1838,7 @@ V.PLAN = () => { const hl = S.tlHl != null && gById(S.tlHl), all = S.planEdit;
   const edit = all ? '<div class="sec"><h3>Your goals</h3><button class="link" data-a="planedit">Done</button></div>' + gRows()
     : hl ? '<div id="tl-edit">' + gRows([hl]) + '<button class="link" data-a="tlclose">Done</button></div>' : '';
   return {id:'PLAN', note:'My Plan: timeline at the top (the centre), then goals-on-track strip, then results in spec order: goals % → what we found → what if → at a glance → 3 end actions. Tap a goal to edit it.', head:appHead('My Plan', 'Drag your goals. Your results update below.'),
-    html:tlBoard() + edit + '<div class="row" style="justify-content:space-between;margin:2px 2px 0"><button class="link" data-a="addgoal">＋ Add a goal</button>' + (all ? '' : '<button class="link" data-a="planedit">✏️ Edit goal details</button>') + '</div>' + tlStrip() +
+    html:tlBoard() + edit + '<div class="row" style="justify-content:space-between;margin:2px 2px 0"><button class="link" data-a="addgoal">＋ Add a goal</button>' + (all ? '' : '<button class="link" data-a="planedit">✏️ Edit goal details</button>') + '</div>' + tlStrip() + (S.goals.length > 1 ? '<details class="card asmg" data-g="rank"' + (S.asmOpen === 'rank' ? ' open' : '') + ' style="margin-top:12px"><summary style="cursor:pointer;font-weight:800;min-height:32px">Which goal first?' + (S.rank ? ' · your order' : '') + '</summary><div style="margin-top:8px">' + rankHTML('plan') + '</div></details>' : '') +
       '<div id="r-res" style="scroll-margin-top:8px"><div class="sec" style="margin-top:18px"><h3 style="font-size:21px">Your results</h3></div>' + resultsHTML() + '</div>'};
 };
 V.GOALS = () => ({id:'PLAN-ADD', note:'Add a goal from My Plan (same goal tiles).', head:appHead('Add a goal', 'Tap to add or remove.', 'seg|timeline'), html:'<div class="gtiles" role="group" aria-label="Goals">' + GOALCAT.map(c => goalTile(c.k)).join('') + '</div>' + S.goals.filter(g => g.k === 'other').map(g => '<div class="pill mint" style="margin-top:10px">' + g.e + ' ' + esc(g.name) + '</div> ').join(''), foot:'<button class="btn" data-a="seg" data-p="timeline">Back to my timeline</button>'});
@@ -1720,9 +1868,9 @@ const T_GOV = 'Set by Government · 2026', T_MINE = 'Your choice', T_HOW = 'How 
 const tMarket = d => { const s = mkSug(d); return s ? 'Suggested ' + s.t.replace(/\) · .*/, '') : 'Your figure'; };   // §18: no range; the suggestion if there is one
 const tRange = d => { const [lo, hi] = d.rng(), f = x => d.t === 'eurw' ? eurW(x) : asmFmt(d, x); return 'Usually ' + f(lo).replace(/ years$/, '') + '–' + f(hi); };
 const asmFmt = (d, v) => v == null ? 'Not chosen yet' : d.t === 'pct' ? pcs(+v) : d.t === 'eur' ? eur(+v) : d.t === 'eurw' ? eurW(+v) + ' a week' : d.t === 'yrs' ? v + (+v === 1 ? ' year' : ' years') : d.t === 'age' ? 'age ' + v : d.t === 'num' ? (d === ASM.retireMult ? v + '× (about ' + +(100 / v).toFixed(1) + '% a year)' : d === ASM.safetyMonths ? v + (+v === 1 ? ' month' : ' months') : String(v)) : ((d.o.find(o => String(o[0]) === String(v)) || [0, String(v)])[1]);
-// §18: a market rate's suggestion (from PARTNER_RATES), in the input's own units; null = no suggestion
-function mkSug(d){ const p = PARTNER_RATES[d.mk]; if (!p || p.v == null) return null; const v = d.afterDirt ? +(p.v * (1 - RI.sav.dirt)).toFixed(4) : p.v, lab = PARTNER_RATES.name ? 'Suggested by ' + PARTNER_RATES.name : p.label;
-  return {v, t:(d.t === 'eur' ? eur(v) : pcs(v)) + (d.afterDirt ? ' after DIRT' : '') + ') · ' + lab + (d.afterDirt && !PARTNER_RATES.name ? ' (' + pcs(p.v) + ' before DIRT)' : '')}; }
+// §18/§19.6: a market rate's suggestion (from SETTINGS), in the input's own units; null = no suggestion
+function mkSug(d){ const p = SET[d.mk], pv = SV(d.mk); if (!p || pv == null) return null; const v = d.afterDirt ? +(pv * (1 - RI.sav.dirt)).toFixed(4) : pv, lab = SL(d.mk);
+  return {v, t:(d.t === 'eur' ? eur(v) : pcs(v)) + (d.afterDirt ? ' after DIRT' : '') + ') · ' + lab + (d.afterDirt && !SOV(d.mk) ? ' (' + pcs(pv) + ' before DIRT)' : '')}; }
 const sugChipTxt = s => 'Use the suggested ' + (/^€/.test(s.t) ? 'figure (' : 'rate (') + s.t;
 function asmGuide(d){ if (d.mk) return d.opt && !mkSug(d) ? 'Optional: no published figure, so no suggestion. Leave it blank to count ' + (d.t === 'eur' ? '€0' : '0%') + '.' : ''; if (d.ty === 2){ const [lo, hi] = d.rng(); return 'Usually between ' + asmFmt(d, lo) + ' and ' + asmFmt(d, hi) + ' (' + d.by + ').'; }
   return d.own ? '' : 'Generally the standard is ' + asmFmt(d, d.sug()) + ' (' + d.by + '). Choose what you want to use.'; }
@@ -1802,7 +1950,7 @@ V.ME = () => { const m = S.me;
   if (m === 'money'){ const flags = checkItems().filter(x => ['look','miss'].includes(x.st));
     return {id:'ME-MONEY', note:'My money: the 6 finance sections, checklist of missing items and ones that need a look, add a document. No bank connection in this version.', head:appHead('My money', 'Keep your figures up to date. Your plan recalculates.', 'meback'),
       html:'<button class="btn sm" style="width:100%" data-a="upl" data-p="smart">📥 Add a document</button><div style="margin-top:12px">' + FSEC.map((s, i) => { const st = secStatus(s); return '<button class="goal" data-a="fsec" data-p="' + i + '"><span class="ic" aria-hidden="true">' + s.e + '</span><span style="flex:1;min-width:0"><b>' + s.t + '</b><br><span class="small">' + esc(secSummary(s)) + '</span></span><span class="sr">' + statusWord(st) + '</span>' + statIcon(st) + '</button>'; }).join('') + '</div>' +
-        (flags.length ? '<div class="card"><b>To sharpen your plan</b>' + flags.map(x => '<div class="mini"><span>' + ({look:'⚠️', miss:'❓'})[x.st] + ' ' + esc(FF[x.k].l) + '</span><button class="link" data-a="fix" data-p="' + FSEC.indexOf(x.s) + '">Fix</button></div>').join('') + '</div>' : '')}; }
+        (flags.length ? '<div class="card"><b>To sharpen your plan</b>' + flags.map(x => '<div class="mini"><span>' + ({look:'⚠️', miss:'❓'})[x.st] + ' ' + esc(FF[x.k].l) + (x.st === 'miss' ? ' <span class="small">· optional</span>' : '') + '</span><button class="link" data-a="fix" data-p="' + FSEC.indexOf(x.s) + '">Fix</button></div>').join('') + '</div>' : '')}; }
   /* Me hub = the customer's profile hub (Pooja Q5) */
   const P = personality(), full = umCount() === 13, r = riskRead(full), b = S.about, nm = S.acct.name || S.fin.name || 'You';
   const seg = (a, opts, on) => '<div class="seg" role="group" style="margin:6px 0 0">' + opts.map(([v, l]) => '<button class="' + (on(v) ? 'on' : '') + '" aria-pressed="' + on(v) + '" data-a="' + a + '" data-p="' + v + '">' + l + '</button>').join('') + '</div>';
@@ -2111,7 +2259,7 @@ const inflLine = () => inflSet() ? ' Prices rising ' + inflTxt() + ', your choic
    a retirement age (never defaulted). CALC_X: the assumptions a tool reads that are not one of its sliders; shown in "Assumptions this tool uses". */
 const FEE = {ty:2, n:'yearly fees', mk:'fundChg', t:'pct'}, RET = {ret:true, n:'retirement age'}, RET_W = {ret:true, n:'age when withdrawals start'},
   IBW = {ty:2, n:'Illness Benefit', rng:() => [0, RI.sp.illness], by:'DSP 2026 maximum; lower if you earned under €300 a week; needs enough PRSI', t:'eurw'},
-  WAIT = {ty:3, n:'years you might wait', sug:() => WAIT_YEARS, by:'an illustration of the cost of waiting', t:'yrs'}, STYLE = {ty:3, n:'investment style', sug:() => 2, by:'Balanced; an adviser checks your attitude to risk', t:'style'},
+  WAIT = {ty:3, n:'years you might wait', sug:() => SV('waitYears'), get by(){ return SB('waitYears'); }, t:'yrs'}, STYLE = {ty:3, n:'investment style', sug:() => SV('style'), get by(){ return SB('style'); }, t:'style'},
   SPY = {ty:2, n:'State Pension (other yearly income)', rng:() => [0, RI.sp.week * RI.sp.weeks], by:'DSP 2026: the full State Pension is ' + eur(RI.sp.week * RI.sp.weeks) + ' a year; it depends on your PRSI record', t:'eur'};
 const CALC_A = {borrow:{rate:'mortRate'}, repayment:{rate:'mortRate'}, overpay:{rate:'mortRate'}, ratechange:{rate:'mortRate'}, term:{rate:'mortRate'}, mortgageprotect:{rate:'mortRate'}, rentbuy:{rate:'mortRate', g:'houseGrow'},
   goalplanner:{r:'cash'}, compound:{r:'invGross'}, lumpsum:{r:'invGross', f:FEE, wait:WAIT}, regularinvest:{g:'invGross', f:FEE}, fees:{g:'invGross', a:FEE, b:FEE}, realreturn:{r:'invGross'},
@@ -2140,7 +2288,7 @@ function calcMissing(c){ const v = calcVals(c), out = [];
   (CALC_X[c.id] || []).forEach(k => { if (!asmMine(k) && !ASM[k].opt) out.push(ASM[k].n); }); return out.filter((x, i, a) => a.indexOf(x) === i); }   // optional tool assumptions (buying fees, deposit earnings): blank counts 0
 const locFmt = (s, x) => s.t === 'pct' ? pcs(x) : s.t === 'eurw' ? eurW(x) + ' a week' : s.t === 'yrs' ? yrN(x) : s.t === 'style' ? CHIP_OPTS.style.find(o => o[0] === x)[1] : eur(x);
 function calcGuide(cid, k){ const s = calcA(cid, k); if (!s) return ''; if (s.ret) return RETIRE_HELP; if (s.a) return [asmGuide(ASM[s.a]), ASM[s.a].mk ? ASM[s.a].help : ''].filter(Boolean).join(' ');
-  if (s.mk) return 'Your statement shows your fund charges. ' + PARTNER_RATES.fundChg.note + '.';
+  if (s.mk) return 'Your statement shows your fund charges. ' + SET.fundChg.note + '.';
   if (s.ty === 3) return 'Generally the standard is ' + locFmt(s, s.sug()) + ' (' + s.by + '). Choose what you want to use.';
   const [lo, hi] = s.rng(); return 'Usually between ' + locFmt(s, lo) + ' and ' + locFmt(s, hi) + ' (' + s.by + ').'; }
 const calcStd = (cid, k) => { const s = calcA(cid, k) || {}, m = s.a ? (ASM[s.a].mk ? mkSug(ASM[s.a]) : null) : s.mk ? mkSug(s) : null;
@@ -2176,7 +2324,7 @@ function calcPre(c){ applyAssume(); S.calcWO = S.calcWO || {}; S.calcWO[c.id] = 
     case 'avc': if (has('income')) { p.sal = F.income; p.tr = trFor(); } if (F.pensionOwnM > 0) p.ex = Math.round((F.pensionOwnM + +(S.penExtra || 0)) * 12); if (S.retireSet) p.y = Math.max(1, S.retireAge - S.about.age); p.g = penG; break;
     case 'lastmoney': case 'drawdown': if ((has('pension') || has('pensionM')) && S.retireSet && asmMine('pen') && asmMine('wage')) p.pot = Math.round(pensionAt(Math.max(0, S.retireAge - S.about.age), F.pension, F.pensionM, penGrowth(), AS.wage)); if (c.id === 'lastmoney' && S.retireSet) p.age = Math.max(S.retireAge, RI.pen.earliestAge); break;
     case 'lumpsum': case 'fees': case 'riskreturn': case 'realreturn': if (has('invest')) p.p = F.invest; break;
-    case 'lifecover': if (has('income')) p.inc = F.income; if (mort) p.mort = F.mortBal; if (F.debt > 0) p.debt = F.debt; if (has('cash') || has('invest')) p.sav = F.cash + F.invest; break;
+    case 'lifecover': if (coverTotal('life') + coverTotal('workCover') > 0) p.ex = Math.round(coverTotal('life') + coverTotal('workCover')); if (has('income')) p.inc = F.income; if (mort) p.mort = F.mortBal; if (F.debt > 0) p.debt = F.debt; if (has('cash') || has('invest')) p.sav = F.cash + F.invest; break;
     case 'networth': if (has('cash')) p.sav = F.cash; if (has('invest')) p.inv = F.invest; if (has('pension')) p.pen = F.pension; if (/^Own/.test(f.home || '')) p.prop = (+f.homeValue || 0) + (+f.propValue || 0); if (mort) p.mort = F.mortBal; if (F.debt > 0) p.loans = F.debt; break;
     case 'surplus': if (has('income')){ p.inc = take(); p.ess = F.costsM + F.oneOffY / 12 + F.mortPayM; p.life = 0; p.debt = F.debt > 0 ? F.debtPayM : 0; if (F.mortPayEst && F.mortBal > 0) S.calcWO[c.id].ess = workedNote('mortPayM'); if (F.debtPayEst) S.calcWO[c.id].debt = workedNote(F.cardPayEst ? 'cardPayM' : 'loanPayM'); } break;   // matches the plan's spare money this year
     case 'budget': if (has('income')) p.inc = take(); break;
@@ -2200,7 +2348,7 @@ const nbHint = (kind, key) => '<span class="nbhint" id="nh-' + kind + '-' + key 
 const NB = {
   ck:{ calc:() => { const t = xTop(); return t && t.v === 'CALC' ? C(t.p) : null; },
     lim(k){ const c = this.calc(), i = c && c.inputs.concat(c.wi || []).find(x => x.k === k); return i ? {min:i.min, max:i.u === '€' ? i.max * 10 : i.max, smax:i.max, widen:i.u === '€', u:i.u, int:['y', 'm', 'age'].includes(i.u) && i.step % 1 === 0} : null; },
-    apply(k, v){ const c = this.calc(); if (!c) return; const vals = calcVals(c); vals[k] = v; S.calcT = S.calcT || {}; (S.calcT[c.id] = S.calcT[c.id] || {})[k] = true;
+    apply(k, v){ const c = this.calc(); if (!c) return; const vals = calcVals(c); vals[k] = v; calcSync(c.id, k, v); S.calcT = S.calcT || {}; (S.calcT[c.id] = S.calcT[c.id] || {})[k] = true;
       const r = document.getElementById('c-' + k); if (r){ if (v > +r.max && this.lim(k).widen) r.max = v; r.value = v; } const out = document.getElementById('cout'); if (out) out.innerHTML = calcOut(c); } },
   wi:{ lim(k){ return k === 'm' ? {min:-5000, max:10000, smax:1000, widen:true, u:'€'} : {min:0, max:2000000, smax:50000, widen:true, u:'€'}; },
     apply(k, v){ if (S.wi.g == null) S.wi.g = defaultWiGoal(); S.wi[k] = v; const r = document.querySelector('[data-wi="' + k + '"]'); if (r){ if (v > +r.max) r.max = v; if (v < +r.min) r.min = v; r.value = v; r.setAttribute('aria-valuetext', eur(v)); } liveUpdate(true); } },
@@ -2382,8 +2530,8 @@ function foundations(){ const F = finNums(), f = S.fin, has = k => !!S.src[k] &&
     if (F.loanBal > 1){ const r = payoff(F.loanBal, 0, F.loanPayM, iAPR(F.loanRate)); items.push(r.m <= 24 ? {st:'mid', s:'Loans of ' + eur(F.loanBal) + ' clear in about ' + Math.max(1, Math.ceil(r.m)) + ' months', a:'debtpay'} : {st:'bad', s:'Loans of ' + eur(F.loanBal) + (r.m === Infinity ? ' with no repayment set' : ' take about ' + Math.ceil(r.m / 12) + ' years to clear'), a:'debtpay'}); if (F.loanPayEst) items[items.length - 1].s += ' (repayment worked out from your figures, because ' + payWhy('loanPayM') + ')'; }
     if (F.debt <= 1) items.push({st:'ok', s:'No costly debt'}); }
   const needLife = S.about.partner || S.about.deps > 0, working = f.work && f.work !== 'Not working';
-  if (needLife){ if (!has('life')) items.push({st:'na', s:'Add your protection to check life cover', sec:4}); else items.push(f.life === 'Yes' ? {st:'ok', s:'Life cover in place'} : {st:f.life === 'No' ? 'bad' : 'mid', s:(f.life === 'No' ? 'No life cover, and ' : 'Not sure about life cover, and ') + (S.about.deps > 0 ? 'people rely on you' : 'you plan with a partner'), a:'lifecover'}); }
-  if (working){ if (!has('ip')) items.push({st:'na', s:'Add your protection to check income protection', sec:4}); else items.push(f.ip === 'Yes' ? {st:'ok', s:'Income protection in place'} : {st:'mid', s:'No income protection if you couldn\'t work', a:'incomegap'}); }
+  if (needLife){ if (!has('life')) items.push({st:'na', s:'Add your protection to check life cover', sec:4}); else items.push(f.life === 'Yes' || coverTotal('workCover') > 0 ? {st:'ok', s:(f.life === 'Yes' ? 'Life cover in place' + (coverTotal('life') > 0 ? ' (' + eur(coverTotal('life')) + ' covered)' : '') + (coverTotal('workCover') > 0 ? ', plus ' + eur(coverTotal('workCover')) + ' through work' : '') : 'Cover through work in place (' + eur(coverTotal('workCover')) + ')')} : {st:f.life === 'No' ? 'bad' : 'mid', s:(f.life === 'No' ? 'No life cover, and ' : 'Not sure about life cover, and ') + (S.about.deps > 0 ? 'people rely on you' : 'you plan with a partner'), a:'lifecover'}); }
+  if (working){ if (!has('ip')) items.push({st:'na', s:'Add your protection to check income protection', sec:4}); else items.push(f.ip === 'Yes' ? {st:'ok', s:'Income protection in place' + (coverTotal('ip') > 0 ? ' (' + eur(coverTotal('ip')) + ' a month)' : '')} : {st:'mid', s:'No income protection if you couldn\'t work', a:'incomegap'}); }
   const rank = {bad:0, mid:1, na:2, ok:3}, worst = items.sort((a, b) => rank[a.st] - rank[b.st])[0];
   if (!items.length) add({e:'🛡️', name:'Clear costly debt & protect your family', st:'na', s:'Add your loans and protection to check this', sec:3});
   else add(Object.assign({e:'🛡️', name:'Clear costly debt & protect your family'}, worst, {items}));
@@ -2537,7 +2685,7 @@ function openReport(){ if (!planReady()){ toast(chooseTxt(planMissing()[0]).repl
   const P0 = project(), wiP = S.pref || (S.wi.m || S.wi.l ? S.wi : null), P = wiP ? project(wiP) : P0, F = findings(P0), um = umCount() === 13, rp = um ? riskRead(true) : null, per = personality();
   const flags = checkItems().filter(x => ['look','miss'].includes(x.st));
   const rows = P0.rows.map(r => '<tr><td>' + r.a + ' (' + r.yr + ')</td><td>' + eur(r.inflow) + '</td><td>' + eur(r.needs) + '</td><td>' + eur(r.used) + '</td><td style="color:' + (isShort(r) ? 'var(--alert-t)' : 'inherit') + '">' + (r.short > 1 ? eur(r.short) : '—') + '</td><td>' + eur(r.liquid) + '</td></tr>').join('');
-  const detail = S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const p = P0.pct[g.id], ex = p < 95 ? extraFor(g) : 0;
+  const detail = resultOrder().map(g => { const p = P0.pct[g.id], ex = p < 95 ? extraFor(g) : 0;
     return '<p><b>' + g.e + ' ' + esc(g.name) + '</b> · ' + (g.kind === 'retire' ? 'from age ' + g.age + ', ' + eur(g.amount) + ' a year' : 'age ' + g.age + ' (' + (YEAR0 + g.age - S.about.age) + '), ' + eur(g.amount)) + ' in today\'s money · ' + g.prio + '.<br>What is on track: <b>' + p + '%</b> covered (' + BANDW[band(p)] + '). ' + (goalLine(P0, g) ? goalLine(P0, g) + '. ' : '') + (p >= 95 ? 'Your income and savings cover it.' : ex ? 'What could close the gap, on our assumptions: saving about <b>' + eur(ex) + ' a month</b> more towards it, or moving it later. An adviser can tell you the best way to do this for you.' : 'What could close the gap: moving it later, a smaller amount, or a bigger change to saving. An adviser can tell you the best way to do this for you.') + '</p>'; }).join('');
   const h = '<div class="rep-bar"><b>Your plan</b><button data-r="print" style="background:var(--sun);color:var(--ink)">🖨 Print / save as PDF</button><button data-r="close" style="background:#fff;color:var(--ink)">Close</button></div><article class="rep">' +
     '<h1>' + esc(S.acct.name || 'Your') + '\'s LifeMap plan</h1><p class="small">Created 29 Sep 2026 · version ' + Math.max(1, S.versions.length) + ' · <b>Preliminary guidance, not financial advice</b></p>' +
@@ -2555,7 +2703,7 @@ function openReport(){ if (!planReady()){ toast(chooseTxt(planMissing()[0]).repl
   if (!S.versions.some(v => /report/.test(v.note))) S.versions.push({note:'Report downloaded', date:'29 Sep 2026'});
 }
 /* ================= RENDER ================= */
-function current(){
+function current(){ if (S.admin) return V.SET();
   if ((S.shell || S.app) && S.tab === 'explore') return exploreScreen();
   if (!S.app && S.shell){ if (S.tab === 'home') return V.HOME0(); if (S.tab === 'plan'){ if (!S.pb) return V.PLAN0(); if (S.scr === 'P3') return V.P3(); if (S.scr === 'PU') return V.PU(); return (V[S.scr] && !/^D/.test(S.scr) ? V[S.scr] : V.B1)(); }
     if (S.tab === 'me') return V.ME(); return V.EXP(); }
@@ -2564,6 +2712,21 @@ function current(){
   if (S.scr === 'P3') return V.P3(); if (S.scr === 'PU') return V.PU();
   return (V[S.scr] || V.D0)();
 }
+/* ---------- Admin view: Settings (journey-spec §19.6). Shown in the prototype for LifeMap and partners. NOT for customers. ---------- */
+function setFmt(s, v){ return v == null ? 'none' : s.u === 'pct' ? pcs(v) : s.u === 'eur' ? eur(v) : s.u === 'yrs' ? v + (v === 1 ? ' year' : ' years') : s.u === 'choice' ? (((ASM[Object.keys(ASM).find(a => ASM[a].sug && ASM[a].o && SET[a] === s)] || {}).o || []).find(o => String(o[0]) === String(v)) || [0, String(v)])[1] : s.u === 'pct3' ? v.map(pcs).join(' / ') : String(v); }
+function setInput(k, s){ const pv = s.pv, id = 'set-' + k;
+  if (s.u === 'pct3') return '<div class="row" style="gap:6px;flex-wrap:wrap">' + s.v.map((x, i) => '<input class="in" style="width:84px" id="' + id + '-' + i + '" data-set="' + k + '|' + i + '" inputmode="decimal" aria-label="Partner figure ' + (i + 1) + ' for ' + esc(s.n) + ' (%)" value="' + (pv ? +(pv[i] * 100).toFixed(2) : '') + '" placeholder="' + +(x * 100).toFixed(2) + '">').join('') + '<span class="small">%</span></div>';
+  if (s.u === 'choice'){ const a = Object.keys(ASM).find(x => ASM[x].sug && ASM[x].o && SET[x] === s), o = a ? ASM[a].o : []; return '<select class="in" id="' + id + '" data-set="' + k + '" aria-label="Partner figure for ' + esc(s.n) + '"><option value="">LifeMap standard</option>' + o.map(([v, l]) => '<option value="' + v + '"' + (String(pv) === String(v) ? ' selected' : '') + '>' + esc(l) + '</option>').join('') + '</select>'; }
+  return '<div class="row" style="gap:6px"><input class="in" style="width:110px" id="' + id + '" data-set="' + k + '" inputmode="decimal" aria-label="Partner figure for ' + esc(s.n) + (s.u === 'pct' ? ' (%)' : '') + '" value="' + (pv != null ? (s.u === 'pct' ? +(pv * 100).toFixed(3) : pv) : '') + '" placeholder="' + (s.v == null ? 'none' : s.u === 'pct' ? +(s.v * 100).toFixed(3) : s.v) + '"><span class="small">' + (s.u === 'pct' ? '%' : s.u === 'eur' ? '€' : s.u === 'yrs' ? 'years' : '') + '</span></div>'; }
+function settingsHTML(){ const grps = []; Object.entries(SET).forEach(([k, s]) => { let g = grps.find(x => x[0] === s.grp); if (!g) grps.push(g = [s.grp, []]); g[1].push(k); });
+  return '<div class="note" role="note" style="background:#FFF3CD;border:1.5px solid #E0B84A"><b>🔒 Admin view · not for customers.</b> LifeMap or a partner (credit union, adviser firm, company, agent) controls these standards. A figure changed here changes the suggestion everywhere, in the app and in the workbook\'s Settings sheet. Customers can still change any of them for their own plan. Law values (tax, USC, PRSI, pension relief, State Pension, Central Bank limits) are not here and can\'t be changed. Retirement age and life expectancy have no standard.</div>' +
+    '<div class="card"><div class="field" style="margin:0"><label for="set-partner">Partner name (customers then read "Suggested by …" beside any figure you change)</label><input class="in" id="set-partner" data-setname="1" value="' + esc(SETTINGS.partner) + '" autocomplete="off" placeholder="e.g. a credit union"></div>' + (Object.values(SET).some(s => s.pv != null) || SETTINGS.partner ? '<button class="link" data-a="setreset" data-p="all" style="margin-top:8px">Back to the LifeMap standards</button>' : '') + '</div>' +
+    grps.map(([g, ks]) => '<details class="card asmg" data-g="set-' + esc(g) + '"' + (S.asmOpen === 'set-' + g ? ' open' : '') + '><summary style="cursor:pointer;font-weight:800;min-height:32px">' + esc(g) + ' (' + ks.length + ')</summary><div style="margin-top:10px">' +
+      ks.map(k => { const s = SET[k]; return '<div class="field" style="margin:0 0 16px"><span class="flabel" id="setl-' + k + '">' + esc(s.n) + (s.pv != null ? ' <span class="tag doc">Changed by ' + esc(SPN()) + '</span>' : '') + '</span>' +
+        '<span class="small" style="display:block">LifeMap standard: <b>' + esc(setFmt(s, s.v)) + '</b> · ' + esc(s.label || s.by) + ' · as at ' + esc(s.asat) + (s.verify ? ' · <b>verify before release</b>' : '') + '</span>' + (s.guide ? '<span class="small" style="display:block">Guidance: ' + esc(s.guide) + '</span>' : '') + (s.note ? '<span class="small" style="display:block">Note: ' + esc(s.note) + '</span>' : '') +
+        (s.src ? '<span class="small" style="display:block;word-break:break-all">Source: ' + esc(s.src) + '</span>' : '') + '<span class="small" style="display:block;margin:4px 0">Partner figure (leave blank for the LifeMap standard):</span>' + setInput(k, s) + (s.pv != null ? '<button class="link" data-a="setreset" data-p="' + k + '">Reset</button>' : '') + '</div>'; }).join('') + '</div></details>').join('') +
+    '<details class="card asmg" data-g="set-guide"><summary style="cursor:pointer;font-weight:800;min-height:32px">Guidance figures (no standard)</summary><div style="margin-top:10px">' + Object.entries(SETTINGS.g).map(([k, s]) => '<div class="field" style="margin:0 0 12px"><span class="flabel">' + esc(s.n) + '</span><span class="small" style="display:block">' + s.v + ' · ' + esc(s.by) + ' · as at ' + esc(s.asat) + ' · <b>verify before release</b></span></div>').join('') + '<p class="small">Life expectancy is only ever shown as guidance. It is never a default: each customer picks their own plan-until age.</p></div></details>'; }
+V.SET = () => ({id:'ADMIN-SET', note:'ADMIN VIEW (journey-spec §19.6, option C): the Settings block, controlled by LifeMap or a partner. Not shown to customers.', head:appHead('Settings', '🔒 Admin view · not for customers', 'adminclose'), html:settingsHTML()});
 function finScreen(){ return S.upl ? V.PU() : S.fsec != null ? V.P3() : V.P2(); }
 /* ================= Emoji are decoration, never read aloud (journey-spec §17) =================
    In every title, heading, card title, tile, list row, chip, button and link, emoji runs are wrapped in aria-hidden spans,
@@ -2580,7 +2743,7 @@ function hideEmoji(root){ if (!root) return; const els = root.matches && root.ma
       if (last < v.length) f.appendChild(document.createTextNode(v.slice(last))); n.parentNode.replaceChild(f, n); }); }); }
 const emoObs = new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.nodeType === 1) hideEmoji(n.closest && n.closest(EMO_NAMED) ? n.closest(EMO_NAMED) : n); else if (n.nodeType === 3 && n.parentElement && !n.parentElement.closest('[aria-hidden="true"]')) { const h = n.parentElement.closest(EMO_NAMED); if (h) hideEmoji(h); } })));
 let lastId = null, focusKey = null;
-function render(){ syncSafety();
+function render(){ syncLists(); syncSafety();
   const scr = document.getElementById('screen'), sc0 = scr.querySelector('.scroll,.qbody'), top0 = sc0 ? sc0.scrollTop : 0;
   const s = current(), same = s.id === lastId;
   let html;
@@ -2608,6 +2771,11 @@ function render(){ syncSafety();
 function go(id){ S.scr = id; S.sheet = null; render(); }
 let toastT = null;
 function toast(msg){ const t = document.getElementById('toast'); t.innerHTML = '<div class="t"><span aria-hidden="true">✨</span>' + esc(msg) + '</div>'; clearTimeout(toastT); toastT = setTimeout(() => { t.innerHTML = ''; }, 2800); }
+function rankHTML(ctx){ const gs = rankList(); if (gs.length < 2) return '';
+  return '<div' + (ctx === 'plan' ? '' : ' class="card"') + ' id="rank-' + ctx + '"><h3 class="h" style="margin:0 0 2px' + (ctx === 'plan' ? ';position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)' : '') + '" id="rank-h-' + ctx + '">Which goal first?</h3><p class="small" style="margin:0 0 8px">Your savings go to the goal at the top first. We start with your Emergency fund; move it if you like.' + (S.rank ? '' : ' (Not changed yet.)') + '</p>' +
+    '<ol class="rank" aria-labelledby="rank-h-' + ctx + '" style="list-style:none;margin:0;padding:0">' + gs.map((g, i) => '<li class="mini" style="align-items:center"><span style="flex:1;min-width:0"><b>' + (i + 1) + '.</b> <span aria-hidden="true">' + g.e + '</span> ' + esc(g.name) + '<br><span class="small">' + (g.kind === 'retire' ? 'Paid from your pension, so its place here doesn\'t change how your savings are shared' : g.kind === 'legacy' ? 'What is left at the end of your plan' : whenTxt(g)) + '</span></span>' +
+      '<span class="row" style="gap:6px"><button class="chip sm" data-a="grank" data-p="' + g.id + '|up" aria-label="Move ' + esc(g.name) + ' up, now ' + (i + 1) + ' of ' + gs.length + '"' + (i === 0 ? ' aria-disabled="true"' : '') + '>▲</button><button class="chip sm" data-a="grank" data-p="' + g.id + '|down" aria-label="Move ' + esc(g.name) + ' down, now ' + (i + 1) + ' of ' + gs.length + '"' + (i === gs.length - 1 ? ' aria-disabled="true"' : '') + '>▼</button></span></li>').join('') + '</ol>' +
+    '<p class="small" role="status" id="rank-msg-' + ctx + '" style="margin:6px 0 0">' + esc(S.rankMsg || '') + '</p>' + (S.rank ? '<button class="link" data-a="grankreset">Back to our suggested order</button>' : '') + '</div>'; }
 function version(note){ S.versions.push({note, date:'29 Sep 2026'}); }
 function toResults(){ S.scr = 'U1'; render(); setTimeout(() => { S.app = true; S.pb = false; S.shell = true; S.tab = 'plan'; S.planSeg = 'main'; S.planGo = 'results'; if (!S.versions.some(v => /results/.test(v.note))) version('First results'); render(); }, RM() ? 300 : 1400); }
 function finBack(){ if (S.from === 'check'){ S.from = null; S.fsec = null; if (S.app) { render(); } else go('P4'); return; } S.fsec = null; if (S.app){ if (S.tab === 'me'){ S.me = 'money'; } } else S.scr = 'P2'; render(); }
@@ -2648,6 +2816,11 @@ const ACT = {
   gyr:p => { const [id, d] = p.split('|'), g = gById(id); moveGoal(g, g.age + +d); focusKey = '[data-a="gyr"][data-p="' + p + '"]'; render(); },
   gmore:p => { S.tlOpen[p] = !S.tlOpen[p]; focusKey = '[data-a="gmore"][data-p="' + p + '"]'; render(); },
   gset:p => { const [id, k, v] = p.split('|'); gById(id)[k] = v; focusKey = '[data-a="gset"][data-p="' + p + '"]'; render(); },
+  adminclose:() => { S.admin = false; render(); },
+  setreset:p => { if (p === 'all'){ SETTINGS.partner = ''; Object.values(SET).forEach(s => { delete s.pv; }); } else delete SET[p].pv; applyAssume(); render(); },
+  grank:p => { const [id, dir] = p.split('|'), list = rankList().map(g => g.id), i = list.indexOf(+id), j = dir === 'up' ? i - 1 : i + 1; if (i < 0 || j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]]; S.rank = list; const g = gById(id); S.rankMsg = g.name + ' is now ' + (j + 1) + ' of ' + list.length; version('Goal priority changed'); focusKey = '[data-a="grank"][data-p="' + p + '"]'; render(); },
+  grankreset:() => { S.rank = null; S.rankMsg = 'Back to the suggested order'; version('Goal priority reset'); render(); },
   gdel:p => { S.goals = S.goals.filter(g => g.id !== +p); if (S.wi.g === +p) S.wi = {g:null, m:0, l:0}; if (S.app) afterPlanEdit(); render(); toast('Goal removed'); },
   f4ok:() => { if (!S.versions.length) version('LifeMap confirmed'); if (S.acct.email === '' && S.save.email) S.acct.email = S.save.email; go('B4'); },
   pbprofile:p => pbAfterProfile(p),
@@ -2671,7 +2844,7 @@ const ACT = {
   docrep:p => { S.fmode[FSEC[+p].id] = 'upload'; render(); },
   docrem:p => { const sec = FSEC[+p]; removeDoc(sec.f.concat(DOC_HIDDEN[sec.id] || [])); Object.keys(DOCT).forEach(c => { if (S.pdocs[c] && !Object.values(S.docOf || {}).includes('pst:' + c)) pstRemove(c); }); toast('Statement removed. Your own figures are used again'); render(); },
   calcadd:p => { const m = calcMissing(C(p)); if (m.length){ toast(missTxt(m[0]) + ' first'); return; } S.sheet = 'calcadd|' + p; render(); },
-  ckstd:p => { const t = xTop(); if (!t || t.v !== 'CALC') return; const c = C(t.p), std = calcStd(c.id, p), v = calcVals(c); if (!std) return; v[p] = std.v; S.calcT = S.calcT || {}; (S.calcT[c.id] = S.calcT[c.id] || {})[p] = true; focusKey = '#co-' + p; render(); },
+  ckstd:p => { const t = xTop(); if (!t || t.v !== 'CALC') return; const c = C(t.p), std = calcStd(c.id, p), v = calcVals(c); if (!std) return; v[p] = std.v; calcSync(c.id, p, v[p]); S.calcT = S.calcT || {}; (S.calcT[c.id] = S.calcT[c.id] || {})[p] = true; focusKey = '#co-' + p; render(); },
   confirmcalcadd:p => { const r = C(p).run(calcVals(C(p))), g = r.goal; if (!g || g.kind === 'blocked') return; const msg = applyHandoff(g); S.sheet = null; if (S.app) afterPlanEdit(); render(); toast(msg); },
   vemail:() => verify('ev', 'P1S'), vsms:() => verify('sv', 'P1K'),
   passkey:p => { S.acct.pk = p === '1'; prefillAbout(); if (p === '1') toast('Face ID added'); if (S.after && S.after.k === 'pst'){ const a = S.after; S.after = null; S.scr = a.scr; pstStart(a.cat, a.files); return; } go('P2'); },
@@ -2679,9 +2852,13 @@ const ACT = {
   uplfail:() => { const sec = S.upl.sec; S.missingDocs = (S.missingDocs || []).concat(S.upl.files); S.upl = null; const i = FSEC.findIndex(s => s.id === sec); S.fmode[sec] = 'type'; if (i >= 0) openSec(i); else { if (!S.app) S.scr = 'P2'; render(); } },
   uplok:() => confirmUpload(),
   fsec:p => openSec(p), fmode:p => { S.fmode[FSEC[S.fsec].id] = p; render(); },
-  fback:() => finBack(), fsave:() => { const sec = FSEC[S.fsec]; if (sec.id === 'about'){ S.fin.name && (S.acct.name = S.fin.name); } toast(sec.t + ' saved'); if (S.app) afterPlanEdit(true); finBack(); },
+  fback:() => finBack(), fsave:() => { const sec = FSEC[S.fsec]; S.saved = S.saved || {}; S.saved[sec.id] = true; if (sec.id === 'about'){ S.fin.name && (S.acct.name = S.fin.name); } toast(sec.t + ' saved'); if (S.app) afterPlanEdit(true); finBack(); },
   fchoice:p => { const [k, v] = p.split('|'); setManual(k, v, 'typed'); focusKey = '[data-a="fchoice"][data-p="' + p + '"]'; render(); },
-  fex:p => { S.sheet = 'ex|' + p; render(); },   // §15: shows an example; never fills the field
+  fex:p => { S.sheet = 'ex|' + p; render(); },
+  iadd:p => { S.lt = S.lt || {}; S.lt[p] = true; const it = newItem(p); LI(p).push(it); focusKey = '#' + itemId(p, it, LDEF[p].f[0]); render(); },
+  idel:p => { const [lk, id] = p.split('|'); S.lt = S.lt || {}; S.lt[lk] = true; S.lists[lk] = LI(lk).filter(it => it.id !== +id); syncLists(); focusKey = '[data-a="iadd"][data-p="' + lk + '"]'; render(); toast('Removed'); },
+  iupl:p => { const [lk, id] = p.split('|'); startUpload(LDEF[lk].sec, [ITEMDOC[lk].title + '.pdf'], {lk, id:+id}); },
+  irem:p => { const [lk, id] = p.split('|'), it = itemById(lk, id); if (!it) return; itemRemoveDoc(it); syncLists(); toast('Statement removed. Your own figures are used again'); render(); },   // §15: shows an example; never fills the field
   fix:p => { if (!S.app) S.from = 'check'; openSec(p); }, ack:p => { S.ack[p] = true; render(); },
   acksec:p => { FSEC.find(x => x.id === p).f.filter(fieldVisible).forEach(k => { if (!FF[k].opt) S.ack[k] = true; }); focusKey = null; render(); },
   toresults:() => { if (!S.checked || !planReady()) return; toResults(); },
@@ -2740,10 +2917,13 @@ function verify(flag, next){ const code = [...document.querySelectorAll('[data-c
 function defaultWiGoal(){ const P = project(); const w = S.goals.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id] || a.age - b.age)[0]; return w ? w.id : null; }
 function afterPlanEdit(quiet){ if (!quiet) version('Goals changed'); }
 function moveGoal(g, age){ if (g.kind === 'legacy') return; const a0 = S.about.age; age = g.kind === 'retire' ? clamp(age, Math.max(55, a0 + 1), 75) : clamp(age, a0 + 1, AS.end); g.age = age; if (g.kind === 'retire') setRetireAge(age); }
-function startUpload(sec, files){ const fail = files.some(f => /fail/i.test(f)); S.upl = {sec, stage:'scan', files, edit:{}}; S.sheet = null;
+function startUpload(sec, files, item){ const fail = files.some(f => /fail/i.test(f)); S.upl = {sec, stage:'scan', files, edit:{}, item:item || null}; S.sheet = null;
   if (!S.app) S.scr = 'PU'; else { if (S.tab === 'plan' || S.tab === 'home') S.tab = 'me'; if (S.tab === 'me') S.me = 'fin'; else S.exp = 'fin'; }
   render(); setTimeout(() => { if (!S.upl) return; S.upl.stage = fail ? 'fail' : 'confirm'; render(); }, RM() ? 200 : 1500); }
-function confirmUpload(){ const u = S.upl, secs = u.sec === 'smart' ? ['income','assets','liab','pension'] : [u.sec];
+function confirmItemUpload(){ const u = S.upl, lk = u.item.lk, T = ITEMDOC[lk], it = itemById(lk, u.item.id);
+  if (it){ T.f.forEach(([fld, v, c]) => { const fixed = u.edit[fld] != null && +u.edit[fld] !== v, nv = fixed ? +u.edit[fld] : v; itemDoc(it, fld, nv, c, fixed, 'upl:item' + it.id); }); (T.txt || []).forEach(([fld, v]) => { if (!hasVal(it.f[fld])){ it.f[fld] = v; it.src[fld] = 'doc'; } }); if (T.old && LDEF[lk].tot) S.look[LDEF[lk].tot.value] = T.old; syncLists(); }
+  S.upl = null; toast('Added from your document'); if (!S.app) S.scr = 'P3'; render(); }
+function confirmUpload(){ if (S.upl.item) return confirmItemUpload(); const u = S.upl, secs = u.sec === 'smart' ? ['income','assets','liab','pension'] : [u.sec];
   secs.forEach(sid => { const U = UPL[sid]; Object.entries(U.v).forEach(([k, [v, c]]) => { const fixed = u.edit[k] != null && +u.edit[k] !== v, nv = fixed ? +u.edit[k] : v;
     delete S.look[k]; setDoc(k, nv, c, fixed, 'upl:' + sid); });   // FP round 6: the document wins over a typed figure; a correction here is still the document
     Object.entries(U.hid || {}).forEach(([k, [v, c]]) => setDoc(k, v, c, false, 'upl:' + sid));
@@ -2767,6 +2947,16 @@ function bind(){
     i.addEventListener('keydown', e => { if (e.key === 'Backspace' && !i.value && all[n - 1]) all[n - 1].focus(); if (e.key === 'Enter') ph.querySelector('.foot .btn').click(); });
     i.addEventListener('paste', e => { const t = (e.clipboardData.getData('text') || '').replace(/\D/g, ''); if (t.length === 6){ e.preventDefault(); all.forEach((x, k) => x.value = t[k]); all[5].focus(); } }); });
   if (ph.querySelector('[data-code]')) ph.querySelector('[data-code]').focus();
+  ph.querySelectorAll('[data-it]').forEach(i => i.addEventListener('input', () => { const [lk, id, fld] = i.dataset.it.split('|'), it = itemById(lk, id), d = FFI[lk + '.' + fld]; if (!it) return; let nv;
+    if (d.type === 'text') nv = i.value.trim() ? i.value : null; else if (d.type === 'pct'){ const n = parseFloat(i.value.replace(/[^\d.]/g, '')); nv = isNaN(n) ? null : Math.min(n, 100); } else { const n = parseInt(i.value.replace(/[^\d]/g, '')); nv = isNaN(n) ? null : d.type === 'num' ? clamp(n, 0, 120) : n; }
+    itemSet(it, fld, nv); syncLists(); const id0 = itemId(lk, it, fld), tg = document.getElementById(id0 + '-t'), nt = document.getElementById(id0 + '-n'); if (tg) tg.innerHTML = itemTag(it, fld); if (nt) nt.innerHTML = itemNote(lk, it, fld); }));
+  ph.querySelectorAll('[data-setname]').forEach(i => i.addEventListener('change', () => { SETTINGS.partner = i.value.trim(); render(); }));
+  ph.querySelectorAll('[data-set]').forEach(i => i.addEventListener('change', () => { const [k, ix] = i.dataset.set.split('|'), s = SET[k], raw = i.value.trim();
+    if (s.u === 'choice') s.pv = raw === '' ? null : (typeof s.v === 'number' ? +raw : raw);
+    else if (s.u === 'pct3'){ const a = (s.pv || s.v).slice(), n = parseFloat(raw); a[+ix] = raw === '' || isNaN(n) ? s.v[+ix] : Math.max(0, n) / 100; s.pv = a.every((x, j) => Math.abs(x - s.v[j]) < 1e-9) ? null : a; }
+    else { const n = parseFloat(raw.replace(/,/g, '')); s.pv = raw === '' || isNaN(n) ? null : Math.max(0, s.u === 'pct' ? n / 100 : n); }
+    if (s.pv == null) delete s.pv; applyAssume(); S.asmOpen = 'set-' + s.grp; render(); }));
+  ph.querySelectorAll('[data-gmonths]').forEach(i => i.addEventListener('change', () => { const n = parseInt(i.value.replace(/\D/g, '')); if (isNaN(n)){ if (asmMine('safetyMonths')){ S.asm = Object.assign({}, S.asm); delete S.asm.safetyMonths; applyAssume(); syncSafety(); } } else setSafetyMonths(n); render(); }));
   ph.querySelectorAll('[data-fin]').forEach(i => i.addEventListener('input', () => { const k = i.dataset.fin, d = FF[k];
     let nv; if (d.type === 'text') nv = i.value; else { const n = parseInt(i.value.replace(/[^\d]/g, '')); nv = isNaN(n) ? null : d.type === 'num' ? clamp(n, 0, 120) : n; }
     const used = setManual(k, nv, 'typed');   // FP round 6: a statement figure is not overwritten; the entry is kept and shown
@@ -2780,7 +2970,7 @@ function bind(){
   ph.querySelectorAll('[data-agree]').forEach(i => i.addEventListener('change', () => { S.book.agree = i.checked; shareBtn(); }));
   ph.querySelectorAll('input[data-wi]').forEach(r => r.addEventListener('input', () => { if (S.wi.g == null) S.wi.g = defaultWiGoal(); S.wi[r.dataset.wi] = +r.value; r.setAttribute('aria-valuetext', eur(+r.value)); liveUpdate(); }));
   if (ph.querySelector('#wi-out')) { if (S.wi.g == null) S.wi.g = defaultWiGoal(); liveUpdate(); const c = ph.querySelector('[data-a="wig"][data-p="' + S.wi.g + '"]'); if (c) { c.classList.add('sel'); c.setAttribute('aria-pressed', 'true'); } }
-  ph.querySelectorAll('input[data-ck]').forEach(inp => inp.addEventListener('input', () => { const t = xTop(); if (!t || t.v !== 'CALC') return; const c = C(t.p), v = calcVals(c), k = inp.dataset.ck, i = c.inputs.concat(c.wi || []).find(x => x.k === k); v[k] = +inp.value; S.calcT = S.calcT || {}; (S.calcT[c.id] = S.calcT[c.id] || {})[k] = true; inp.setAttribute('aria-valuetext', fmtIn(i, v[k]));
+  ph.querySelectorAll('input[data-ck]').forEach(inp => inp.addEventListener('input', () => { const t = xTop(); if (!t || t.v !== 'CALC') return; const c = C(t.p), v = calcVals(c), k = inp.dataset.ck, i = c.inputs.concat(c.wi || []).find(x => x.k === k); v[k] = +inp.value; calcSync(c.id, k, v[k]); S.calcT = S.calcT || {}; (S.calcT[c.id] = S.calcT[c.id] || {})[k] = true; inp.setAttribute('aria-valuetext', fmtIn(i, v[k]));
     const o = document.getElementById('co-' + k); if (o) { o.value = nbFmt(v[k]); o.style.width = nbW(o.value); } const out = document.getElementById('cout'); if (out) out.innerHTML = calcOut(c); }));
   ph.querySelectorAll('input[type=file][data-pfile]').forEach(i => i.addEventListener('change', () => { const fs = [...i.files].map(f => f.name); if (fs.length) pstStart(i.dataset.pfile, fs); }));
   ph.querySelectorAll('[data-pv]').forEach(i => i.addEventListener('input', () => { if (!S.pst) return; S.pst.edit[i.dataset.pv] = i.value; if (i.dataset.pv === 'prsi'){ const e = document.getElementById('pst-sp'); if (e) e.textContent = spFromYears(+i.value || 0); } }));
@@ -2863,8 +3053,9 @@ function loadSample(){
   S.acct = {name:'Aoife', email:'aoife@example.ie', mobile:'087 123 4567', c1:true, c2:false, ev:true, sv:true, pk:true};
   const put = (k, v, src, c) => { S.fin[k] = v; S.src[k] = src; if (c) S.conf[k] = c; };
   Object.entries(SAMPLE_FIN).forEach(([k, [v, src, c]]) => put(k, v, src, c)); S.look.pension = 'Statement is over 12 months old';
+  Object.entries(SAMPLE_POL).forEach(([t, arr]) => arr.forEach(o => { const it = newItem(t); Object.entries(o).forEach(([f, v]) => { it.f[f] = v; it.src[f] = 'typed'; }); LI(t).push(it); }));
   S.partner = {mode:'manual', email:'', sent:false, name:'Cian'};
-  S.retireSet = true; S.infl = INFL_STD; useAllStd(); Object.assign(S.asm, {planEnd:95, cardRate:0.20, loanRate:0.08, pSpWeek:239.44, mortRate:0.0375, buyFees:3000, depEarn:0.01, survivor:RI.sp.survivor}); applyAssume();
+  S.retireSet = true; S.infl = SV('infl'); useAllStd(); Object.assign(S.asm, {planEnd:95, cardRate:SAMPLE_RATES.cardRate, loanRate:SAMPLE_RATES.loanRate, pSpWeek:239.44, mortRate:0.0375, buyFees:3000, depEarn:0.01, survivor:RI.sp.survivor}); applyAssume();
   S.toolPick = {lumpsum:{f:0, wait:WAIT_YEARS}, regularinvest:{f:1}, fees:{a:0.5, b:1.5}, riskreturn:{s:2}, incomegap:{ib:RI.sp.illness}};   // Aoife's tool choices (§14: the sample has every choice made)   // Aoife chose the standards, plans to 95, and typed her card / loan APRs and Cian's State Pension
   S.checked = true; S.app = true; S.shell = true; S.pb = false; S.tab = 'plan'; S.planSeg = 'main'; S.versions = [{note:'LifeMap confirmed', date:'29 Sep 2026'}, {note:'First results', date:'29 Sep 2026'}];
 }
@@ -2875,6 +3066,7 @@ const discOnly = () => { S = fresh(); Object.assign(S.ans, {'2':0, '4':1, '7':1,
 const JUMPS = [
   ['Onboarding', [['D0','Welcome', () => { S = fresh(); }], ['D1','What brought you here?', () => { S = fresh(); S.scr = 'D1'; }], ['D2','Question 1 of 6', () => { S = fresh(); S.scr = 'D2'; S.di = 0; }], ['D5','Question 4 (road)', () => { S = fresh(); S.scr = 'D5'; S.di = 3; }], ['D6','Question 5 (scenario)', () => { S = fresh(); S.scr = 'D6'; S.di = 4; }], ['DR','Money personality + terms', () => { discOnly(); S.scr = 'DR'; }], ['DS','Save your results', () => { discOnly(); S.scr = 'DS'; }]]],
   ['App before a plan', [['HOME-0','Home (no plan yet)', () => { discOnly(); S.shell = true; S.tab = 'home'; }], ['XPL-01','Explore', () => { discOnly(); S.shell = true; S.tab = 'explore'; }], ['CALC-retirement','A calculator', () => { discOnly(); S.shell = true; S.tab = 'explore'; S.xs = [{v:'CALC', p:'retirement'}]; }], ['VID-01','A video', () => { discOnly(); S.shell = true; S.tab = 'explore'; S.xs = [{v:'VID', p:'v2'}]; }], ['PLAN-0','My Plan (empty state)', () => { discOnly(); S.shell = true; S.tab = 'plan'; }]]],
+  ['Admin (not for customers)', [['ADMIN-SET','Settings: standards, wording, sources, partner label', () => { loadSample(); S.admin = true; }]]],
   ['Plan builder', [['B1','1 · About you & family', pre(() => { S.scr = 'B1'; })], ['F1','2 · Your goals', pre(() => { S.scr = 'F1'; })], ['F2','3 · Your timeline (drag)', pre(() => { S.scr = 'F2'; })], ['F4','3 · Confirm my LifeMap', pre(() => { S.scr = 'F4'; })], ['B4','4 · Your money profile', pre(() => { delete S.ans['6']; S.scr = 'B4'; })], ['P1','5 · Secure your account', pre(() => { S.acct.c1 = false; S.acct.ev = S.acct.sv = false; S.scr = 'P1'; })], ['P1E','5 · Email code', pre(() => { S.acct.ev = S.acct.sv = false; S.scr = 'P1E'; })], ['P2','6 · Your finances hub', pre(() => { S.scr = 'P2'; })], ['P3-2','6 · Income (type it)', pre(() => { S.scr = 'P3'; S.fsec = 1; })], ['P3-6','6 · Pension (upload)', pre(() => { S.scr = 'P3'; S.fsec = 5; S.fmode.pension = 'upload'; })], ['P4','7 · Check your details', pre(() => { S.checked = false; S.scr = 'P4'; })]]],
   ['Results & app', [['HOME','Home dashboard', () => { loadSample(); S.tab = 'home'; }], ['ASK','Ask (help sheet)', () => { loadSample(); S.tab = 'home'; S.sheet = 'ask'; S.ask.open = 'pgap'; }], ['PLAN','My Plan (timeline + results)', () => { loadSample(); }], ['ME-01','Me', () => { loadSample(); S.tab = 'me'; }], ['ME-UM','Your money profile', () => { loadSample(); S.tab = 'me'; S.me = 'um'; }], ['ME-CHK','Your first answers (re-check)', () => { loadSample(); S.tab = 'me'; S.me = 'recheck'; }], ['ME-TERMS','Your money terms', () => { loadSample(); S.tab = 'me'; S.me = 'terms'; }], ['ME-UM2','Money profile · capacity', () => { loadSample(); S.tab = 'me'; S.me = 'ums'; S.um.sec = 2; }], ['ME-R','Profile result', () => { loadSample(); Object.assign(S.um.a, {u4:1, u9:3, u10:1, u11:1, u12:2, u14:2}); S.um.done = {1:true, 2:true, 3:true}; S.tab = 'me'; S.me = 'umr'; }], ['ME-MONEY','My money', () => { loadSample(); S.tab = 'me'; S.me = 'money'; }]]],
   ['Connect', [['C0','Help your adviser know you', () => { loadSample(); S.tab = 'exp'; S.exp = 'c0'; }], ['C1','Your match', () => { loadSample(); S.tab = 'exp'; S.exp = 'c1'; }], ['C2','Share your plan', () => { loadSample(); S.tab = 'exp'; S.exp = 'c2'; }], ['C3','Pick a time', () => { loadSample(); S.tab = 'exp'; S.exp = 'c3'; }], ['C4',"You're booked", () => { loadSample(); S.tab = 'exp'; S.exp = 'c4'; S.book.done = true; S.book.slot = SLOTS[1]; }]]]
