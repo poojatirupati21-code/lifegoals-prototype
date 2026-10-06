@@ -148,7 +148,7 @@ h3.h{font-size:19px;margin:0 0 4px;line-height:1.2}
 .inw{position:relative}.inw .cur{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-weight:700;color:var(--muted);pointer-events:none}.inw .in.eur{padding-left:30px}
 .fhelp{display:flex;gap:14px;flex-wrap:wrap}.fhelp .link{font-size:12.5px;padding:4px 0;min-height:32px}
 .tag{font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
-.tag.doc{background:var(--ok-l);color:var(--ok-t)}.tag.typed{background:#EEF2F0;color:var(--muted)}.tag.est{background:var(--sun-l);color:var(--acc-d)}.tag.none{background:#EEF2F0;color:var(--muted)}.tag.look{background:var(--gap-l);color:var(--gap-t)}.tag.pre{background:var(--sea-l);color:var(--sea-d)}
+.tag.doc{background:var(--ok-l);color:var(--ok-t)}.tag.typed{background:#EEF2F0;color:var(--muted)}.tag.none{background:#EEF2F0;color:var(--muted)}.tag.look{background:var(--gap-l);color:var(--gap-t)}.tag.pre{background:var(--sea-l);color:var(--sea-d)}
 input[type=range]{width:100%;accent-color:var(--sea-d);height:32px}
 .seg{display:flex;gap:4px;background:#E6EEEA;border-radius:14px;padding:4px;margin-bottom:14px}
 .seg button{flex:1;border:0;background:none;border-radius:11px;min-height:40px;font-weight:800;font-size:13.5px;cursor:pointer;color:var(--muted)}
@@ -627,34 +627,94 @@ const FF = {
   name:{l:'First name', type:'text', pre:1},
   age:{l:'Your age', type:'num', min:18, max:80, pre:1},
   retireAge:{l:'Retirement age', type:'num', min:50, max:75, pre:1, hint:'From your timeline flag'},
-  pAge:{l:"Partner's age", type:'num', min:18, max:85, est:() => S.about.age, show:() => S.about.partner && S.partner.mode !== 'invite'},
-  work:{l:'Your work', type:'choice', o:['Employed','Self-employed','Not working'], est:'Employed'},
-  income:{l:'Your gross yearly income', type:'eur', est:45000, hint:'Before tax'},
-  pIncome:{l:"Partner's gross yearly income", type:'eur', est:38000, show:() => S.about.partner && S.partner.mode !== 'invite'},
-  otherM:{l:'Other income a month (before tax)', type:'eur', est:0, opt:1, hint:'Optional. Taxed with your other income'},
-  costsM:{l:'Monthly living costs', type:'eur', est:() => 2000 + (S.about.partner ? 800 : 0) + 450 * (S.about.deps || 0), hint:'Rent, bills, food and extras. Leave out mortgage and loan repayments.'},
-  oneOffY:{l:'Yearly one-off costs', type:'eur', est:1500, opt:1, hint:'Optional. Car tax, insurance, holidays'},
-  home:{l:'Your home', type:'choice', o:['Own outright','Own with mortgage','Rent','Live with family'], est:'Rent'},
-  homeValue:{l:'Home value', type:'eur', est:380000, show:own},
-  cash:{l:'Cash savings', type:'eur', est:8000, hint:'Incl. credit union and State Savings'},
-  invest:{l:'Investments', type:'eur', est:0, hint:'Shares, funds, share schemes, crypto: one total'},
-  propValue:{l:'Other property: value', type:'eur', est:0, opt:1, hint:'Optional'},
-  rentM:{l:'Other property: rent received a month (before tax)', type:'eur', est:0, opt:1, hint:'Optional. Rental profit is taxed at your marginal rate, with USC and PRSI'},
-  mortBal:{l:'Mortgage left', type:'eur', est:200000, show:mort},
-  mortPayM:{l:'Monthly repayment', type:'eur', est:1100, show:mort},
-  mortYears:{l:'Years left', type:'num', min:1, max:40, est:20, show:mort},
-  cardBal:{l:'Credit cards: total owed', type:'eur', est:0},
-  cardPayM:{l:'Credit cards: monthly repayment', type:'eur', est:0},
-  loanBal:{l:'Other loans (car, personal, credit union): total owed', type:'eur', est:0},
-  loanPayM:{l:'Other loans: monthly repayment', type:'eur', est:0},
+  pAge:{l:"Partner's age", type:'num', min:18, max:85, show:() => S.about.partner && S.partner.mode !== 'invite'},
+  work:{l:'Your work', type:'choice', o:['Employed','Self-employed','Not working']},
+  income:{l:'Your gross yearly income', type:'eur', hint:'Before tax'},
+  pIncome:{l:"Partner's gross yearly income", type:'eur', show:() => S.about.partner && S.partner.mode !== 'invite'},
+  otherM:{l:'Other income a month (before tax)', type:'eur', opt:1, hint:'Optional. Taxed with your other income'},
+  costsM:{l:'Monthly living costs', type:'eur', hint:'Rent, bills, food and extras. Leave out mortgage and loan repayments.'},
+  oneOffY:{l:'Yearly one-off costs', type:'eur', opt:1, hint:'Optional. Car tax, insurance, holidays'},
+  home:{l:'Your home', type:'choice', o:['Own outright','Own with mortgage','Rent','Live with family']},
+  homeValue:{l:'Home value', type:'eur', show:own},
+  cash:{l:'Cash savings', type:'eur', hint:'Incl. credit union and State Savings'},
+  invest:{l:'Investments', type:'eur', hint:'Shares, funds, share schemes, crypto: one total'},
+  propValue:{l:'Other property: value', type:'eur', opt:1, hint:'Optional'},
+  rentM:{l:'Other property: rent received a month (before tax)', type:'eur', opt:1, hint:'Optional. Rental profit is taxed at your marginal rate, with USC and PRSI'},
+  mortBal:{l:'Mortgage left', type:'eur', show:mort},
+  mortPayM:{l:'Monthly repayment', type:'eur', show:mort},
+  mortYears:{l:'Years left', type:'num', min:1, max:40, show:mort},
+  cardBal:{l:'Credit cards: total owed', type:'eur'},
+  cardPayM:{l:'Credit cards: monthly repayment', type:'eur'},
+  loanBal:{l:'Other loans (car, personal, credit union): total owed', type:'eur'},
+  loanPayM:{l:'Other loans: monthly repayment', type:'eur'},
   life:{l:'Life cover', type:'ynn'}, ip:{l:'Income protection', type:'ynn'}, ci:{l:'Serious illness cover', type:'ynn'}, workCover:{l:'Cover through work', type:'ynn'}, health:{l:'Health insurance', type:'ynn'},
-  pension:{l:'Pension value today', type:'eur', est:() => Math.max(0, S.about.age - 25) * 3500, hint:'All pots together'},
-  pensionM:{l:'Paid in each month', type:'eur', est:() => Math.round((S.fin.income || 45000) * 0.1 / 12 / 10) * 10, hint:'Including your employer'},
-  pensionOwnM:{l:'Of that, paid by you each month', type:'eur', opt:1, est:() => Math.round((+S.fin.pensionM || 0) * (S.fin.work === 'Self-employed' ? 1 : 0.5)), hint:'Optional. Only your own share gets tax relief. If you leave it blank we assume half (all of it if self-employed); change that in Your assumptions', show:() => +S.fin.pensionM > 0 && S.fin.work !== 'Not working'},
+  pension:{l:'Pension value today', type:'eur', hint:'All pots together'},
+  pensionM:{l:'Paid in each month', type:'eur', hint:'Including your employer'},
+  pensionOwnM:{l:'Of that, paid by you each month', type:'eur', opt:1, hint:'Optional. Only your own share gets tax relief. If you leave it blank, you choose your share in Your assumptions', show:() => +S.fin.pensionM > 0 && S.fin.work !== 'Not working'},
   ae:{l:'Have you been auto-enrolled in My Future Fund?', type:'choice', o:['Yes','No','Not sure'], opt:1, hint:LAW.ae + ' Set by law, so we count you in unless you say no', show:() => S.fin.work === 'Employed' && S.about.age >= RI.ae.ageMin && S.about.age <= RI.ae.ageMax && +S.fin.income > RI.ae.earnMin && !(+S.fin.pensionM > 0)},
-  sp:{l:'State Pension', type:'choice', o:['Expect full','Partly','Not sure'], est:'Not sure', hint:LAW.sp + ' Check your record on MyWelfare'},
+  sp:{l:'State Pension', type:'choice', o:['Expect full','Partly','Not sure'], hint:LAW.sp + ' Check your record on MyWelfare'},
   pSp:{l:'Your partner\'s State Pension', type:'choice', o:['Own full','Own partial','Qualified adult increase','None','Not sure'], opt:1, show:() => !!S.about.partner, hint:'Optional. A partner without their own State Pension may get a Qualified Adult increase on yours (means-tested)'}
 };
+/* ================= "Not sure? See an example" (journey-spec §15, Pooja 6 Oct 2026) =================
+   Every customer's money is different, so we never fill in a figure for them. Each Your finances field links to a short example card
+   built from the sample customers' own figures (SAMPLE_FIN, the same data loadSample() uses). The card never fills the field. */
+const SAMPLE_FIN = {name:['Aoife', 'pre'], age:[38, 'pre'], retireAge:[63, 'pre'], pAge:[37, 'typed'],
+  work:['Employed', 'doc', 99], income:[58000, 'doc', 98], pIncome:[22000, 'typed'], otherM:[0, 'typed'], costsM:[3600, 'typed'], oneOffY:[1800, 'doc', 81],
+  home:['Own with mortgage', 'doc', 99], homeValue:[420000, 'typed'], cash:[9000, 'doc', 97], invest:[6200, 'doc', 88],
+  mortBal:[203700, 'doc', 96], mortRate:[3.85, 'doc', 94], mortPayM:[1180, 'doc', 93], mortYears:[21, 'doc', 90], cardBal:[400, 'doc', 86], cardPayM:[40, 'doc', 80], loanBal:[3500, 'doc', 88], loanPayM:[100, 'doc', 84],
+  life:['Yes', 'doc', 95], ip:['No', 'typed'], ci:['Not sure', 'typed'], workCover:['Yes', 'doc', 90], health:['Yes', 'typed'],
+  pension:[72000, 'doc', 95], pensionM:[520, 'doc', 91], sp:['Expect full', 'typed']};
+const SAMPLE_OWN_SHARE = 0.5;   // Aoife's choice in Your assumptions (her statement shows the same €260 of €520)
+const sf = k => SAMPLE_FIN[k] ? SAMPLE_FIN[k][0] : null, se = k => eur(sf(k));
+const YNN_O = [['Yes', 'you have it'], ['No', 'you don\'t'], ['Not sure', 'check your documents, then come back']];
+// t: the example sentence (ends with what they enter or pick); w: where to find yours; o: options explained (choice fields)
+const EXAMPLES = {
+  age:{t:() => 'Aoife is ' + sf('age') + '. She enters ' + sf('age') + '.', w:'your date of birth, on your passport or driving licence.'},
+  retireAge:{t:() => 'Aoife wants to retire at ' + sf('retireAge') + ', before her State Pension starts at ' + RI.sp.age + '. She enters ' + sf('retireAge') + '.', w:'the normal retirement age on your annual pension benefit statement.'},
+  pAge:{t:() => 'Aoife\'s partner Cian is ' + sf('pAge') + '. She enters ' + sf('pAge') + '.', w:'your partner\'s date of birth.'},
+  work:{o:[['Employed', 'you get a payslip'], ['Self-employed', 'you file a Form 11'], ['Not working', 'no earnings right now']], t:() => 'Aoife has a payslip, so she picks ' + sf('work') + '.', w:'your payslip, or your Form 11 if self-employed.'},
+  income:{t:() => 'Aoife earns ' + se('income') + ' a year before tax. She enters ' + se('income') + '.', w:'gross pay on your payslip, or your Employment Detail Summary in Revenue myAccount.'},
+  pIncome:{t:() => 'Cian earns ' + se('pIncome') + ' a year before tax. Aoife enters ' + se('pIncome') + '.', w:'your partner\'s payslip or Employment Detail Summary (Revenue myAccount).'},
+  otherM:{t:() => 'Aoife and Cian have no other income, such as rent or maintenance. They enter ' + se('otherM') + '.', w:'your bank statements, or Revenue myAccount for rental income.'},
+  costsM:{t:() => 'Aoife and Cian spend ' + se('costsM') + ' a month on bills, food and extras, not counting the mortgage or loans. They enter ' + se('costsM') + '.', w:'your banking app\'s spending summary, or 3 months of current-account statements.'},
+  oneOffY:{t:() => 'Aoife and Cian\'s yearly one-off costs, such as car tax, insurance and holidays, come to ' + se('oneOffY') + '. They enter ' + se('oneOffY') + '.', w:'last year\'s bank statements.'},
+  home:{o:[['Own outright', 'no mortgage'], ['Own with mortgage', 'still paying it off'], ['Rent', 'you pay a landlord'], ['Live with family', 'no rent or mortgage']], t:() => 'They\'re paying off a mortgage, so Aoife picks ' + sf('home') + '.', w:'your mortgage statement or tenancy agreement.'},
+  homeValue:{t:() => 'Aoife and Cian think their home is worth about ' + se('homeValue') + '. They enter ' + se('homeValue') + '.', w:'sale prices of similar homes on the Property Price Register, or your LPT valuation.'},
+  cash:{t:() => 'Aoife and Cian have ' + se('cash') + ' in savings, including the credit union. They enter ' + se('cash') + '.', w:'your banking and credit union apps, or An Post State Savings.'},
+  invest:{t:() => 'Aoife\'s investment statement shows ' + se('invest') + '. She enters ' + se('invest') + '.', w:'your investment, share-scheme or broker statement or app.'},
+  propValue:{t:() => 'Aoife and Cian don\'t own another property. They enter €0.', w:'for a property you own, the Property Price Register or your LPT return.'},
+  rentM:{t:() => 'Aoife and Cian don\'t rent out a property, so no rent comes in. They enter €0.', w:'your tenancy agreement or RTB registration.'},
+  mortBal:{t:() => 'Aoife and Cian owe ' + se('mortBal') + ' on their mortgage. They enter ' + se('mortBal') + '.', w:'your annual mortgage statement or your lender\'s app.'},
+  mortPayM:{t:() => 'Aoife and Cian repay ' + se('mortPayM') + ' a month. They enter ' + se('mortPayM') + '.', w:'your mortgage statement, or the direct debit on your bank statement.'},
+  mortYears:{t:() => 'Aoife and Cian\'s mortgage has ' + sf('mortYears') + ' years left. They enter ' + sf('mortYears') + '.', w:'the remaining term on your annual mortgage statement.'},
+  cardBal:{t:() => 'Aoife and Cian owe ' + se('cardBal') + ' on their credit card. They enter ' + se('cardBal') + '.', w:'your latest credit-card statement or banking app.'},
+  cardPayM:{t:() => 'They pay ' + se('cardPayM') + ' a month off the card. They enter ' + se('cardPayM') + '.', w:'your card statement or banking app: what you actually pay.'},
+  loanBal:{t:() => 'Aoife and Cian owe ' + se('loanBal') + ' on a car loan. They enter ' + se('loanBal') + '.', w:'your loan statement, credit union app or Central Credit Register report.'},
+  loanPayM:{t:() => 'They repay ' + se('loanPayM') + ' a month on the car loan. They enter ' + se('loanPayM') + '.', w:'your loan agreement, or the payment on your bank statement.'},
+  life:{o:YNN_O, t:() => 'Aoife has life cover, so she picks ' + sf('life') + '.', w:'your policy schedule, or HR for cover through work.'},
+  ip:{o:YNN_O, t:() => 'Aoife has no income protection, so she picks ' + sf('ip') + '.', w:'your policy documents or your employer\'s benefits booklet.'},
+  ci:{o:YNN_O, t:() => 'Aoife isn\'t sure about serious illness cover, so she picks ' + sf('ci') + '.', w:'your policy documents, or ask your insurer.'},
+  workCover:{o:YNN_O, t:() => 'Aoife\'s job includes cover, such as death-in-service, so she picks ' + sf('workCover') + '.', w:'your employer\'s benefits booklet or HR.'},
+  health:{o:YNN_O, t:() => 'Aoife and Cian have health insurance, so Aoife picks ' + sf('health') + '.', w:'your health insurer\'s renewal letter or app.'},
+  pension:{t:() => 'Aoife\'s pension statement shows ' + se('pension') + '. She enters ' + se('pension') + '.', w:'your annual pension benefit statement or the provider\'s app. Add all pots together.'},
+  pensionM:{t:() => se('pensionM') + ' goes into Aoife\'s pension each month, including her employer\'s share. She enters ' + se('pensionM') + '.', w:'your payslip (your share) and annual benefit statement (your employer\'s).'},
+  pensionOwnM:{t:() => 'Of the ' + se('pensionM') + ', Aoife pays ' + eur(sf('pensionM') * SAMPLE_OWN_SHARE) + ' herself. She enters ' + eur(sf('pensionM') * SAMPLE_OWN_SHARE) + '.', w:'the pension deduction on your payslip.'},
+  ae:{o:[['Yes', 'My Future Fund comes off your pay'], ['No', 'you\'re not enrolled'], ['Not sure', 'check your payslip']], t:() => 'Aoife already pays into a workplace pension, so she picks No.', w:'a My Future Fund deduction on your payslip.'},
+  sp:{o:[['Expect full', 'about ' + RI.sp.fullYears + ' years of PRSI by ' + RI.sp.age], ['Partly', 'fewer years'], ['Not sure', 'check first']], t:() => 'Aoife expects the full rate, so she picks ' + sf('sp') + '.', w:'your PRSI record and State Pension statement on MyWelfare.ie.'},
+  pSp:{o:[['Own full', 'their own full rate'], ['Own partial', 'a reduced rate'], ['Qualified adult increase', 'an addition to yours'], ['None', ''], ['Not sure', '']], t:() => 'Cian isn\'t sure of his rate yet, so Aoife picks Not sure.', w:'your partner\'s MyWelfare.ie record.'}
+};
+const exChoice = k => FF[k].type === 'choice' || FF[k].type === 'ynn';
+function exHTML(k){ const d = FF[k], x = EXAMPLES[k]; if (!d || !x) return '';
+  return '<h2 class="t" id="ex-t">Example: ' + esc(d.l) + '</h2>' + (x.o ? '<ul class="small" style="margin:0 0 8px;padding-left:18px">' + x.o.map(([o, m]) => '<li><b>' + esc(o) + '</b>' + (m ? ': ' + esc(m) : '') + '</li>').join('') + '</ul>' : '') +
+    '<p class="sub" style="margin:0 0 8px" id="ex-s">' + esc(x.t()) + '</p><p class="small" style="margin:0 0 8px"><span aria-hidden="true">📍</span> <b>Where to find yours:</b> ' + esc(x.w) + '</p>' +
+    (d.type === 'eur' ? '<p class="small" style="margin:0 0 8px"><b>Nothing to add? Enter 0.</b></p>' : '') + '<p class="small" style="margin:0 0 12px;color:var(--muted)">Example only. Not a typical or recommended amount.</p><button class="btn" data-a="closesheet">Got it</button>'; }
+// Figures the engine works out from the customer's own figures (calculations, not guesses about the person)
+function workedNote(k){ const F = finNums();
+  if (k === 'mortPayM' && F.mortBal > 0 && F.mortPayEst && F.mortYearsKnown) return 'Worked out from your figures: about ' + eur(F.mortPayM) + ' a month, from your balance, rate and years left. Type yours to replace it.';
+  if ((k === 'cardPayM' && F.cardBal > 0 && F.cardPayEst) || (k === 'loanPayM' && F.loanBal > 0 && F.loanPayEst)){ const card = k === 'cardPayM', stated = finN(k);
+    return 'Worked out from your figures: ' + eur(card ? F.cardPayM : F.loanPayM) + ' a month clears it in 5 years, because ' + (stated > 0 ? 'the repayment given doesn\'t cover the interest' : 'no repayment was given') + '. Type yours to replace it.'; }
+  return ''; }
+const workedList = () => ['mortPayM', 'cardPayM', 'loanPayM'].map(k => [k, workedNote(k)]).filter(x => x[1]);
 /* mocked document reader output */
 const UPL = {
   income:{v:{work:['Employed',99], income:[58000,98], costsM:[3100,74], oneOffY:[1800,81]}, docs:['Payslip · Aug 2026','Current-account statement · Jun–Aug 2026']},
@@ -806,10 +866,12 @@ function mkGoal(k, custom){
   else if (c.kind === 'legacy'){ applyAssume(); g.age = AS.end; }   // FP round 4 F9: tested and shown at the end of the plan (90)
   else g.age = Math.min(89, a0 + (custom ? custom[3] : c.yrs));
   if (k === 'edu' && S.about.deps > 1) g.amount = c.amt * Math.min(3, S.about.deps);
-  if (k === 'safety'){ applyAssume(); const F = finNums(), e = S.src && S.src.costsM ? essM(F) : val(FF.costsM.est); g.amount = Math.round(e * SAVE.buffer / 1000) * 1000; }   // B16: one safety-net setting everywhere
+  if (k === 'safety'){ applyAssume(); g.auto = true; syncSafety(g); }   // B16 + §15: months × the customer's own essential spending; until their costs are in, the goal keeps its own target   // B16: one safety-net setting everywhere
   return g;
 }
 const retireGoal = () => S.goals.find(g => g.kind === 'retire');
+// A safety-net goal the customer hasn't edited follows their essential spending once their costs are known (never an invented figure)
+function syncSafety(only){ if (!S || !S.src || !S.src.costsM) return; (only ? [only] : S.goals.filter(g => g.k === 'safety' && g.auto)).forEach(g => { applyAssume(); g.amount = Math.round(essM(finNums()) * SAVE.buffer / 1000) * 1000; }); }
 function setRetireAge(a){ S.retireAge = a; S.retireSet = true; const r = retireGoal(); if (r) r.age = a; S.fin.retireAge = a; S.src.retireAge = S.src.retireAge || 'pre'; }
 
 /* ================= CASHFLOW ENGINE (adapted from LifeGoals 2.0 project(), with fixes) ================= */
@@ -901,10 +963,13 @@ const asmStd = k => ASM[k].ty === 3 && !ASM[k].own && ASM[k].sug;   // has a "Us
 function planMissing(){ if (!S) return []; const out = [];
   if (!inflSet()) out.push({k:'infl', n:'inflation rate', ty:3});
   if (!S.retireSet) out.push({k:'retireAge', n:'retirement age', ty:3, own:true});
+  if (S.fin && finN('income') > 0 && !S.fin.work) out.push({k:'work', n:'work (employed, self-employed or not working)', add:true});   // sets how income is taxed (PRSI class, USC) and auto-enrolment
+  if (S.about && S.about.partner && FF.pAge.show() && !(finN('pAge') > 0)) out.push({k:'pAge', n:'partner\'s age', add:true});
+  if (S.fin && S.fin.home === 'Own with mortgage' && finN('mortBal') > 0 && !(finN('mortPayM') > 0) && !(finN('mortYears') > 0)) out.push({k:'mortYears', n:'mortgage years left (or your monthly repayment)', add:true});
   ASM_KEYS().filter(k => ASM[k].need() && !asmMine(k)).sort((a, b) => (a === 'planEnd' ? -1 : 0) - (b === 'planEnd' ? -1 : 0)).forEach(k => out.push({k, n:ASM[k].n, ty:ASM[k].ty, own:!!ASM[k].own}));
   return out; }
 const planReady = () => !planMissing().length;
-const chooseTxt = m => 'Choose your ' + m.n + ' to see this';
+const chooseTxt = m => (m.add ? 'Add your ' : 'Choose your ') + m.n + ' to see this';
 // "Use the standard for all of these": every type-3 item not chosen yet, incl. inflation. Never retirement age or plan-until age; never type 2.
 function useAllStd(){ S.asm = Object.assign({}, S.asm); let n = 0; ASM_KEYS().filter(k => asmStd(k) && !asmMine(k)).forEach(k => { S.asm[k] = ASM[k].sug(); n++; });
   if (!inflSet()){ S.infl = ST.infl; S.inflOther = false; n++; } applyAssume(); return n; }
@@ -996,12 +1061,12 @@ function assumeRows(){ applyAssume(); const F = finNums(), mine = k => asmMine(k
 const rowHTML = x => '<div class="mini"><span>' + esc(x[0]) + '<br><span class="tag ' + TAG_CLS(x[2]) + '">' + esc(x[2]) + '</span></span><b>' + esc(x[1]) + '</b></div>';
 function assumeSheet(){ const R = assumeRows(), gov = R.filter(x => x[2] === T_GOV), rest = R.filter(x => x[2] !== T_GOV);
   return rest.map(rowHTML).join('') + '<details style="margin-top:8px"><summary style="cursor:pointer;font-weight:800;min-height:32px">' + T_GOV + ' (' + gov.length + ')</summary>' + gov.map(rowHTML).join('') + '</details>'; }
-// Debts: credit cards and other loans amortise separately at their APR (effective). A stated repayment is used if it more than covers the interest; otherwise a 5-year repayment is estimated.
+// Debts: credit cards and other loans amortise separately at their APR (effective). A stated repayment is used if it more than covers the interest; otherwise a 5-year repayment is worked out from the customer's figures (labelled, spec §15).
 function debtNums(n){ const cR = n('cardRate') > 0 ? n('cardRate') / 100 : AS.cardRate, lR = n('loanRate') > 0 ? n('loanRate') / 100 : AS.loanRate, c = n('cardBal'), l = n('loanBal') + n('debt'), lp = n('loanPayM') + n('debtPayM'), cp = n('cardPayM');
   const ok = (b, p, r) => b > 0 && p > b * iAPR(r), pay = (b, p, r) => ok(b, p, r) ? p : pmtM(b, iAPR(r), 60), cardPayM = c > 0 ? pay(c, cp, cR) : 0, loanPayM = l > 0 ? pay(l, lp, lR) : 0;
   return {cardRateKnown:n('cardRate') > 0 || asmMine('cardRate'), loanRateKnown:n('loanRate') > 0 || asmMine('loanRate'), cardBal:c, cardRate:cR, cardPayM, cardPayEst:c > 0 && !ok(c, cp, cR), loanBal:l, loanRate:lR, loanPayM, loanPayEst:l > 0 && !ok(l, lp, lR), debt:c + l, debtPayM:cardPayM + loanPayM, debtPayEst:(c > 0 && !ok(c, cp, cR)) || (l > 0 && !ok(l, lp, lR))}; }
 function finNums(){
-  // Skipped figures count as €0 and show as ❓ Missing. Only "Estimate for me" adds a (labelled) typical figure. (spec §11)
+  // Skipped figures count as €0 and show as ❓ Missing. We never fill in a figure for the customer (spec §15).
   const f = S.fin, n = k => { const v = f[k]; return v != null && v !== '' && !isNaN(+v) ? +v : 0; };
   const mortOn = f.home === 'Own with mortgage', mR = n('mortRate') > 0 ? n('mortRate') / 100 : AS.mortRate, mStated = mortOn ? n('mortPayM') : 0, inc = f.work === 'Not working' ? 0 : n('income');
   const penM = f.work !== 'Not working' && inc > 0 ? n('pensionM') : 0, own = f.pensionOwnM != null && f.pensionOwnM !== '' && !isNaN(+f.pensionOwnM) ? Math.min(penM, +f.pensionOwnM) : penM * asmV('ownShare');
@@ -1011,7 +1076,7 @@ function finNums(){
   const C = S.about.cred || {};
   return {age:S.about.age, R:S.retireAge, work:f.work, married:!!S.about.partner && S.about.married === true, partner:!!S.about.partner, pAge:n('pAge') || S.about.age, income:inc, pIncome:S.about.partner ? n('pIncome') : 0,
     otherM:n('otherM'), costsM:n('costsM'), oneOffY:n('oneOffY'), cash:n('cash'), invest:n('invest'), rentM:n('rentM'),
-    mortBal:mortOn ? n('mortBal') : 0, mortRate:mR, mortPayM:mortOn ? (mStated || mPmt(n('mortBal'), mR, n('mortYears') || 25)) : 0, mortPayEst:mortOn && !mStated, mortPayLow:mortOn && mStated > 0 && n('mortBal') > 0 && mStated < mPmt(n('mortBal'), mR, n('mortYears') || 25) - 1, mortYears:mortOn ? n('mortYears') : 0,
+    mortBal:mortOn ? n('mortBal') : 0, mortRate:mR, mortPayM:mortOn ? (mStated || mPmt(n('mortBal'), mR, n('mortYears') || 25)) : 0, mortPayEst:mortOn && !mStated, mortYearsKnown:n('mortYears') > 0, mortPayLow:mortOn && mStated > 0 && n('mortBal') > 0 && n('mortYears') > 0 && mStated < mPmt(n('mortBal'), mR, n('mortYears')) - 1, mortYears:mortOn ? n('mortYears') : 0,
     ...debtNums(n),
     pension:n('pension'), pensionM:penM, pensionOwnM:own, penG:penGrowth(), sp:spF, spKnown:yrsSP != null || f.sp === 'Expect full' || asmMine('spWeek'), pSp, pSpO, ae:aeElig && f.ae !== 'No', aeElig, mortRateKnown:n('mortRate') > 0 || asmMine('mortRate'),
     rentCred:!!C.rent && f.home === 'Rent', spccc:!!C.lone && S.about.deps > 0 && !S.about.partner, carer:!!C.carer && !!S.about.partner && S.about.married === true};
@@ -1019,7 +1084,7 @@ function finNums(){
 // Essential spending a month (B16: the same everywhere): living costs + mortgage + loan repayments
 const essM = F => (F = F || finNums(), F.costsM + F.mortPayM + (F.debt > 0 ? F.debtPayM : 0));
 // FP round 6: stated figures are used as stated. The mortgage repayment is the one on the statement (or typed); the standard
-// formula is only an estimate when no repayment is given. Monthly amortisation, at the statement's rate when we have it.
+// formula works the repayment out from balance, rate and years left when none is given (labelled, spec §15). Monthly amortisation, at the statement's rate when we have it.
 function mPmt(bal, r, yrs){ const i = r / 12, n = Math.max(1, Math.round(yrs * 12)); return bal > 0 ? (i ? bal * i / (1 - Math.pow(1 + i, -n)) : bal / n) : 0; }
 function pmtM(bal, i, n){ return bal > 0 ? (i ? bal * i / (1 - Math.pow(1 + i, -n)) : bal / n) : 0; }
 function amortYear(bal, r, payM, iM){ const i = iM != null ? iM : r / 12; let paid = 0; for (let m = 0; m < 12 && bal > 0.5; m++){ const it = bal * i, p = Math.min(payM, bal + it); paid += p; bal = bal + it - p; } return {bal:Math.max(0, bal), paid}; }
@@ -1168,11 +1233,11 @@ const isShort = r => r.shortLiving > Math.max(500, r.needs * 0.02) || !!r.goalSh
 const rowCol = r => isShort(r) ? 'var(--alert)' : r.used > 1 ? 'var(--nudge)' : 'var(--good)';
 function extraFor(g){ for (const m of [25,50,75,100,150,200,250,300,400,500,600,750,1000,1250,1500,2000]){ if (project({g:g.id, m, l:0}).pct[g.id] >= 95) return m; } return null; }
 function yearsTxt(g){ const n = g.age - S.about.age; return g.kind === 'legacy' ? 'at the end of your plan' + (asmMine('planEnd') ? ' (' + AS.end + ')' : '') : g.kind === 'retire' ? (S.retireSet ? 'at ' + g.age : 'at an age you haven\'t chosen yet') : 'in ' + n + ' year' + (n === 1 ? '' : 's'); }
-function qualityCount(){ let n = 0; FSEC.forEach(s => s.f.forEach(k => { if (fieldVisible(k) && !FF[k].opt && (S.src[k] === 'est' || !S.src[k])) n++; })); return n; }
+function qualityCount(){ let n = 0; FSEC.forEach(s => s.f.forEach(k => { if (fieldVisible(k) && !FF[k].opt && !S.src[k]) n++; })); return n; }
 function skippedSecs(){ return FSEC.filter(sec => { const fs = sec.f.filter(fieldVisible); return fs.length && fs.every(k => !S.src[k] && !S.look[k]); }); }
 function roughNote(){ const sk = skippedSecs(), rough = qualityCount() > 2; if (!sk.length && !rough) return '';
   const and = xs => xs.length > 1 ? xs.slice(0, -1).join(', ') + ' and ' + xs[xs.length - 1] : xs[0], money = sk.filter(x => x.id !== 'prot').map(x => x.t), prot = sk.some(x => x.id === 'prot');
-  const msg = (money.length ? and(money) + (money.length > 1 ? ' are' : ' is') + ' missing, so ' + (money.length > 1 ? 'they count' : 'it counts') + ' as €0. ' : '') + (prot ? 'Your protection cover isn\'t added yet. ' : '') + (!sk.length ? 'Some figures are estimated or missing. ' : '');
+  const msg = (money.length ? and(money) + (money.length > 1 ? ' are' : ' is') + ' missing, so ' + (money.length > 1 ? 'they count' : 'it counts') + ' as €0. ' : '') + (prot ? 'Your protection cover isn\'t added yet. ' : '') + (!sk.length ? 'Some figures are missing, so they count as €0. ' : '');
   return '<div class="nudge" id="r-rough" style="background:var(--sun-l);border:1.5px solid var(--sun)"><span aria-hidden="true" style="font-size:20px">🧩</span><span><b>Rough picture.</b> ' + msg + (sk.length === 1 ? 'Add it' : 'Add them') + ' to sharpen your plan.</span><button class="link" data-a="me" data-p="money">Add now</button></div>'; }
 function fieldVisible(k){ const d = FF[k]; return !d.show || d.show(); }
 function secStatus(sec){
@@ -1188,7 +1253,7 @@ function ring(p, size, col){ const r = (size - 10) / 2, c = 2 * Math.PI * r; ret
 const PHASES = ['Discover','Define','Prepare','Understand'];
 function phaseBar(n){ return '<div class="phasebar" aria-label="Step ' + n + ' of 4: ' + PHASES[n - 1] + '">' + PHASES.map((_, k) => '<i class="' + (k < n ? 'on' : '') + '"></i>').join('') + '</div>'; }
 function brandBar(back, right){ return '<div class="topbar">' + (back ? '<button class="backb" data-a="' + back + '">‹ Back</button>' : '<div class="brand"><span class="mark"></span>LifeGoals</div>') + (right || '') + '</div>'; }
-/* FP round 6: data precedence, everywhere: document > customer-typed > "Estimate for me" > tool default.
+/* FP round 6: data precedence, everywhere: document > customer-typed > (nothing: Missing) (spec §15).
    A statement figure is never overwritten by a later manual entry: the entry is kept (S.man) and shown, and the statement value is used
    until the customer replaces or removes the statement. Corrections on "We read these values" are reading corrections: still the statement. */
 const isDoc = k => !!S.src && S.src[k] === 'doc';
@@ -1205,7 +1270,7 @@ function docNote(k){ const m = (S.man || {})[k]; if (!isDoc(k) || !m || String(m
   const f = x => FF[k] && FF[k].type === 'eur' ? eur(+x) : esc(String(x));
   return 'You typed ' + f(m.v) + '. Your statement says ' + f(S.fin[k]) + '; we\'re using that.'; }
 function tagFor(k){ const s = S.src[k]; if (S.look[k] && !S.ack[k]) return '<span class="tag look">⚠️ Needs a look</span>';
-  return s === 'doc' ? '<span class="tag doc">✅ ' + ((S.fix || {})[k] ? 'From your statement (corrected)' : 'From document' + (S.conf[k] ? ' · ' + S.conf[k] + '%' : '')) + '</span>' : s === 'typed' ? '<span class="tag typed">✏️ Your figure</span>' : s === 'est' ? '<span class="tag est">≈ Estimated</span>' : s === 'none' ? '<span class="tag none">Confirmed none</span>' : s === 'pre' ? '<span class="tag pre">From your answers</span>' : '<span class="tag none">❓ Missing</span>'; }
+  return s === 'doc' ? '<span class="tag doc">✅ ' + ((S.fix || {})[k] ? 'From your statement (corrected)' : 'From document' + (S.conf[k] ? ' · ' + S.conf[k] + '%' : '')) + '</span>' : s === 'typed' ? '<span class="tag typed">✏️ Your figure</span>' : s === 'pre' ? '<span class="tag pre">✏️ Your figure · from your answers</span>' : '<span class="tag none">❓ Missing</span>'; }
 function fmtField(k){ const v = S.fin[k], d = FF[k]; if (v == null || v === '') return '—'; return d.type === 'eur' ? eur(+v) : String(v); }
 const gById = id => S.goals.find(g => g.id === +id);
 function statusWord(st){ return st === 'done' ? 'Done' : st === 'look' ? 'Needs a look' : st === 'part' ? 'In progress' : 'Not started'; }
@@ -1337,10 +1402,10 @@ function fieldHTML(k){ const d = FF[k], v = S.fin[k];
   const id = 'f-' + k, lab = '<label for="' + id + '">' + esc(d.l) + ' <span id="tag-' + k + '">' + tagFor(k) + '</span></label>';
   let inp = '';
   if (d.type === 'choice' || d.type === 'ynn'){ const os = d.o || ['Yes','No','Not sure'];
-    return '<div class="field"><span class="flabel">' + esc(d.l) + ' <span id="tag-' + k + '">' + tagFor(k) + '</span></span><div class="chips" role="group" aria-label="' + esc(d.l) + '">' + os.map(o => '<button class="chip sm' + (v === o ? ' sel' : '') + '" aria-pressed="' + (v === o) + '" data-a="fchoice" data-p="' + k + '|' + o + '">' + esc(o) + '</button>').join('') + '</div>' + (docNote(k) ? '<span class="small" style="display:block;color:var(--acc-d)" role="status">' + docNote(k) + '</span>' : '') + (d.type === 'choice' && d.est ? '<div class="fhelp"><button class="link" data-a="fest" data-p="' + k + '">Not sure? Estimate for me</button></div>' : '') + '</div>'; }
+    return '<div class="field"><span class="flabel">' + esc(d.l) + ' <span id="tag-' + k + '">' + tagFor(k) + '</span></span><div class="chips" role="group" aria-label="' + esc(d.l) + '">' + os.map(o => '<button class="chip sm' + (v === o ? ' sel' : '') + '" aria-pressed="' + (v === o) + '" data-a="fchoice" data-p="' + k + '|' + o + '">' + esc(o) + '</button>').join('') + '</div>' + (docNote(k) ? '<span class="small" style="display:block;color:var(--acc-d)" role="status">' + docNote(k) + '</span>' : '') + (EXAMPLES[k] ? '<div class="fhelp"><button class="link" data-a="fex" data-p="' + k + '" aria-haspopup="dialog">Not sure? See an example</button></div>' : '') + '</div>'; }
   if (d.type === 'text') inp = '<input class="in" id="' + id + '" data-fin="' + k + '" value="' + esc(v || '') + '">';
   else inp = '<div class="inw">' + (d.type === 'eur' ? '<span class="cur" aria-hidden="true">€</span>' : '') + '<input class="in' + (d.type === 'eur' ? ' eur' : '') + '" id="' + id + '" inputmode="numeric" data-fin="' + k + '" value="' + (v == null ? '' : Math.round(+v)) + '"' + (d.hint ? ' aria-describedby="h-' + k + '"' : '') + '></div>';
-  return '<div class="field">' + lab + inp + '<span class="small dnote" id="dn-' + k + '" role="status" style="display:block;color:var(--acc-d)">' + docNote(k) + '</span>' + (d.hint ? '<span class="small" id="h-' + k + '">' + esc(d.hint) + '</span>' : '') + (d.pre || d.type === 'text' ? '' : '<div class="fhelp"><button class="link" data-a="fest" data-p="' + k + '">Not sure? Estimate for me</button><button class="link" data-a="fnone" data-p="' + k + '">I don\'t have this</button></div>') + '</div>';
+  return '<div class="field">' + lab + inp + '<span class="small dnote" id="dn-' + k + '" role="status" style="display:block;color:var(--acc-d)">' + docNote(k) + '</span>' + (d.hint ? '<span class="small" id="h-' + k + '">' + esc(d.hint) + '</span>' : '') + (workedNote(k) ? '<span class="small" id="wo-' + k + '" style="display:block;color:var(--sea-d)">' + esc(workedNote(k)) + '</span>' : '') + (d.type === 'text' || !EXAMPLES[k] ? '' : '<div class="fhelp"><button class="link" data-a="fex" data-p="' + k + '" aria-haspopup="dialog">Not sure? See an example</button></div>') + '</div>';
 }
 /* Partner: two choices side by side (Pooja Q4). Same state in Your finances and the Me tab, so it is never asked twice. */
 function partnerBlock(noMoney){ const pt = S.partner, m = pt.mode;
@@ -1348,8 +1413,8 @@ function partnerBlock(noMoney){ const pt = S.partner, m = pt.mode;
   if (m === 'invite') h += pt.sent ? '<div class="card" style="background:var(--ok-l);box-shadow:none;margin-top:12px"><b>💌 Invite sent to ' + esc(pt.email) + '</b><p class="small" style="color:var(--ink);margin:4px 0 0">They get a secure link to add their own details. You only see what they choose to share.</p><div class="row" style="gap:16px"><button class="link" data-a="presend">Resend</button><button class="link" data-a="pcancel">Cancel invite</button></div></div>'
     : '<div class="field" style="margin:12px 0 0"><label for="p-email">Their email</label><input class="in" id="p-email" type="email" autocomplete="off" data-partner="email" value="' + esc(pt.email) + '"><p id="perr" class="small" style="color:var(--gap-t);margin:0;min-height:4px" role="alert"></p><button class="btn sm" style="width:100%;margin-top:6px" data-a="pinvite">Send invite</button></div>';
   if (m === 'manual') h += '<div style="margin-top:12px"><div class="field"><label for="p-name">Their first name</label><input class="in" id="p-name" data-partner="name" autocomplete="off" value="' + esc(pt.name) + '"></div>' +
-    '<div class="field"><label for="f-pAge">Their age <span id="tag-pAge">' + tagFor('pAge') + '</span></label><input class="in" id="f-pAge" inputmode="numeric" data-fin="pAge" value="' + (S.fin.pAge == null ? '' : S.fin.pAge) + '"></div>' +
-    (noMoney ? '<p class="small" style="margin:0">You can add their income later, in Your finances.</p></div>' : '<div class="field" style="margin:0"><label for="f-pIncome">Their gross yearly income <span class="small" style="font-weight:600">Optional</span></label><div class="inw"><span class="cur" aria-hidden="true">€</span><input class="in eur" id="f-pIncome" inputmode="numeric" data-fin="pIncome" value="' + (S.fin.pIncome == null ? '' : Math.round(S.fin.pIncome)) + '"></div><span class="small">Before tax. Leave it blank and we\'ll ask in Income, or estimate it.</span></div></div>');
+    '<div class="field"><label for="f-pAge">Their age <span id="tag-pAge">' + tagFor('pAge') + '</span></label><input class="in" id="f-pAge" inputmode="numeric" data-fin="pAge" value="' + (S.fin.pAge == null ? '' : S.fin.pAge) + '"><div class="fhelp"><button class="link" data-a="fex" data-p="pAge" aria-haspopup="dialog">Not sure? See an example</button></div></div>' +
+    (noMoney ? '<p class="small" style="margin:0">You can add their income later, in Your finances.</p></div>' : '<div class="field" style="margin:0"><label for="f-pIncome">Their gross yearly income <span class="small" style="font-weight:600">Optional</span></label><div class="inw"><span class="cur" aria-hidden="true">€</span><input class="in eur" id="f-pIncome" inputmode="numeric" data-fin="pIncome" value="' + (S.fin.pIncome == null ? '' : Math.round(S.fin.pIncome)) + '"></div><span class="small">Before tax. Leave it blank and we\'ll ask in Income.</span></div></div>');
   if (!m) h += '<p class="small" style="margin:10px 0 0">Pick one. You can change it later in <b>Me</b>.</p>';
   return h; }
 V.P3 = () => { const sec = FSEC[S.fsec], mode = sec.docs.length ? (S.fmode[sec.id] || 'type') : 'type';
@@ -1359,7 +1424,7 @@ V.P3 = () => { const sec = FSEC[S.fsec], mode = sec.docs.length ? (S.fmode[sec.i
     (sec.id === 'about' ? '<div class="card"><div class="field"><span class="flabel">Planning with a partner? <span class="tag pre">From your answers</span></span><div class="seg" role="group" style="margin:0" aria-label="Planning with a partner">' + ['Yes','No'].map(x => { const on = (x === 'Yes') === !!S.about.partner; return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-a="partner" data-p="' + x + '">' + x + '</button>'; }).join('') + '</div></div>' +
       '<div class="field" style="margin:0"><span class="flabel">Children or others who rely on you <span class="tag pre">From your answers</span></span><div class="seg" role="group" style="margin:0" aria-label="Dependants">' + ['0','1','2','3+'].map((x, k) => '<button class="' + (S.about.deps === k ? 'on' : '') + '" aria-pressed="' + (S.about.deps === k) + '" data-a="deps" data-p="' + k + '">' + x + '</button>').join('') + '</div></div>' +
       (S.about.partner ? '<div style="border-top:1px dashed var(--line);margin-top:14px;padding-top:12px"><b>Your partner</b>' + partnerBlock() + '</div>' : '') + credChips() + '</div>' : '');
-  return {id:'P3-' + (S.fsec + 1), note:'Section ' + (S.fsec + 1) + ' of 6 · ' + sec.t + '. Upload vs Type it; every field has Estimate for me / I don\'t have this.', head:flowHead(3, 'Your finances · ' + (S.fsec + 1) + ' of 6', sec.e + ' ' + sec.t, sec.id === 'about' ? 'Mostly filled in from your answers. Just check it.' : 'Upload a document or type it in. Round figures are fine.', 'fback'),
+  return {id:'P3-' + (S.fsec + 1), note:'Section ' + (S.fsec + 1) + ' of 6 · ' + sec.t + '. Upload vs Type it; every field has "Not sure? See an example" (§15), which never fills the field.', head:flowHead(3, 'Your finances · ' + (S.fsec + 1) + ' of 6', sec.e + ' ' + sec.t, sec.id === 'about' ? 'Mostly filled in from your answers. Just check it.' : 'Upload a document or type it in. Round figures are fine.', 'fback'),
   html:(sec.docs.length ? '<div class="seg" role="group" aria-label="How to add">' + [['upload','📄 Upload'],['type','⌨️ Type it']].map(([m, l]) => '<button class="' + (mode === m ? 'on' : '') + '" aria-pressed="' + (mode === m) + '" data-a="fmode" data-p="' + m + '">' + l + '</button>').join('') + '</div>' : '<p class="small">No documents needed here. ID and proof of address are handled by your adviser later.</p>') + body,
   foot:'<button class="btn" data-a="fsave">Save this section</button>'};
 };
@@ -1379,21 +1444,21 @@ V.PU = () => { const u = S.upl, sm = u.sec === 'smart';
 };
 const MORT_LOW = "This repayment wouldn't clear the mortgage in the years left";
 function checkItems(){ const out = [], fN = finNums(); if (fN.mortPayLow && !S.look.mortPayM) S.look.mortPayM = MORT_LOW; else if (!fN.mortPayLow && S.look.mortPayM === MORT_LOW) delete S.look.mortPayM; /* FP round 4 F4 */ FSEC.forEach(s => s.f.filter(fieldVisible).filter(k => k !== 'retireAge').forEach(k => { const src = S.src[k], look = S.look[k];
-  const st = look ? 'look' : src === 'est' ? 'est' : !src ? (FF[k].opt ? null : 'miss') : src === 'doc' ? 'ok' : 'typed'; if (st) out.push({k, s, st}); })); return out; }
-V.P4 = () => { const it = checkItems(), flag = it.filter(x => ['look','est','miss'].includes(x.st)), good = it.filter(x => !['look','est','miss'].includes(x.st));
-  const ic = {look:'⚠️', est:'≈', miss:'❓'}, lb = {look:'Needs a look', est:'Estimated for you', miss:'Missing'};
+  const st = look ? 'look' : !src ? (FF[k].opt ? null : 'miss') : src === 'doc' ? 'ok' : 'typed'; if (st) out.push({k, s, st}); })); return out; }
+V.P4 = () => { const it = checkItems(), flag = it.filter(x => ['look','miss'].includes(x.st)), good = it.filter(x => !['look','miss'].includes(x.st));
+  const ic = {look:'⚠️', miss:'❓'}, lb = {look:'Needs a look', miss:'Missing'};
   // #21: a skipped section (nothing entered at all) is one row, not one row per field
   const skipped = FSEC.filter(sec => { const fs = sec.f.filter(fieldVisible); return fs.length && fs.every(k => !S.src[k] && !S.look[k]); });
   const one = flag.filter(x => !skipped.includes(x.s));
   const secRow = sec => { const ks = sec.f.filter(fieldVisible).filter(k => !FF[k].opt), left = ks.every(k => S.ack[k]);
     return '<div class="ck"><span class="i" aria-hidden="true">❓</span><div style="flex:1"><b>' + sec.e + ' ' + sec.t + '</b> <span class="small">· skipped</span><div class="small">' + (sec.id === 'prot' ? 'Not added yet' : 'Not added yet, so it counts as €0 for now') + (left ? ' · <b>Left for my adviser</b>' : '') + '</div>' +
       '<div class="a"><button class="link" data-a="fix" data-p="' + FSEC.indexOf(sec) + '">Add now</button>' + (left ? '' : '<button class="link" data-a="acksec" data-p="' + sec.id + '">Leave for my adviser</button>') + '</div></div></div>'; };
-  return {id:'P4', note:'Data-gap review: one row per skipped section; single rows only for ≈ / ❓ / ⚠️ items in partly filled sections. Required accuracy tick starts unticked.', head:flowHead(3, 'Step 3 · Prepare', 'Check your details', flag.length ? 'Only the items worth a second look are shown.' : 'Everything looks complete.', 'go|P2'),
-  html:(flag.length ? '<div class="card">' + skipped.map(secRow).join('') + one.map(x => '<div class="ck"><span class="i" aria-hidden="true">' + ic[x.st] + '</span><div style="flex:1"><b>' + esc(FF[x.k].l) + '</b> <span class="small">· ' + x.s.t + '</span><div class="small">' + lb[x.st] + (x.st === 'look' ? ': ' + esc(S.look[x.k]) : x.st === 'est' ? ' (' + fmtField(x.k) + ')' : '') + (S.ack[x.k] ? ' · <b>Left for my adviser</b>' : '') + '</div>' +
+  return {id:'P4', note:'Data-gap review: one row per skipped section; single rows only for ❓ / ⚠️ items in partly filled sections. Required accuracy tick starts unticked.', head:flowHead(3, 'Step 3 · Prepare', 'Check your details', flag.length ? 'Only the items worth a second look are shown.' : 'Everything looks complete.', 'go|P2'),
+  html:(flag.length ? '<div class="card">' + skipped.map(secRow).join('') + one.map(x => '<div class="ck"><span class="i" aria-hidden="true">' + ic[x.st] + '</span><div style="flex:1"><b>' + esc(FF[x.k].l) + '</b> <span class="small">· ' + x.s.t + '</span><div class="small">' + lb[x.st] + (x.st === 'look' ? ': ' + esc(S.look[x.k]) : '') + (workedNote(x.k) ? '. ' + esc(workedNote(x.k)) : '') + (S.ack[x.k] ? ' · <b>Left for my adviser</b>' : '') + '</div>' +
       '<div class="a"><button class="link" data-a="fix" data-p="' + FSEC.indexOf(x.s) + '">Fix now</button>' + (S.ack[x.k] ? '' : '<button class="link" data-a="ack" data-p="' + x.k + '">Leave for my adviser</button>') + '</div></div></div>').join('') + '</div>' : '') +
     '<details class="card" style="margin-top:12px"><summary style="cursor:pointer;font-weight:800;min-height:32px">✅ ' + good.length + ' details look good</summary>' + good.map(x => '<div class="mini"><span>' + esc(FF[x.k].l) + '</span><span>' + fmtField(x.k) + ' ' + tagFor(x.k) + '</span></div>').join('') + '</details>' +
     '<div class="card"><label class="check"><input type="checkbox" data-chk="1"' + (S.checked ? ' checked' : '') + '><span><b>These details are right, as far as I know</b></span></label></div>' + p4Asm(),
-  foot:(planReady() ? '' : '<p class="small" style="margin:0;text-align:center" id="p4-need">' + esc(chooseTxt(planMissing()[0]).replace(/ to see this$/, '')) + ' above to see your results.</p>') + '<button class="btn" data-a="toresults" id="seeres"' + (S.checked && planReady() ? '' : ' disabled') + '>See my results</button>'};
+  foot:(planReady() ? '' : '<p class="small" style="margin:0;text-align:center" id="p4-need">' + esc(chooseTxt(planMissing()[0]).replace(/ to see this$/, '')) + (planMissing()[0].add ? ' in Your finances' : ' above') + ' to see your results.</p>') + '<button class="btn" data-a="toresults" id="seeres"' + (S.checked && planReady() ? '' : ' disabled') + '>See my results</button>'};
 };
 V.U1 = () => ({id:'U1', note:'Loader. Never shows a made-up result.', head:flowHead(4, 'Step 4 · Understand', 'Building your plan', '', ''), html:'<div style="padding:60px 0;text-align:center"><div class="spin" aria-hidden="true"></div><p class="sub" style="margin-top:18px" role="status">Running your numbers…</p><p class="small">If this takes a while, we\'ll let you know by email and SMS when it\'s ready.</p></div>'});
 /* ================= RESULTS ================= */
@@ -1679,7 +1744,7 @@ function p4Asm(){ const ty2 = ASM_KEYS().filter(k => ASM[k].ty === 2 && ASM[k].n
     '<details class="asmg" data-g="p4"' + (S.asmOpen === 'p4' ? ' open' : '') + ' style="margin-top:8px"><summary style="cursor:pointer;font-weight:800;min-height:32px">See or change each one</summary><div style="margin-top:10px">' + rest.map(asmInput).join('') + '</div></details></div></div>'; }
 // "Choose your [item] to see this": shown instead of any result that needs a missing choice (§14)
 function gateHTML(where){ const m = planMissing(); if (!m.length) return '';
-  return '<div class="card" id="gate-' + where + '" style="border:1.5px dashed #B9C9D6;box-shadow:none"><b>' + esc(chooseTxt(m[0])) + '</b><p class="small" style="margin:4px 0 8px">' + (m.length > 1 ? 'Also still to choose: ' + esc(m.slice(1).map(x => x.n).join(', ')) + '.' : 'One choice left.') + '</p><button class="btn sm" data-a="asmopen">Make my choices</button></div>'; }
+  return '<div class="card" id="gate-' + where + '" style="border:1.5px dashed #B9C9D6;box-shadow:none"><b>' + esc(chooseTxt(m[0])) + '</b><p class="small" style="margin:4px 0 8px">' + (m.length > 1 ? 'Also still to choose: ' + esc(m.slice(1).map(x => x.n).join(', ')) + '.' : 'One choice left.') + '</p>' + (m[0].add ? '<button class="btn sm" data-a="fix" data-p="' + FSEC.findIndex(s => s.f.includes(m[0].k === 'mortYears' ? 'mortYears' : m[0].k)) + '">Add it</button>' : '<button class="btn sm" data-a="asmopen">Make my choices</button>') + '</div>'; }
 V.ME = () => { const m = S.me;
   if (m === 'asm') return {id:'ME-ASM', note:'Your assumptions (journey-spec §14): type 2 values show their usual range, type 3 values start blank with the standard and a one-tap chip, type 1 values are shown as Set by Government. Drives the plan and the calculators live.', head:appHead('Your assumptions', 'Some values are set by law. For the rest we show the usual range or the standard, and you choose.', S.asmBack || 'meback'), html:asmScreen()};
   if (m === 'recheck') return {id:'ME-CHK', note:'Re-check of the 6 Discover answers, pre-filled. Confirm or change (Pooja Q5).', head:appHead('Your first answers', 'From when you started. Do they still fit you?', 'meback'),
@@ -1707,10 +1772,10 @@ V.ME = () => { const m = S.me;
       '<div class="card"><b>Your preferences</b><p class="small" style="margin:4px 0 8px">Optional. Your adviser will ask about this before recommending anything.</p><div class="chips"><button class="chip sm' + (S.advQs.includes(ESG_Q) ? ' sel' : '') + '" aria-pressed="' + S.advQs.includes(ESG_Q) + '" data-a="advq" data-p="' + esc(ESG_Q) + '">🌿 ' + esc(ESG_Q) + '</button></div></div>' +
       '<div class="card"><b>What your adviser can see</b>' + (S.book.done ? Object.entries({report:'Plan report', fin:'Finances', docs:'Documents', um:'Understand Me profile'}).map(([k, l]) => '<div class="mini"><span>' + l + '</span><b>' + (S.book.share[k] ? 'Shared' : 'Not shared') + '</b></div>').join('') : '<p class="small" style="margin:6px 0 0">Nothing is shared. You choose what to share when you book.</p>') + '</div>' +
       '<button class="btn ghost" style="margin-top:12px;color:var(--gap-t)" data-a="sheet" data-p="delete">Delete my data</button><button class="link" data-a="sheet" data-p="money">How LifeGoals makes money</button>'};
-  if (m === 'money'){ const flags = checkItems().filter(x => ['look','est','miss'].includes(x.st));
-    return {id:'ME-MONEY', note:'My money: the 6 finance sections, checklist of missing / estimated items, add a document. No bank connection in this version.', head:appHead('My money', 'Keep your figures up to date. Your plan recalculates.', 'meback'),
+  if (m === 'money'){ const flags = checkItems().filter(x => ['look','miss'].includes(x.st));
+    return {id:'ME-MONEY', note:'My money: the 6 finance sections, checklist of missing items and ones that need a look, add a document. No bank connection in this version.', head:appHead('My money', 'Keep your figures up to date. Your plan recalculates.', 'meback'),
       html:'<button class="btn sm" style="width:100%" data-a="upl" data-p="smart">📥 Add a document</button><div style="margin-top:12px">' + FSEC.map((s, i) => { const st = secStatus(s); return '<button class="goal" data-a="fsec" data-p="' + i + '"><span class="ic" aria-hidden="true">' + s.e + '</span><span style="flex:1;min-width:0"><b>' + s.t + '</b><br><span class="small">' + esc(secSummary(s)) + '</span></span><span class="sr">' + statusWord(st) + '</span>' + statIcon(st) + '</button>'; }).join('') + '</div>' +
-        (flags.length ? '<div class="card"><b>To sharpen your plan</b>' + flags.map(x => '<div class="mini"><span>' + ({look:'⚠️', est:'≈', miss:'❓'})[x.st] + ' ' + esc(FF[x.k].l) + '</span><button class="link" data-a="fix" data-p="' + FSEC.indexOf(x.s) + '">Fix</button></div>').join('') + '</div>' : '')}; }
+        (flags.length ? '<div class="card"><b>To sharpen your plan</b>' + flags.map(x => '<div class="mini"><span>' + ({look:'⚠️', miss:'❓'})[x.st] + ' ' + esc(FF[x.k].l) + '</span><button class="link" data-a="fix" data-p="' + FSEC.indexOf(x.s) + '">Fix</button></div>').join('') + '</div>' : '')}; }
   /* Me hub = the customer's profile hub (Pooja Q5) */
   const P = personality(), full = umCount() === 13, r = riskRead(full), b = S.about, nm = S.acct.name || S.fin.name || 'You';
   const seg = (a, opts, on) => '<div class="seg" role="group" style="margin:6px 0 0">' + opts.map(([v, l]) => '<button class="' + (on(v) ? 'on' : '') + '" aria-pressed="' + on(v) + '" data-a="' + a + '" data-p="' + v + '">' + l + '</button>').join('') + '</div>';
@@ -1756,7 +1821,7 @@ function applyHandoff(g){ const a0 = S.about.age, age = n => Math.min(AS.end, a0
   if (g.kind === 'need'){ S.needs = Object.assign({}, S.needs, {[g.need]:Math.round(g.amount)}); return 'Noted for your adviser'; }
   if (g.kind === 'mfree'){ let m = S.goals.find(x => x.kind === 'mfree'); if (!m){ m = mkGoal('mfree'); S.goals.push(m); } m.age = age(g.years); return 'Mortgage free added to your plan'; }
   const k = g.kind === 'safety' ? 'safety' : g.kind === 'pot' ? 'wealth' : g.k === 'home' ? 'home' : 'other', x = k === 'other' ? mkGoal('other', [g.em, g.name, Math.round(g.amount), Math.max(1, g.years)]) : mkGoal(k);
-  x.name = g.name.replace(/ \(deposit goal\)$/, ''); x.e = g.em; x.amount = Math.round(g.amount); x.age = age(g.years); x.saved = Math.round(g.saved || 0); S.goals.push(x);
+  x.name = g.name.replace(/ \(deposit goal\)$/, ''); x.e = g.em; x.amount = Math.round(g.amount); x.auto = false; x.age = age(g.years); x.saved = Math.round(g.saved || 0); S.goals.push(x);
   return (S.app ? x.name + ' added to your plan' : x.name + ' added. It will be on your timeline when you make your plan'); }
 function marriedField(){ const m = S.about.married; return '<div style="margin:10px 0 0"><span class="flabel" style="font-size:13.5px">Married or in a civil partnership? <span class="small" style="font-weight:600">Optional</span></span><div class="seg" role="group" aria-label="Married or in a civil partnership" style="margin:6px 0 0">' + ['Yes','No'].map(x => { const on = (m === true && x === 'Yes') || (m === false && x === 'No'); return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-a="married" data-p="' + x + '">' + x + '</button>'; }).join('') + '</div><span class="small">If yes, we use joint assessment for income tax, which can lower your tax.</span></div>'; }
 const verified = () => S.acct.ev && S.acct.sv;
@@ -1806,7 +1871,7 @@ const lastPayI = (P, i, pay, n) => balAfter(P, i, pay, n - 1) * (1 + i);
 const totIntI = (P, i, pay, n) => pay * (n - 1) + lastPayI(P, i, pay, n) - P;
 // FP round 6: the customer's own figure, if the tool still shows the figures we pre-filled (not moved by the customer)
 const mine = (id, keys) => !keys.some(k => ((S.calcT || {})[id] || {})[k]);
-const statedM = k => S.src && S.src[k] && S.src[k] !== 'est' && +S.fin[k] > 0 ? +S.fin[k] : null;   // a stated (statement or typed) monthly figure
+const statedM = k => S.src && S.src[k] && +S.fin[k] > 0 ? +S.fin[k] : null;   // a stated (statement or typed) monthly figure
 const srcWord = k => S.src[k] === 'doc' ? 'your statement' : 'your figures';
 const yrs = m => { const y = Math.floor(m / 12), mo = Math.round(m % 12); return y ? y + ' yr' + (y > 1 ? 's' : '') + (mo ? ' ' + mo + ' mo' : '') : mo + (mo === 1 ? ' month' : ' months'); };
 const yrN = n => n + (n === 1 ? ' year' : ' years');
@@ -2029,7 +2094,7 @@ const CALC_X = {borrow:['buyFees'], deposit:['buyFees'], rentbuy:['rentRise', 'u
 const calcA = (id, k) => { const s = (CALC_A[id] || {})[k]; return s == null ? null : typeof s === 'string' ? {a:s, n:ASM[s].n, ty:ASM[s].ty} : s; };
 const aCalc = (a, v) => v == null ? null : ASM[a].t === 'pct' ? +(v * 100).toFixed(4) : +v;   // assumption value in the tool's units
 function calcMissing(c){ const v = calcVals(c), out = [];
-  c.inputs.forEach(i => { if (v[i.k] == null){ const s = calcA(c.id, i.k); out.push(s ? s.n : i.l.toLowerCase()); } });
+  c.inputs.forEach(i => { if (v[i.k] == null){ const s = calcA(c.id, i.k); out.push(s ? s.n : 'add:' + i.l.toLowerCase()); } });
   (CALC_X[c.id] || []).forEach(k => { if (!asmMine(k)) out.push(ASM[k].n); }); return out.filter((x, i, a) => a.indexOf(x) === i); }
 const locFmt = (s, x) => s.t === 'pct' ? pcs(x) : s.t === 'eurw' ? eurW(x) + ' a week' : s.t === 'yrs' ? yrN(x) : s.t === 'style' ? CHIP_OPTS.style.find(o => o[0] === x)[1] : eur(x);
 function calcGuide(cid, k){ const s = calcA(cid, k); if (!s) return ''; if (s.ret) return RETIRE_HELP; if (s.a) return asmGuide(ASM[s.a]);
@@ -2042,10 +2107,11 @@ function fieldBlank(i, cid){ const std = calcStd(cid, i.k);
 function calcAsmBlock(c){ const ks = CALC_X[c.id]; if (!ks) return ''; const left = ks.filter(k => !asmMine(k)), g = 'c-' + c.id;
   return '<details class="card asmg" data-g="' + g + '"' + (left.length || S.asmOpen === g ? ' open' : '') + ' style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:800;min-height:32px">Assumptions this tool uses' + (left.length ? ' · ' + left.length + ' to choose' : '') + '</summary><div style="margin-top:10px">' +
     ks.map(k => asmInput(k, true)).join('') + (left.some(asmStd) ? useAllBtn('calc') : '') + '<p class="small" style="margin:6px 0 0">These are your plan-wide choices: changing one here changes it everywhere.</p></div></details>'; }
+const missTxt = m => m.startsWith('add:') ? 'Add your ' + m.slice(4) : 'Choose your ' + m;   // "Add your years left" for a missing personal figure
 const moTxt = x => { const r = Math.round(x * 10) / 10; return (r % 1 ? r.toFixed(1) : String(r)) + (r === 1 ? ' month' : ' months'); };
 // calcVals (FP round 6): pre-filled every time from what we know, in precedence order:
-// the customer's own move of a slider in this tool > the statement's figures for this tool > Your finances (statement > typed > estimate) > the plan > tool default.
-function calcPre(c){ applyAssume(); const p = {}, f = S.fin, has = k => S.src[k] && f[k] != null && f[k] !== '' && !isNaN(+f[k]), F = finNums(), mort = F.mortBal > 0, home = S.goals.find(g => g.k === 'home');
+// the customer's own move of a slider in this tool > the statement's figures for this tool > Your finances (statement > typed) > the plan > tool default.
+function calcPre(c){ applyAssume(); S.calcWO = S.calcWO || {}; S.calcWO[c.id] = {}; const p = {}, f = S.fin, has = k => S.src[k] && f[k] != null && f[k] !== '' && !isNaN(+f[k]), F = finNums(), mort = F.mortBal > 0, home = S.goals.find(g => g.k === 'home');
   const ess = F.costsM + F.mortPayM + (F.debt > 0 ? F.debtPayM : 0), take = () => { const P = project(); return P.rows[0].inflow / 12; }, rg = retireGoal();
   p.age = S.about.age;
   // §14: assumptions come from the customer's own choices (CALC_A in calcVals), never a default. Here only their own data: a stated mortgage rate, their retirement age, their State Pension.
@@ -2054,10 +2120,10 @@ function calcPre(c){ applyAssume(); const p = {}, f = S.fin, has = k => S.src[k]
   switch (c.id){
     case 'borrow': if (has('income')) p.inc = F.income; if (has('pIncome')) p.inc2 = F.pIncome; if (home && home.saved) p.dep = home.saved; if (f.home) p.ftb = /^Own/.test(f.home) ? 0 : 1; break;
     case 'deposit': if (home && home.saved) p.saved = home.saved; break;
-    case 'repayment': case 'ratechange': if (mort){ p.loan = F.mortBal; p.rate = mRate; p.term = F.mortYears || 25; } break;
-    case 'term': if (mort){ p.loan = F.mortBal; p.rate = mRate; p.a = F.mortYears || 25; } break;
-    case 'overpay': if (mort){ p.bal = F.mortBal; p.rate = mRate; p.yrs = F.mortYears || 25; } break;
-    case 'mortgageprotect': if (mort){ p.bal = F.mortBal; p.rate = mRate; p.y = F.mortYears || 25; } break;
+    case 'repayment': case 'ratechange': if (mort){ p.loan = F.mortBal; p.rate = mRate; p.term = F.mortYears || null; } break;
+    case 'term': if (mort){ p.loan = F.mortBal; p.rate = mRate; p.a = F.mortYears || null; } break;
+    case 'overpay': if (mort){ p.bal = F.mortBal; p.rate = mRate; p.yrs = F.mortYears || null; } break;
+    case 'mortgageprotect': if (mort){ p.bal = F.mortBal; p.rate = mRate; p.y = F.mortYears || null; } break;
     case 'emergency': if (has('costsM')) p.e = ess; if (has('cash')) p.s = F.cash; break;
     case 'incomegap': if (has('costsM')) p.e = ess; if (has('cash')) p.s = F.cash; if (has('income')) p.inc = F.income; break;
     case 'retirement': if (has('pension')) p.pot = F.pension; if (has('pensionM')) p.m = F.pensionM; if (S.retireSet) p.ra = S.retireAge; if (F.spKnown) p.o = Math.round(AS.sp * F.sp); p.g = penG; if (rg) p.d = rg.amount; break;
@@ -2067,13 +2133,13 @@ function calcPre(c){ applyAssume(); const p = {}, f = S.fin, has = k => S.src[k]
     case 'lumpsum': case 'fees': case 'riskreturn': case 'realreturn': if (has('invest')) p.p = F.invest; break;
     case 'lifecover': if (has('income')) p.inc = F.income; if (mort) p.mort = F.mortBal; if (F.debt > 0) p.debt = F.debt; if (has('cash') || has('invest')) p.sav = F.cash + F.invest; break;
     case 'networth': if (has('cash')) p.sav = F.cash; if (has('invest')) p.inv = F.invest; if (has('pension')) p.pen = F.pension; if (/^Own/.test(f.home || '')) p.prop = (+f.homeValue || 0) + (+f.propValue || 0); if (mort) p.mort = F.mortBal; if (F.debt > 0) p.loans = F.debt; break;
-    case 'surplus': if (has('income')){ p.inc = take(); p.ess = F.costsM + F.oneOffY / 12 + F.mortPayM; p.life = 0; p.debt = F.debt > 0 ? F.debtPayM : 0; } break;   // matches the plan's spare money this year
+    case 'surplus': if (has('income')){ p.inc = take(); p.ess = F.costsM + F.oneOffY / 12 + F.mortPayM; p.life = 0; p.debt = F.debt > 0 ? F.debtPayM : 0; if (F.mortPayEst && F.mortBal > 0) S.calcWO[c.id].ess = workedNote('mortPayM'); if (F.debtPayEst) S.calcWO[c.id].debt = workedNote(F.cardPayEst ? 'cardPayM' : 'loanPayM'); } break;   // matches the plan's spare money this year
     case 'budget': if (has('income')) p.inc = take(); break;
-    case 'debtpay': if (F.debt > 0){ const cm = F.cardBal > 0 ? payoff(F.cardBal, 0, F.cardPayM, iAPR(F.cardRate)).m : 0, lm = F.loanBal > 0 ? payoff(F.loanBal, 0, F.loanPayM, iAPR(F.loanRate)).m : 0; if (cm >= lm){ p.b = F.cardBal; p.p = F.cardPayM; p.apr = F.cardRateKnown ? F.cardRate * 100 : undefined; } else { p.b = F.loanBal; p.p = F.loanPayM; p.apr = F.loanRateKnown ? F.loanRate * 100 : undefined; } } break;
+    case 'debtpay': if (F.debt > 0){ const cm = F.cardBal > 0 ? payoff(F.cardBal, 0, F.cardPayM, iAPR(F.cardRate)).m : 0, lm = F.loanBal > 0 ? payoff(F.loanBal, 0, F.loanPayM, iAPR(F.loanRate)).m : 0; if (cm >= lm){ p.b = F.cardBal; p.p = F.cardPayM; if (F.cardPayEst) S.calcWO[c.id].p = workedNote('cardPayM'); p.apr = F.cardRateKnown ? F.cardRate * 100 : undefined; } else { p.b = F.loanBal; p.p = F.loanPayM; if (F.loanPayEst) S.calcWO[c.id].p = workedNote('loanPayM'); p.apr = F.loanRateKnown ? F.loanRate * 100 : undefined; } } break;
   }
   Object.assign(p, (S.calcDoc || {})[c.id] || {}); return p; }
 function calcVals(c){ S.calcV[c.id] = S.calcV[c.id] || {}; S.calcT = S.calcT || {}; const v = S.calcV[c.id], T = S.calcT[c.id] || {}, pre = calcPre(c);
-  c.inputs.concat(c.wi || []).forEach(i => { if (T[i.k] && v[i.k] != null) return; const s = calcA(c.id, i.k), tp = ((S.toolPick || {})[c.id] || {})[i.k], x = pre[i.k] != null ? pre[i.k] : s ? (s.a ? aCalc(s.a, asmGet(s.a)) : tp != null ? tp : null) : i.v; v[i.k] = x == null ? null : clamp(+(+x).toFixed(4), i.min, i.max); });   // stated figures are not rounded to the slider step
+  c.inputs.concat(c.wi || []).forEach(i => { if (T[i.k] && v[i.k] != null) return; const s = calcA(c.id, i.k), tp = ((S.toolPick || {})[c.id] || {})[i.k], x = pre[i.k] != null ? pre[i.k] : pre[i.k] === null ? null : s ? (s.a ? aCalc(s.a, asmGet(s.a)) : tp != null ? tp : null) : i.v; v[i.k] = x == null ? null : clamp(+(+x).toFixed(4), i.min, i.max); });   // stated figures are not rounded to the slider step
   return v; }
 /* ================= Editable value boxes beside every slider (Pooja, 1 Oct) =================
    Type a figure instead of dragging. Commits live while typing (once valid) and on Enter / blur. Typed values keep their precision;
@@ -2118,8 +2184,9 @@ const fmtIn = (i, v) => i.u === '€' ? eur(v) : i.u === '%' ? v + '%' : i.u ===
 // FP round 7: whole-number choices are chips, never sliders (no 0.5 first-time buyer, no style 2.5 → €NaN)
 const CHIP_OPTS = {yn:[[1, 'Yes'], [0, 'No']], style:[[1, '1 · Cautious'], [2, '2 · Balanced'], [3, '3 · Growth']], tax:[[20, '20%'], [40, '40%']]};
 const fieldC = (i, v, src, cid) => { const on = x => v != null && +v === x, std = v == null && cid ? calcStd(cid, i.k) : null; return '<div class="field"><span class="flabel" id="cl-' + i.k + '">' + esc(i.l) + (src && src.includes(i.k) ? ' <span class="tag doc">From your statement</span>' : '') + (v == null ? ' <span class="tag look">Not chosen yet</span>' : '') + '</span><div class="chips" role="group" aria-labelledby="cl-' + i.k + '">' + CHIP_OPTS[i.u].map(([x, l]) => '<button class="chip sm' + (on(x) ? ' sel' : '') + '" aria-pressed="' + on(x) + '" data-a="ckset" data-p="' + i.k + '|' + x + '">' + l + '</button>').join('') + '</div>' + (std ? '<button class="chip sm" style="margin-top:6px" data-a="ckstd" data-p="' + i.k + '">Use the standard (' + esc(std.t) + ')</button>' : '') + (v == null && cid ? '<span class="small" style="display:block;margin-top:4px">' + esc(calcGuide(cid, i.k)) + '</span>' : '') + '</div>'; };
-const fieldR = (i, v, src, cid) => CHIP_OPTS[i.u] ? fieldC(i, v, src, cid) : v == null ? fieldBlank(i, cid) : '<div class="field"><div class="flabel"><label id="cl-' + i.k + '" for="c-' + i.k + '">' + esc(i.l) + (src && src.includes(i.k) ? ' <span class="tag doc">From your statement</span>' : '') + '</label>' + nbox('ck', i.k, v, i.u, 'cl-' + i.k, {id:'co-' + i.k, dec:i.step % 1 !== 0 || i.u === '%'}) + '</div><input type="range" id="c-' + i.k + '" data-ck="' + i.k + '" min="' + i.min + '" max="' + Math.max(i.max, v) + '" step="' + i.step + '" value="' + v + '" aria-labelledby="cl-' + i.k + '" aria-valuetext="' + esc(fmtIn(i, v)) + '">' + nbHint('ck', i.k) + (cid && calcA(cid, i.k) && calcA(cid, i.k).ty === 2 ? '<span class="small" style="display:block;margin-top:2px">' + esc(calcGuide(cid, i.k)) + '</span>' : '') + '</div>';
-function calcOut(c){ const miss = calcMissing(c); if (miss.length) return '<div class="card" id="cgate" style="background:var(--ink);color:#fff"><div class="eyebrow" style="color:var(--sun)">Your result</div><b style="font-size:18px;display:block;margin:4px 0">' + esc('Choose your ' + miss[0] + ' to see this') + '</b>' + (miss.length > 1 ? '<p style="margin:0;font-size:13.5px;color:#DCE7F2">Also still to choose: ' + esc(miss.slice(1).join(', ')) + '.</p>' : '') + '</div>';
+const woC = (cid, k) => cid && S.calcWO && S.calcWO[cid] && S.calcWO[cid][k] && !((S.calcT || {})[cid] || {})[k] ? S.calcWO[cid][k] : '';
+const fieldR = (i, v, src, cid) => CHIP_OPTS[i.u] ? fieldC(i, v, src, cid) : v == null ? fieldBlank(i, cid) : '<div class="field"><div class="flabel"><label id="cl-' + i.k + '" for="c-' + i.k + '">' + esc(i.l) + (src && src.includes(i.k) ? ' <span class="tag doc">From your statement</span>' : '') + (woC(cid, i.k) ? ' <span class="tag pre">Worked out from your figures</span>' : '') + '</label>' + nbox('ck', i.k, v, i.u, 'cl-' + i.k, {id:'co-' + i.k, dec:i.step % 1 !== 0 || i.u === '%'}) + '</div><input type="range" id="c-' + i.k + '" data-ck="' + i.k + '" min="' + i.min + '" max="' + Math.max(i.max, v) + '" step="' + i.step + '" value="' + v + '" aria-labelledby="cl-' + i.k + '" aria-valuetext="' + esc(fmtIn(i, v)) + '">' + nbHint('ck', i.k) + (woC(cid, i.k) ? '<span class="small" style="display:block;margin-top:2px">' + esc(woC(cid, i.k).replace(/ Type yours to replace it\.$/, '')) + '</span>' : '') + (cid && calcA(cid, i.k) && calcA(cid, i.k).ty === 2 ? '<span class="small" style="display:block;margin-top:2px">' + esc(calcGuide(cid, i.k)) + '</span>' : '') + '</div>';
+function calcOut(c){ const miss = calcMissing(c); if (miss.length) return '<div class="card" id="cgate" style="background:var(--ink);color:#fff"><div class="eyebrow" style="color:var(--sun)">Your result</div><b style="font-size:18px;display:block;margin:4px 0">' + esc(missTxt(miss[0]) + ' to see this') + '</b>' + (miss.length > 1 ? '<p style="margin:0;font-size:13.5px;color:#DCE7F2">Also still to add or choose: ' + esc(miss.slice(1).map(x => x.replace(/^add:/, '')).join(', ')) + '.</p>' : '') + '</div>';
   const v = calcVals(c), r = c.run(v); return '<div class="card" style="background:var(--ink);color:#fff"><div class="eyebrow" style="color:var(--sun)">' + esc(r.lbl) + '</div><div style="font-family:var(--fh);font-size:36px;font-weight:800;margin:4px 0">' + r.val + '</div><p style="margin:0;font-size:14px;line-height:1.5;color:#DCE7F2">' + esc(r.line) + '</p>' + r.rows.filter(Boolean).map(x => '<div class="row" style="justify-content:space-between;border-top:1px solid rgba(255,255,255,.14);padding:8px 0;margin-top:8px;font-size:13.5px"><span>' + x[0] + '</span><b>' + x[1] + '</b></div>').join('') + '</div>'; }
 function toolsForYou(){ const ks = S.goals.map(g => g.spec), ids = []; const add = x => { if (!ids.includes(x)) ids.push(x); };
   if (ks.includes('mortgage')) { add('borrow'); add('deposit'); } if (ks.includes('pension')) { add('retirement'); add('contrib'); } add('goalplanner'); add('emergency'); add('surplus'); add('lifecover'); add('compound'); return ids.slice(0, 6); }
@@ -2266,8 +2333,8 @@ function foundations(){ const F = finNums(), f = S.fin, has = k => !!S.src[k] &&
   // 3. Clear costly debt & protect your family: the weakest item shows
   const items = [];
   if (has('cardBal') || has('loanBal') || has('debt')){
-    if (F.cardBal > 1){ const r = payoff(F.cardBal, 0, F.cardPayM, iAPR(F.cardRate)); items.push(r.m <= 12 ? {st:'mid', s:'Credit card ' + eur(F.cardBal) + ' clears in about ' + Math.max(1, Math.ceil(r.m)) + ' months', a:'debtpay'} : {st:'bad', s:'Credit card ' + eur(F.cardBal) + (r.m === Infinity ? ' with no repayment set' : ' takes about ' + Math.ceil(r.m) + ' months to clear'), a:'debtpay'}); }
-    if (F.loanBal > 1){ const r = payoff(F.loanBal, 0, F.loanPayM, iAPR(F.loanRate)); items.push(r.m <= 24 ? {st:'mid', s:'Loans of ' + eur(F.loanBal) + ' clear in about ' + Math.max(1, Math.ceil(r.m)) + ' months', a:'debtpay'} : {st:'bad', s:'Loans of ' + eur(F.loanBal) + (r.m === Infinity ? ' with no repayment set' : ' take about ' + Math.ceil(r.m / 12) + ' years to clear'), a:'debtpay'}); }
+    if (F.cardBal > 1){ const r = payoff(F.cardBal, 0, F.cardPayM, iAPR(F.cardRate)); items.push(r.m <= 12 ? {st:'mid', s:'Credit card ' + eur(F.cardBal) + ' clears in about ' + Math.max(1, Math.ceil(r.m)) + ' months', a:'debtpay'} : {st:'bad', s:'Credit card ' + eur(F.cardBal) + (r.m === Infinity ? ' with no repayment set' : ' takes about ' + Math.ceil(r.m) + ' months to clear'), a:'debtpay'}); if (F.cardPayEst) items[items.length - 1].s += ' (repayment worked out from your figures: ' + (finN('cardPayM') > 0 ? 'yours doesn\'t cover the interest' : 'none given') + ')'; }
+    if (F.loanBal > 1){ const r = payoff(F.loanBal, 0, F.loanPayM, iAPR(F.loanRate)); items.push(r.m <= 24 ? {st:'mid', s:'Loans of ' + eur(F.loanBal) + ' clear in about ' + Math.max(1, Math.ceil(r.m)) + ' months', a:'debtpay'} : {st:'bad', s:'Loans of ' + eur(F.loanBal) + (r.m === Infinity ? ' with no repayment set' : ' take about ' + Math.ceil(r.m / 12) + ' years to clear'), a:'debtpay'}); if (F.loanPayEst) items[items.length - 1].s += ' (repayment worked out from your figures: ' + (finN('loanPayM') > 0 ? 'yours doesn\'t cover the interest' : 'none given') + ')'; }
     if (F.debt <= 1) items.push({st:'ok', s:'No costly debt'}); }
   const needLife = S.about.partner || S.about.deps > 0, working = f.work && f.work !== 'Not working';
   if (needLife){ if (!has('life')) items.push({st:'na', s:'Add your protection to check life cover', sec:4}); else items.push(f.life === 'Yes' ? {st:'ok', s:'Life cover in place'} : {st:f.life === 'No' ? 'bad' : 'mid', s:(f.life === 'No' ? 'No life cover, and ' : 'Not sure about life cover, and ') + (S.about.deps > 0 ? 'people rely on you' : 'you plan with a partner'), a:'lifecover'}); }
@@ -2352,7 +2419,7 @@ const ASK_GEN = [
   ['risk', 'What is a risk profile?', 'A short summary of how much ups and downs suit you. It combines how much risk you <b>want</b> to take, how much you <b>can</b> afford to take, and <b>how long</b> you can wait. It is indicative: your adviser confirms it with you.'],
   ['capacity', 'What does "capacity" mean?', 'Your capacity for loss is how big a fall in value you could live with without it hurting everyday life. For example, could you still pay your bills if your investments dropped for a while?'],
   ['behaviour', 'What is "investor behaviour"?', 'How you tend to act with money, for example whether you research, ask an expert or act fast. It helps your adviser explain things in a way that suits you.'],
-  ['estimate', 'What happens if I estimate a figure?', 'We fill in a typical figure so you can see results straight away. It is marked "≈ Estimated". Swap in your real figure any time to sharpen your plan.'],
+  ['estimate', 'What if I don\'t know a figure?', '"Not sure? See an example" shows how our example customers, Aoife and Cian, filled it in, and where to find yours. It never fills in a figure for you: every customer\'s money is different. Nothing to add? Enter 0. Leave it blank and it shows as Missing and counts as €0 until you add it.'],
   ['data', 'Is my data safe?', 'Your data is stored in the EU and never sold. Nothing is shared with an adviser unless you tick what to share. You can delete everything in Me › Privacy & preferences.'],
   ['partner', 'Can my partner join?', 'Yes. In Me you can invite your partner to add their own details, or add their name, age and income yourself.'],
   ['free', 'Does it cost anything?', 'LifeGoals is free for you. If you work with an adviser, their firm may pay us a fee. Your adviser will tell you how they are paid before you agree to anything.']
@@ -2370,7 +2437,7 @@ function askCtx(id){ id = id || '';
   if (id === 'F2' || id === 'PLAN') return ['ctx', 'How does the timeline work?', 'Each goal sits at the age you would like it to happen. Drag it left for sooner or right for later, or use the − and + buttons underneath. Rough is fine; you can change it any time.'];
   if (id === 'F4') return ['ctx', 'What is my LifeMap?', 'It is your list of goals with when and how much. Next, we add your money so we can check how far it goes.'];
   if (/^P1/.test(id)) return ['ctx', 'Why do I need an account?', 'So your money details are stored safely and only you can see them. We check your email and mobile to keep your account secure.'];
-  if (/^P[234]|^PU/.test(id)) return ['ctx', 'Why do you need my figures?', 'Your income, savings, debts and pension let us work out how far your money can go. Rough figures are fine. "Estimate for me" fills in a typical figure you can change later. We don\'t connect to your bank.'];
+  if (/^P[234]|^PU/.test(id)) return ['ctx', 'Why do you need my figures?', 'Your income, savings, debts and pension let us work out how far your money can go. Rough figures are fine. "Not sure? See an example" shows where to find each one; we never fill in a figure for you. We don\'t connect to your bank.'];
   if (id === 'HOME') return ['ctx', 'What is "overall readiness"?', 'It is the average of how much each of your goals is covered. 100% means your income and savings are expected to cover every goal. It is a quick summary; My Plan shows the detail.'];
   if (/^ME/.test(id)) return ['ctx', 'Why does my profile matter?', 'Your answers set the indicative risk profile shown on My Plan and in your report. Your adviser sees it only if you choose to share it, so you won\'t have to repeat yourself.'];
   if (/^C|^EXP/.test(id)) return ['ctx', 'What happens at the adviser meeting?', 'It is free, about 45 minutes, and there is no obligation. The adviser goes through your plan with you and answers your questions. Only they can give you advice.'];
@@ -2388,7 +2455,7 @@ const ASK_GUARD = 'I can\'t tell you what to do with your money: that would be a
 function askMatch(q){ const t = q.toLowerCase(), plan = askPlan(), all = plan.concat(ASK_GEN), by = k => (all.find(x => x[0] === k) || [])[2];
   if (/\b(should i|shall i|which (fund|product|pension|provider|bank)|recommend|best (fund|investment|pension|mortgage|option)|buy|sell|invest in|worth it|tell me what to do)\b/.test(t)) return ASK_GUARD;
   const rules = [[/advice|advise/, 'advice'], [/%|percent|covered|on track/, plan.length ? (by('pgap') ? 'pgap' : 'pok') : 'covered'], [/today|inflation|prices/, 'today'], [/capacity|afford|loss/, 'capacity'], [/behaviou?r/, 'behaviour'], [/risk|profile/, plan.length ? 'prisk' : 'risk'],
-    [/retire|pension/, plan.length ? 'pret' : 'covered'], [/gap|short/, plan.length && by('pgap') ? 'pgap' : 'covered'], [/strength|best/, plan.length ? 'pbest' : 'covered'], [/estimat/, 'estimate'], [/data|safe|privacy|share|delete/, 'data'], [/partner|wife|husband|spouse/, 'partner'], [/cost|free|fee|charge|money do you make/, 'free']];
+    [/retire|pension/, plan.length ? 'pret' : 'covered'], [/gap|short/, plan.length && by('pgap') ? 'pgap' : 'covered'], [/strength|best/, plan.length ? 'pbest' : 'covered'], [/estimat|example|don.?t know|not sure/, 'estimate'], [/data|safe|privacy|share|delete/, 'data'], [/partner|wife|husband|spouse/, 'partner'], [/cost|free|fee|charge|money do you make/, 'free']];
   for (const [re, k] of rules) if (re.test(t) && by(k)) return by(k);
   return 'I can explain how LifeGoals works and what your results mean. Try one of the questions above' + (S.app ? ', or book a free adviser meeting for personal advice' : '') + '.'; }
 function askHTML(sid){ const c = askCtx(sid), plan = askPlan(), o = S.ask.open;
@@ -2404,7 +2471,8 @@ function sheetHTML(sid){ const s = S.sheet; if (!s) return ''; let h = '';
   if (s === 'ask') h = askHTML(sid);
   const [t, p] = s.split('|');
   if (t === 'fnd') h = fndSheet(p);
-  if (t === 'calcadd'){ const c = C(p), m = calcMissing(c); h = m.length ? '<h2 class="t">' + esc('Choose your ' + m[0] + ' first') + '</h2><p class="sub">This result needs your choices before it can go in your plan.</p><button class="btn" data-a="closesheet">OK</button>' : handoffHTML(p, c.run(calcVals(c)).goal); }
+  if (t === 'ex') h = exHTML(p);
+  if (t === 'calcadd'){ const c = C(p), m = calcMissing(c); h = m.length ? '<h2 class="t">' + esc(missTxt(m[0]) + ' first') + '</h2><p class="sub">This result needs your choices before it can go in your plan.</p><button class="btn" data-a="closesheet">OK</button>' : handoffHTML(p, c.run(calcVals(c)).goal); }
   if (t === 'invite') h = '<h2 class="t">Enter your invite code</h2><p class="sub">From your adviser or employer.</p><div class="field"><label for="inv">Code</label><input class="in" id="inv" placeholder="e.g. ABC123"></div><button class="btn" data-a="invite">Continue</button>';
   if (t === 'whyask') h = '<h2 class="t">Why we ask</h2><p class="sub">Your answers help us show goals and results that fit you. We don\'t save anything unless you choose to, and nothing is shared with an adviser without your say. This is guidance, not advice.</p><button class="btn" data-a="closesheet">Got it</button>';
   if (t === 'save') h = '<h2 class="t">Save and come back later</h2><p class="sub">We\'ll email you a secure link. No password, and no money details yet.</p><div class="field"><label for="sv-email">Email</label><input class="in" id="sv-email" type="email" autocomplete="email" value="' + esc(S.save.email) + '"></div><label class="check"><input type="checkbox" id="sv-comms"' + (S.save.comms ? ' checked' : '') + '><span>Optional: send me tips and updates</span></label><p id="sverr" class="small" style="color:var(--gap-t)" role="alert"></p><button class="btn" data-a="dosave">Email me a link</button>';
@@ -2416,13 +2484,13 @@ function sheetHTML(sid){ const s = S.sheet; if (!s) return ''; let h = '';
   if (t === 'history') h = '<h2 class="t">Plan history</h2>' + S.versions.map((v, k) => '<div class="mini"><span><b>Version ' + (k + 1) + '</b> · ' + esc(v.note) + '</span><span class="small">' + v.date + '</span></div>').join('') + '<button class="btn" style="margin-top:12px" data-a="closesheet">Close</button>';
   if (t === 'delete') h = '<h2 class="t">Delete my data?</h2><p class="sub">Your plan, answers, figures and documents will be deleted. This can\'t be undone.</p><button class="btn" style="background:var(--gap-t)" data-a="dodelete">Delete everything</button><button class="btn ghost" style="margin-top:10px" data-a="closesheet">Keep my data</button>';
   if (t === 'profile') h = '<div class="adv"><span class="face" aria-hidden="true">' + esc((S.acct.name || 'A')[0]) + '</span><div><h2 class="t" style="margin:0">' + esc(S.acct.name || 'You') + '</h2><div class="small">' + (S.acct.pk ? 'Signed in with Face ID' : 'Signed in with email code') + '</div></div></div><button class="goal" style="margin-top:14px" data-a="me" data-p="privacy"><span class="ic">🔐</span><b style="flex:1">Privacy & preferences</b></button><button class="goal" data-a="me" data-p="details"><span class="ic">🙋</span><b style="flex:1">My details</b></button>';
-  return '<div class="sheet-bg" data-a="closesheet"><div class="sheet" role="dialog" aria-modal="true" aria-label="' + esc(t) + '" data-a="noop"><div class="grab"></div><button class="sx" data-a="closesheet" aria-label="Close">✕</button>' + h + '</div></div>';
+  return '<div class="sheet-bg" data-a="closesheet"><div class="sheet" role="dialog" aria-modal="true"' + (t === 'ex' ? ' aria-labelledby="ex-t" aria-describedby="ex-s"' : ' aria-label="' + esc(t) + '"') + ' data-a="noop"><div class="grab"></div><button class="sx" data-a="closesheet" aria-label="Close">✕</button>' + h + '</div></div>';
 }
 
 /* ================= REPORT (printable) ================= */
 function openReport(){ if (!planReady()){ toast(chooseTxt(planMissing()[0]).replace(/this$/, 'your report')); ACT.asmopen(); return; }
   const P0 = project(), wiP = S.pref || (S.wi.m || S.wi.l ? S.wi : null), P = wiP ? project(wiP) : P0, F = findings(P0), um = umCount() === 13, rp = um ? riskRead(true) : null, per = personality();
-  const flags = checkItems().filter(x => ['look','est','miss'].includes(x.st));
+  const flags = checkItems().filter(x => ['look','miss'].includes(x.st));
   const rows = P0.rows.map(r => '<tr><td>' + r.a + ' (' + r.yr + ')</td><td>' + eur(r.inflow) + '</td><td>' + eur(r.needs) + '</td><td>' + eur(r.used) + '</td><td style="color:' + (isShort(r) ? 'var(--alert-t)' : 'inherit') + '">' + (r.short > 1 ? eur(r.short) : '—') + '</td><td>' + eur(r.liquid) + '</td></tr>').join('');
   const detail = S.goals.slice().sort((a, b) => a.age - b.age).map(g => { const p = P0.pct[g.id], ex = p < 95 ? extraFor(g) : 0;
     return '<p><b>' + g.e + ' ' + esc(g.name) + '</b> · ' + (g.kind === 'retire' ? 'from age ' + g.age + ', ' + eur(g.amount) + ' a year' : 'age ' + g.age + ' (' + (YEAR0 + g.age - S.about.age) + '), ' + eur(g.amount)) + ' in today\'s money · ' + g.prio + '.<br>What is on track: <b>' + p + '%</b> covered (' + BANDW[band(p)] + '). ' + (goalLine(P0, g) ? goalLine(P0, g) + '. ' : '') + (p >= 95 ? 'Your income and savings cover it.' : ex ? 'What could close the gap, on our assumptions: saving about <b>' + eur(ex) + ' a month</b> more towards it, or moving it later. An adviser can tell you the best way to do this for you.' : 'What could close the gap: moving it later, a smaller amount, or a bigger change to saving. An adviser can tell you the best way to do this for you.') + '</p>'; }).join('');
@@ -2434,7 +2502,7 @@ function openReport(){ if (!planReady()){ toast(chooseTxt(planMissing()[0]).repl
     '<section><h2>4. Your detailed plan, in plain words</h2>' + detail + '</section>' +
     '<section><h2>Your financial foundations</h2><p>Good planning is built from the bottom up.</p><ol>' + foundations().map(l => '<li><b>' + l.name + '</b>: ' + FND_LBL[l.st] + '. ' + esc(l.s) + '.</li>').join('') + '</ol>' + (fndNext() ? '<p>Next best step: ' + esc(fndNext().t) + '. ' + esc(fndNext().d) + '</p>' : '') + '</section>' +
     '<section><h2>5. What-if you saved</h2>' + (wiP ? '<p>' + (wiP.m ? (wiP.m > 0 ? 'Saving ' + eur(wiP.m) + ' more a month' : 'Saving ' + eur(-wiP.m) + ' less a month') : '') + (wiP.m && wiP.l ? ' and ' : '') + (wiP.l ? 'adding ' + eur(wiP.l) + ' once' : '') + (gById(wiP.g) ? ' towards ' + esc(gById(wiP.g).name.toLowerCase()) : '') + ':</p><p>' + wiText(P0, P) + '</p>' : '<p>You haven\'t tried a what-if yet.</p>') + '</section>' +
-    '<section><h2>6. Your money snapshot</h2>' + (S.about.partner ? '<p>Partner: ' + esc(partnerLine()) + '</p>' : '') + '<div class="tscroll"><table><tbody>' + FSEC.map(s => s.f.filter(fieldVisible).map(k => '<tr><td>' + s.t + ' · ' + esc(FF[k].l) + '</td><td>' + fmtField(k) + '</td><td>' + tagFor(k) + '</td></tr>').join('')).join('') + '</tbody></table></div>' + (flags.length ? '<p>' + flags.length + ' item(s) are estimated, missing or need a look.</p>' : '') + '</section>' +
+    '<section><h2>6. Your money snapshot</h2>' + (S.about.partner ? '<p>Partner: ' + esc(partnerLine()) + '</p>' : '') + '<div class="tscroll"><table><tbody>' + FSEC.map(s => s.f.filter(fieldVisible).map(k => '<tr><td>' + s.t + ' · ' + esc(FF[k].l) + '</td><td>' + fmtField(k) + '</td><td>' + tagFor(k) + '</td></tr>').join('')).join('') + '</tbody></table></div>' + (flags.length ? '<p>' + flags.length + (flags.length === 1 ? ' item is' : ' items are') + ' missing or need a look.</p>' : '') + workedList().map(x => '<p>' + esc(FF[x[0]].l) + ': ' + esc(x[1].replace(/ Type yours to replace it\.$/, '')) + '</p>').join('') + '</section>' +
     '<section><h2>7. Your money personality' + (um ? ' and indicative risk profile' : '') + '</h2>' + (discEnough() ? '<p><b>' + per.e + ' ' + per.name + '</b>: ' + per.strap + '</p><div style="max-width:520px"><b>Your money terms</b>' + termsHTML() + '</div>' : '<p>Not enough answers yet to show a money personality.</p>') + (um ? '<p>Indicative risk profile: <b>' + riskLabelText(rp) + '</b>' + (rp.limit ? ' (set by ' + RISK_SETBY[rp.limit] + ')' : '') + '. ' + (rp.mis ? esc(rp.mis) : '') + (rp.keNote ? ' ' + KE_NOTE : '') + ' Your adviser confirms your risk profile with you.</p>' : (discEnough() && riskRead(false).label ? '<p>Risk profile, first read: <b>' + riskRead(false).label + '</b> · finish your profile to confirm. A first read is never shown above Balanced.</p>' : '') + '<p>Complete <i>Understand me</i> to add your indicative risk profile.</p>') + '</section>' +
     '<section><h2>8. Your questions for an adviser</h2>' + (S.advQs.length ? '<ul>' + S.advQs.map(q => '<li>' + esc(q) + '</li>').join('') + '</ul>' : '<p>None yet.</p>') + '</section>' +
     '<section><h2>9. What your plan assumes</h2><p>' + assumeRows().map(x => esc(x[0]) + ': ' + esc(x[1]) + ' (' + esc(x[2]) + ')').join(' · ') + '. Investments can fall as well as rise. All projections are illustrative and not guaranteed. This is preliminary guidance, not financial advice. Only an authorised adviser can give advice. ' + DISC_FORMAL + '</p></section></article>';
@@ -2453,7 +2521,7 @@ function current(){
 }
 function finScreen(){ return S.upl ? V.PU() : S.fsec != null ? V.P3() : V.P2(); }
 let lastId = null, focusKey = null;
-function render(){
+function render(){ syncSafety();
   const scr = document.getElementById('screen'), sc0 = scr.querySelector('.scroll,.qbody'), top0 = sc0 ? sc0.scrollTop : 0;
   const s = current(), same = s.id === lastId;
   let html;
@@ -2487,7 +2555,7 @@ function openSec(i){ S.fsec = +i; S.upl = null; if (S.app){ if (S.tab !== 'exp')
 
 /* ================= ACTIONS ================= */
 const ACT = {
-  go:p => go(p), sheet:p => { S.sheet = p; render(); }, closesheet:() => { S.sheet = null; render(); }, noop:() => {}, toast:p => toast(p),
+  go:p => go(p), sheet:p => { S.sheet = p; render(); }, closesheet:() => closeSheet(), noop:() => {}, toast:p => toast(p),
   invite:() => { const v = (document.getElementById('inv') || {}).value; S.entry = 'adviser invite' + (v ? ' ' + v : ''); S.sheet = null; render(); toast('Invite linked'); },
   why:p => { const k = p, i = S.why.indexOf(k); if (i >= 0) { S.why.splice(i, 1); if (k === 'other') S.whyNote = ''; } else S.why.push(k); focusKey = '[data-a="why"][data-p="' + k + '"]'; render(); },
   dstart:() => { S.di = 0; go('D2'); },
@@ -2541,7 +2609,7 @@ const ACT = {
   pstup:p => pstStart(DOCT[p] ? p : 'retire'), pstok:() => pstConfirm(), pstrem:p => { pstRemove(p); toast('Statement removed. Your own figures are used again'); render(); },
   docrep:p => { S.fmode[FSEC[+p].id] = 'upload'; render(); },
   docrem:p => { const sec = FSEC[+p]; removeDoc(sec.f.concat(DOC_HIDDEN[sec.id] || [])); Object.keys(DOCT).forEach(c => { if (S.pdocs[c] && !Object.values(S.docOf || {}).includes('pst:' + c)) pstRemove(c); }); toast('Statement removed. Your own figures are used again'); render(); },
-  calcadd:p => { const m = calcMissing(C(p)); if (m.length){ toast('Choose your ' + m[0] + ' first'); return; } S.sheet = 'calcadd|' + p; render(); },
+  calcadd:p => { const m = calcMissing(C(p)); if (m.length){ toast(missTxt(m[0]) + ' first'); return; } S.sheet = 'calcadd|' + p; render(); },
   ckstd:p => { const t = xTop(); if (!t || t.v !== 'CALC') return; const c = C(t.p), std = calcStd(c.id, p), v = calcVals(c); if (!std) return; v[p] = std.v; S.calcT = S.calcT || {}; (S.calcT[c.id] = S.calcT[c.id] || {})[p] = true; focusKey = '#co-' + p; render(); },
   confirmcalcadd:p => { const r = C(p).run(calcVals(C(p))), g = r.goal; if (!g || g.kind === 'blocked') return; const msg = applyHandoff(g); S.sheet = null; if (S.app) afterPlanEdit(); render(); toast(msg); },
   vemail:() => verify('ev', 'P1S'), vsms:() => verify('sv', 'P1K'),
@@ -2552,8 +2620,7 @@ const ACT = {
   fsec:p => openSec(p), fmode:p => { S.fmode[FSEC[S.fsec].id] = p; render(); },
   fback:() => finBack(), fsave:() => { const sec = FSEC[S.fsec]; if (sec.id === 'about'){ S.fin.name && (S.acct.name = S.fin.name); } toast(sec.t + ' saved'); if (S.app) afterPlanEdit(true); finBack(); },
   fchoice:p => { const [k, v] = p.split('|'); setManual(k, v, 'typed'); focusKey = '[data-a="fchoice"][data-p="' + p + '"]'; render(); },
-  fest:p => { const d = FF[p]; setManual(p, val(d.est), 'est'); focusKey = '[data-a="fest"][data-p="' + p + '"]'; render(); },
-  fnone:p => { setManual(p, 0, 'none'); focusKey = '[data-a="fnone"][data-p="' + p + '"]'; render(); },
+  fex:p => { S.sheet = 'ex|' + p; render(); },   // §15: shows an example; never fills the field
   fix:p => { if (!S.app) S.from = 'check'; openSec(p); }, ack:p => { S.ack[p] = true; render(); },
   acksec:p => { FSEC.find(x => x.id === p).f.filter(fieldVisible).forEach(k => { if (!FF[k].opt) S.ack[k] = true; }); focusKey = null; render(); },
   toresults:() => { if (!S.checked || !planReady()) return; toResults(); },
@@ -2631,7 +2698,7 @@ function bind(){
   ph.querySelectorAll('details.asmg').forEach(d => d.addEventListener('toggle', () => { if (d.open) S.asmOpen = d.dataset.g; else if (S.asmOpen === d.dataset.g) S.asmOpen = null; })); bindNB(ph);   // keep the open group across re-renders
   ph.querySelectorAll('input[data-in="age"]').forEach(r => r.addEventListener('input', () => { S.about.age = +r.value; r.setAttribute('aria-valuetext', 'Age ' + S.about.age); const o = document.getElementById('age-v') || ph.querySelector('.stepper output'); if (o) { if ('value' in o && o.tagName === 'INPUT') o.value = S.about.age; else o.textContent = S.about.age; } }));
   ph.querySelectorAll('[data-gname]').forEach(i => i.addEventListener('input', () => { gById(i.dataset.gname).name = i.value.slice(0, 30) || 'My goal'; }));
-  ph.querySelectorAll('[data-gamt]').forEach(i => i.addEventListener('change', () => { gById(i.dataset.gamt).amount = Math.max(0, parseInt(i.value.replace(/\D/g, '')) || 0); render(); }));
+  ph.querySelectorAll('[data-gamt]').forEach(i => i.addEventListener('change', () => { const g = gById(i.dataset.gamt); g.amount = Math.max(0, parseInt(i.value.replace(/\D/g, '')) || 0); g.auto = false; render(); }));
   ph.querySelectorAll('[data-gsaved]').forEach(i => i.addEventListener('change', () => { gById(i.dataset.gsaved).saved = Math.max(0, parseInt(i.value.replace(/\D/g, '')) || 0); render(); }));
   ph.querySelectorAll('[data-acct]').forEach(i => i.addEventListener(i.type === 'checkbox' ? 'change' : 'input', () => { S.acct[i.dataset.acct] = i.type === 'checkbox' ? i.checked : i.value; const a = S.acct, b = document.getElementById('acctgo');
     if (b) b.disabled = !(a.name.trim() && /.+@.+\..+/.test(a.email) && a.mobile.replace(/\D/g, '').length >= 9 && a.c1); }));
@@ -2720,7 +2787,10 @@ document.addEventListener('click', e => {
   if (el.getAttribute('aria-disabled') === 'true' && a !== 'gpick') return;
   if (ACT[a]) ACT[a](p);
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape'){ if (document.getElementById('report').classList.contains('on')) { document.getElementById('report').classList.remove('on'); return; } if (S.sheet){ S.sheet = null; render(); } } });
+function closeSheet(){ const s = S.sheet; S.sheet = null; if (s && s.startsWith('ex|')) focusKey = '[data-a="fex"][data-p="' + s.slice(3) + '"]'; render(); }   // §15: focus goes back to the link
+document.addEventListener('keydown', e => { if (e.key === 'Escape'){ if (document.getElementById('report').classList.contains('on')) { document.getElementById('report').classList.remove('on'); return; } if (S.sheet) closeSheet(); }
+  if (e.key === 'Tab' && S && S.sheet){ const sh = document.querySelector('#screen .sheet'); if (!sh) return; const f = [...sh.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')].filter(x => !x.disabled && x.offsetParent !== null); if (!f.length) return;
+    const first = f[0], last = f[f.length - 1]; if (!sh.contains(document.activeElement)){ e.preventDefault(); first.focus(); } else if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); } else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); } } });   // dialogs keep focus inside
 
 /* ================= SAMPLE CUSTOMER + SIDE PANEL ================= */
 function loadSample(){
@@ -2728,15 +2798,10 @@ function loadSample(){
   Object.assign(S.ans, {'2':0, '4':1, '6':2, '7':1, '8':2, '9':2, '12':1}); S.why = ['track', 'change'];
   S.about = {age:38, partner:true, deps:2}; S.retireAge = 63;
   ['edu','travel','mfree','safety','retire'].forEach(k => S.goals.push(mkGoal(k)));
-  const G = k => S.goals.find(g => g.k === k); G('edu').age = 48; G('edu').amount = 50000; G('travel').age = 41; G('travel').amount = 12000; G('mfree').age = 55; G('safety').age = 40; G('safety').amount = 15000; G('safety').saved = 5000; retireGoal().amount = 46000;
+  const G = k => S.goals.find(g => g.k === k); G('edu').age = 48; G('edu').amount = 50000; G('travel').age = 41; G('travel').amount = 12000; G('mfree').age = 55; G('safety').age = 40; G('safety').amount = 15000; G('safety').auto = false; G('safety').saved = 5000; retireGoal().amount = 46000;
   S.acct = {name:'Aoife', email:'aoife@example.ie', mobile:'087 123 4567', c1:true, c2:false, ev:true, sv:true, pk:true};
   const put = (k, v, src, c) => { S.fin[k] = v; S.src[k] = src; if (c) S.conf[k] = c; };
-  put('name', 'Aoife', 'pre'); put('age', 38, 'pre'); put('retireAge', 63, 'pre'); put('pAge', 37, 'typed');
-  put('work', 'Employed', 'doc', 99); put('income', 58000, 'doc', 98); put('pIncome', 22000, 'typed'); put('otherM', 0, 'none'); put('costsM', 3600, 'est'); put('oneOffY', 1800, 'doc', 81);
-  put('home', 'Own with mortgage', 'doc', 99); put('homeValue', 420000, 'typed'); put('cash', 9000, 'doc', 97); put('invest', 6200, 'doc', 88);
-  put('mortBal', 203700, 'doc', 96); put('mortRate', 3.85, 'doc', 94); put('mortPayM', 1180, 'doc', 93); put('mortYears', 21, 'doc', 90); put('cardBal', 400, 'doc', 86); put('cardPayM', 40, 'doc', 80); put('loanBal', 3500, 'doc', 88); put('loanPayM', 100, 'doc', 84);   // small card balance + a car loan
-  put('life', 'Yes', 'doc', 95); put('ip', 'No', 'typed'); put('ci', 'Not sure', 'typed'); put('workCover', 'Yes', 'doc', 90); put('health', 'Yes', 'typed');
-  put('pension', 72000, 'doc', 95); put('pensionM', 520, 'doc', 91); put('sp', 'Expect full', 'typed'); S.look.pension = 'Statement is over 12 months old';
+  Object.entries(SAMPLE_FIN).forEach(([k, [v, src, c]]) => put(k, v, src, c)); S.look.pension = 'Statement is over 12 months old';
   S.partner = {mode:'manual', email:'', sent:false, name:'Cian'};
   S.retireSet = true; S.infl = INFL_STD; useAllStd(); Object.assign(S.asm, {planEnd:95, cardRate:0.20, loanRate:0.08, pSpWeek:239.44, mortRate:0.0375, buyFees:3000, depEarn:0.01, survivor:RI.sp.survivor}); applyAssume();
   S.toolPick = {lumpsum:{f:0, wait:WAIT_YEARS}, regularinvest:{f:1}, fees:{a:0.5, b:1.5}, riskreturn:{s:2}, incomegap:{ib:RI.sp.illness}};   // Aoife's tool choices (§14: the sample has every choice made)   // Aoife chose the standards, plans to 95, and typed her card / loan APRs and Cian's State Pension
