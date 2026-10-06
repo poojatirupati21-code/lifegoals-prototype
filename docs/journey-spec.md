@@ -484,3 +484,20 @@ Every customer's money is different, so we never fill in a figure for them.
 - Data precedence becomes: document > customer-typed > (nothing: Missing).
 - Figures the engine **works out from the customer's own figures** stay, labelled "Worked out from your figures" with the reason: the mortgage repayment from balance, rate and years left; a 5-year repayment for a loan or card with no (or too small) stated repayment. These are calculations, not guesses about the person.
 - All the old made-up estimate figures (€45,000 income, €8,000 cash, €380,000 home, etc.) are deleted.
+
+## 16. LifeMap rebrand + cover (Pooja, 6 Oct 2026; binding)
+- **Name:** the product and platform is **LifeMap** (by DigiPro.AI). Replace "LifeGoals" in every customer-facing string (prototype, workbook, Word spec). File names stay for now.
+- **Cover (D0)**, short and human, no AI-sounding copy:
+  - Full-bleed real photo (a winding road through Irish countryside), dark gradient at the bottom for legible text. Photo to be supplied/licensed; until then a clearly marked photo slot.
+  - Logo: **LifeMap**
+  - Headline: **Where do you want life to take you?**
+  - Line: **Your goals and your money, on one simple map.**
+  - Button: **Let's start**
+  - Small: **Free · About a minute · Nothing saved unless you say so** · "Why we ask" link · **Guidance, not advice.** · "I have an invite" stays.
+- **D1:** "What brings you to LifeMap today?" The chip 🛟 "Building a safety net for emergencies" becomes ☔ **"Saving for a rainy day"**.
+- **Goal tile:** "Build a safety net" becomes **"Rainy day fund"** (helper line: "Your emergency fund"). Elsewhere "emergency fund" stays as the plain term.
+- **Discover Q8 (map version; scoring, tags and line shapes unchanged):**
+  "Pick a road for your long-term money." / "A flat road is steady but slower. A hilly road has bigger ups and downs, with more growth potential."
+  🛣️ Flat and steady (Low risk) · 🏞️ Gentle hills (Cautious) · ⛰️ Hills and dips (Balanced) · 🏔️ Mountain road, but exciting (High risk).
+  Any reference to "forecast", "sunny", "stormy" for this question changes to the road wording (e.g. personality reveal, Me, report, notes).
+- Goal status icons: unchanged until Pooja decides.
