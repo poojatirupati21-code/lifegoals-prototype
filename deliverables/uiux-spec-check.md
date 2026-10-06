@@ -1,7 +1,7 @@
-# UI/UX calculator spec: automated check (prototype 3fcfc96, 6 Oct 2026)
+# UI/UX calculator spec: automated check (prototype fc0d2ae, 6 Oct 2026)
 
 Document: deliverables/LifeGoals-Calculators-UIUX-Spec.docx (file name unchanged; the product is LifeMap). A4, **320 pages, 13.5 MB**, 28 calculators (C01 to C28), rebuilt from:
-- prototype commit 3fcfc96: journey-spec §14 to §19 (the §19 feedback items: lists, complete-on-save, Settings, Emergency fund months, goal order)
+- prototype commit fc0d2ae: journey-spec §14 to §20 (the §19 feedback items and the §20 copy pass, 26 reworded blocks)
 - the workbook as committed (new sheets "Settings" and "Your lists", their named cells, the new guidance texts)
 
 The screenshots are palette-quantised PNGs (256 colours, no dithering) to keep the file small; the text was not touched. I converted the docx to PDF with LibreOffice and looked at sample pages: 3.7 (Settings: standards table, partner override, admin view, workbook sheet), 4.8 (the item block, Liabilities, Protection, Pension, per-item upload), 4.9 (complete on save), 4.10 (workbook Your lists and the calculators that use it), 6.1 and 6.2 (months, goal order). Layout, tables and images are fine. LibreOffice's PDF font has no glyphs for a few newer emoji; they are in the .docx text.
@@ -10,7 +10,7 @@ The screenshots are palette-quantised PNGs (256 colours, no dithering) to keep t
 
 **7444 checks passed, 0 failed. Browser console errors: 0.**
 
-**Planted-error test.** I made a copy of the docx with 14 deliberate edits and ran the same check on it. It found all 14, which showed up as 58 failed checks. The 14 edits:
+**Planted-error test.** I made a copy of the docx with 16 deliberate edits and ran the same check on it. It found all 16, which showed up as 61 failed checks. The 14 edits:
 1. C01 result label
 2. C11 result line
 3. C01 unit
@@ -25,6 +25,8 @@ The screenshots are palette-quantised PNGs (256 colours, no dithering) to keep t
 12. A Settings wording in 3.7.1 ("Irish pay has grown about 3%–4% a year recently (CSO)" changed to "2%–4%", every occurrence)
 13. A protection field label ("Death-in-service: lump sum" changed to "Death in service: lump sum", every occurrence)
 14. The ranking heading ("Which goal first?" changed to "Which goal comes first?", every occurrence)
+15. A copy-pass wording: the Emergency fund months note ("use the same number." changed to "use the same value.", every occurrence)
+16. A copy-pass wording: the Known limits row ("stay at the 2026 rates." changed to "stay at the 2027 rates.", every occurrence)
 
 ## What is checked
 
@@ -81,9 +83,8 @@ A fresh headless Chromium run (390×844, scale 2), separate from the screenshot 
 
 ## Changed in this rebuild
 
-- **§19 (new sections):** 3.7 Settings replaces the §18 partner rates section (37 standards table, partner override, admin view, customer side, workbook sheet Settings); 4.8 Lists (item block, Liabilities, Protection, Pensions, per-item upload); 4.9 a saved section is complete and blanks are optional; 4.10 workbook "Your lists" and the calculators that fall back to it; 6 Goals (Emergency fund months and goal order). Section 4.4 now lists 47 cards with a "Shown on" column.
-- Updated: the register text in 3.3 (standards and market rates moved to Settings), the cover and Purpose bullets, Appendix A (lists, complete on save, goals, Settings strings) and Appendix B, per-calculator workbook tables (evaluated guidance texts and the Your lists fallback line), C11 states (months blank until chosen).
-- Screenshots: new item, hub, Settings admin and ranking screens; palette-quantised to bring the file from 38 MB to 13.5 MB.
+- **Copy pass (§20):** the doc follows the reworded prototype text: the step 7 and Your assumptions intros, the What your plan assumes intro and its "How the plan works" and "Known limits" rows, the Emergency fund months note (6.1 and Appendix A), the "For the rest we show a suggestion or the standard" line in Appendix A. The change list is in docs/copy-audit.md.
+- The workbook README lines that were reworded are not quoted in this document, so nothing else moved. Page count and file size are unchanged (320 pages, 13.5 MB).
 
 ## Open points (Appendix B of the spec)
 
