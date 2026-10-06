@@ -501,3 +501,14 @@ Every customer's money is different, so we never fill in a figure for them.
   🛣️ Flat and steady (Low risk) · 🏞️ Gentle hills (Cautious) · ⛰️ Hills and dips (Balanced) · 🏔️ Mountain road, but exciting (High risk).
   Any reference to "forecast", "sunny", "stormy" for this question changes to the road wording (e.g. personality reveal, Me, report, notes).
 - Goal status icons: keep the weather icons (☀️ 🌦️ ⛈️) as they are (Pooja, 6 Oct 2026).
+
+## 17. Irish tone, Explore layout, accessibility, sourced ranges, Budget 2027 (Pooja, 6 Oct 2026; binding)
+- **Discover Q8, Irish tone** (scores, tags and line shapes unchanged):
+  "Pick your road for your long-term money." / "The motorway is steady but slower. The mountain pass has more twists and turns, and more room to grow."
+  🛣️ **Straight up the motorway** (Low risk) · 🏞️ **A quiet country road** (Cautious) · 🌿 **Up and down the boreens** (Balanced) · 🏔️ **Over the Healy Pass, hairpins and all** (High risk).
+  Use everyday Irish phrasing elsewhere only where it reads naturally; never slang that could confuse.
+- **Explore order:** What-ifs for your goals (if a plan) → **Focus on one area** (moved up, same box style) → Tools for you → videos → **Calculators** (moved down).
+  - "Calculators" is shown in the same box style as Focus on one area: one row per group (🏡 Home & mortgage · 🎯 Savings & goals · 🌅 Pensions & retirement · 📈 Investments · 🛡️ Protection · 💶 Everyday money), each with its one-line blurb and "N tools", chevron, opening that group's calculators. The coloured tile grid goes.
+- **Accessibility:** emoji in screen titles and headings must not be read aloud (aria-hidden on the emoji; the accessible name is the words only). Applies everywhere.
+- **Guidance ranges must be sourced.** Every "Usually between X and Y" must name an official or published source (CBI, CSO, Revenue, DSP, Pensions Authority, CCPC…). If a range has no such source, remove the range and make the input optional with no figure. Never quote a range we made up. Specifically: the deposit-rate range (2%–2.3%) and the line "credit unions charge less" are removed unless an official source supports them; the deposit rate becomes optional.
+- **Budget 2027:** Ireland's Budget 2027 (announced 6 Oct 2026). Each change applies only from its own effective date (most tax changes from 1 Jan 2027; some welfare changes from a later date). The rules register keeps the 2026 value and adds the 2027 value with its effective date; the plan uses each value for the years it applies. Only changes officially announced (gov.ie / Revenue / DSP budget documents) are used.
