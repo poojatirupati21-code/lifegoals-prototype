@@ -500,4 +500,4 @@ Every customer's money is different, so we never fill in a figure for them.
   "Pick a road for your long-term money." / "A flat road is steady but slower. A hilly road has bigger ups and downs, with more growth potential."
   🛣️ Flat and steady (Low risk) · 🏞️ Gentle hills (Cautious) · ⛰️ Hills and dips (Balanced) · 🏔️ Mountain road, but exciting (High risk).
   Any reference to "forecast", "sunny", "stormy" for this question changes to the road wording (e.g. personality reveal, Me, report, notes).
-- Goal status icons: unchanged until Pooja decides.
+- Goal status icons: keep the weather icons (☀️ 🌦️ ⛈️) as they are (Pooja, 6 Oct 2026).
