@@ -493,7 +493,7 @@ Every customer's money is different, so we never fill in a figure for them.
   - Headline: **The life you'd like, mapped out.**
   - Line: **A life map that guides you, step by step.**
   - Button: **Let's start**, with the line under it: **An easy tool, built for you.**
-  - Small: **Free · About a minute · Nothing saved unless you say so** · "Why we ask" link · **Guidance, not advice.** · "I have an invite" stays.
+  - Nothing else on the cover except the "Why we ask" and "I have an invite" links. No trust line and no "Guidance, not advice" on the cover (Pooja, 6 Oct 2026); that disclaimer stays wherever results are shown.
 - **D1:** "What brings you to LifeMap today?" Only the name changes; the chips stay exactly as they are (🛟 "Building a safety net for emergencies" unchanged). No "rainy day" wording (Pooja, 6 Oct 2026).
 - **Goal tile:** "Build a safety net" becomes **"Emergency fund"** (no helper line, no "rainy day").
 - **Discover Q8 (map version; scoring, tags and line shapes unchanged):**
