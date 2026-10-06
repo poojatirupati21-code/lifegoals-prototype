@@ -1,10 +1,10 @@
-# UI/UX calculator spec: automated check (prototype 4d065a8, 6 Oct 2026)
+# UI/UX calculator spec: automated check (prototype e1cbc5a, workbook a04796c, 6 Oct 2026)
 
 Document: deliverables/LifeGoals-Calculators-UIUX-Spec.docx (file name unchanged; the product is now LifeMap). A4, **293 pages**, 28 calculators (C01 to C28), rebuilt from:
-- prototype commit 4d065a8: journey-spec §15 ("Not sure? See an example" cards, statuses, precedence) and §16 (LifeMap name, new cover, road version of Q8, "Emergency fund" tile and goal)
-- the workbook as committed with this document (customer-facing "LifeGoals" text renamed to "LifeMap"; recalc.py: 0 errors, 1,508 formulas)
+- prototype commit e1cbc5a ("Not added yet" tag, natural gate names, accurate worked-out reasons) on top of 4d065a8: journey-spec §15 ("Not sure? See an example" cards, statuses, precedence) and §16 (LifeMap name, new cover, road version of Q8, "Emergency fund" tile and goal)
+- workbook commit a04796c (customer-facing text says LifeMap; C11 goal "Emergency fund")
 
-I converted it to PDF with LibreOffice and looked at sample pages: the cover page, section 4 (link, card layout, all-cards tables, Liabilities statuses), section 5 (cover, other §16 changes) and the C02 "Your finances gaps" block. Layout, tables and images are fine. LibreOffice's PDF font has no glyphs for a few newer emoji (🛣️ 🏞️ ⛰️ 🏔️ in section 5.2); they are in the .docx text and show in Word.
+I converted it to PDF with LibreOffice and looked at sample pages: 4.6 checklists and 4.7, the C06 "Your finances gaps" block, Appendix B, and from the previous round the cover page, section 4 (link, card layout, all-cards tables, Liabilities statuses), section 5 (cover, other §16 changes) and the C02 "Your finances gaps" block. Layout, tables and images are fine. LibreOffice's PDF font has no glyphs for a few newer emoji (🛣️ 🏞️ ⛰️ 🏔️ in section 5.2); they are in the .docx text and show in Word.
 
 ## Result
 
@@ -31,7 +31,7 @@ Shared parts: the inflation chips in their 3 states, the rules version and all r
 - **All 33 example cards**: for each field, the link "Not sure? See an example" exists on its Your finances section; tapping it opens the card; title, options with meanings, sentence, "Where to find yours" line and the "Nothing to add? Enter 0." flag equal the row in section 4.4; small print, "Got it" and the dialog semantics (role dialog, aria-labelledby ex-t, aria-describedby ex-s); Escape closes it, focus returns to the link, and the field value and status are unchanged.
 - **Statuses**: the six tags from the live tagFor() are in the 4.5 table; no "≈ Estimated" or "Confirmed none" on screen.
 - **Checklist**: every "Check your details" row (icon, field, line, incl. the worked-out note) is in the 4.6 table, and only ⚠️ / ❓ rows appear.
-- **Calculators**: with years left missing, C02, C04, C05, C06 and C23 show "Add your … to see this", and the text is in 4.7 and in each calculator section; C25 and C27 show the "Worked out from your figures" tag and line, verbatim in both places.
+- **Calculators**: with years left missing, C02, C04, C05, C06 and C23 show "Add … to see this" with their own natural names (e.g. C06 "Add the first term (your mortgage years left) to see this") and the "Not added yet" tag, and the text is in 4.7 and in each calculator section; C25 and C27 show the "Worked out from your figures" tag and line, verbatim in both places.
 - **Cover**: every cover string is in the 5.1 table and Appendix A; the cover shows nothing else (no trust line, no "Guidance, not advice."); D1 title, the "Emergency fund" tile and all Q8 strings are in section 5.
 - **Brand**: no customer-facing "LifeGoals" left in the docx (only the file names), and none of the old wording ("Start · about 1 min", "Your life. Your plan.", "Pick a forecast", "Also still to choose:").
 
@@ -73,20 +73,18 @@ Shared parts: the inflation chips in their 3 states, the rules version and all r
 
 ## Changed in this rebuild
 
-- New section 4 (Your finances, §15): the link, the card layout, dialog behaviour, all 33 card texts, statuses, precedence, worked-out figures, checklists, and how missing or worked-out figures show in calculators. Seven calculators (C02, C04, C05, C06, C23, C25, C27) have a "Your finances gaps" block.
-- New section 5 (LifeMap, §16): the cover with its photo slot, plus the D1 title, the "Emergency fund" tile and C11 goal, and Q8.
-- Updated: 1.6 result gate ("Add your … to see this", "Also still to add or choose:"), 1.9 tags, the pre-fill order (document > typed; nothing filled in), pre-fill sources (no "25 if unknown"), C02 stated-repayment rule, Appendix A shared strings, and the cover page and header (LifeMap).
+- **"Not added yet"**: a personal figure missing from Your finances has its own tag; "Not chosen yet" stays for §14 choices. Updated in 1.6, 4.7, the per-calculator gap blocks and Appendix A; the inputs and screen-value tables show the tag the screen shows.
+- **Natural gate names**: every gate and "Also still to add or choose" list is recaptured (e.g. C06 "Add the first term (your mortgage years left) to see this", C07 "the deposit's earning rate", C19 "the first fee (fee A), the second fee (fee B)", C16/C20 "the Cautious style growth"). The Appendix A template is now "Choose / Add {item} to see this".
+- **Worked-out reasons**: the 4.5 template has all three reasons (blank, typed €0, too small); the Liabilities example now shows "because a €0 repayment wouldn't clear it".
+- **"Nothing to add? Enter 0."**: documented as euro fields only, as journey-spec §15 now says.
+- **Appendix B**: the five §15/§16 items from last round are moved to "fixed"; only the cover photo, Budget 2027 and the title emoji remain.
+- **Check fix**: one of my new §15 checks expected every missing-figure gate to start "Add your"; C06 now (correctly) says "Add the first term …". The first run reported that as 1 failure; I fixed the check, not the doc, and re-ran both the check and the planted-error test.
 
 ## Open points (Appendix B of the spec)
 
 - Budget 2027 (6 Oct 2026) update.
 - The emoji in screen titles is read aloud by screen readers.
-- §15: a missing personal figure shows the tag "Not chosen yet" while the gate says "Add your …".
-- §15: C06 gate reads "Add your term a to see this".
-- §15: the worked-out note says "because no repayment was given" after a typed €0.
-- §15: "Nothing to add? Enter 0." shows on euro fields only; the spec lists it for every card.
 - §16: the cover photo is a placeholder; re-check contrast when the licensed photo goes in.
-- §16: the workbook C11 plan output formula still names the goal "Safety net"; the prototype says "Emergency fund".
 
 ## Failures
 
