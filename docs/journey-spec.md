@@ -494,8 +494,8 @@ Every customer's money is different, so we never fill in a figure for them.
   - Line: **Your goals and your money, on one simple map.**
   - Button: **Let's start**
   - Small: **Free · About a minute · Nothing saved unless you say so** · "Why we ask" link · **Guidance, not advice.** · "I have an invite" stays.
-- **D1:** "What brings you to LifeMap today?" The chip 🛟 "Building a safety net for emergencies" becomes ☔ **"Saving for a rainy day"**.
-- **Goal tile:** "Build a safety net" becomes **"Rainy day fund"** (helper line: "Your emergency fund"). Elsewhere "emergency fund" stays as the plain term.
+- **D1:** "What brings you to LifeMap today?" Only the name changes; the chips stay exactly as they are (🛟 "Building a safety net for emergencies" unchanged). No "rainy day" wording (Pooja, 6 Oct 2026).
+- **Goal tile:** "Build a safety net" becomes **"Emergency fund"** (no helper line, no "rainy day").
 - **Discover Q8 (map version; scoring, tags and line shapes unchanged):**
   "Pick a road for your long-term money." / "A flat road is steady but slower. A hilly road has bigger ups and downs, with more growth potential."
   🛣️ Flat and steady (Low risk) · 🏞️ Gentle hills (Cautious) · ⛰️ Hills and dips (Balanced) · 🏔️ Mountain road, but exciting (High risk).
