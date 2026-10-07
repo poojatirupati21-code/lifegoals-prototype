@@ -1,16 +1,16 @@
-# UI/UX calculator spec: automated check (prototype head, journey-spec §14 to §25, 6 Oct 2026)
+# UI/UX calculator spec: automated check (prototype HEAD 423d6d1, workbook ecf2b90, journey-spec §14 to §26, 7 Oct 2026)
 
-Document: deliverables/LifeGoals-Calculators-UIUX-Spec.docx (file name unchanged; the product is LifeMap). A4, **311 pages, 18.2 MB**, 28 calculators (C01 to C28), rebuilt from:
-- the prototype at the head of branch claude/simplify-customer-journey-zqxep3: journey-spec §14 to §25 (the §19 feedback items, the §20 copy pass, §21 Experts boxes and Focus tiles, §22 skippable Step 7, §23 Emergency fund naming, cover photo and Budget 2027 note, §24 Liabilities, What-if and saving files, §25 photos on tiles and two real videos)
+Document: deliverables/LifeGoals-Calculators-UIUX-Spec.docx (file name unchanged; the product is LifeMap). A4, **331 pages, 17.5 MB**, 28 calculators (C01 to C28), rebuilt from:
+- the prototype at commit 423d6d1 of branch claude/simplify-customer-journey-zqxep3 and the workbook at commit ecf2b90: journey-spec §14 to §26 (the §19 feedback items, the §20 copy pass, §21 Experts boxes and Focus tiles, §22 skippable Step 7, §23 Emergency fund naming, cover photo and Budget 2027 note, §24 Liabilities, What-if and saving files, §25 photos on tiles and two real videos, §26 What-if order and labelled example figures, and the planner, developer and PM review rounds)
 - the workbook as committed (new sheets "Settings" and "Your lists", their named cells, the new guidance texts)
 
 The screenshots are palette-quantised PNGs (256 colours, no dithering) to keep the file small; the text was not touched. I converted the docx to PDF with LibreOffice and looked at sample pages: 3.7 (Settings: standards table, partner override, admin view, workbook sheet), 4.8 (the item block, Liabilities, Protection, Pension, per-item upload), 4.9 (complete on save), 4.10 (workbook Your lists and the calculators that use it), 6.1 and 6.2 (months, goal order). Layout, tables and images are fine. LibreOffice's PDF font has no glyphs for a few newer emoji; they are in the .docx text.
 
 ## Result
 
-**7528 checks passed, 0 failed. Browser console errors: 0.**
+**7601 checks passed, 0 failed. Browser console errors: 0.** The check was run against the final docx and the prototype and workbook named above.
 
-**Planted-error test.** I made a copy of the docx with 23 deliberate edits and ran the same check on it. It found all 23, which showed up as 74 failed checks (7454 passed). The 23 edits:
+**Planted-error test.** I made a copy of the docx with 26 deliberate edits and ran the same check on it. It found all 26, which showed up as 82 failed checks (7519 passed). The 26 edits:
 1. C01 result label
 2. C11 result line
 3. C01 unit
@@ -34,6 +34,11 @@ The screenshots are palette-quantised PNGs (256 colours, no dithering) to keep t
 21. A video title ("Your retirement plan: how it works" changed to "…how it work", every occurrence; caught by the 2.6 video row check)
 22. The What-if live line ("With this what-if you" changed to "With this what-if we", every occurrence; caught by the 7.2 check)
 23. A Liabilities label ("Do you have a mortgage?" changed to "Do you have a mortgage loan?", every occurrence; caught by the 4.8.2 check)
+24. The "Use the standards for the rest" card text ("One tap uses the standard for" changed to "…standards for"; caught by the 7.5 check)
+25. The example-figures label ("Example figures. Change them to yours." changed to "…Change them.", every occurrence; caught by the 2.7 check and the Explore tool checks)
+26. The investment standard wording ("less about 1% charges" changed to "2%"; caught by the 7.7 and Settings checks)
+
+(The results-banner edit, number 20, was re-aimed at the new banner wording "3 details missing.")
 
 ## What is checked
 
@@ -54,6 +59,8 @@ A fresh headless Chromium run (390×844, scale 2), separate from the screenshot 
 **§21 and §22 (29 checks):** the six Focus on one area tiles (emoji, name, blurb and --art slot equal the live tiles in 2.2; the grid, honesty and contrast lines); the five specialist boxes on the Experts tab, C0 and C1 equal 2.5 and the old chip row is gone; Step 7 (3.5): the "Choose 3 things" card, counter, "Everything else" card, the standards button and its note, both buttons disabled before the 3 choices, no tick, the standards button leaves the 3 unchosen; Skip opens results with a banner; the 1 and 3 missing banner texts equal 3.5.1.
 
 **§23 to §25 (new in this rebuild).** Re-driven live and compared with the docx text: Emergency fund naming (gate, label, group, assumptions row, calculator question; the Lifecast wording that stays is listed in 7.1 and each item is still in the prototype; no stray "safety net" anywhere else in the document); the cover (JPEG slot, position, the four-viewport contrast table with every line at 4.5:1 or better, the honesty note about the 912 × 502 photo); the Budget 2027 note (same words in the sheet, the footnote and 7.4, no Budget figures named); the Focus tiles (five photos and their object-positions in 2.2, Protection drawn); both real videos (a row each in the 2.6 table: title, topic, length, file, poster, tool; Home strip; failure message; captions line; "NOT embedded" note); Liabilities (question, add button, four other-property fields, order); What-if (section titles, labels, live line, warning); saving files (every message, file name, library URL, the honest limits). The four other-property mortgage example cards (mort2.*) are now reached and compared like the other 49, so 53 cards are checked (60 keys less the 7 old single-total cards).
+
+**§26 and the fix rounds (new, about 75 checks).** Re-driven live and compared with sections 2.7 and 7.5 to 7.14: the "Use the standards for the rest" card on the gate and Home (15 standards, gone after the tap, 3 choices left); the other-property mortgage gate (clears with years or a repayment); the derived investment standard (2.6%, cautious 1.9%, 3.3% at 6% growth) and the workbook Set_inv, Set_inv_Cautious values and formula; the three "main strength" outcomes; 4 required choices with a partner income and 3 without, the partner retirement age field and the Known limits row; the unknown-rate buttons, planning-rate note and "What your plan assumes" rows; the Emergency fund goal equal to months times essential spending and the typed-amount note; the repayment flag (on, off, off with no rate); all 32 partner-override ranges; no invented age (blank box, Next off, "Not given yet", the add-age sheet); What-if order; the example label on all 28 tools (top) and hidden with a plan; the report dialog (focus, inert background, Esc returns focus); the single banner; the Explorer watch-out; the workbook README 2.4, Budget note block and calcPr.
 
 ## Per calculator
 
@@ -95,8 +102,10 @@ A fresh headless Chromium run (390×844, scale 2), separate from the screenshot 
 
 ## Changed in this rebuild
 
+- **7 October rounds (§26, planner, developer):** new 2.7 (example figures), new 7.5 to 7.14, and updated 3.5 (Step 7 with 3 or 4 choices), 7.1 (the Explorer watch-out no longer says safety net; the C11 text had come from a stale workbook export and is now from the final workbook), 7.2 (What-if order) and 7.3 (print fallback "Nothing opened"). The doc check re-reads the Explore tool result lines without the new example label (the label is documented in 2.7). "Also still to choose:" is the live gate wording again, so it is no longer on the old-wording list.
+
 - **§23 to §25:** new 2.6 (the two videos and the media folder), cover photo and contrast table in 5, Emergency fund naming (7.1), What-if card (7.2), saving the plan and meeting details (7.3), Budget 2027 note (7.4), Liabilities mortgage first (4.8.2), photos on the Focus tiles (2.2); first-page list of files to keep together. Design tokens that hold pictures now read "url(embedded photo, N KB)" instead of the raw data.
-- **Check fixes:** the card check now opens the other-property mortgage item so its four example cards are compared; the saving-files check reads apostrophes the way the browser does. **A bug in the previous committed doc is fixed:** the design-token table split the picture slots (data URIs with a semicolon) into about 40 pages of random text (section 1 ran from page 5 to page 48). Section 1 is now 9 pages, so the document is 311 pages instead of 336 although it has more content. The calculator sections are unchanged in length.
+- **Check fixes:** the card check now opens the other-property mortgage item so its four example cards are compared; the saving-files check reads apostrophes the way the browser does. **A bug in the previous committed doc is fixed:** the design-token table split the picture slots (data URIs with a semicolon) into about 40 pages of random text (section 1 ran from page 5 to page 48). Section 1 is now 9 pages, so the previous document was 336 pages and this one is 331 although it has much more content. The calculator sections are unchanged in length.
 
 - **§21 and §22:** new 2.2 (illustrated square tiles, art slots, scrim, reduced motion), new 2.5 (Talk to a specialist), rewritten 3.5 (Step 7: Choose 3 things, standards for the rest, Skip) and new 3.5.1 (results banner). Screenshots were recaptured and palette-quantised. All tile and box text is checked against the live prototype.
 
@@ -110,6 +119,7 @@ A fresh headless Chromium run (390×844, scale 2), separate from the screenshot 
 - The admin view is a prototype screen; access and approval of partner figures belong to the production build.
 - The cover-through-work hint (death-in-service "usually a multiple of your salary") should be checked with a protection expert.
 - Emergency fund months in C11 keep a value typed there after the goal changes it (typing in a calculator wins; the plan uses the latest). Consider showing the plan-wide value again.
+- **Defects found in the prototype and workbook (reported, not fixed):** (1) the "Use the standards for the rest" card repeats every missing item under "will still be yours to make" (it compares two separately built lists by identity); (2) the workbook Set_inv_Label says "forecast" while the app says "prediction", and the workbook formula reads Suggest_Fund_Charges while the app reads the Settings charges figure. Both are in Appendix B of the spec.
 - Captions: the two real videos have none; the doc says "Captions not available yet" and no transcript is invented.
 - Real video playback could not be tested (the test browser has no H.264); the doc says so in 2.6.
 - Saving files: PDF generation was tested with the real jsPDF and html2canvas files served by a stub for cdnjs; the real Claude viewer and the real cdnjs were not reachable, so that is untested (7.3).
