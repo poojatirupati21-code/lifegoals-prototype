@@ -1,16 +1,16 @@
-# UI/UX calculator spec: automated check (prototype and workbook at commit 94c659b, branch head 97dade8, journey-spec §14 to §27, 8 Oct 2026)
+# UI/UX calculator spec: automated check (prototype and workbook at commit 54f2fea, journey-spec §14 to §27, 8 Oct 2026)
 
-Document: deliverables/LifeGoals-Calculators-UIUX-Spec.docx (file name unchanged; the product is LifeMap). A4, **335 pages, 17.0 MB**, 28 calculators (C01 to C28), rebuilt from:
-- the prototype and the workbook, both as committed in 94c659b on branch claude/simplify-customer-journey-zqxep3: journey-spec §14 to §27 (the independent calculator audit fixes, the simpler journey with only four required choices, Set by LifeMap standards, the free retirement age and early-retirement engine, the gate card, workbook v2.7) (the §19 feedback items, the §20 copy pass, §21 Experts boxes and Focus tiles, §22 skippable Step 7, §23 Emergency fund naming, cover photo and Budget 2027 note, §24 Liabilities, What-if and saving files, §25 photos on tiles and two real videos, §26 What-if order and labelled example figures, and the planner, developer and PM review rounds)
+Document: deliverables/LifeGoals-Calculators-UIUX-Spec.docx (file name unchanged; the product is LifeMap). A4, **335 pages, 16.9 MB**, 28 calculators (C01 to C28), rebuilt from:
+- the prototype and the workbook, both as committed in 54f2fea (final fixes after 94c659b) on branch claude/simplify-customer-journey-zqxep3: journey-spec §14 to §27 (the independent calculator audit fixes, the simpler journey with only four required choices, Set by LifeMap standards, the free retirement age and early-retirement engine, the gate card, workbook v2.7) (the §19 feedback items, the §20 copy pass, §21 Experts boxes and Focus tiles, §22 skippable Step 7, §23 Emergency fund naming, cover photo and Budget 2027 note, §24 Liabilities, What-if and saving files, §25 photos on tiles and two real videos, §26 What-if order and labelled example figures, and the planner, developer and PM review rounds)
 - the workbook as committed (new sheets "Settings" and "Your lists", their named cells, the new guidance texts)
 
 The screenshots are palette-quantised PNGs (256 colours, no dithering) to keep the file small; the text was not touched. I converted the docx to PDF with LibreOffice and looked at sample pages: 3.7 (Settings: standards table, partner override, admin view, workbook sheet), 4.8 (the item block, Liabilities, Protection, Pension, per-item upload), 4.9 (complete on save), 4.10 (workbook Your lists and the calculators that use it), 6.1 and 6.2 (months, goal order). Layout, tables and images are fine. LibreOffice's PDF font has no glyphs for a few newer emoji; they are in the .docx text.
 
 ## Result
 
-**7744 checks passed, 0 failed. Browser console errors: 0.** The check was run against the final docx and the prototype and workbook named above.
+**7746 checks passed, 0 failed. Browser console errors: 0.** The check was run against the final docx and the prototype and workbook named above.
 
-**Planted-error test.** I made a copy of the docx with 27 deliberate edits and ran the same check on it. It found them, which showed up as 145 failed checks (7599 passed). The edits are listed below; the numbers are those of the earlier rounds, and the edits about the old "Use the standards" card and the old C07 gate were replaced because that text no longer exists:
+**Planted-error test.** I made a copy of the docx with 27 deliberate edits and ran the same check on it. It found them, which showed up as 148 failed checks (7598 passed). The edits are listed below; the numbers are those of the earlier rounds, and the edits about the old "Use the standards" card and the old C07 gate were replaced because that text no longer exists:
 1. C01 result label
 2. C11 result line
 3. C01 unit
@@ -40,7 +40,7 @@ The screenshots are palette-quantised PNGs (256 colours, no dithering) to keep t
 
 27. The standards card remainder ("3 choices will still be yours to make" changed to "18 choices…"; caught by the 7.5 checks)
 
-(New in this round: the gate card heading ("To see your results we need" changed to "…we want"), "Date has passed" changed to "Date passed", the tag "Set by LifeMap" changed to "Set by Lifemap" (every occurrence), and the access-age standard wording ("some occupational schemes allow 50" changed to "…55"); the old C07 gate edit now aims at the C12 "Also still to add or choose" sentence. The results-banner edit, number 20, was re-aimed at the new banner wording "3 details missing.")
+(Added in the last sync: the C07 opportunity cost ("€4,786" changed to "€4,788") and the Step 7 heading "All 4 chosen" changed to "All four chosen"; both are caught. Added in the previous round: the gate card heading ("To see your results we need" changed to "…we want"), "Date has passed" changed to "Date passed", the tag "Set by LifeMap" changed to "Set by Lifemap" (every occurrence), and the access-age standard wording ("some occupational schemes allow 50" changed to "…55"); the old C07 gate edit now aims at the C12 "Also still to add or choose" sentence. The results-banner edit, number 20, was re-aimed at the new banner wording "3 details missing.")
 
 ## What is checked
 
@@ -105,6 +105,8 @@ A fresh headless Chromium run (390×844, scale 2), separate from the screenshot 
 | §15 / §16 | Example cards, statuses, checklist, gaps in calculators; LifeMap cover, Q8, tile | 516 | 0 |  |
 
 ## Changed in this rebuild
+
+- **Final sync (54f2fea):** C07 deposit earnings use the suggested 1.29% after DIRT (tag "Assumed: add yours") and the default opportunity cost is €4,786; the C10 sentence drops the waiting sentence instead of embedding a gate string; the workbook C20 style guard "Choose 1, 2 or 3"; Step 7 heading "All 4 chosen" / "All 3 chosen" with "Your results have what they need. You can change any of these."; the workbook gate also gates age (18 to 80) and a typed partner age (18 to 85), which the app does not; new named cells (Rules_Year, Rules_Year_Next, Scheme_Earliest_Age, Max_Money_Input, Retire_Min, Retire_Max, Retire_Help, Retire_RangeText, Retire_Note, PRet_Note, Req_Heading and a Use_ cell); the Calculation register has 106 rows; counts: the app SETTINGS block has 38 standards, the Your assumptions screen is built from 47 input definitions (48 boxes without a partner and 49 with one on screen), and the workbook Settings sheet counts 41 filled rows in this check against the planner's 42 (38 standards, 2 life-expectancy guidance figures, the Ireland-now reading and the card APR cap): one row is unaccounted for and is reported.
 
 - **§27, audit fixes, workbook 2.7 (8 October):** new 7.5 (gate card), 7.6 (other-property mortgage assumed term), 7.9 and 7.10 rewritten, 7.15 (the simpler journey), 7.16 (audit fixes), 7.17 (workbook v2.7: Plan sheets, gate logic, goal limit, validation, register); 2.7, 3.4, 3.5, 3.7 and 6.1 rewritten (no "Use the standards" button, the tags, the short Step 7); the per-calculator result lines follow the audit text (C01, C02, C03, C07, C10, C12, C13, C15, C16, C20, C22, C28); the new screenshots are in deliverables/screens-s27.
 
