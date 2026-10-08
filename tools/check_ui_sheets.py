@@ -49,17 +49,19 @@ def main():
                      'rangeOnScreen': 'tool design' not in str(r['Where the with-plan figure comes from'] or ''), 'noplan': r['Starts at WITHOUT a plan (as the screen shows it)'], 'plan': r['Starts at WITH a plan (Aoife sample)'],
                      'dname': r['Developer name (sheet!name)'], 'unit': r['Unit'], 'sheet': r['Developer sheet'], 'sec': r['Where on the screen']})
     plan = []
-    standards = []
+    standards = []; nstates = 0
     mws = wb['UI Make my plan']; heads = [c.value for c in mws[4]]; stop = False
     for row in mws.iter_rows(min_row=5, values_only=True):
         if row[0] == 'Group': stop = True
         if stop:
             if row[0] in (None, '', 'Group'): continue
-            standards.append({'label': row[1], 'chip': row[6]}); continue
+            standards.append({'label': row[1], 'tag': row[3], 'chip': row[6]}); continue
         r = dict(zip(heads, row))
         if r['Screen'] in (None, '') or r['Element type'] in (None, ''): continue
+        if r['Element type'] == 'Screen state': nstates += 1; continue   # the first row of a journey-spec 27 state: a title, not a screen element
         plan.append({'screen': r['Screen'], 'name': r['Screen name'], 'type': r['Element type'], 'label': r['Label / text exactly as shown'], 'chip': r['Choice / option texts']})
-    dump = os.path.join(work, 'dump.json'); json.dump({'calc': calc, 'plan': plan, 'standards': standards}, open(dump, 'w'))
+    sheet_text = ' '.join(str(c) for t in ('UI Calculators', 'UI Make my plan') for row in wb[t].iter_rows(values_only=True) for c in row if isinstance(c, str))
+    dump = os.path.join(work, 'dump.json'); json.dump({'calc': calc, 'plan': plan, 'standards': standards, 'sheetText': sheet_text}, open(dump, 'w'))
     env = dict(os.environ); env.setdefault('NODE_PATH', '/opt/node22/lib/node_modules')
     live = json.loads(subprocess.run(['node', os.path.join(HERE, 'check_ui_extract.js'), dump, ex_path], check=True, env=env, capture_output=True, text=True).stdout.strip().splitlines()[-1])
     lines = []
@@ -71,8 +73,9 @@ def main():
     out('- UI Calculators: %d slider rows, min/max/step differing from the live input: **%d**' % (live['sliderRows'], len(live['sliderMismatch'])))
     out('- Choice and chip texts checked: %d, missing on screen: **%d**' % (live['chipTexts'], len(live['chipMissing'])))
     out('- UI Make my plan: %d screens, %d rows, labels missing on screen: **%d**' % (live['screens'], live['planRows'], len(live['planLabelsMissing'])))
-    out('- Your assumptions: %d Settings standards, labels missing on screen: **%d**' % (live['standards'], len(live['standardsMissing'])))
-    for k in ('calcLabelsMissing', 'sliderMismatch', 'chipMissing', 'planLabelsMissing', 'standardsMissing'):
+    out('- Your assumptions: %d Settings standards in the sheet (the app has %d, the extract %d), labels missing on screen: **%d**; standards count differs from the app: **%d**' % (live['standards'], live['standardsLive'], live['standardsExtract'], len(live['standardsMissing']), 0 if live['standards'] == live['standardsLive'] == live['standardsExtract'] else 1))
+    out('- Journey-spec 27: %d state screens in UI Make my plan (%d with a "Screen state" row); %d required wordings: missing in the sheets **%d**, missing on the live prototype in that state **%d**' % (len(set(p['screen'] for p in plan if str(p['screen']).startswith('S27-'))), nstates, live['required'], len(live['requiredMissingSheet']), len(live['requiredMissingLive'])))
+    for k in ('calcLabelsMissing', 'sliderMismatch', 'chipMissing', 'planLabelsMissing', 'standardsMissing', 'requiredMissingSheet', 'requiredMissingLive'):
         for m in live[k][:40]: out('  - %s: %s' % (k, m))
     # ---- developer comparison
     out('')
@@ -137,7 +140,7 @@ def main():
         out(''); out('### %s (%d)' % (title, len(lst)))
         for x in lst: out('- ' + x)
     if a.report: open(a.report, 'w').write('\n'.join(lines) + '\n')
-    bad = len(live['calcLabelsMissing']) + len(live['planLabelsMissing']) + len(live['chipMissing']) + len(live['sliderMismatch']) + len(live['standardsMissing'])
+    bad = len(live['calcLabelsMissing']) + len(live['planLabelsMissing']) + len(live['chipMissing']) + len(live['sliderMismatch']) + len(live['standardsMissing']) + len(live['requiredMissingSheet']) + len(live['requiredMissingLive']) + (0 if live['standards'] == live['standardsLive'] == live['standardsExtract'] else 1)
     print('\nLABEL/RANGE FAILURES vs live prototype: %d' % bad)
     sys.exit(1 if bad else 0)
 

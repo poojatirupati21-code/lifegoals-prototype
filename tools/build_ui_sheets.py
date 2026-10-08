@@ -35,6 +35,7 @@ LEGEND = [
     ('Result / Result line / Sub-result row', 'result', 'The big result, the sentence under it and the small rows below it.'),
     ('Note / Tip / Example-figures label / Disclaimer', 'note', 'Text that explains, with no input.'),
     ('Button / Link', 'button', 'Something the customer taps; the behaviour is in the "Help / behaviour" column.'),
+    ('Screen state', 'head', 'First row of a journey-spec 27 state in UI Make my plan: what the state is and what to look at. The rows under it are what the screen shows in that state.'),
 ]
 thin = Side(style='thin', color='C9D3DC')
 BORDER = Border(left=thin, right=thin, top=thin, bottom=thin)
@@ -51,7 +52,7 @@ def kind_fill(t):
     if t.startswith('Gate'): return fill(FILL['gate'])
     if t in ('Note', 'Tip', 'Disclaimer', 'Example-figures label', 'Example-figures label (on result)', 'Banner', 'Help text', 'Eyebrow'): return fill(FILL['note'])
     if t.startswith('Button') or t == 'Link': return fill(FILL['button'])
-    if t in ('Heading', 'Section header (opens)'): return fill(FILL['head'])
+    if t in ('Heading', 'Section header (opens)', 'Screen state'): return fill(FILL['head'])
     return fill(None)
 
 
@@ -341,6 +342,16 @@ def calc_rows(rec, dev, num_names):
             lab = (b or a)[0]
             nm = match(lab, (b or a)[1], rec.get('numPlan') or {})
             add(typ='Sub-result row', sec='Result', label=lab, noplan=a[1] if a else '', plan=b[1] if b else '', **devcols(nm))
+    # journey-spec 27.3: tools that follow the retirement age, read again with the retirement age set to 50
+    E = rec.get('early')
+    if E and E.get('result'):
+        er = E['result']; base_rows = {(a, b) for a, b in ((pr or cr or {}).get('rows', []))}
+        add(typ='Result (retiring at 50)', sec='Result', label=er['lbl'], plan=er['val'], source='The sample plan with the retirement age set to 50', behaviour='Same tool with the retirement age at 50: income stops at 50, the years before the pension (60) and the State Pension (66) are paid from savings, and the gap is shown.')
+        m = re.search(r"Most pensions can't be taken before.*?savings and other income\.", er.get('line') or '')
+        if m: add(typ='Note', sec='Result', label=m.group(0).strip(), plan='Shown when retiring at 50', noplan='Not shown', behaviour='Early-retirement warning: shown when the retirement age is before the pension access age (journey-spec 27.3). The access age is the Settings standard "Pension access age" (60, or 50 for some occupational schemes).')
+        for lab, val in er.get('rows', []):
+            if (lab, val) in base_rows: continue
+            add(typ='Sub-result row (retiring at 50)', sec='Result', label=lab, plan=val, source='The sample plan with the retirement age set to 50')
     # buttons and their behaviour
     ap, an, ag = rec.get('addPlan'), rec.get('addNone'), rec.get('addGated')
     beh = []
@@ -429,18 +440,30 @@ def main():
             if p and os.path.exists(p):
                 o, (w, h) = quant(p); im = XlImage(o); s.add_image(im, '%s%d' % (get_column_letter(col), r + 2)); hmax = max(hmax, im.height); nimg += 1
         r += 2 + int(math.ceil(hmax / 20.0)) + 2
+        if rec.get('shotEarly'):
+            p = os.path.join(shots, os.path.basename(rec['shotEarly']))
+            if os.path.exists(p):
+                s.cell(row=r, column=2, value='%s retiring at 50 (journey-spec 27.3: the early-retirement warning and the years before the State Pension)' % n).font = Font(italic=True)
+                o, (w, h) = quant(p); im = XlImage(o); s.add_image(im, 'B%d' % (r + 1)); nimg += 1
+                r += 1 + int(math.ceil(im.height / 20.0)) + 2
     # ------------------------------------------------------------ UI Make my plan
     MH = ['Screen', 'Screen name', '#', 'Element type', 'Label / text exactly as shown', 'Unit', 'Min', 'Max', 'Step', 'Starts at / pre-filled with (Aoife sample)', 'Where the pre-fill comes from (tag on screen)', 'Choice / option texts',
           'Help / hint / behaviour', 'Example card (Not sure? See an example)', 'Picture (390 px)']
-    MW = [10, 26, 4, 18, 46, 6, 8, 8, 6, 24, 28, 44, 44, 52, 56]
+    MW = [10, 26, 4, 18, 46, 6, 8, 8, 6, 24, 28, 44, 44, 52, 56, 36]
     m['A1'] = 'UI Make my plan: one row per element of the plan-builder steps, the results and Your assumptions (from the live prototype)'; m['A1'].font = Font(bold=True, size=13, color=INK)
-    m['A2'] = ('Steps 1 to 8: 1 About you & family, 2 Your goals, 3 Your timeline (and Confirm), 4 Your money profile, 5 Secure your account, 6 Your finances (six sections), 7 Check your details, 8 Results. '
+    m['A2'] = ('Steps 1 to 8: 1 About you & family, 2 Your goals, 3 Your timeline (and Confirm), 4 Your money profile, 5 Secure your account, 6 Your finances (six sections), 7 Check your details, 8 Results; then the journey-spec 27 states (gate card, Step 7 lists, free retirement age, Date has passed, early retirement, details missing). '
                'Pre-filled values are the sample customer\'s. A "Where the pre-fill comes from" tag is the tag the screen shows.')
     m['A2'].alignment = Alignment(wrap_text=True, vertical='top'); m.merge_cells('A2:O2'); m.row_dimensions[2].height = 32
     header(m, 4, MH, MW); m.freeze_panes = 'F5'
-    r = 5; mp_span = {}
+    r = 5; mp_span = {}; last_group = None
     for sc in X['plan']:
+        if sc.get('group') and sc['group'] != last_group:
+            if last_group is None:
+                c0 = m.cell(row=r, column=2, value='Journey-spec 27 states: the screens as they look in each state (gate card, Step 7, free retirement age, "Date has passed", early retirement, details missing). Each block starts with a "Screen state" row.'); c0.font = Font(bold=True, size=12, color=INK); r += 1
+            c1 = m.cell(row=r, column=2, value='State group: ' + sc['group']); c1.font = Font(bold=True, color='FFFFFF'); c1.fill = fill(TEAL); r += 1; last_group = sc['group']
         first = r
+        if sc.get('note'):
+            put(m, r, [sc['screen'], sc['name'], '', 'Screen state', 'State: ' + sc['name'], '', '', '', '', '', '', '', sc['note'], '', ''], kind=(4, kind_fill('Screen state'))); r += 1
         for i, e in enumerate(sc['rows'], 1):
             typ = e['type']
             ex = ' || '.join('%s: %s' % (k, X['examples'].get(k)) for k in (e.get('example') or []) if X['examples'].get(k))
@@ -466,7 +489,8 @@ def main():
     # Settings standards as the customer sees them
     r += 2
     m.cell(row=r, column=1, value='Your assumptions: the Settings standards as the customer sees them (wording and chip text)').font = Font(bold=True, size=12, color=INK); r += 1
-    SH = ['Group', 'Standard (screen label)', '', 'Tag', 'Standard value', 'Unit', 'Chip text', 'Help text on the field', 'Wording of the standard', 'Source', 'As at', 'Verify before release', 'Developer name', 'Developer cell', 'Developer value']
+    m.cell(row=r - 1, column=1).value = 'Your assumptions: the %d Settings standards as the customer sees them (wording and chip text). Tags in brackets, and the "Back to ..." button, appear once the customer has changed the figure (it then reads "Your choice").' % len(X['standards'])
+    SH = ['Group', 'Standard (screen label)', '', 'Tag', 'Standard value', 'Unit', 'Chip text', 'Help text on the field', 'Wording of the standard', 'Source', 'As at', 'Verify before release', 'Developer name', 'Developer cell', 'Developer value', 'Name in the Settings sheet']
     for i, t in enumerate(SH, 1):
         cc = m.cell(row=r, column=i, value=t); cc.font = HEAD_FONT; cc.fill = fill(TEAL); cc.border = BORDER; cc.alignment = Alignment(wrap_text=True)
     r += 1
@@ -480,23 +504,30 @@ def main():
                 sh, ref = list(wb.defined_names[dn].destinations)[0]; dcell = '%s!%s' % (sh, ref.replace('$', '')); dval = wbv[sh][ref.replace('$', '')].value
             except Exception:
                 pass
-        vals = [sd['group'], sd['label'], '', '; '.join(sd['tags']), sd['standard'], sd['unit'] or '', '; '.join(sd['chips']), ' '.join(sd['help']), (se or {}).get('wording') or '', (se or {}).get('source') or '', (se or {}).get('asat') or '',
-                'yes' if (se or {}).get('verify') else ('no' if se else ''), dn if dcell else '', dcell, dval if dval is not None else '']
+        ac = sd.get('afterChange') or {}
+        tags = uniq(sd['tags'] + [t + ' (after a change)' for t in ac.get('tags', [])])
+        vals = [sd['group'], sd['label'], '', '; '.join(tags), sd['standard'], sd['unit'] or '', '; '.join(uniq(sd['chips'] + ac.get('back', []))), ' '.join(sd['help']), (se or {}).get('wording') or '', (se or {}).get('source') or '', (se or {}).get('asat') or '',
+                'yes' if (se or {}).get('verify') else ('no' if se else ''), dn if dcell else '', dcell, dval if dval is not None else '', (se or {}).get('name') or '']
         put(m, r, vals); r += 1
     # ------------------------------------------------------------ UI Guide
     g.column_dimensions['A'].width = 30; g.column_dimensions['B'].width = 60; g.column_dimensions['C'].width = 40; g.column_dimensions['D'].width = 16
     g['A1'] = 'UI Guide: how to read the UI layer of this workbook'; g['A1'].font = Font(bold=True, size=14, color=INK)
     lines = [
-        ('What this is', 'The developer sheets (C01 to C28, Tax engine, Settings and the others) hold the formulas. The four "UI" sheets show the same 28 calculators, and the Make-my-plan journey, as they look in the LifeMap application, so the UI/UX person and the developer work from one file.'),
+        ('What this is', 'The developer sheets (C01 to C28, the Plan sheets, Tax engine, Settings and the others) hold the formulas. The four "UI" sheets (teal tabs, listed below with links) show the same 28 calculators, and the Make-my-plan journey with its journey-spec 27 states, as they look in the LifeMap application, so the UI/UX person and the developer work from one file.'),
         ('Where it comes from', 'Every label, range, start value, chip, help text and picture was read from the running prototype (%s%s) by tools/extract_ui.js with a real browser. Nothing was typed by hand. Re-run tools/build_ui_sheets.py on the final workbook to refresh it.' % (X['meta']['prototype'], (' at commit ' + commit) if commit else '')),
         ('How to read UI Calculators', 'One row per element of a screen, top to bottom. Filter column A for a calculator or column G for an element type. The "Developer ..." columns point to the cell in that calculator\'s developer sheet (click the sheet name to jump to the cell). The last column compares the screen with that cell.'),
         ('"Without a plan" and "With a plan"', 'Without a plan: the tool opened from Explore with no profile; it shows its own example figures, labelled "Example figures. Change them to yours." With a plan: the Aoife sample customer, whose own figures fill the inputs. Results without a plan are read after the standards are chosen.'),
         ('Developer vs screen', 'Slider ranges on screen are narrower than the developer\'s allowed ranges by design. The last column says "default same" or "DEFAULT DIFFERS" for the start value, and whether the slider range sits inside the developer\'s allowed range. A blank start on screen means the customer must choose (journey-spec §14); the developer sheet may carry an example default.'),
-        ('Screenshots', 'UI Screens has two pictures per calculator (390 px wide) next to the row range in UI Calculators. UI Make my plan has the picture of each step beside its rows.')]
+        ('Screenshots', 'UI Screens has two pictures per calculator (390 px wide, without a plan and with the sample plan) next to the row range in UI Calculators; a third picture (retiring at 50) for each tool that follows the retirement age. UI Make my plan has the picture of each step and of each journey-spec 27 state beside its rows.'),
+        ('Journey-spec 27 states', 'UI Make my plan also shows the states added by journey-spec 27: the "To see your results we need N things" card on Results, Home and the Report (1 to 4 things, with and without a working partner) and its jump buttons; Step 7 "Choose 3 / 4 things" and "What we\'ve set for you (change any)" with the tags Set by LifeMap, Your choice, Assumed: add yours, Not chosen yet and the "Back to LifeMap\'s figure" button; the free retirement age (help text and the two calm notes, for the customer and the partner); "Date has passed" with "Change the date"; early-retirement results (income stops, bridge years, shortfall); and the "N details missing" banner with the Assumed rows. Each state starts with a "Screen state" row. The Settings standards table lists all %d standards, including "Pension access age" (From 60 (most pensions) / From 50 (some occupational schemes)).' % len(X['standards']))]
     r = 3
     for k, v in lines:
         g.cell(row=r, column=1, value=k).font = Font(bold=True); cc = g.cell(row=r, column=2, value=v); cc.alignment = Alignment(wrap_text=True, vertical='top'); g.merge_cells(start_row=r, start_column=2, end_row=r, end_column=4)
         g.cell(row=r, column=1).alignment = Alignment(vertical='top'); g.row_dimensions[r].height = max(30, 15 * (len(v) // 100 + 1)); r += 1
+    r += 1; g.cell(row=r, column=1, value='The four UI sheets (all in this workbook; click to open)').font = Font(bold=True, size=12, color=INK); r += 1
+    for nm, ds in (('UI Guide', 'This sheet: how to read the layer, the colour legend, the screen order and links to every sheet.'), ('UI Calculators', 'One row per screen element of the 28 calculators, with the developer cell each maps to and a check against it.'),
+                   ('UI Screens', 'A 390 px picture of each calculator, without a plan and with the sample plan (and retiring at 50 where it matters).'), ('UI Make my plan', 'One row per element of the eight steps, the results, the journey-spec 27 states and the Settings standards, with the pictures.')):
+        link(g.cell(row=r, column=1), nm, 'A1', nm); d = g.cell(row=r, column=2, value=ds); d.alignment = Alignment(wrap_text=True, vertical='top'); g.merge_cells(start_row=r, start_column=2, end_row=r, end_column=4); g.row_dimensions[r].height = 30; r += 1
     r += 1; g.cell(row=r, column=1, value='Colour legend (element type column)').font = Font(bold=True, size=12, color=INK); r += 1
     for name, kf, desc in LEGEND:
         cc = g.cell(row=r, column=1, value=name); cc.fill = fill(FILL[kf]); cc.border = BORDER; cc.alignment = Alignment(wrap_text=True, vertical='top')
@@ -508,7 +539,7 @@ def main():
     for i, (k, v) in enumerate(order):
         g.cell(row=r, column=1, value=k).font = Font(bold=True); cc = g.cell(row=r, column=2, value=v); cc.alignment = Alignment(wrap_text=True, vertical='top'); g.merge_cells(start_row=r, start_column=2, end_row=r, end_column=4)
         g.cell(row=r, column=1).alignment = Alignment(vertical='top', wrap_text=True); g.row_dimensions[r].height = max(18, 15 * (len(v) // 90 + 1)); r += 1
-    r += 1; g.cell(row=r, column=1, value='Make my plan: steps 1 to 8 and Results').font = Font(bold=True, size=12, color=INK); r += 1
+    r += 1; g.cell(row=r, column=1, value='Make my plan: steps 1 to 8, Results and the journey-spec 27 states').font = Font(bold=True, size=12, color=INK); r += 1
     header_row = ['Screen', 'Name', 'Rows in UI Make my plan', '']
     for i, t in enumerate(header_row, 1):
         cc = g.cell(row=r, column=i, value=t); cc.font = HEAD_FONT; cc.fill = fill(TEAL)

@@ -6,7 +6,7 @@
 // Input: a JSON dump of the two UI sheets (written by check_ui_sheets.py) and the extract (for how each screen is opened). Output: one JSON line.
 const fs = require('fs'), path = require('path');
 let chromium; try { ({ chromium } = require('playwright')); } catch (e) { ({ chromium } = require('/opt/node22/lib/node_modules/playwright')); }
-const { INSTALL, openCalc, openHow } = require('./ui_states');
+const { INSTALL, openCalc, openHow, openAsmChanged } = require('./ui_states');
 const HTML = process.env.UI_HTML || path.resolve(__dirname, '..', 'LifeGoals-Customer-Journey-Prototype.html');
 const dump = JSON.parse(fs.readFileSync(process.argv[2], 'utf8')), ext = JSON.parse(fs.readFileSync(process.argv[3], 'utf8'));
 const flat = s => String(s == null ? '' : s).replace(/\s+/g, '').replace(/[\u200b\ufe0f]/g, '').toLowerCase();
@@ -21,7 +21,7 @@ const flat = s => String(s == null ? '' : s).replace(/\s+/g, '').replace(/[\u200
   const byCalc = {}; dump.calc.forEach(r => (byCalc[r.n] = byCalc[r.n] || []).push(r));
   for (const n of Object.keys(byCalc).sort()) {
     const id = idOf[n], rows = byCalc[n]; let all = '', sliders = {};
-    for (const st of ['none', 'chosen', 'plan']) { await openCalc(page, st, id); all += ' ' + await text();
+    for (const st of ['none', 'chosen', 'plan'].concat((ext.calcs.find(c => c.n === n) || {}).early ? ['early'] : [])) { await openCalc(page, st, id); all += ' ' + await text();
       sliders[st] = await page.evaluate(() => [...document.querySelectorAll('#main input[type=range]')].map(r => { const l = (document.getElementById((r.getAttribute('aria-labelledby') || '').split(' ')[0]) || {}).textContent || ''; return { label: window.__ui.N(l.replace(/\s*Not chosen yet|\s*Set by LifeMap|\s*Your choice|\s*Assumed: add yours|\s*From your statement|\s*Worked out.*$/g, '')), min: r.min, max: r.max, step: r.step }; })); }
     const A = flat(all);
     for (const r of rows) { res.calcRows++;
@@ -37,8 +37,22 @@ const flat = s => String(s == null ? '' : s).replace(/\s+/g, '').replace(/[\u200
     await openHow(page, h); const A = flat(await text()); res.screens++;
     for (const r of byScr[name]) { res.planRows++; if (r.label && !A.includes(flat(r.label))) res.planLabelsMissing.push([name, r.type, r.label]);
       for (const t of String(r.chip || '').split('; ').filter(Boolean)) { res.chipTexts++; if (!A.includes(flat(t))) res.chipMissing.push([name, r.label, t]); } } }
-  // the Settings standards, as the customer sees them on Your assumptions
-  await openHow(page, 'ME-ASM'); const AS = flat(await text()); res.standards = 0; res.standardsMissing = [];
-  for (const sd of dump.standards || []) { res.standards++; if (!AS.includes(flat(sd.label))) res.standardsMissing.push(sd.label); for (const t of String(sd.chip || '').split('; ').filter(Boolean)) { res.chipTexts++; if (!AS.includes(flat(t))) res.chipMissing.push(['Your assumptions', sd.label, t]); } }
+  // the Settings standards, as the customer sees them on Your assumptions (as sent, and with every standard changed: "Your choice" and "Back to LifeMap's figure")
+  await openHow(page, 'ME-ASM'); const AS0 = flat(await text()); await openAsmChanged(page); const AS1 = flat(await text()), AS = AS0 + ' ' + AS1; res.standards = 0; res.standardsMissing = [];
+  const liveStd = await page.evaluate(() => Object.keys(ASM).length); res.standardsLive = liveStd; res.standardsExtract = ext.standards.length;
+  for (const sd of dump.standards || []) { res.standards++; if (!AS.includes(flat(sd.label))) res.standardsMissing.push(sd.label);
+    for (const t of String(sd.tag || '').split('; ').filter(Boolean)) { res.chipTexts++; if (!AS.includes(flat(t.replace(/ \(after a change\)$/, '')))) res.chipMissing.push(['Your assumptions (tag)', sd.label, t]); }
+    for (const t of String(sd.chip || '').split('; ').filter(Boolean)) { res.chipTexts++; if (!AS.includes(flat(t))) res.chipMissing.push(['Your assumptions', sd.label, t]); } }
+  // the journey-spec 27 wording: each string must be in the sheets AND on the live prototype in the state named
+  const REQUIRED = [['To see your results we need 4 things', 'S27:G-R4'], ['To see your results we need 3 things', 'S27:G-R3'], ['To see your results we need 2 things', 'S27:G-R2P'], ['To see your results we need 1 thing', 'S27:G-R1'], ["Partner's retirement age", 'S27:G-R4'], ['Choose', 'S27:G-R4'], ['Almost there', 'S27:G-P4'],
+    ['Choose 3 things', 'S27:S7-3'], ['Choose 4 things', 'S27:S7-4P'], ["What we've set for you (change any)", 'S27:S7-LIST'], ['Set by LifeMap', 'S27:S7-LIST'], ['Your choice', 'S27:S7-LIST'], ['Assumed: add yours', 'S27:S7-LIST'], ['Not chosen yet', 'S27:S7-LIST'], ["Back to LifeMap's figure", 'S27:S7-LIST'], ['3 of 3 chosen', 'S27:S7-3C'],
+    ['Choose the age you want to plan for, any age from', 'S27:RA-C-45'], ['Retiring before 50 is possible', 'S27:RA-C-45'], ['Pensions can usually be drawn from 60 (some schemes from 50)', 'S27:RA-C-55'], ['Their pay stops at this age', 'S27:RA-P-45'], ['Their own pension is not modelled', 'S27:RA-P-55'],
+    ['Date has passed', 'S27:DP-PLAN'], ['Change the date', 'S27:DP-PLAN'], ['retirement starts', 'S27:ER-50-50'], ['Shortfall', 'S27:ER-50-55'], ['Paid from savings', 'S27:ER-50-60'], ['1 detail missing', 'S27:BN-1'], ['details missing', 'S27:BN-N'],
+    ['Assumed: add yours · we use 25 years', 'S27:S7-ASSUMED'], ['Assumed: add yours · we use your age', 'S27:S7-ASSUMED'], ['Assumed: add yours · we use Employed', 'S27:S7-ASSUMED'], ['Assumed: add yours · we use the Central Bank average rate', 'S27:S7-ASSUMED'], ['Assumed: add yours · we use a planning rate of 20%', 'S27:S7-ASSUMED'],
+    ['From 60 (most pensions)', 'ME-ASM'], ['From 50 (some occupational schemes)', 'ME-ASM'], ['Earliest age you can draw your pension', 'ME-ASM'], ['Pension access age', '#SETTINGS']];
+  res.required = REQUIRED.length; res.requiredMissingSheet = []; res.requiredMissingLive = []; const sheetText = flat(dump.sheetText || ''), cache = {};
+  for (const [t, how] of REQUIRED) { if (!sheetText.includes(flat(t))) res.requiredMissingSheet.push([t, how]);
+    if (!(how in cache)) { cache[how] = how === '#SETTINGS' ? flat(await page.evaluate(() => Object.values(SETTINGS.s).map(x => x.n).join(' | '))) : (await openHow(page, how), flat(await text())); }
+    if (!cache[how].includes(flat(t))) res.requiredMissingLive.push([t, how]); }
   console.log(JSON.stringify(res)); await browser.close();
 })();

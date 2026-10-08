@@ -8,7 +8,7 @@ let chromium; try { ({ chromium } = require('playwright')); } catch (e) { ({ chr
 const HTML = process.env.UI_HTML || path.resolve(__dirname, '..', 'LifeGoals-Customer-Journey-Prototype.html');
 const OUT = path.resolve(process.argv[2] || path.join(__dirname, 'out')), SHOTS = process.argv.includes('--shots');
 
-const { INSTALL, prime, openCalc, openHow, PLAN_SCREENS } = require('./ui_states');
+const { INSTALL, prime, openCalc, openHow, openState, STATES, PLAN_SCREENS } = require('./ui_states');
 
 // ---------- in-page readers ----------
 const READ_CALC = () => {
@@ -44,7 +44,7 @@ const DEF_CALC = () => CALCS.map((c, i) => ({ id: c.id, n: 'C' + String(i + 1).p
       document.querySelectorAll('#screen *').forEach(e => { if (e.children.length || e.closest('.foot,.askfab,#toast,.tabbar,nav,.fab,.sheet-bg')) return; const r = e.getBoundingClientRect(); if (r.width > 0 && r.height > 0) b = Math.max(b, r.bottom - ph.top); });
       return Math.ceil(b + fh + 130); });
     await page.setViewportSize({ width: 390, height: Math.min(6000, Math.max(700, need)) }); await page.waitForTimeout(200);
-    const f = path.join(OUT, 'shots', name + '.png'); await page.locator('#phone').screenshot({ path: f }); await page.setViewportSize({ width: 390, height: 2600 }); await page.waitForTimeout(100); return 'shots/' + name + '.png'; };
+    const f = path.join(OUT, 'shots', name + '.png'); await page.locator('#phone').screenshot({ path: f, animations: 'disabled' }); await page.setViewportSize({ width: 390, height: 2600 }); await page.waitForTimeout(100); return 'shots/' + name + '.png'; };
   const open = (state, id) => openCalc(page, state, id);
   const defs = await ev(DEF_CALC), calcs = [];
   // preference sources: which of the customer's own data changes this tool's pre-filled value (found by changing each stored figure and re-reading the tool)
@@ -66,6 +66,7 @@ const DEF_CALC = () => CALCS.map((c, i) => ({ id: c.id, n: 'C' + String(i + 1).p
     rec.addNone = await ev(() => { const t = document.querySelector('#toast .t'); const s = document.querySelector('.sheet'); return { toast: t && !s ? window.__ui.T(t) : null, h2: s ? window.__ui.T(s.querySelector('h2')) : null, sub: s ? window.__ui.T(s.querySelector('p.sub')) : null, buttons: s ? [...s.querySelectorAll('button:not(.sx)')].map(window.__ui.T) : [] }; });
     await open('chosen', d.id);
     await open('plan', d.id); rec.plan = await ev(READ_CALC); rec.numPlan = await ev(NUM); rec.shotPlan = await shot(d.n + '-plan'); rec.src = await sources(d.id);
+    if (Object.values(rec.src.via).some(v => v.includes('Your retirement age'))) { await open('early', d.id); rec.early = await ev(READ_CALC); rec.numEarly = await ev(NUM); rec.shotEarly = await shot(d.n + '-early'); }   // journey-spec 27.3: this tool follows the retirement age; read it again at 50
     await open('plan', d.id);
     await ev(() => { const b = document.querySelector('#main [data-a="calcadd"]'); b && b.click(); }); await page.waitForTimeout(150);
     rec.addPlan = await ev(() => { const s = document.querySelector('.sheet'); return s ? { h2: window.__ui.T(s.querySelector('h2')), sub: window.__ui.T(s.querySelector('p.sub')), eyebrow: window.__ui.T(s.querySelector('.eyebrow')), buttons: [...s.querySelectorAll('button:not(.sx)')].map(window.__ui.T), text: window.__ui.T(s).slice(0, 400) } : null; });
@@ -90,11 +91,25 @@ const DEF_CALC = () => CALCS.map((c, i) => ({ id: c.id, n: 'C' + String(i + 1).p
     if (id === 'P3') { for (let i = 0; i < 6; i++) { await openHow(page, 'P3:' + i); const secName = await ev(() => { const h = document.querySelector('#screen header h2'); return h ? window.__ui.T(h) : ''; }); await readScreen('P3:' + i, name, 'section ' + (i + 1) + ' ' + secName.replace(/[^A-Za-z0-9 ]/g, '').trim()); } continue; }
     await readScreen(id, name, id === 'P4-start' ? 'start: nothing chosen yet' : '');
   }
+  // journey-spec 27 states: gate card, Step 7, free retirement age, date passed, early retirement, details missing
+  for (const st of STATES) { await openState(page, st.id);
+    const r = await ev(a => { const U = window.__ui, out = { head: [], body: [], foot: [] }, keep = x => x.text || x.type.startsWith('Input');
+      a.roots.forEach(rt => { if (rt === 'main') { const main = document.getElementById('main') || document.getElementById('screen'), h = document.querySelector('#screen header');
+          if (h) out.head = out.head.concat(U.walk(h).filter(x => x.text)); out.body = out.body.concat(U.walk(main).filter(keep)); out.foot = out.foot.concat([...document.querySelectorAll('#screen .foot')].flatMap(f => U.walk(f)).filter(x => x.text)); }
+        else { const el = document.querySelector(rt); if (el) out.body = out.body.concat(U.walk(el, { sheet: a.sheet, self: true }).filter(keep)); } }); return out; }, { roots: st.roots, sheet: !!st.sheet });
+    const seen = new Set(r.body.map(x => x.type + '|' + x.text)), foot = r.foot.filter(x => !seen.has(x.type + '|' + x.text));
+    plan.push({ screen: 'S27-' + st.id, how: 'S27:' + st.id, group: st.group, name: st.name, note: st.note, rows: r.head.concat(r.body, foot), shot: await shot('MP-S27-' + st.id) }); }
   // Settings standards as the customer sees them (Your assumptions fields and their chips)
-  const standards = await ev(() => { loadSample(); applyAssume(); const o = []; Object.keys(ASM).forEach(k => { const d = ASM[k]; try { const box = document.createElement('div'); box.innerHTML = asmInput(k); const f = box.querySelector('.field'); if (!f) return; const fr = window.__ui.fieldRows(f), fi = fr[0]; const st = typeof d.sug === 'function' ? d.sug() : null; o.push({ key: k, group: (ASM_GRP.find(g => g[0] === d.g) || [])[1] || d.g, label: d.l, tags: fi.tags, kind: d.t, unit: d.u || null, standard: st == null ? null : asmFmt(d, st), chips: fi.chips.map(c => c.t).concat(fi.options.map(c => c.t)), help: fi.help, guide: asmGuide(d), type: d.ty || null, gate: d.n || null }); } catch (e) { o.push({ key: k, error: String(e) }); } }); return o; });
+  const standards = await ev(() => { loadSample(); applyAssume(); const o = []; const host = document.createElement('div'); host.style.cssText = 'position:absolute;left:-9999px;top:0;width:360px'; document.body.appendChild(host);   // attached (but off screen) so the choice buttons have a layout and are read
+    const read = k => { host.innerHTML = asmInput(k); return host.querySelector('.field'); };
+    Object.keys(ASM).forEach(k => { const d = ASM[k]; try { const f = read(k); if (!f) return; const fr = window.__ui.fieldRows(f), fi = fr[0]; const st = typeof d.sug === 'function' ? d.sug() : null;
+      // what the field shows after the customer changes it: the tag turns into "Your choice" and a "Back to LifeMap's figure" button appears
+      const was = S.asm[k]; let ch = null; try { const base = asmV(k); S.asm = Object.assign({}, S.asm); S.asm[k] = d.t === 'choice' ? (d.o.find(x => String(x[0]) !== String(base)) || d.o[0])[0] : (base == null ? 0 : +base) + (d.t === 'pct' ? 0.01 : 1); const g = read(k); ch = { tags: [...g.querySelectorAll('.flabel .tag')].map(window.__ui.T), back: [...g.querySelectorAll('button[data-a="asmback"]')].map(window.__ui.T) }; } finally { if (was == null) delete S.asm[k]; else S.asm[k] = was; }
+      o.push({ key: k, group: (ASM_GRP.find(g => g[0] === d.g) || [])[1] || d.g, label: d.l, tags: fi.tags, kind: d.t, unit: d.u || null, standard: st == null ? null : asmFmt(d, st), chips: fi.chips.map(c => c.t).concat(fi.options.map(c => c.t)), help: fi.help, guide: asmGuide(d), type: d.ty || null, gate: d.n || null, afterChange: ch }); } catch (e) { o.push({ key: k, error: String(e) }); } });
+    host.remove(); return o; });
   const settings = await ev(() => Object.entries(SETTINGS.s).map(([k, s]) => ({ key: k, name: s.n, group: s.grp, value: s.pv != null ? s.pv : s.v, unit: s.u, wording: typeof s.by === 'string' ? s.by : null, source: s.src || null, asat: s.asat || null, guide: s.guide || null, verify: !!s.verify })));
   const examples = await ev(() => { const o = {}; Object.keys(EXAMPLES).sort().forEach(k => { try { const d = document.createElement('div'); d.innerHTML = exHTML(k); o[k] = window.__ui.N(d.textContent); } catch (e) { o[k] = null; } }); return o; });
-  const meta = { prototype: path.basename(HTML), calcCount: calcs.length, screens: plan.length, errors };
+  const meta = { prototype: path.basename(HTML), calcCount: calcs.length, screens: plan.length, states: STATES.length, standards: standards.length, errors };
   fs.writeFileSync(path.join(OUT, 'ui-extract.json'), JSON.stringify({ meta, groups, exploreCalcList, calcs, plan, standards, settings, examples }, null, 1));
-  console.log('extracted', calcs.length, 'calculators,', plan.length, 'plan screens,', standards.length, 'assumption fields; page errors:', errors.length, errors.slice(0, 3)); await browser.close();
+  console.log('extracted', calcs.length, 'calculators,', plan.length, 'plan screens (' + STATES.length + ' journey-spec 27 states),', standards.length, 'assumption fields; page errors:', errors.length, errors.slice(0, 3)); await browser.close();
 })();
