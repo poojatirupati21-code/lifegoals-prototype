@@ -150,3 +150,21 @@ These 23 standards are the planning choices behind the "Use the standard (X)" ch
 ## C. Not flagged
 
 - `sp.weeks` = 52 (Convention)
+
+## D. Added after the independent calculator audit (8 Oct 2026)
+
+| Item | What the product now does | What to check | Suggested checker |
+|---|---|---|---|
+| Retirement lump sum above €500,000 | The lump sum is up to 25% of the fund with no cap. The first €200,000 is tax-free, the next €300,000 is taxed at 20%, and anything above €500,000 is taxed at the higher rate (40%). USC and PRSI are not applied to the lump sum. | **Verify on Revenue**: confirm that the part above €500,000 is taxed at the person's marginal rate, and whether USC applies. We use the higher rate because a lump sum that size is above the standard-rate band. | Tax specialist |
+| Standard Fund Threshold after 2029 | The threshold is set by law to 2029 (€2.2m, €2.4m, €2.6m, €2.8m). After 2029 the plan assumes it rises with prices. The Retirement projection compares the fund in today's money with the 2026 threshold. | Confirm the threshold schedule on Revenue / the Finance Act and whether any indexation after 2029 is legislated. | Tax specialist |
+| Illness Benefit duration | Illness Benefit is paid for at most 2 years (624 days); the Income protection gap tool never counts more than 24 months and never says "indefinitely". | Confirm the 624-day maximum (and the 312-day rule for fewer contributions) on gov.ie / Department of Social Protection. | Financial planner |
+| Stamp duty on a new home | The tools say stamp duty is worked out on the price shown; for a new home it is charged on the price excluding VAT, and Help to Buy is not included. | Confirm the new-home VAT rule on Revenue. | Tax specialist |
+
+
+## E. The Plan sheets of LifeGoals-Calculators.xlsx (8 Oct 2026)
+
+| Item | What it is | What to check | Suggested checker |
+|---|---|---|---|
+| Plan sheets match the app | Nine sheets (Plan inputs, Plan pay & tax, Plan debt months, Plan cashflow, Plan goals, Plan results, Plan profile, Plan how it works, Calculation register) repeat the plan engine with formulas. `tools/plan-vs-xlsx/plan-vs-xlsx.sh` feeds the same inputs to the app and to a copy of the workbook and compares them. | Re-run it after any change to `project()`, `finNums()`, `hhTax()`, `foundations()`, `findings()`, `riskRead()` or `personality()`. A mismatch means the workbook or the app is wrong; decide which. | Developer |
+| Two typed search figures | The app finds "the extra a month that reaches 100%" and "the extra that closes the main gap" by trying values. A spreadsheet cannot, so these are typed cells (Plan how it works explains). | Confirm a tester knows to type them. | Product |
+| Findings, foundations and home figures with a what-if | These are for the base plan. They match the app only when the what-if is zero; goal % and goal lines do follow the what-if. | Confirm this is acceptable for the workbook. | Product |
