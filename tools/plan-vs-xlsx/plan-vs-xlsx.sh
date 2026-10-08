@@ -21,3 +21,4 @@ node gen_scen.js sample "$W/sample.json"
 python3 -c "import json; a=json.load(open('$W/rnd.json'))+json.load(open('$W/sample.json')); json.dump(a,open('$W/all.json','w')); print(len(a),'scenarios')"
 pgrep -f "port=2002" >/dev/null || { soffice --headless --invisible --norestore "--accept=socket,host=localhost,port=2002;urp;" >/dev/null 2>&1 & sleep 6; }
 python3 harness.py "$W/copy.xlsx" "$W/all.json" 5
+python3 n1_checks.py "$W/copy.xlsx" "$W/all.json"

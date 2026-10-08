@@ -15,6 +15,7 @@ The deliverable is never touched (it works on a copy). The last line is `SCENARI
 - plans with 9, 12, 15 and 20 goals saved for from savings;
 - `scenarios/recheck-41.json`: the 41 hand-built customers of the independent recheck (blank gate, zero and 4.5% inflation, ages 18 and 74, retired already, income at tax-band edges, Standard Fund Threshold breach, relief cap, what-if up and down, goal ages before today, long debts, nine goals ...);
 - journey-spec section 27: about a third of the random customers retire early (any age from their own age + 1), some with the pension access age set to 50, and about 8% leave out retirement age, inflation or plan-until age so the gate card ("we need N things", in the app's order) is compared too; the unchosen market rates (CBI suggestion for the mortgage and loans, 20% planning rate for cards) are compared through the plan figures;
+- `n1_checks.py` (run last by the script): an age outside 18 to 80 (partner 18 to 85), a part-year age or a word must give the gate card ("Your age" / "Partner's age") and never be read as 0; the allowed edge ages 18, 80 (partner 85) must not gate (13 cases);
 - the prototype's own sample customer, once with "Fill example values" on and nothing typed, and once typed in.
 
 ## What is compared

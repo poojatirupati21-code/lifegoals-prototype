@@ -175,6 +175,17 @@ def compare(x, sc, out, tol=1.0, verbose=True):
                 elif M['fndNextN']:
                     for nm, k in [('Fnd_NextT', 'fndNextT'), ('Fnd_NextD', 'fndNextD')]:
                         if x.val(nm) != M[k]: bad.append(('misc', nm, M[k], x.val(nm)))
+        if not sc.get('fill'):
+            for nm, k in [('Retire_Note', 'retNote'), ('PRet_Note', 'pNote'), ('Req_Heading', 'heading')]:
+                v = x.val(nm); v = '' if v is None else v
+                if v != M[k]: bad.append(('misc', nm, M[k], v))
+            if M.get('planEndSet'):
+                for nm, k in [('Retire_Min', 'retMin'), ('Retire_Max', 'retMax')]:
+                    if x.val(nm) != M[k]: bad.append(('misc', nm, M[k], x.val(nm)))
+                if x.val('Retire_RangeText') != M['retRange']: bad.append(('misc', 'Retire_RangeText', M['retRange'], x.val('Retire_RangeText')))
+            for k, t in M['use'].items():
+                v = x.val('Use_' + k); v = '' if v is None else v
+                if v != t: bad.append(('misc', 'Use_' + k, t, v))
         for i, m in enumerate(M['months']):
             v = x.val(f'GR{i + 1}_Months'); v = '' if v is None else v
             if v != m: bad.append(('months', i, m, v))
