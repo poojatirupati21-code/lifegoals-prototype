@@ -1,0 +1,1267 @@
+[
+ {
+  "id": "borrow",
+  "sheet": "C01 Borrowing",
+  "inputs": [
+   {
+    "key": "inc",
+    "name": "Income",
+    "kind": "n"
+   },
+   {
+    "key": "inc2",
+    "name": "Partner_Income",
+    "kind": "n"
+   },
+   {
+    "key": "dep",
+    "name": "Deposit",
+    "kind": "n"
+   },
+   {
+    "key": "ftb",
+    "name": "First_Time_Buyer",
+    "kind": "yn"
+   },
+   {
+    "key": "rate",
+    "name": "Interest_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "term",
+    "name": "Term_Years",
+    "kind": "n"
+   },
+   {
+    "key": "xdep",
+    "name": "Extra_Deposit",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Home_Price",
+   "Max_Loan",
+   "Monthly_Repayment",
+   "Borrow_By_Income",
+   "Stamp_Duty",
+   "Price_By_Deposit",
+   "Price_By_Income",
+   "Income_Multiple",
+   "Total_Deposit",
+   "Limit_Set_By",
+   "Plan_Goal_Amount",
+   "Plan_Goal_Saved"
+  ],
+  "extra": [
+   false,
+   false,
+   [
+    [
+     "buyFees",
+     "Buying_Fees"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "repayment",
+  "sheet": "C02 Mortgage repayment",
+  "inputs": [
+   {
+    "key": "loan",
+    "name": "Loan_Amount",
+    "kind": "n"
+   },
+   {
+    "key": "rate",
+    "name": "Interest_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "term",
+    "name": "Term_Years",
+    "kind": "n"
+   },
+   {
+    "key": "dr",
+    "name": "Rate_Change",
+    "kind": "pct"
+   }
+  ],
+  "outputs": [
+   "Monthly_Repayment",
+   "Formula_Repayment",
+   "Months_To_Pay",
+   "Total_Interest",
+   "Total_Repaid",
+   "New_Rate",
+   "Repayment_If_Changed",
+   "Change_Per_Year",
+   "Plan_Goal_Amount"
+  ],
+  "extra": []
+ },
+ {
+  "id": "deposit",
+  "sheet": "C03 Deposit",
+  "inputs": [
+   {
+    "key": "price",
+    "name": "Home_Price",
+    "kind": "n"
+   },
+   {
+    "key": "pc",
+    "name": "Deposit_Pct",
+    "kind": "pct"
+   },
+   {
+    "key": "saved",
+    "name": "Saved",
+    "kind": "n"
+   },
+   {
+    "key": "mo",
+    "name": "Monthly_Saving",
+    "kind": "n"
+   },
+   {
+    "key": "xmo",
+    "name": "Extra_Saving",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Months_To_Deposit",
+   "Total_Needed",
+   "Deposit_Needed",
+   "Stamp_Duty",
+   "Still_To_Save",
+   "Plan_Goal_Amount",
+   "Plan_Goal_Saved",
+   "Plan_Goal_Years"
+  ],
+  "extra": [
+   false,
+   false,
+   [
+    [
+     "buyFees",
+     "Buying_Fees"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "overpay",
+  "sheet": "C04 Mortgage overpayment",
+  "inputs": [
+   {
+    "key": "bal",
+    "name": "Mortgage_Balance",
+    "kind": "n"
+   },
+   {
+    "key": "rate",
+    "name": "Interest_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "yrs",
+    "name": "Years_Left",
+    "kind": "n"
+   },
+   {
+    "key": "x",
+    "name": "Extra_Payment",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Months_Now",
+   "Months_With_Extra",
+   "Months_Sooner",
+   "Interest_Saved",
+   "Interest_Now",
+   "Interest_With_Extra",
+   "Repayment_Now",
+   "Plan_Goal_Years"
+  ],
+  "extra": []
+ },
+ {
+  "id": "ratechange",
+  "sheet": "C05 Interest rate impact",
+  "inputs": [
+   {
+    "key": "loan",
+    "name": "Mortgage_Balance",
+    "kind": "n"
+   },
+   {
+    "key": "rate",
+    "name": "Current_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "term",
+    "name": "Years_Left",
+    "kind": "n"
+   },
+   {
+    "key": "d",
+    "name": "Rate_Change",
+    "kind": "pct"
+   }
+  ],
+  "outputs": [
+   "Monthly_Change",
+   "Repayment_Now",
+   "Repayment_After",
+   "Yearly_Change",
+   "New_Rate",
+   "Formula_Now"
+  ],
+  "extra": []
+ },
+ {
+  "id": "term",
+  "sheet": "C06 Term comparison",
+  "inputs": [
+   {
+    "key": "loan",
+    "name": "Loan_Amount",
+    "kind": "n"
+   },
+   {
+    "key": "rate",
+    "name": "Interest_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "a",
+    "name": "Term_A",
+    "kind": "n"
+   },
+   {
+    "key": "b",
+    "name": "Term_B",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Interest_Difference",
+   "Monthly_A",
+   "Monthly_B",
+   "Interest_A",
+   "Interest_B"
+  ],
+  "extra": []
+ },
+ {
+  "id": "rentbuy",
+  "sheet": "C07 Rent vs buy",
+  "inputs": [
+   {
+    "key": "rent",
+    "name": "Monthly_Rent",
+    "kind": "n"
+   },
+   {
+    "key": "price",
+    "name": "Home_Price",
+    "kind": "n"
+   },
+   {
+    "key": "dep",
+    "name": "Deposit",
+    "kind": "n"
+   },
+   {
+    "key": "rate",
+    "name": "Mortgage_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "term",
+    "name": "RentBuy_Term",
+    "kind": "n"
+   },
+   {
+    "key": "y",
+    "name": "Years",
+    "kind": "n"
+   },
+   {
+    "key": "g",
+    "name": "House_Growth",
+    "kind": "pct"
+   }
+  ],
+  "outputs": [
+   "Home_Equity",
+   "Rent_Paid",
+   "Buying_Costs",
+   "Home_Value",
+   "Loan",
+   "Monthly_Repayment",
+   "Balance_After",
+   "Interest_Paid",
+   "Upkeep",
+   "Stamp_Duty",
+   "Opportunity_Cost",
+   "Plan_Goal_Amount"
+  ],
+  "extra": [
+   false,
+   false,
+   [
+    [
+     "rentRise",
+     "Rent_Growth"
+    ],
+    [
+     "upkeep",
+     "Upkeep_Rate"
+    ],
+    [
+     "buyFees",
+     "Buying_Fees"
+    ],
+    [
+     "depEarn",
+     "Opp_Rate"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "goalplanner",
+  "sheet": "C08 Goal planner",
+  "inputs": [
+   {
+    "key": "t",
+    "name": "Goal_Amount",
+    "kind": "n"
+   },
+   {
+    "key": "y",
+    "name": "Years",
+    "kind": "n"
+   },
+   {
+    "key": "s",
+    "name": "Saved",
+    "kind": "n"
+   },
+   {
+    "key": "r",
+    "name": "Growth_Rate",
+    "kind": "pct"
+   }
+  ],
+  "outputs": [
+   "Monthly_Saving",
+   "Future_Cost",
+   "Saved_Grows_To",
+   "Still_Needed",
+   "Plan_Goal_Amount",
+   "Plan_Goal_Saved",
+   "Plan_Goal_Years"
+  ],
+  "extra": [
+   true
+  ]
+ },
+ {
+  "id": "compound",
+  "sheet": "C09 Compound growth",
+  "inputs": [
+   {
+    "key": "p",
+    "name": "Starting_Amount",
+    "kind": "n"
+   },
+   {
+    "key": "m",
+    "name": "Monthly_Addition",
+    "kind": "n"
+   },
+   {
+    "key": "r",
+    "name": "Growth_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "y",
+    "name": "Years",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Grows_To",
+   "Value_Today",
+   "Paid_In",
+   "Growth_Earned",
+   "Plan_Goal_Amount"
+  ],
+  "extra": [
+   true
+  ]
+ },
+ {
+  "id": "lumpsum",
+  "sheet": "C10 Lump sum growth",
+  "inputs": [
+   {
+    "key": "p",
+    "name": "Amount",
+    "kind": "n"
+   },
+   {
+    "key": "r",
+    "name": "Growth_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "y",
+    "name": "Years",
+    "kind": "n"
+   },
+   {
+    "key": "f",
+    "name": "Yearly_Fees",
+    "kind": "pct"
+   },
+   {
+    "key": "wait",
+    "name": "Wait_Years",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Headline",
+   "Grows_To",
+   "Value_Start_Later",
+   "Value_Today",
+   "Cost_Of_Waiting",
+   "Fees_Cost",
+   "Growth_After_Fees",
+   "Real_Return",
+   "Plan_Goal_Amount"
+  ],
+  "extra": [
+   true,
+   true
+  ]
+ },
+ {
+  "id": "emergency",
+  "sheet": "C11 Emergency fund",
+  "inputs": [
+   {
+    "key": "e",
+    "name": "Essential_Spending",
+    "kind": "n"
+   },
+   {
+    "key": "mt",
+    "name": "Months_Wanted",
+    "kind": "n"
+   },
+   {
+    "key": "s",
+    "name": "Savings",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Months_Covered",
+   "Target",
+   "Still_To_Build",
+   "Plan_Goal_Amount",
+   "Plan_Goal_Saved"
+  ],
+  "extra": []
+ },
+ {
+  "id": "retirement",
+  "sheet": "C12 Retirement projection",
+  "inputs": [
+   {
+    "key": "age",
+    "name": "Age",
+    "kind": "n"
+   },
+   {
+    "key": "ra",
+    "name": "Retirement_Age",
+    "kind": "n"
+   },
+   {
+    "key": "pot",
+    "name": "Pension_Today",
+    "kind": "n"
+   },
+   {
+    "key": "m",
+    "name": "Monthly_Contribution",
+    "kind": "n"
+   },
+   {
+    "key": "d",
+    "name": "Desired_Income",
+    "kind": "n"
+   },
+   {
+    "key": "o",
+    "name": "Other_Income",
+    "kind": "n"
+   },
+   {
+    "key": "g",
+    "name": "Growth_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "later",
+    "name": "Retire_Later",
+    "kind": "n"
+   },
+   {
+    "key": "more",
+    "name": "Save_More",
+    "kind": "n"
+   },
+   {
+    "key": "less",
+    "name": "Spend_Less",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Gap_Today",
+   "Projected_Fund",
+   "Fund_Today",
+   "Calculated_Fund",
+   "Target_Today",
+   "Years_To_Retirement",
+   "Bridge_Years",
+   "Lump_Sum",
+   "Lump_Sum_Tax",
+   "Lump_Sum_Net",
+   "Early_Warning",
+   "SFT_Warning",
+   "Use_Statement_Projection",
+   "Plan_Goal_Income",
+   "Plan_Goal_Age"
+  ],
+  "extra": [
+   true,
+   false,
+   [
+    [
+     "wage",
+     "Wage"
+    ],
+    [
+     "retireMult",
+     "Retire_Multiple"
+    ],
+    [
+     "penChg",
+     "Typical_Pension_Charges"
+    ],
+    [
+     "lumpSum",
+     "Lump_Sum_Pct"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "contrib",
+  "sheet": "C13 Contribution impact",
+  "inputs": [
+   {
+    "key": "sal",
+    "name": "Salary",
+    "kind": "n"
+   },
+   {
+    "key": "inc",
+    "name": "Increase_Pct",
+    "kind": "pct"
+   },
+   {
+    "key": "y",
+    "name": "Years",
+    "kind": "n"
+   },
+   {
+    "key": "g",
+    "name": "Growth_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "tr",
+    "name": "Tax_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "age",
+    "name": "Age",
+    "kind": "n"
+   },
+   {
+    "key": "ex",
+    "name": "Existing_Pension_Year",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Grows_To",
+   "Value_Today",
+   "Extra_Per_Month",
+   "Net_Cost_Per_Month",
+   "Relief_Limit_Year",
+   "Relieved_Year",
+   "Relief_Per_Month",
+   "Plan_Goal_Contribution"
+  ],
+  "extra": [
+   true,
+   false,
+   [
+    [
+     "penChg",
+     "Typical_Pension_Charges"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "avc",
+  "sheet": "C14 AVC impact",
+  "inputs": [
+   {
+    "key": "m",
+    "name": "AVC_Per_Month",
+    "kind": "n"
+   },
+   {
+    "key": "sal",
+    "name": "Salary",
+    "kind": "n"
+   },
+   {
+    "key": "y",
+    "name": "Years",
+    "kind": "n"
+   },
+   {
+    "key": "g",
+    "name": "Growth_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "tr",
+    "name": "Tax_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "age",
+    "name": "Age",
+    "kind": "n"
+   },
+   {
+    "key": "ex",
+    "name": "Existing_Pension_Year",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Grows_To",
+   "Value_Today",
+   "Paid_In",
+   "Net_Cost",
+   "Net_Cost_Per_Month",
+   "Relief_Limit_Year",
+   "Relieved_Year",
+   "Relief_Per_Month",
+   "Plan_Goal_Contribution"
+  ],
+  "extra": [
+   true,
+   false,
+   [
+    [
+     "penChg",
+     "Typical_Pension_Charges"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "lastmoney",
+  "sheet": "C15 Will my money last",
+  "inputs": [
+   {
+    "key": "pot",
+    "name": "Retirement_Savings",
+    "kind": "n"
+   },
+   {
+    "key": "w",
+    "name": "Yearly_Withdrawal",
+    "kind": "n"
+   },
+   {
+    "key": "g",
+    "name": "Growth_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "age",
+    "name": "Age_At_Start",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Years_Lasting",
+   "Lasts_To_Age",
+   "Withdrawal_Rate"
+  ],
+  "extra": [
+   true,
+   false,
+   [
+    [
+     "ddTiming",
+     "Withdrawal_Timing",
+     "T"
+    ],
+    [
+     "planEnd",
+     "Plan_To_Age"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "drawdown",
+  "sheet": "C16 Drawdown scenarios",
+  "inputs": [
+   {
+    "key": "pot",
+    "name": "Retirement_Savings",
+    "kind": "n"
+   },
+   {
+    "key": "w",
+    "name": "Yearly_Withdrawal",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Years_Cautious",
+   "Years_Balanced",
+   "Years_Growth"
+  ],
+  "extra": [
+   true,
+   false,
+   [
+    [
+     "riskMu1",
+     "DD_Cautious"
+    ],
+    [
+     "riskMu2",
+     "DD_Balanced"
+    ],
+    [
+     "riskMu3",
+     "DD_Growth"
+    ],
+    [
+     "ddTiming",
+     "Withdrawal_Timing",
+     "T"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "realreturn",
+  "sheet": "C17 Inflation adjusted return",
+  "inputs": [
+   {
+    "key": "p",
+    "name": "Amount",
+    "kind": "n"
+   },
+   {
+    "key": "r",
+    "name": "Nominal_Return",
+    "kind": "pct"
+   },
+   {
+    "key": "y",
+    "name": "Years",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Future_Value",
+   "Value_Today",
+   "Real_Return"
+  ],
+  "extra": [
+   true
+  ]
+ },
+ {
+  "id": "regularinvest",
+  "sheet": "C18 Regular investing",
+  "inputs": [
+   {
+    "key": "m",
+    "name": "Monthly_Amount",
+    "kind": "n"
+   },
+   {
+    "key": "y",
+    "name": "Years",
+    "kind": "n"
+   },
+   {
+    "key": "g",
+    "name": "Growth_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "f",
+    "name": "Yearly_Fees",
+    "kind": "pct"
+   }
+  ],
+  "outputs": [
+   "Headline",
+   "Value_After_Fees",
+   "Value_Before_Fees",
+   "Fees_Cost",
+   "Paid_In",
+   "Value_Today",
+   "Growth_After_Fees",
+   "Real_Return",
+   "Plan_Goal_Amount"
+  ],
+  "extra": [
+   true,
+   true
+  ]
+ },
+ {
+  "id": "fees",
+  "sheet": "C19 Fees impact",
+  "inputs": [
+   {
+    "key": "p",
+    "name": "Amount_Invested",
+    "kind": "n"
+   },
+   {
+    "key": "y",
+    "name": "Years",
+    "kind": "n"
+   },
+   {
+    "key": "g",
+    "name": "Growth_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "a",
+    "name": "Fee_A",
+    "kind": "pct"
+   },
+   {
+    "key": "b",
+    "name": "Fee_B",
+    "kind": "pct"
+   }
+  ],
+  "outputs": [
+   "Difference",
+   "Value_With_Fee_A",
+   "Value_With_Fee_B",
+   "Fee_Gap"
+  ],
+  "extra": []
+ },
+ {
+  "id": "riskreturn",
+  "sheet": "C20 Risk and return",
+  "inputs": [
+   {
+    "key": "p",
+    "name": "Amount",
+    "kind": "n"
+   },
+   {
+    "key": "y",
+    "name": "Years",
+    "kind": "n"
+   },
+   {
+    "key": "s",
+    "name": "Style",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Middle",
+   "Weaker",
+   "Stronger",
+   "Difficult_Year_Fall",
+   "Style_Name",
+   "Spread"
+  ],
+  "extra": [
+   false,
+   false,
+   [
+    [
+     "riskMu1",
+     "Mu_Cautious"
+    ],
+    [
+     "riskMu2",
+     "Mu_Balanced"
+    ],
+    [
+     "riskMu3",
+     "Mu_Growth"
+    ],
+    [
+     "riskVol1",
+     "Vol_Cautious"
+    ],
+    [
+     "riskVol2",
+     "Vol_Balanced"
+    ],
+    [
+     "riskVol3",
+     "Vol_Growth"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "lifecover",
+  "sheet": "C21 Life cover",
+  "inputs": [
+   {
+    "key": "inc",
+    "name": "Yearly_Income",
+    "kind": "n"
+   },
+   {
+    "key": "y",
+    "name": "Years_Support",
+    "kind": "n"
+   },
+   {
+    "key": "mort",
+    "name": "Mortgage_Balance",
+    "kind": "n"
+   },
+   {
+    "key": "mp",
+    "name": "Mortgage_Protected",
+    "kind": "yn"
+   },
+   {
+    "key": "debt",
+    "name": "Other_Debts",
+    "kind": "n"
+   },
+   {
+    "key": "sav",
+    "name": "Savings",
+    "kind": "n"
+   },
+   {
+    "key": "ex",
+    "name": "Existing_Cover",
+    "kind": "n"
+   },
+   {
+    "key": "surv",
+    "name": "Survivor_Pension",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Cover_Gap",
+   "Income_Need",
+   "Debts_To_Clear",
+   "Already_Have",
+   "Income_Replacement",
+   "Plan_Goal_Need"
+  ],
+  "extra": [
+   false,
+   false,
+   [
+    [
+     "lifeShare",
+     "Life_Replace"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "incomegap",
+  "sheet": "C22 Income protection gap",
+  "inputs": [
+   {
+    "key": "e",
+    "name": "Essential_Spending",
+    "kind": "n"
+   },
+   {
+    "key": "sp",
+    "name": "Sick_Pay_Months",
+    "kind": "n"
+   },
+   {
+    "key": "s",
+    "name": "Savings",
+    "kind": "n"
+   },
+   {
+    "key": "inc",
+    "name": "Gross_Income",
+    "kind": "n"
+   },
+   {
+    "key": "ib",
+    "name": "Illness_Benefit",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Months_Coping",
+   "Monthly_Gap",
+   "IP_Needed",
+   "Illness_Benefit_Month",
+   "Savings_Months",
+   "IP_Max",
+   "Plan_Goal_Need"
+  ],
+  "extra": []
+ },
+ {
+  "id": "mortgageprotect",
+  "sheet": "C23 Mortgage protection",
+  "inputs": [
+   {
+    "key": "bal",
+    "name": "Mortgage_Balance",
+    "kind": "n"
+   },
+   {
+    "key": "rate",
+    "name": "Interest_Rate",
+    "kind": "pct"
+   },
+   {
+    "key": "y",
+    "name": "Years_Left",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Cover_Today",
+   "Warning",
+   "Balance_Year_1",
+   "Balance_Year_2",
+   "Balance_Year_3",
+   "Repayment"
+  ],
+  "extra": []
+ },
+ {
+  "id": "networth",
+  "sheet": "C24 Net worth",
+  "inputs": [
+   {
+    "key": "sav",
+    "name": "Savings",
+    "kind": "n"
+   },
+   {
+    "key": "inv",
+    "name": "Investments",
+    "kind": "n"
+   },
+   {
+    "key": "pen",
+    "name": "Pensions",
+    "kind": "n"
+   },
+   {
+    "key": "prop",
+    "name": "Property",
+    "kind": "n"
+   },
+   {
+    "key": "mort",
+    "name": "Mortgage",
+    "kind": "n"
+   },
+   {
+    "key": "loans",
+    "name": "Other_Loans",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Net_Worth",
+   "You_Own",
+   "You_Owe"
+  ],
+  "extra": []
+ },
+ {
+  "id": "surplus",
+  "sheet": "C25 Monthly surplus",
+  "inputs": [
+   {
+    "key": "inc",
+    "name": "Take_Home",
+    "kind": "n"
+   },
+   {
+    "key": "ess",
+    "name": "Essentials",
+    "kind": "n"
+   },
+   {
+    "key": "life",
+    "name": "Lifestyle",
+    "kind": "n"
+   },
+   {
+    "key": "debt",
+    "name": "Debt_Repayments",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Surplus",
+   "Going_Out",
+   "Plan_Goal_Amount"
+  ],
+  "extra": []
+ },
+ {
+  "id": "budget",
+  "sheet": "C26 Budget 50 30 20",
+  "inputs": [
+   {
+    "key": "inc",
+    "name": "Take_Home",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Save",
+   "Needs",
+   "Wants",
+   "Split_Check"
+  ],
+  "extra": [
+   false,
+   false,
+   [
+    [
+     "budgetNeeds",
+     "Budget_Needs"
+    ],
+    [
+     "budgetWants",
+     "Budget_Wants"
+    ],
+    [
+     "budgetSave",
+     "Budget_Save"
+    ]
+   ]
+  ]
+ },
+ {
+  "id": "debtpay",
+  "sheet": "C27 Debt repayment",
+  "inputs": [
+   {
+    "key": "b",
+    "name": "Balance",
+    "kind": "n"
+   },
+   {
+    "key": "apr",
+    "name": "APR",
+    "kind": "pct"
+   },
+   {
+    "key": "p",
+    "name": "Monthly_Payment",
+    "kind": "n"
+   },
+   {
+    "key": "x",
+    "name": "Extra_Payment",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Months_To_Clear",
+   "Total_Interest",
+   "Monthly_Rate"
+  ],
+  "extra": []
+ },
+ {
+  "id": "loan",
+  "sheet": "C28 Loan repayment",
+  "inputs": [
+   {
+    "key": "a",
+    "name": "Loan_Amount",
+    "kind": "n"
+   },
+   {
+    "key": "apr",
+    "name": "APR",
+    "kind": "pct"
+   },
+   {
+    "key": "y",
+    "name": "Years",
+    "kind": "n"
+   }
+  ],
+  "outputs": [
+   "Monthly_Repayment",
+   "Total_Repaid",
+   "Total_Interest",
+   "Monthly_Rate"
+  ],
+  "extra": []
+ }
+]
