@@ -22,7 +22,7 @@ const flat = s => String(s == null ? '' : s).replace(/\s+/g, '').replace(/[\u200
   for (const n of Object.keys(byCalc).sort()) {
     const id = idOf[n], rows = byCalc[n]; let all = '', sliders = {};
     for (const st of ['none', 'chosen', 'plan']) { await openCalc(page, st, id); all += ' ' + await text();
-      sliders[st] = await page.evaluate(() => [...document.querySelectorAll('#main input[type=range]')].map(r => { const l = (document.getElementById((r.getAttribute('aria-labelledby') || '').split(' ')[0]) || {}).textContent || ''; return { label: window.__ui.N(l.replace(/\s*Not chosen yet|\s*From your statement|\s*Worked out.*$/g, '')), min: r.min, max: r.max, step: r.step }; })); }
+      sliders[st] = await page.evaluate(() => [...document.querySelectorAll('#main input[type=range]')].map(r => { const l = (document.getElementById((r.getAttribute('aria-labelledby') || '').split(' ')[0]) || {}).textContent || ''; return { label: window.__ui.N(l.replace(/\s*Not chosen yet|\s*Set by LifeMap|\s*Your choice|\s*Assumed: add yours|\s*From your statement|\s*Worked out.*$/g, '')), min: r.min, max: r.max, step: r.step }; })); }
     const A = flat(all);
     for (const r of rows) { res.calcRows++;
       if (r.label && !SYN.has(r.label) && !A.includes(flat(r.label))) res.calcLabelsMissing.push([n, r.type, r.label]);

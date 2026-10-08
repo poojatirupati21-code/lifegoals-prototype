@@ -4,7 +4,7 @@ window.applyScenario = function(sc){
   S = fresh(); S.app = true; S.shell = true; S.gid = 1;
   const ab = sc.about || {};
   S.about = {age:ab.age, partner:ab.partner ? true : null, deps:ab.deps == null ? 0 : ab.deps, married:ab.married == null ? null : ab.married, cred:Object.assign({}, sc.cred || {})};
-  if (sc.retireAge != null){ S.retireAge = sc.retireAge; S.retireSet = true; }
+  if (sc.retireAge != null){ S.retireAge = sc.retireAge; S.retireSet = true; S.fin.retireAge = sc.retireAge; S.src.retireAge = 'typed'; }
   if (sc.pRet != null){ S.pRet = sc.pRet; S.pRetSet = true; }
   if (sc.infl != null) S.infl = sc.infl;
   S.assume = sc.assume || 'standard';
@@ -25,6 +25,8 @@ window.applyScenario = function(sc){
   S.um = S.um || {}; S.um.a = S.um.a || {}; S.um.chips = [];
   const pr = sc.prof || {}; Object.entries(pr.ans || {}).forEach(([k, v]) => { S.ans[k] = v; }); Object.entries(pr.um || {}).forEach(([k, v]) => { S.um.a[k] = v; }); S.um.chips = (pr.chips || []).slice();
   const w = sc.wi || {}; S.wi = {g:w.g != null ? S.goals[w.g].id : null, m:w.m || 0, l:w.l || 0};
+  const se = sc.sess || {}; S.book = S.book || {}; S.book.done = !!se.booked; S.book.slot = se.slot || ''; S.um.rechecked = !!se.rechecked; S.pref = se.pref ? {g:null, m:100, l:0} : null;
+  S.saved = {}; (sc.saved || []).forEach(k => S.saved[k] = true); S.look = {}; (sc.look || []).forEach(k => S.look[k] = 'flagged'); S.ack = {}; (sc.ack || []).forEach(k => S.ack[k] = true);
   syncLists(); applyAssume(); syncSafety(); return true;
 };
 window.readOutputs = function(){
@@ -42,9 +44,9 @@ window.readOutputs = function(){
     const rows = P.rows, sh = rows.filter(chartShort), liv = sh.filter(r => r.shortLiving > 0.5);
     out.chart = {shortYears:sh.length, dip:rows.filter(r => !chartShort(r) && rowParts(r).fromSavings > 0.5).length, firstAge:sh.length ? sh[0].a : '', firstAmt:sh.length ? rowParts(sh[0]).short : '', total:sh.reduce((t, r) => t + rowParts(r).short, 0), livYears:liv.length, livFirst:liv.length ? liv[0].a : '', roadFirst:(rows.find(isShort) || {a:''}).a, roadShort:rows.filter(isShort).length,
       parts:rows.map(r => { const p = rowParts(r); return [p.fromIncome, p.fromSavings, p.short]; })};
-    { const L = foundations(), fx = fndNext(L), rest = ASM_KEYS().filter(k => asmStd(k) && ASM[k].need()), pm = planMissing(), e = essM(finNums());
+    { const L = foundations(), fx = fndNext(L), pm = planMissing(), e = essM(finNums());
       out.misc = {fndNextN:fx ? fx.x.n : 0, fndNextT:fx ? fx.t : '', fndNextD:fx ? fx.d.replace(/&#39;/g, "'") : '', slip:Pb ? S.goals.filter(g => Pb.pct[g.id] < 95).map(g => g.name).join('|') + (S.goals.some(g => Pb.pct[g.id] < 95) ? '|' : '') : '', slipN:S.goals.filter(g => Pb.pct[g.id] < 95).length,
-        reqN:reqKeys().length, reqGot:reqKeys().length - req3Missing().length, stdLeft:gateStd().length, stdNeed:rest.length, months:S.goals.map(g => g.k === 'safety' && e > 0 && g.amount > 0 ? Math.round(g.amount / e * 10) / 10 : '')}; }
+        reqN:reqKeys().length, reqGot:reqKeys().length - req3Missing().length, months:S.goals.map(g => g.k === 'safety' && e > 0 && g.amount > 0 ? Math.round(g.amount / e * 10) / 10 : '')}; }
     out.chapters = chapters(P).map(c => { const s2 = c.rows.filter(isShort), dip = c.rows.filter(r => r.used > 1 && !isShort(r)); return {dec:c.dec, from:c.from, to:c.to, n:c.rows.length, short:s2.length, dip:dip.length, avg:s2.length ? s2.reduce((s, r) => s + r.short, 0) / s2.length : 0, wx:s2.length ? 'storm' : dip.length > c.rows.length / 3 ? 'showers' : dip.length ? 'partly' : 'sun'}; }); }
   { const full = umCount() === 13, r = riskRead(full), per = personality(), mt = myTerms(), sec = k => (mt.find(x => x.k === k) || {tags:[]}).tags.join('|');
     const d = new DOMParser().parseFromString(planProfileBanner(), 'text/html'), bt = d.querySelector('#r-prof > span:nth-of-type(2)');
@@ -55,10 +57,27 @@ window.readOutputs = function(){
   out.lines = S.goals.map(g => goalLine(P, g));
   try { const F = findings(P0); out.find = {sT:F.sT, gT:F.gT, dT:F.dT, ex:F.ex == null ? null : F.ex, best:F.best ? S.goals.indexOf(F.best) : -1, worst:S.goals.indexOf(F.worst)}; } catch (e) { out.find = null; }
   try { const fnd = foundations(); out.fnd = fnd.map(l => ({name:l.name, st:l.st, s:l.s})); } catch (e) { out.fnd = null; }
-  out.missing = planMissing().map(x => x.k); out.gateText = planMissing().length ? chooseTxt(planMissing()[0]) : '';
+  out.missing = planMissing().map(x => x.k); out.missingT = planMissing().map(x => x.t); out.gateText = planMissing().length ? chooseTxt(planMissing()[0]) : '';
   out.missingFlags = missingFlags().length;
   const f = finNums(); out.fin = {essM:essM(f), mortPayM:f.mortPayM, cardPayM:f.cardPayM, loanPayM:f.loanPayM, penG:f.penG, own:f.pensionOwnM, penM:f.pensionM, sp:f.sp, debt:f.debt, loanBal:f.loanBal, cardBal:f.cardBal, loanRate:f.loanRate, cardRate:f.cardRate};
   out.ASx = 1; out.AS = {infl:AS.infl, wage:AS.wage, cash:AS.cash, inv:AS.inv, pen:AS.pen, penRet:AS.penRet, end:AS.end, year0:YEAR0, buffer:SAVE.buffer};
+  // ---- recheck round: my money sections, next best step, what-if text, goal years, video reasons, category counts, year labels, chapter stories, Understand Me counts
+  { const strip = h => String(h).replace(/<br>/g, '\\n').replace(/<[^>]+>/g, '').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+    const ci = checkItems();
+    out.fin6 = {st:FSEC.map(secStatus), done:FSEC.filter(s => secStatus(s) === 'done').length, minOK:minOK() ? 1 : 0, quality:qualityCount(), skipped:skippedSecs().length, rough:roughNote() ? 1 : 0, homeRough:(skippedSecs().length || qualityCount() > 2) ? 1 : 0,
+      good:ci.filter(x => !['look', 'miss'].includes(x.st)).length, looks:ci.filter(x => x.st === 'look' && !S.ack[x.k]).length};
+    try { const n = nextStep(); out.next = {t:strip(n.t), d:strip(n.d), b:n.b}; } catch (e) { out.next = null; }
+    { const f2 = finNums(), ry = f2.R - f2.age; out.ret = {year:ry, pot:(ry >= 1 && ry <= out.N) ? P.rows[ry - 1].pen : '', incM:(ry >= 0 && ry <= out.N) ? P.rows[ry].inflow / Math.pow(1 + AS.infl, ry) / 12 : ''}; }
+    try { const sp = specialist(); out.expertIdx = sp.goal ? S.goals.indexOf(sp.goal) + 1 : 0; } catch (e) { out.expertIdx = null; }
+    out.pctBase = S.goals.map(g => P0.pct[g.id]); out.wiTxt = strip(wiText(P0, P)); out.wiPairs = S.goals.map(g => P0.pct[g.id] !== P.pct[g.id] ? g.name + ' goes from ' + P0.pct[g.id] + '% to ' + P.pct[g.id] + '%' : '');
+    const a0 = S.about.age; out.years = S.goals.map(g => ({y:YEAR0 + g.age - a0, t:passedG(g) ? 'Date has passed' : (g.kind === 'retire' ? 'Age ' : 'age ') + g.age + ' · ' + (YEAR0 + g.age - a0)}));
+    out.vidPct = ['mortgage', 'pension', 'protection', 'investment', 'planner'].map(k => { const g = S.goals.find(x => x.spec === k && x.kind !== 'retire') || (k === 'pension' ? retireGoal() : null); return g ? P0.pct[g.id] : ''; });
+    out.catN = CATS.map(c => CALCS.filter(x => x.cat === c.id).length);
+    out.yrLabel = P.rows.map(r => isShort(r) ? 'Gap to plan for: short ' + eur(r.short) : r.used > 1 ? 'Using savings' : 'Comfortable');
+    out.stories = chapters(P).map(c => { const sh = c.rows.filter(isShort), dip = c.rows.filter(r => r.used > 1 && !isShort(r)), allRet = c.rows.every(r => r.retired);
+      return sh.length ? 'Short by about ' + eur(sh.reduce((s, r) => s + r.short, 0) / sh.length) + ' a year in ' + sh.length + ' of these years.' : allRet ? 'Living on your pensions and savings, and they hold up.' : dip.length ? "Some years dip into savings. That's what they're for." : 'Income comfortably covers life.'; });
+    const sec = UM.map(s => ({got:s.qs.filter(q => q.d ? typeof S.ans[q.d] === 'number' : typeof S.um.a[q.u] === 'number').length, tot:s.qs.length}));
+    out.umSec = sec; out.umLeft = UM_NEW.filter(u => u === '6' ? typeof S.ans['6'] !== 'number' : typeof S.um.a[u] !== 'number').length; out.umLeftTxt = umLeftTxt(); }
   return out;
 };
 `;

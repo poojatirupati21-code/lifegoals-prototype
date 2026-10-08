@@ -25,7 +25,7 @@ def apply_sc(x, sc):
     S('In_penExtra', sc.get('penExtra'))
     for k, n in [('rent', 'In_credRent'), ('lone', 'In_credLone'), ('carer', 'In_credCarer')]:
         if sc.get('cred', {}).get(k): x.setname(n, 'Yes', col='C')
-    for k, v in sc.get('fin', {}).items(): S('In_' + k, v)
+    for k, v in sc.get('fin', {}).items(): S('In_' + k, v / 100 if k in ('mortRate', 'cardRate', 'loanRate', 'penChg') else v)
     for k, v in sc.get('asm', {}).items(): S('In_a_' + k, v)
     pr = sc.get('prof', {})
     for k, v in pr.get('ans', {}).items(): x.setname('PA_' + k + '_Typed', v + 1)
@@ -45,6 +45,14 @@ def apply_sc(x, sc):
         x.set(sh, f'F{row}', g['amount']); x.set(sh, f'G{row}', g.get('saved', 0)); x.set(sh, f'H{row}', g.get('prio', 'Must have'))
         if rank is not None: x.set(sh, f'I{row}', rank.index(i) + 1)
         if g['k'] == 'safety': x.set(sh, f'J{row}', 'Yes' if g.get('auto') else 'No')
+    if sc.get('look'): x.setname('In_lookKeys', ','.join(sc['look']), col='C')
+    if sc.get('ack'): x.setname('In_ackKeys', ','.join(sc['ack']), col='C')
+    for k, n in zip(['about', 'income', 'assets', 'liab', 'prot', 'pension'], range(1, 7)):
+        if k in sc.get('saved', []): x.setname(f'In_saved{n}', 'Yes', col='C')
+    se = sc.get('sess') or {}
+    if se.get('booked'): x.setname('In_booked', 'Yes', col='C'); x.setname('In_slot', se.get('slot', ''), col='C')
+    if se.get('rechecked'): x.setname('In_rechecked', 'Yes', col='C')
+    if se.get('pref'): x.setname('In_prefSet', 'Yes', col='C')
     L = sc.get('lists', {})
     for lk, r0, cols in [('cards', 6, ('owed', 'pay', 'rate')), ('loans', 21, ('owed', 'pay', 'rate'))]:
         for j, it in enumerate(L.get(lk, [])):
@@ -56,6 +64,12 @@ def apply_sc(x, sc):
     for j, it in enumerate(L.get('mort2', [])):
         for c, f in zip('DEFG', ('owed', 'pay', 'years', 'rate')):
             if it.get(f) is not None: x.set('Your lists', f'{c}{MORT2_FIRST + j}', it[f] / 100 if f == 'rate' else it[f])
+
+def feed_before(x, sc, out):
+    if not out.get('wiOn'): return
+    for i, p in enumerate(out['pctBase']):
+        sh = x.locate(f'GR{i + 1}_PctBefore')
+        x.set(sh[0], sh[1], p)
 
 def feed_typed(x, sc, out):
     """the two helper figures the workbook cannot search for (the what-if searches): taken from the prototype"""
@@ -92,6 +106,10 @@ def compare(x, sc, out, tol=1.0, verbose=True):
     gk = x.val('Gate_Keys'); gk = '' if gk is None else gk
     if gk != ','.join(out['missing']): bad.append(('gate', 'keys', ','.join(out['missing']), gk))
     if x.val('Gate_Text') != out['gateText']: bad.append(('gate', 'text', out['gateText'], x.val('Gate_Text')))
+    gc = 'To see your results we need %d thing%s' % (len(out['missing']), '' if len(out['missing']) == 1 else 's') if out['missing'] else ''
+    if x.val('Gate_Card') != gc: bad.append(('gate', 'card', gc, x.val('Gate_Card')))
+    gn = x.val('Gate_Names'); gn = '' if gn is None else gn
+    if gn != ', '.join(out['missingT']): bad.append(('gate', 'names', ', '.join(out['missingT']), gn))
     if out['find'] and not out.get('wiOn'):
         F = out['find']
         for nm, k in [('Find_Strength', 'sT'), ('Find_Gap', 'gT'), ('Find_Decision', 'dT')]:
@@ -146,7 +164,7 @@ def compare(x, sc, out, tol=1.0, verbose=True):
                 if not ok: bad.append(('chapter', k, exp, vals)); break
     M = out.get('misc')
     if M:
-        for nm, k in [('Req_Count', 'reqN'), ('Req_Got', 'reqGot'), ('Std_Left', 'stdLeft'), ('Std_Need', 'stdNeed'), ('Slip_Count', 'slipN')]:
+        for nm, k in [('Req_Count', 'reqN'), ('Req_Got', 'reqGot'), ('Slip_Count', 'slipN')]:
             v = x.val(nm)
             if v != M[k] and not (out.get('wiOn') and nm.startswith('Slip')): bad.append(('misc', nm, M[k], v))
         if not out.get('wiOn'):
@@ -177,6 +195,53 @@ def compare(x, sc, out, tol=1.0, verbose=True):
             if isinstance(exp, str) and isinstance(v, str) or isinstance(exp, (int, float)) and isinstance(v, (int, float)):
                 if v != exp: bad.append(('prof', nm, exp, v))
             elif not (exp == '' and v == ''): bad.append(('prof', nm, exp, v))
+    RT = out.get('ret')
+    if RT:
+        if x.val('Ret_Year') != RT['year']: bad.append(('ret', 'year', RT['year'], x.val('Ret_Year')))
+        for nm, k in [('Ret_PotNominal', 'pot'), ('Ret_IncomeMonth', 'incM')]:
+            v = x.val(nm); e = RT[k]
+            if e == '':
+                if k == 'pot': continue
+            elif not isinstance(v, (int, float)) or abs(v - e) > (1 if k == 'pot' else 0.05): bad.append(('ret', nm, e, v))
+    if out.get('expertIdx') is not None and not out.get('wiOn') and x.val('Expert_Idx') != out['expertIdx']: bad.append(('expert', out['expertIdx'], x.val('Expert_Idx')))
+    F6 = out.get('fin6')
+    if F6:
+        for n in range(1, 7):
+            if x.val(f'Fin{n}_St') != F6['st'][n - 1]: bad.append(('fin6', f'Fin{n}_St', F6['st'][n - 1], x.val(f'Fin{n}_St')))
+        for nm, k in [('Fin_Done', 'done'), ('Fin_MinOK', 'minOK'), ('Fin_Quality', 'quality'), ('Fin_Skipped', 'skipped'), ('Rough_Show', 'rough'), ('Home_Rough', 'homeRough'), ('Good_Count', 'good'), ('Look_Count', 'looks')]:
+            if x.val(nm) != F6[k]: bad.append(('fin6', nm, F6[k], x.val(nm)))
+    if out.get('next') and not out.get('wiOn'):
+        NX = out['next']
+        for nm, k in [('Next_T', 't'), ('Next_D', 'd'), ('Next_B', 'b')]:
+            if x.val(nm) != NX[k]: bad.append(('next', nm, NX[k], x.val(nm)))
+    if out.get('wiTxt') is not None:
+        if x.val('Wi_Text') != out['wiTxt']: bad.append(('wiText', out['wiTxt'], x.val('Wi_Text')))
+        for i, t in enumerate(out['wiPairs']):
+            v = x.val(f'GR{i + 1}_WiTxt'); v = '' if v is None else v
+            if v != t: bad.append(('wiGoal', i, t, v))
+    for i, yv in enumerate(out.get('years', [])):
+        if x.val(f'GR{i + 1}_Year') != yv['y']: bad.append(('year', i, yv['y'], x.val(f'GR{i + 1}_Year')))
+        if x.val(f'GR{i + 1}_AgeYear') != yv['t']: bad.append(('ageyear', i, yv['t'], x.val(f'GR{i + 1}_AgeYear')))
+    if out.get('vidPct') and not out.get('wiOn'):
+        for k, key in enumerate(['mortgage', 'pension', 'protection', 'investment', 'planner']):
+            v = x.val(f'Vid_{key}_Pct'); v = '' if v is None else v
+            if v != out['vidPct'][k]: bad.append(('vid', key, out['vidPct'][k], v))
+    for k, c in enumerate(out.get('catN', [])):
+        if x.val(f'Cat_N{k + 1}') != c: bad.append(('cat', k, c, x.val(f'Cat_N{k + 1}')))
+    if out.get('yrLabel'):
+        m = x.meta['C']
+        for t in range(N + 1):
+            v = x.getcell(m['sheet'], f"{m['cols']['yrLabel']}{m['r0'] + t}")
+            if v != out['yrLabel'][t]: bad.append(('yrLabel', t, out['yrLabel'][t], v)); break
+    for k, st in enumerate(out.get('stories', [])):
+        sheet = x.locate('Chap_Story')[0]; r0 = int(x.locate('Chap_Story')[1].replace('$', '').split(':')[0][1:])
+        v = x.getcell(sheet, f'K{r0 + k}')
+        if v != st: bad.append(('story', k, st, v))
+    if out.get('umSec') and not sc.get('fill'):
+        for k, u in enumerate(out['umSec']):
+            if x.val(f'Prof_UmSec{k + 1}') != u['got']: bad.append(('umsec', k, u['got'], x.val(f'Prof_UmSec{k + 1}')))
+        if x.val('Prof_UmLeft') != out['umLeft']: bad.append(('umleft', out['umLeft'], x.val('Prof_UmLeft')))
+        if x.val('Prof_UmLeftTxt') != out['umLeftTxt']: bad.append(('umlefttxt', out['umLeftTxt'], x.val('Prof_UmLeftTxt')))
     if not sc.get('fill') and x.val('Missing_Count') != out['missingFlags']: bad.append(('missing', 'count', out['missingFlags'], x.val('Missing_Count')))
     return bad
 
@@ -185,7 +250,9 @@ def run(path, scen_json, only=None, limit=10):
     for k, d in enumerate(data):
         if only is not None and k not in only: continue
         sc, out = d['sc'], d['out']
-        apply_sc(x, sc); feed_typed(x, sc, out); x.calc()
+        apply_sc(x, sc)
+        if not sc.get('fill'): feed_typed(x, sc, out); feed_before(x, sc, out)
+        x.calc()
         bad = compare(x, sc, out)
         res.append((sc.get('name', k), len(bad)))
         if bad:

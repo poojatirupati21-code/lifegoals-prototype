@@ -10,6 +10,7 @@ function mk(i) {
   const retired = rnd() < .08;
   sc.retireAge = retired ? Math.max(50, age - ri(0, 5)) : Math.max(age + 1, pick([55, 60, 63, 65, 66, 68, 70])); if (sc.retireAge > 75) sc.retireAge = 75;
   if (retired && age < 52) sc.retireAge = 50;
+  if (!retired && rnd() < .3) sc.retireAge = Math.max(age + 1, pick([25, 30, 35, 40, 45, 50, 55, 58, 60]));   // section 27: any age after your own (early retirement)
   sc.infl = pick([0.02, 0.025, 0.039, 0.01, 0.03]); sc.assume = pick(['standard', 'standard', 'cautious']); sc.q6 = pick([null, 0, 1, 2, 3, 4]);
   if (rnd() < .2) sc.saveM = pick([0, 100, 400, 900, 2500]); if (sc.saveM != null && rnd() < .5) sc.saveUp = rnd() < .5;
   if (rnd() < .15) sc.penExtra = pick([50, 150, 300]);
@@ -24,7 +25,7 @@ function mk(i) {
   if (rnd() < .35) { fin.cardBal = pick([400, 2500, 9000]); fin.cardPayM = pick([0, 30, 120, 400]); if (rnd() < .5) fin.cardRate = pick([18, 22]); }
   if (rnd() < .35) { fin.loanBal = pick([3500, 12000, 40000]); fin.loanPayM = pick([0, 100, 350, 900]); if (rnd() < .5) fin.loanRate = pick([6.5, 9]); }
   if (rnd() < .1) { fin.debt = pick([5000, 80000]); fin.debtPayM = pick([0, 200]); }
-  if (partner) { fin.pAge = Math.max(18, age + ri(-6, 6)); fin.pIncome = pick([0, 0, 25000, 50000, 90000]); if (fin.pIncome > 0) sc.pRet = pick([60, 62, 65, 66, 68]); fin.pSp = pick([undefined, 'Own full', 'Own partial', 'Qualified adult increase', 'None', 'Not sure']); }
+  if (partner) { fin.pAge = Math.max(18, age + ri(-6, 6)); fin.pIncome = pick([0, 0, 25000, 50000, 90000]); if (fin.pIncome > 0) sc.pRet = pick([40, 50, 55, 60, 62, 65, 66, 68]); fin.pSp = pick([undefined, 'Own full', 'Own partial', 'Qualified adult increase', 'None', 'Not sure']); }
   Object.keys(fin).forEach(k => fin[k] === undefined && delete fin[k]);
   // lists: sometimes use lists for cards, loans, pensions and other-property mortgages
   const L = {}; 
@@ -42,6 +43,9 @@ function mk(i) {
   ch('mortRate', pick([0.03, 0.04])); ch('cardRate', pick([0.18, 0.23])); ch('loanRate', pick([0.06, 0.1])); ch('spWeek', pick([150, 230, 299])); ch('pSpWeek', pick([100, 239.44])); ch('penChg', pick([0.005, 0.01, 0.015]));
   if (L.pens && L.pens.some(p => p.own != null) && L.pens.some(p => p.own == null)) A.ownShare = pick([.4, .5, 1]); else ch('ownShare', pick([.4, .5, 1]));
   sc.asm = A;
+  // section 27: only four choices block results; sometimes one or more of them are missing
+  if (rnd() < .08) sc.infl = null; if (rnd() < .08) delete sc.retireAge; if (rnd() < .08) delete A.planEnd; if (rnd() < .5 && A.accessAge == null && rnd() < .3) A.accessAge = 50;
+  if (partner && fin.pIncome > 0 && rnd() < .1) delete sc.pRet;
   // goals
   const goals = []; const ng = pick([0, 1, 2, 3, 4, 5, 6, 8]);
   const planEnd = A.planEnd;
@@ -51,6 +55,12 @@ function mk(i) {
   if (rnd() < .75) goals.push({k:'retire', amount:pick([20000, 35000, 50000, 70000]), prio:'Must have'});
   // keep at most 8 funded goals
   let fcount = 0; sc.goals = goals.filter(g => { if (['legacy', 'retire'].includes(g.k)) return true; return ++fcount <= 8; });
+  if (process.env.NFUND) {   // many-goal plans (the app has no cap): NFUND funded goals, kinds in turn, then 'Something else' with its own names
+    const nf = +process.env.NFUND, kinds = FUND.filter(k => k !== 'mfree' || home === 'Own with mortgage'); sc.name = 'many' + nf + '-' + i;
+    sc.goals = []; for (let k = 0; k < nf; k++) { const key = k < kinds.length ? kinds[k] : 'other'; const g = {k:key, amount:pick([3000, 9000, 25000, 60000, 150000]), saved:rnd() < .2 ? pick([300, 4000]) : 0, prio:rnd() < .35 ? 'Nice to have' : 'Must have', age:Math.min(89, age + (rnd() < .1 ? 0 : ri(1, Math.max(2, 85 - age))))};
+      if (key === 'other') g.name = 'Goal ' + (k + 1); if (key === 'safety') g.auto = rnd() < .5; if (key === 'mfree') g.amount = 100000; sc.goals.push(g); }
+    sc.goals.push({k:'retire', amount:pick([20000, 35000, 50000]), prio:'Must have'}); if (rnd() < .5) sc.goals.push({k:'legacy', age:A.planEnd, amount:pick([5000, 20000]), prio:'Nice to have'});
+  }
   if (rnd() < .5 && sc.goals.length > 1) { const idx = sc.goals.map((_, i) => i); for (let i = idx.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [idx[i], idx[j]] = [idx[j], idx[i]]; } sc.rank = idx; }
   if (sc.goals.length && rnd() < .4) sc.wi = {g:ri(0, sc.goals.length - 1), m:ri(-300, 1000), l:pick([0, 5000, 40000])};
   // Discover and Understand Me answers (option index from 0), some left blank
@@ -59,6 +69,11 @@ function mk(i) {
   ['u4', 'u9', 'u10', 'u11', 'u12', 'u14'].forEach(u => { if (rnd() < .7) pu[u] = opt(4); });
   const chips = rnd() < .5 ? [] : pick([['None'], ['Savings account'], ['Savings account', 'None'], ['Shares or funds'], ['Shares or funds', 'Savings account'], ['Property']]);
   sc.prof = {ans:pa, um:pu, chips};
+  const FK = ['income', 'costsM', 'cash', 'pension', 'work', 'pensionM', 'invest', 'life'], SK = ['about', 'income', 'assets', 'liab', 'prot', 'pension'];
+  if (rnd() < .12) { sc.look = [pick(FK)]; if (rnd() < .3) sc.look.push(pick(FK)); if (rnd() < .4) sc.ack = [sc.look[0]]; }
+  if (rnd() < .12) { sc.saved = [pick(SK)]; if (rnd() < .4) sc.saved.push(pick(SK)); }
+  if (rnd() < .5) sc.sess = {booked:rnd() < .6, slot:'Tue 14 Oct, 10:00', rechecked:rnd() < .5, pref:rnd() < .2};
+  if (rnd() < .3 && fin.income !== undefined) fin.propValue = pick([0, 90000]);
   return sc;
 }
 const EDGE = [

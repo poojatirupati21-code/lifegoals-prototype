@@ -119,7 +119,7 @@ Every item below is flagged "verify before release" in the prototype: the Irish 
 
 ## B2. LifeMap planning standards (not flagged "verify", but each needs a named reviewer)
 
-These 23 standards are the planning choices behind the "Use the standard (X)" chips (§14 type 3). They are LifeMap's own choices, not law and not a published statistic, so there is no single page to open. Before launch each is labelled "LifeMap planning standard, reviewed [date] by [name]". The sources named are the reference points a reviewer can compare with; where none exists the row says so. Customers always see the plain wording next to the figure and can type their own.
+These 23 standards are the planning choices LifeMap uses automatically and labels "Set by LifeMap" (§27; before §27 they were the "Use the standard (X)" chips of §14 type 3). They are LifeMap's own choices, not law and not a published statistic, so there is no single page to open. Before launch each is labelled "LifeMap planning standard, reviewed [date] by [name]". The sources named are the reference points a reviewer can compare with; where none exists the row says so. Customers always see the plain wording next to the figure and can type their own.
 
 | Standard | Workbook name | Value | As at | Source (named) | What to check | Suggested checker |
 |---|---|---|---|---|---|---|
@@ -168,3 +168,14 @@ These 23 standards are the planning choices behind the "Use the standard (X)" ch
 | Plan sheets match the app | Nine sheets (Plan inputs, Plan pay & tax, Plan debt months, Plan cashflow, Plan goals, Plan results, Plan profile, Plan how it works, Calculation register) repeat the plan engine with formulas. `tools/plan-vs-xlsx/plan-vs-xlsx.sh` feeds the same inputs to the app and to a copy of the workbook and compares them. | Re-run it after any change to `project()`, `finNums()`, `hhTax()`, `foundations()`, `findings()`, `riskRead()` or `personality()`. A mismatch means the workbook or the app is wrong; decide which. | Developer |
 | Two typed search figures | The app finds "the extra a month that reaches 100%" and "the extra that closes the main gap" by trying values. A spreadsheet cannot, so these are typed cells (Plan how it works explains). | Confirm a tester knows to type them. | Product |
 | Findings, foundations and home figures with a what-if | These are for the base plan. They match the app only when the what-if is zero; goal % and goal lines do follow the what-if. | Confirm this is acceptable for the workbook. | Product |
+
+## F. Journey-spec section 27 (8 Oct 2026)
+
+| Item | What it is | What to check | Suggested checker |
+|---|---|---|---|
+| Pension access age (Settings `accessAge`) | A new LifeMap standard: the earliest age a pension can be drawn, 60 by default, 50 if the customer says their occupational scheme allows it. Early retirement before it is paid from savings; any shortfall is shown. | Confirm 60 and 50 against Revenue (PRSA, personal and occupational pension rules), and that the wording "most pensions from 60, some occupational schemes from 50" is right. | Financial planner (rationale), Proposition & Product Manager (assigns and signs off) |
+| Free retirement age | Any age from today's age + 1 to plan-until age - 1, with calm notes below 50 and below 60. | Confirm the notes read as guidance, not advice, and do not discourage a legitimate choice. | Financial planner |
+| Unchosen market rates | A mortgage, loan or card rate the customer does not give is assumed: the Central Bank average (mortgage 3.48%, personal and car loan 6.72%) or the planning rate (card 20%), labelled "Assumed: add yours" and counted in "N details missing". | Confirm the Central Bank figures are current at launch and that the planning rate for cards is prudent. | Financial planner, Compliance |
+| Other missing personal figures | Years left on a mortgage, partner's age and similar figures use a stated default (25 years, the customer's own age) until added, and are counted as missing. | Confirm the defaults are acceptable for a rough picture. | Financial planner |
+| Automatic standards | All LifeMap standards are used without being chosen; only retirement age, plan-until age, inflation and a working partner's retirement age block results. | Confirm each standard is something an adviser would accept as a starting point (section B2 lists the reviewers). | Financial planner |
+
