@@ -182,6 +182,9 @@ def compare(x, sc, out, tol=1.0, verbose=True):
                     for nm, k in [('Fnd_NextT', 'fndNextT'), ('Fnd_NextD', 'fndNextD')]:
                         if x.val(nm) != M[k]: bad.append(('misc', nm, M[k], x.val(nm)))
         if not sc.get('fill'):
+            for nm, k in [('Rep_MoreM', 'more'), ('Rep_LimitM', 'limit'), ('Rep_AfterReliefM', 'after'), ('Rep_TaxRate', 'rate'), ('Rep_GrossMoreM', 'gross')]:
+                v = x.val(nm)
+                if v is None or abs(v - M['rep'][k]) > (1 if k in ('limit', 'after', 'gross') else 1e-9): bad.append(('misc', nm, M['rep'][k], v))
             v = x.val('DOB_Msg'); v = '' if v is None else v
             if v != M['dobMsg']: bad.append(('misc', 'DOB_Msg', M['dobMsg'], v))
             if x.val('DOB_AgeToday') != M['ageToday']: bad.append(('misc', 'DOB_AgeToday', M['ageToday'], x.val('DOB_AgeToday')))

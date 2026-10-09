@@ -29,3 +29,31 @@ Identical: 5% retirement and 100% family; run-out at 52; peak €289,942 at 49; 
 4. "How complete is your picture": ours 12 of 21 vs v5 15 of 27: different item count; priority list matches. **Define the items explicitly (document the list) and match v5's 27 if it can be reconstructed; otherwise keep ours and document.**
 5. The page-2 headline and sub-line wording is rule-generated and tested for v5 only; the missing-items priority table is the planner's: Pooja/PM to confirm.
 6. Net worth reads "not yet known" whenever cash, investments, pension, cards or loans is missing.
+
+## Phase 2 decisions and results (schema 1.0.0)
+
+`reportData()` now returns the schema 1.0.0 object (all 11 pages); the phase 1 data model is `reportModel()` (kept for the reconciliation tests). s28.js validates the v5 customer and 100 generated customers with jsonschema (0 errors) and runs the schema invariants (goal counts, one bar and one appendix row per year, no NaN or undefined text, four questions, five levels). `tools/report/vectors.json` holds 30 customers plus the sample customer (inputs in the plan-vs-xlsx scenario format and the whole output; today fixed to 8 Oct 2026; two vectors have required choices missing and return `{ready:false, missing}`). Rebuild it with `node tools/report/make-vectors.js`.
+
+1. **Over-80 increase (fixed, engine and workbook):** the €10 a week over-80 increase is added only when a State Pension is counted. The v5 customer's age-80 row is now €303,867, the future-euro gap €5,328,044 and the covered amount €294,698 (about €295k), exactly v5.
+2. **Retire at 65 (explained and fixed by 1):** the 17% came from the same over-80 increase (17.02% before, 16.98% after). Now 16% / 68, as v5.
+3. **Pay N more into a pension (kept ours):** treating N as the net cost after tax relief (gross = N / (1 - tax rate) = €1,417) gives 32% / 50 here (v5 33% / 52); the extra money comes out of spare money, so savings run out two years earlier. Paying it without touching savings (the what-if path) gives 28% / 52 at €1,417 and only reaches 33% at about €1,700 gross, so no reading of "€850 after relief" reproduces both v5 numbers. We keep the engine-consistent result and word it "After tax relief". The combined "+ €425 more" row is 87% / 68 (v5 87% / 70), same reason; that row also says when it takes money from another goal.
+4. **How complete is your picture (kept ours):** the items are the Check your details items for this customer: first name, date of birth, work, income, monthly costs, home, cash savings, investments, credit cards (owed, monthly payment), other loans (owed, monthly payment), life cover, income protection, serious illness cover, cover through work, health insurance, pension value, monthly pension payment, auto-enrolment answer, State Pension: 21 items (more appear with a mortgage, a partner, goals-specific items). v5's 27 cannot be rebuilt from its page 3 list and the Your finances fields, so we keep 12 of 21 and say so. The priority table (High: pension value, cash savings, State Pension record, income, costs, mortgage; Medium: loans and cards, investments, monthly pension, protection) is the planner's, for Pooja/PM to confirm.
+
+### Remaining differences from `tools/report/mock-v5.json` (v5 customer, every one explained)
+
+| Path | Ours | Mock | Why |
+|---|---|---|---|
+| `cashflow.paidChart.bars[3].fromSavings` | 16,824 | 0 | v5's bars leave out goal payments (the family goal in 2029); ours includes them so each bar is living costs plus goal payments. Honest, and the appendix still shows needs only |
+| `cashflow.paidChart.bars[25].fromSavings` | 98,075 | 98,076 | a one-euro rounding |
+| `foundations.levels[4].status` | about €1,625 a month spare | about €812 | the app's foundations function reports spare money before saving; v5 shows what is left after goals |
+| `foundations.protection.nextBest.text` | "…You're 4.5 of 6 months there." | "…Add your savings so we can check it." | the app estimates months of cover from the customer's answer |
+| `foundations.personality.note` | adds "Something to watch: …" | "You like risk but dislike losses: …" | v5's second sentence is not in the app; the app's own "watch" line is used |
+| `riskScale.labels[3,4]` | Balanced–growth, Growth | Balanced–adventurous, Adventurous | the app's approved risk labels |
+| `goalsDetail.goals[0].bars.coverPct` | 9.5 | 9.8 | exact 118,205 / 1,240,000; v5 divided the rounded figures |
+| `money.complete.have/total` | 12 / 21 | 15 / 27 | see 4 |
+| `money.exampleChip` | "" | "example" | the chip is only for demonstration customers |
+| `scenarios.groups[0].rows[6]` (pay more into a pension) | 32% / 50 | 33% / 52 | see 3 |
+| `scenarios.groups[1].rows[1]` (+ €425 more) | gap from 68 | 70 | see 3 |
+| `scenarios.toTone` | gold | coral | 94% is in the gold band (70 to 94); the mock colours it coral |
+
+Everything else (all other 400+ values, including every appendix row and the page 7 table except the two rows above) is identical to the mock.

@@ -1447,7 +1447,7 @@ function project(wi){
       const mn = arfMin(a, pen), want = rule === 'min' ? pen * mn : rule === 'fixed' ? Math.max(fixedReal * infl, pen * mn) : pen * Math.max(1 / Math.max(1, AS.end - a + 1), mn);
       const draw = Math.min(pen, want); pen = (pen - draw) * (1 + AS.penRet); p1.draw = draw;
     }
-    if (a >= AS.spAge) p1.sp = AS.sp * f.sp * spI + (a >= 80 ? RI.sp.over80 * RI.sp.weeks * spI : 0);
+    if (a >= AS.spAge) p1.sp = AS.sp * f.sp * spI + (a >= 80 && f.sp > 0 ? RI.sp.over80 * RI.sp.weeks * spI : 0);   // the over-80 increase belongs to a State Pension in payment: none counted, none added
     // --- partner (employment to 66, then their State Pension or a Qualified Adult increase paid to you)
     let p2 = null;
     if (f.partner){ const pa = f.pAge + t; p2 = {emp:f.pAge > 0 && pa < (f.pRet || 66) ? f.pIncome * wgw : 0, se:false, sp:0, draw:0, other:0, relief:0, age:pa};
@@ -1939,7 +1939,7 @@ function repScenarios(P, f){
       text:'Retire at ' + age + ', start a pension' + (sp ? ' and check your State Pension record' : '') + ': about ' + bc.covered + '% covered, ' + (bc.gapStartsAt != null ? 'with a gap only from age ' + bc.gapStartsAt : 'with no gap') + '.' + (alt ? ' Retiring at ' + (alt.id === 'c65' ? 65 : 60) + ' instead reaches ' + alt.covered + '%.' : '')}; }
   out.assumesNote = 'Results from the plan engine on your plan; all rows except the State Pension and combined rows assume ' + (f.sp > 0 ? 'your current State Pension figure' : 'no State Pension') + '. A full State Pension is not confirmed. Pension money is locked until ' + (+asmV('accessAge')) + ', so retiring before then rests on savings alone. An expert can confirm every figure.';
   return out; }
-function reportData(){
+function reportModel(){
   applyAssume(); if (!S || !planReady()) return {ready:false, missing:typeof planMissing === 'function' ? planMissing().map(m => ({key:m.k, name:m.n})) : []};
   const f = finNums(), P = project(), rows = P.rows, a0 = f.age, infl = AS.infl, rg = S.goals.find(g => g.kind === 'retire'), order = resultOrder(), y0 = rows[0].yr, yrOf = a => y0 + a - a0, defl = r => Math.pow(1 + infl, r.t);
   const D = {ready:true, meta:{name:S.acct.name || S.fin.name || '', dateISO:new Date().toISOString().slice(0, 10), age:a0, ageToday:S.about.ageToday == null ? a0 : S.about.ageToday, dateOfBirth:S.about.dob && dobValid(S.about.dob) ? S.about.dob.y + '-' + String(S.about.dob.m).padStart(2, '0') + '-' + String(S.about.dob.d).padStart(2, '0') : null, yearStart:y0, planEndAge:AS.end, retireAge:rg ? f.R : null, retireSet:!!S.retireSet, inflation:infl, partner:!!f.partner, stateAge:RI.sp.age, stateFullYear:Math.round(RI.sp.week * RI.sp.weeks), accessAge:+asmV('accessAge'), rows:rows.length, retired:!!rg && f.R <= a0}};
@@ -1999,6 +1999,142 @@ function reportData(){
       text:'Savings reach ' + eur(peakRow.liquid) + ' at ' + peakRow.a + '.' + (runOut ? ' Savings run out at ' + runOut.a + '.' : ' Savings last to ' + AS.end + '.')},
     paid:{series:partsAll.map(p => ({age:p.a, year:p.yr, fromIncome:Math.round(p.fromIncome), fromSavings:Math.round(p.fromSavings), shortfall:Math.round(p.short), spend:Math.round(p.spend)})), axisMax:gMax, payStopsAge:rg ? f.R : null, worstShortfall:worstShort.short > 0.5 ? {age:worstShort.a, amount:Math.round(worstShort.short)} : null, text:(rg ? 'Pay stops at ' + f.R + '. ' : '') + 'Costs keep rising.'}};
   return D; }
+/* ---- schema 1.0.0 builder: docs/report-data.schema.json. Every string below is final display text; numbers are raw. ---- */
+const repNumW = n => ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty', 'twenty-one', 'twenty-two', 'twenty-three', 'twenty-four', 'twenty-five', 'twenty-six', 'twenty-seven', 'twenty-eight', 'twenty-nine', 'thirty'][n] || String(n);
+const repMon = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const repBandTone = b => b === 'good' ? 'good' : b === 'nudge' ? 'gold' : 'coral', repBandKey = b => b === 'nudge' ? 'gold' : b, repBandText = b => b === 'good' ? 'On track' : b === 'nudge' ? 'Nearly there' : 'Needs attention';
+const repTicks = (max, n) => Array.from({length:(n || 4) + 1}, (_, i) => Math.round(max / (n || 4) * i));
+const repLc = s => s ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+function repMeta(g, yrOf){ const y = yrOf(g.kind === 'legacy' ? AS.end : g.age); return g.kind === 'retire' ? 'From ' + g.age + ' · ' + y + ' · ' + eur(g.amount) + ' a year' : g.kind === 'legacy' ? 'At the end of the plan · ' + y + ' · ' + eur(g.amount) : 'Age ' + g.age + ' · ' + y + ' · ' + eur(g.amount); }
+function reportQuestions(M, f, R){ const q = [], P = project(), rg = S.goals.find(g => g.kind === 'retire'), acc = +asmV('accessAge'), spFull = f.sp >= 0.999, working = f.income > 0 && f.work !== 'Not working';
+  if (rg && !M.meta.retired){ const p = P.pct[rg.id]; q.push(p < 95 ? 'Is retiring at ' + f.R + ' realistic? If not, what age gets me closest to ' + eur(rg.amount) + ' a year?' : 'Is my plan for retiring at ' + f.R + ' strong enough if prices or markets move against me?'); }
+  else if (rg) q.push('How should I draw income from my pension and savings so they last?');
+  if (working && f.R > f.age) q.push('How much should I pay into a pension each month, and where?');
+  if (rg && f.R < acc && f.R > f.age) q.push('How do I cover ' + f.R + ' to ' + acc + ' while pension money is locked?');
+  else if (rg && f.R < RI.sp.age && f.R > f.age) q.push('How do I cover ' + f.R + ' to ' + RI.sp.age + ' before the State Pension starts?');
+  if (working && S.fin.ip !== 'Yes') q.push('What income protection do I need, and what does it cost?');
+  if (!spFull) q.push('How do I check my State Pension record and fill any gaps?');
+  if ((S.about.partner || S.about.deps > 0) && S.fin.life !== 'Yes') q.push('How much life cover do my family and I need?');
+  if (f.debt > 1 || f.cardBal > 1) q.push('What is the best order to clear my debts and build savings?');
+  ['Which of my goals should I fund first?', 'Is my emergency fund the right size?', 'How should I invest money I will not need for ten years or more?', 'Are there tax reliefs I am missing?'].forEach(x => q.push(x));
+  return q.filter((x, i) => q.indexOf(x) === i).slice(0, 4); }
+function reportData(){
+  const M = reportModel(); if (!M.ready) return M;
+  const f = finNums(), P = project(), rows = P.rows, a0 = f.age, rg = S.goals.find(g => g.kind === 'retire'), y0 = rows[0].yr, yrOf = a => y0 + a - a0, name = (M.meta.name || '').trim(), td = dobToday();
+  const ageT = S.about.ageToday != null ? S.about.ageToday : a0, dateText = td.getDate() + ' ' + repMon[td.getMonth()] + ' ' + td.getFullYear(), poss = name ? name + '’s' : 'Your', gap = M.onePage.gap, goalsM = M.onePage.goals, sc = M.scenarios;
+  const nOn = M.onePage.goalsOnTrack, nG = goalsM.length, worstBand = goalsM.length ? goalsM.reduce((m, g) => g.pct < m.pct ? g : m, goalsM[0]).band : 'good', retired = M.meta.retired;
+  const gapZones = (from, to) => { const z = []; const R = rg ? Math.max(a0, Math.min(f.R, AS.end)) : a0, ro = gap.runOutAge;
+    if (rg && R > from) z.push({fromAge:from, toAge:R, label:'WORKING', tone:'good'});
+    if (ro != null){ if (ro > R) z.push({fromAge:Math.max(from, R), toAge:ro, label:'', tone:'gold'}); z.push({fromAge:Math.max(from, ro), toAge:to, label:'A GAP', tone:'coral'}); }
+    else z.push({fromAge:Math.max(from, rg ? R : from), toAge:to, label:rg ? '' : 'COVERED', tone:'good'});
+    return z.filter(q => q.toAge > q.fromAge); };
+  // ---- meta, footer, road ----
+  const meta = {customerName:name, possessiveName:poss, dateText, dateUpper:dateText.toUpperCase(), version:1, currentAge:ageT, currentYear:td.getFullYear(), planEndAge:AS.end, retireAge:rg ? f.R : AS.end, statePensionAge:RI.sp.age, hasPartner:!!f.partner, alreadyRetired:!!retired, hasMortgage:S.fin.home === 'Own with mortgage' && f.mortBal > 0, headerRight:poss + ' plan · ' + dateText};
+  const footer = {line:'Preliminary guidance, not financial advice. Illustrative, not guaranteed.', coverLine:'Version 1 · Preliminary guidance, not financial advice. An indicative guide: an expert can confirm the details.'};
+  const segs = []; { const R = rg && !retired ? Math.min(f.R, AS.end) : a0, ro = gap.runOutAge; if (R > a0) segs.push({fromAge:a0, toAge:R, tone:'good'});
+    if (ro != null){ if (ro > R) segs.push({fromAge:R, toAge:ro, tone:'gold'}); segs.push({fromAge:Math.max(R, ro), toAge:AS.end, tone:'coral'}); } else segs.push({fromAge:R, toAge:AS.end, tone:'good'}); }
+  const ms = []; S.goals.filter(g => g.kind !== 'retire' && g.kind !== 'legacy' && !passedG(g) && g.age <= AS.end).forEach(g => ms.push({age:g.age, label:g.name, sub:'age ' + g.age, tone:repBandTone(band(P.pct[g.id])), badge:String(g.age)}));
+  if (rg && !retired && f.R > a0 && f.R <= AS.end) ms.push({age:f.R, label:'You retire', sub:'age ' + f.R, tone:'gold', badge:String(f.R)});
+  if (gap.runOutAge != null) ms.push({age:gap.runOutAge, label:'Savings run out', sub:'age ' + gap.runOutAge, tone:'coral', badge:String(gap.runOutAge)});
+  if (RI.sp.age > a0 && RI.sp.age <= AS.end) ms.push({age:RI.sp.age, label:'State Pension', sub:'age ' + RI.sp.age, tone:'blue', badge:String(RI.sp.age)});
+  ms.sort((a, b) => a.age - b.age); const msOut = ms.slice(0, 8).map((m, i) => Object.assign(m, {side:i % 2 ? 'below' : 'above'}));
+  const road = {startAge:a0, endAge:AS.end, segments:segs, milestones:msOut, startLabel:'You, today · age ' + ageT, endLabel:'Plan to age ' + AS.end};
+  // ---- cover ----
+  const cover = {eyebrow:'PREPARED FOR ' + (name ? name.toUpperCase() : 'YOU') + ' · ' + meta.dateUpper, title:poss + ' road ahead', lead:'A clear, indicative guide to where you are, where you’re heading, and who can help you get there.', badge:'YOUR PERSONAL PLAN',
+    tiles:[{icon:nOn === nG ? 'sun' : nOn ? 'partly' : 'storm', tone:nOn === nG ? 'good' : nOn ? 'gold' : 'coral', big:nOn + ' of ' + nG, small:'goals on track today'}, gap.hasGap ? {icon:'storm', tone:'coral', big:'Age ' + gap.runOutAge, small:'when savings run out'} : {icon:'sun', tone:'good', big:'Covered', small:'to age ' + AS.end}, {icon:'storm', tone:'blue', big:'Next step', small:'share your plan with an expert'}]};
+  // ---- page 2 ----
+  const planGoals = goalsM.map(g => ({name:g.name, icon:g.key, kind:g.key, pct:g.pct, band:repBandKey(g.band), bandText:repBandText(g.band), meta:repMeta(S.goals.find(s => s.id === g.id), yrOf), sentence:g.sentence}));
+  const closeTone = ['good', 'gold', 'blue'];
+  const plan = {big:nOn + ' of ' + nG, bigLabel:'goals on track', bigTone:nOn === nG ? 'good' : worstBand === 'good' ? 'good' : repBandTone(worstBand), eyebrow:'YOUR PLAN ON A PAGE', title:gap.hasGap || nOn < nG ? M.onePage.headline : 'Your plan is on track', lead:gap.hasGap || nOn < nG ? M.onePage.subline : 'Your income and savings cover everything you told us about.', goals:planGoals,
+    band:gap.hasGap ? {kind:'gap', cells:[{big:'Age ' + gap.runOutAge, small:'savings run out'}, {big:gap.gapYears + (gap.gapYears === 1 ? ' year' : ' years'), small:'with a gap, to age ' + gap.toAge}, {big:'≈ ' + gap.todayShort, small:'short in today’s money (' + gap.futureShort + ' in future euros)'}]} : {kind:'none', cells:[{big:'Age ' + AS.end, small:'savings last'}, {big:'0 years', small:'with a gap'}, {big:'€0', small:'short'}]},
+    close:sc.topThree.length ? {title:'What could close the gap', items:sc.topThree.map((x, i) => ({points:'+' + x.points + ' points', tone:closeTone[i], title:x.title, text:x.body}))} : {title:'What keeps you on track', items:[]},
+    next:{title:'Next: share this plan with an expert', text:'They check the numbers and choose the best way forward.', button:'Meet an expert'}};
+  // ---- page 3 ----
+  const mo = M.money, ownRows = mo.own.map(r => r.status === 'missing' ? {label:r.label, status:'missing'} : {label:r.label, value:r.text || eur(r.value || 0)});
+  const oweRows = mo.owe.filter(r => r.key !== 'mortgage' || r.status !== 'none' || S.fin.home).map(r => r.status === 'missing' ? {label:r.label, status:'missing'} : {label:r.label, value:r.text || eur(r.value || 0)});
+  const cp = mo.complete, short = mo.leftM < 0;
+  const money = {big:short ? eur(-mo.leftM) + ' short' : eur(mo.leftM), bigLabel:short ? 'each month' : 'left each month', bigTone:short ? 'coral' : 'good', eyebrow:'YOUR MONEY TODAY', title:mo.marginText,
+    tiles:[{label:'Living costs', value:eur(mo.livingM + mo.debtPaymentsM), amount:mo.livingM + mo.debtPaymentsM, tone:'navy'}, {label:'Goals', value:eur(mo.goalsM), amount:mo.goalsM, tone:'teal'}, {label:'Left over', value:eur(Math.max(0, mo.leftM)), amount:Math.max(0, mo.leftM), tone:'white'}],
+    sentence:short ? 'Your costs and goals are more than you take home, so savings are being used. Cutting a cost or moving a goal would help.' : 'For every €100 you take home, about €' + mo.leftPer100 + ' is left at the end of the month. ' + mo.marginNote, takeHome:mo.takeHomeNote, exampleChip:'',
+    own:{title:'YOU OWN', rows:ownRows}, owe:{title:'YOU OWE', rows:oweRows.length ? oweRows : [{label:'Debts', value:'No debts told to us'}]}, netWorth:mo.netWorth.known ? {label:'Net worth', value:eur(mo.netWorth.value)} : {label:'Net worth', status:'not yet known'},
+    complete:{eyebrow:'HOW COMPLETE IS YOUR PICTURE?', have:cp.given, total:cp.total, sub:cp.missing.length ? 'Add these next to sharpen your plan.' : 'Your picture is complete. Thank you.', photo:'money-plant', items:cp.missing.map(x => ({title:x.label, sub:x.why, priority:x.priority}))}};
+  // ---- page 4 ----
+  const roadmap = {big:gap.hasGap ? 'Age ' + gap.runOutAge : '0 years', bigLabel:gap.hasGap ? 'savings run out' : 'with a gap', bigTone:gap.hasGap ? 'coral' : 'good', eyebrow:'YOUR ROADMAP', title:M.roadmap.headline, lead:M.roadmap.legend,
+    decades:M.roadmap.decades.map(d => { const gc = d.chips.filter(c => c.pct != null).concat(d.chips.filter(c => c.pct == null)), chips = gc.slice(0, 3).map(c => ({age:c.age, text:c.pct == null ? c.name : c.name + ' · ' + c.pct + '%', tone:c.pct == null ? 'blue' : repBandTone(c.band)})); if (gc.length > 3) chips.push({age:gc[3].age, text:'+' + (gc.length - 3) + ' more', tone:'grey'});
+      const gy = d.spark.map(p => { const r = rows.find(x => x.a === p.age); return !!r && chartShort(r); });
+      return {label:d.label, range:'age ' + d.fromAge + '–' + d.toAge, icon:d.weather === 'storm' ? 'storm' : d.weather === 'sun' ? 'sun' : 'partly', tone:d.weather === 'storm' ? 'coral' : d.weather === 'sun' ? 'good' : 'gold', title:d.tags[0], chip:d.weather === 'storm' ? 'A gap to plan for' : d.weather === 'sun' ? 'Comfortable' : 'Watch this', text:d.sentence, goalChips:chips, spark:{label:'Savings', values:d.spark.map(p => p.savings), gapYears:gy}}; })};
+  // ---- page 5 ----
+  const gd = M.onePage.goals.slice().sort((a, b) => (b.kind === 'retire') - (a.kind === 'retire') || a.age - b.age), kindTxt = {savings:'paid from savings', income:'paid from pension and State Pension', gap:'a gap'}, stateOf = {savings:'savings', income:'pension', gap:'gap'};
+  const goalsDetailGoals = gd.map(g => { const sg = S.goals.find(s => s.id === g.id), o = {name:g.name, kind:g.key, icon:g.key, pct:g.pct, band:repBandKey(g.band), bandText:repBandText(g.band), meta:g.kind === 'retire' ? repMeta(sg, yrOf) + ', today’s money' : repMeta(sg, yrOf), sentence:g.sentence};
+    if (g.kind === 'retire' && g.retirement){ const r = g.retirement; o.photo = 'retired-reading';
+      o.bars = {type:'retire', costLabel:'Retirement costs', costValue:'about ' + r.costTodayShort, costPct:100, coverLabel:'Your plan covers', coverValue:'about ' + r.coveredTodayShort, coverPct:r.costToday ? Math.max(0, Math.min(100, Math.round(1000 * r.coveredToday / r.costToday) / 10)) : 0, note:'In today’s money. In future euros: ' + r.costFutureShort + ' and ' + repShort(r.coveredFuture) + ' (' + g.pct + '%). ' + (r.gapToday > 0 ? 'The gap is about ' + r.gapTodayShort + ' in today’s money.' : 'There is no gap.')};
+      const cells = [], first = r.strip[0], last = r.strip[r.strip.length - 1]; r.strip.forEach(sg2 => { for (let a = sg2.from; a <= sg2.to; a++) cells.push({age:a, state:stateOf[sg2.kind]}); });
+      o.years = {title:'Your retirement years', summary:r.fundedYears + ' funded · ' + r.gapYears + ' with a gap', cells, leftLabel:'Ages ' + first.from + '–' + first.to + ': ' + kindTxt[first.kind], rightLabel:r.strip.length > 1 ? 'Ages ' + last.from + '–' + last.to + ': ' + kindTxt[last.kind] : ''}; }
+    else { const mn = g.monthly || {needsM:0, puttingInM:0}; if (sg.k === 'home') o.photo = 'house-for-sale'; o.bars = {type:'saving', needLabel:'Needs a month', needValue:eur(mn.needsM), needPct:100, putLabel:'You’re putting in', putValue:eur(mn.puttingInM), putPct:mn.needsM > 0 ? Math.min(100, Math.round(1000 * mn.puttingInM / mn.needsM) / 10) : 100}; }
+    return o; });
+  const nNeed = nG - nOn, goalsDetail = {big:(retired || !rg ? Math.min(...goalsM.map(g => g.pct)) : goalsM.find(g => g.kind === 'retire').pct) + '%', bigLabel:rg ? 'retirement covered' : 'lowest goal covered', bigTone:repBandTone(rg ? goalsM.find(g => g.kind === 'retire').band : worstBand), eyebrow:'YOUR GOALS IN DETAIL',
+    title:nNeed === 0 ? 'All ' + nG + (nG === 1 ? ' goal' : ' goals') + ' on track' : nOn + ' of ' + nG + ' on track, ' + nNeed + (nNeed === 1 ? ' needs' : ' need') + ' attention', goals:goalsDetailGoals,
+    howToRead:'How to read this page. Today’s money shows what things cost now; future euros add price rises. Covered is how much of a goal’s cost your income and savings meet: 100% is fully covered, 5% leaves about 95% to plan for.'};
+  // ---- page 6 ----
+  const cfS = M.cashflow.savings, cfP = M.cashflow.paid, lastP = cfP.series[cfP.series.length - 1], pk = cfS.peak, z = gapZones(a0, AS.end);
+  const cashflow = {big:eur(pk.amount), bigLabel:'savings at the peak, age ' + pk.age, bigTone:gap.hasGap ? 'coral' : 'good', eyebrow:'CASHFLOW', title:gap.hasGap ? 'Your savings run out at ' + gap.runOutAge : 'Your savings last to ' + AS.end,
+    savingsChart:Object.assign({title:'Your savings, age ' + a0 + ' to ' + AS.end, subtitle:'Cash and investments', yMax:cfS.axisMax, yTicks:repTicks(cfS.axisMax), series:cfS.series.map(p => ({age:p.age, value:p.savings})), peak:pk.amount > 0 ? {age:pk.age, value:pk.amount, label:'Peak ' + eur(pk.amount), sub:'at age ' + pk.age} : null, runOut:gap.hasGap ? {age:gap.runOutAge, label:'Savings run out at ' + gap.runOutAge} : null, zones:z, caption:cfS.text}),
+    paidChart:{title:'How each year is paid', legend:[{tone:'good', label:'Paid from income'}, {tone:'gold', label:'Paid from savings'}, {tone:'coral', label:'Shortfall, not covered'}], yMax:cfP.axisMax, yTicks:repTicks(cfP.axisMax), bars:cfP.series.map(p => ({age:p.age, fromIncome:p.fromIncome, fromSavings:p.fromSavings, shortfall:p.shortfall})), zones:z,
+      stopMarker:rg && !retired && f.R > a0 && f.R <= AS.end ? {age:f.R, label:'Pay stops at ' + f.R} : null, lastLabel:lastP.shortfall > 0 ? {age:lastP.age, label:eur(lastP.shortfall) + ' a year at ' + lastP.age} : null, caption:cfP.text}};
+  // ---- page 7 ----
+  const rowOut = (r, idMap) => ({id:idMap[r.id] || r.id, title:r.title, sub:r.sub2 || r.sub, pct:r.covered, gapStartsAge:r.gapStartsAt});
+  const rId = {payMore:'morePension', c60:'c60pension', c60more:'c60more', c65:'c65pension'}, since = n => (n === 1 ? 'One year' : repNumW(n).charAt(0).toUpperCase() + repNumW(n).slice(1) + ' years') + ' later';
+  const one = sc.rows.map(r => { const o = rowOut(r, rId); if (r.id === 'retire60' || r.id === 'retire65') o.sub = since(r.age - f.R); return o; });
+  const todayRow = {id:'today', title:'Today’s plan', sub:'Retire at ' + f.R + ', ' + (f.sp >= 0.999 ? 'full State Pension counted' : f.sp > 0 ? 'part of the State Pension counted' : 'no State Pension counted'), pct:sc.today.covered, gapStartsAge:sc.today.gapStartsAt, emphasis:true};
+  const groups = [{title:'ONE CHANGE AT A TIME', rows:[todayRow].concat(one)}]; if (sc.combined.length) groups.push({title:'COMBINED', rows:sc.combined.map((r, i) => { const o = rowOut(r, rId); return o; })});
+  const toPct = sc.bestCovered != null && !sc.allOnTrack ? sc.bestCovered : sc.today.covered, tgtBand = p => p >= 95 ? 'good' : p >= 70 ? 'gold' : 'coral';
+  const scenarios = {fromPct:sc.today.covered, toPct, fromTone:tgtBand(sc.today.covered), toTone:tgtBand(toPct), eyebrow:'WHAT COULD CHANGE THE ANSWER', title:sc.allOnTrack ? 'Your plan is on track' : sc.helpsMost ? sc.helpsMost.text : 'Small changes can help', columns:{what:'WHAT IF YOU…', covered:'COVERED', gap:'GAP STARTS AT'}, groups,
+    explore:{title:'A path to explore', text:sc.pathToExplore ? sc.pathToExplore.text : sc.allOnTrack ? 'Everything you told us about is covered. A yearly review keeps it on track.' : 'An expert can show you which changes fit your life.'}, footnote:sc.assumesNote || 'Results from the plan engine on your plan. An expert can confirm every figure.'};
+  // ---- page 8 ----
+  const FL = foundations(), nx = fndNext(FL), lvlTone = {ok:'good', held:'good', mid:'gold', bad:'coral', na:'grey'}, lvlIcon = {ok:'sun', held:'sun', mid:'partly', bad:'storm', na:'partly'}, solid = FL.filter(l => l.st === 'ok').length;
+  const stTxt = l => FND_LBL[l.st] + ' · ' + (/^[A-Z][a-z]/.test(l.s) ? repLc(l.s) : l.s);
+  const prot = (label, v, key) => ({label, value:S.src[key] && v != null && v !== '' ? v : 'Not given', good:S.src[key] && v != null && v !== '' ? v === 'Yes' : null});
+  const nbText = !nx ? 'All five foundations are solid. A yearly review keeps it on track.' : nx.x.n === 1 ? 'Spend less than you earn first. ' + nx.d : nx.x.n === 2 ? 'Build your emergency fund to ' + fndT() + ' months. ' + (nx.x.st === 'na' ? 'Add your savings so we can check it.' : nx.d) : nx.x.n === 3 ? (nx.t.replace('first', '') .trim() + '. ' + nx.d) : nx.x.n === 4 ? 'Get your goals on track. ' + nx.d : 'Start growing your wealth when you’re ready. ' + nx.d;
+  const per = personality(), rr = riskRead(umCount() === 13), tm = myTerms(), tq = k => { const x = tm.find(t => t.k === k); return x ? x.tags.join(' · ') : ''; };
+  const riskOn = rr && rr.label != null ? RISK_LBL.indexOf(rr.label) : null;
+  const foundationsP = {big:solid + ' of 5', bigLabel:'foundations solid', bigTone:solid === 5 ? 'good' : solid === 0 ? 'coral' : 'gold', eyebrow:'FOUNDATIONS AND YOU', title:'Build from the bottom up', lead:'Good planning is built from the bottom up.',
+    levels:FL.slice().reverse().map(l => ({level:l.n, icon:lvlIcon[l.st], title:l.name, status:stTxt(l), tone:lvlTone[l.st]})),
+    protection:{title:'Protection', photo:'car-and-calculator', rows:[prot('Life cover', S.fin.life, 'life'), prot('Health insurance', S.fin.health, 'health'), prot('Cover through work', S.fin.workCover, 'workCover'), prot('Income protection', S.fin.ip, 'ip'), prot('Serious illness cover', S.fin.ci, 'ci')], nextBest:{label:'NEXT BEST STEP', text:nbText}},
+    personality:{eyebrow:'YOUR MONEY PERSONALITY', name:per ? 'The ' + per.name : 'Not worked out yet', icon:per ? (per.name === 'Explorer' ? 'compass' : 'partly') : 'partly', strap:per ? per.strap : 'Answer a few more questions to see your money personality.',
+      quadrants:[{label:'HOW YOU FEEL ABOUT MONEY', value:tq('mindset') || 'Not answered yet'}, {label:'HOW YOU TEND TO ACT', value:tq('behaviour') || 'Not answered yet'}, {label:'HOW MUCH RISK YOU WANT', value:riskOn != null && rr.want ? RISK_LBL[rr.want - 1] + (rr.provisional ? ' (first read)' : '') : 'Not assessed yet'}, {label:'HOW MUCH YOU CAN AFFORD TO LOSE', value:tq('capacity') ? tq('capacity') + ' (your answer)' : 'Not answered yet'}],
+      riskScale:{title:'Risk profile', labels:RISK_LBL.slice(), activeIndex:riskOn != null && riskOn >= 0 ? riskOn : null},
+      note:(riskOn == null ? 'Finish Understand me to add your indicative risk profile. ' : '') + (rr && rr.mis ? rr.mis : per ? 'Something to watch: ' + repLc(per.watch) : '')}};
+  // ---- page 9 ----
+  const needAssets = ['cash', 'invest', 'pension'].filter(k => !(S.src[k] && S.fin[k] != null && S.fin[k] !== '')), chk = [];
+  if (needAssets.length) chk.push('Add your ' + [{cash:'cash savings', invest:'investments', pension:'pension value'}[needAssets[0]]].concat(needAssets.slice(1).map(k => ({cash:'cash savings', invest:'investments', pension:'pension value'}[k]))).join(', ').replace(/, ([^,]*)$/, ' and $1'));
+  if (f.sp < 0.999) chk.push('Check your State Pension record on MyWelfare.ie');
+  if (riskOn == null) chk.push('Finish “Understand me” for your risk profile');
+  if (!(S.src.life && S.src.ip)) chk.push('Add your protection answers');
+  if (!chk.length) chk.push('Bring your latest pension and bank statements');
+  const tops = []; const addT = x => { if (!tops.includes(x)) tops.push(x); };
+  S.goals.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id] || a.age - b.age).forEach(g => { if (g.spec === 'pension'){ addT('Retirement planning'); addT('Pensions and tax relief'); } if (g.spec === 'mortgage'){ addT('Mortgages'); addT('Buying a home'); } if (g.spec === 'investment') addT('Investing'); if (g.spec === 'protection' && !(S.fin.ip !== 'Yes' && f.income > 0)) addT('Protection'); if (g.spec === 'planner') addT('Financial planning'); });
+  if (f.sp < 0.999 || S.goals.some(g => g.spec === 'pension')) addT('State Pension'); if (S.fin.ip !== 'Yes' && f.income > 0) addT('Income protection'); if (f.debt > 1) addT('Clearing debt');
+  const nextP = {eyebrow:'WHAT HAPPENS NEXT', title:'Share your plan with an expert', lead:'This guide is a starting point. An expert can confirm it, answer your questions and help you choose what to do.', button:'Meet an expert in the app', photo:'team-with-charts',
+    steps:[{n:1, title:'Share your plan', text:'Send this guide to an expert, with your permission.'}, {n:2, title:'Meet your expert', text:'They check the numbers and your details.'}, {n:3, title:'Agree your personal plan', text:'Choose the steps that fit your life.'}],
+    topics:{title:'An expert can help with', chips:tops.slice(0, 6)}, checklist:{title:'Before you meet', items:chk.slice(0, 4)}, questions:{title:'Questions to ask', items:reportQuestions(M, f, f.R)}, ready:{title:'Ready when you are', text:'Your plan stays private until you choose to share it.', button:'Meet an expert'}};
+  // ---- page 10 ----
+  const sp$ = f.sp > 0 ? eur(Math.round(AS.sp * f.sp)) + ' a year counted' : '€0 in this plan', mort = f.mortBal > 0 && S.fin.home === 'Own with mortgage';
+  const left = [['Prices rise', pcs(AS.infl) + ' a year'], ['Pay rises', pcs(AS.wage) + ' a year'], ['Cash grows', pcs(AS.cash) + ' a year, after DIRT'], ['Investments grow', pcs(AS.inv) + ' a year, after charges and exit tax'], ['Pensions grow', pcs(AS.pen) + ' working, ' + pcs(AS.penRet) + ' once retired'], ['State Pension', sp$ + ' (full rate ' + eurW(RI.sp.week) + ' a week)']];
+  const right = [['Tax', y0 + ' Irish income tax, USC, PRSI'], ['Saved towards goals', 'About ' + eur(mo.goalsM) + ' a month'], ['Emergency fund', SAVE.buffer + ' months kept aside'], ['Order of goals', S.rank ? 'Your own ranking' : 'Must-haves, then soonest first'], ['Retirement age', rg ? (retired ? 'Already retired' : String(f.R)) : 'No retirement goal'], ['Plan ends', 'Age ' + AS.end]];
+  if (mort) right.push(['Mortgage rate', pcs(AS.mortRate) + (S.fin.mortRate ? ' (your statement)' : ' (assumed)')]);
+  if (f.partner){ left.push(['Partner', f.pAge ? 'Age ' + f.pAge + (S.pRetSet ? ', stops work at ' + S.pRet : '') : 'Counted as your age']); }
+  const glossary = [['Today’s money · future euros', 'Today’s prices, and amounts after prices rise.'], ['Inflation', 'How fast prices rise. This plan uses ' + pcs(AS.infl) + ' a year.'], ['Shortfall', 'The part of a year’s costs your plan cannot pay.'], ['Covered %', 'How much of a goal’s cost your income and savings meet.'], ['PRSA · ARF', 'A personal pension account · a fund you draw income from.'], ['State Pension', 'Government pension from ' + RI.sp.age + '. Full rate ' + eurW(RI.sp.week) + ' a week.'], ['USC · PRSI', 'Irish charges on pay. PRSI builds your State Pension record.'], ['Capacity for loss', 'How much you could afford to lose.'], ['My Future Fund', 'Ireland’s automatic workplace pension.']];
+  const assumptions = {big:String(left.length + right.length), bigLabel:'things we assumed', eyebrow:'ASSUMPTIONS AND SMALL PRINT', title:'What your plan assumes', left, right,
+    knownLimits:{title:'Known limits', items:['Living costs stay the same through the plan, apart from prices.', 'Drawdown is from an ARF or vested PRSA. Spare money not saved is assumed spent.', 'Irish rules checked 2 Oct 2026. Budget 2027 changes (announced 6 Oct 2026) aren’t included yet. We’ll update your plan once they’re final.']},
+    pleaseNote:{title:'Please note', text:'This is preliminary guidance, not financial advice. Only an authorised adviser can give advice. Investments can fall as well as rise. All projections are illustrative, not guaranteed. This tool is designed to help you explore your preferences. It does not replace a formal suitability or risk assessment where financial advice is provided.'},
+    sources:'Sources: Revenue; Department of Social Protection; CSO flash inflation September 2026; ECB target; LifeMap plan engine.', glossary:{title:'Words used in this report', items:glossary}};
+  // ---- page 11 ----
+  const ap = rows.map(r => ({age:r.a, year:r.yr, income:Math.round(r.inflow), needs:Math.round(r.needs), shortfall:Math.round(rowParts(r).short), savingsLeft:Math.round(r.liquid)}));
+  const appendix = {big:String(ap.length), bigLabel:'years in numbers', eyebrow:'APPENDIX', title:'Every year in numbers', columns:['Age (year)', 'Income', 'Needs', 'Shortfall', 'Savings left'], rows:ap,
+    note:gap.hasGap ? 'Future euros. ' + gap.gapYears + ' shortfall years sum to ' + eur(gap.futureEuros) + ' (future euros) or about ' + gap.todayShort + ' in today’s money.' : 'Future euros. No shortfall years: your income and savings cover every year.'};
+  const out = {schemaVersion:'1.0.0', meta, footer, road, cover, plan, money, roadmap, goalsDetail, cashflow, scenarios, foundations:foundationsP, next:nextP, assumptions, appendix};
+  const curl = o => typeof o === 'string' ? o.replace(/(\w)'(\w)/g, '$1’$2') : Array.isArray(o) ? o.map(curl) : o && typeof o === 'object' ? Object.fromEntries(Object.entries(o).map(([k, v]) => [k, curl(v)])) : o;   // typographic apostrophes in every display string
+  return curl(out); }
 /* END REPORT DATA */
 /* ================= DETAIL CASHFLOW CHART (Pooja, 1 Oct): stacked, honest, tappable ================= */
 // Split one year's spending (living + loans & mortgage + goal costs) into: from income / from savings / shortfall. Parts sum exactly to spend.
