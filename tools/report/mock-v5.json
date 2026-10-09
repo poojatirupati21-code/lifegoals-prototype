@@ -1,0 +1,2193 @@
+{
+ "schemaVersion": "1.0.0",
+ "meta": {
+  "customerName": "Pooja",
+  "possessiveName": "Pooja’s",
+  "dateText": "8 Oct 2026",
+  "dateUpper": "8 OCT 2026",
+  "version": 1,
+  "currentAge": 27,
+  "currentYear": 2026,
+  "planEndAge": 80,
+  "retireAge": 50,
+  "statePensionAge": 66,
+  "hasPartner": false,
+  "alreadyRetired": false,
+  "hasMortgage": false,
+  "headerRight": "Pooja’s plan · 8 Oct 2026"
+ },
+ "footer": {
+  "line": "Preliminary guidance, not financial advice. Illustrative, not guaranteed.",
+  "coverLine": "Version 1 · Preliminary guidance, not financial advice. An indicative guide: an expert can confirm the details."
+ },
+ "road": {
+  "startAge": 27,
+  "endAge": 80,
+  "segments": [
+   {
+    "fromAge": 27,
+    "toAge": 50,
+    "tone": "good"
+   },
+   {
+    "fromAge": 50,
+    "toAge": 52,
+    "tone": "gold"
+   },
+   {
+    "fromAge": 52,
+    "toAge": 80,
+    "tone": "coral"
+   }
+  ],
+  "milestones": [
+   {
+    "age": 30,
+    "label": "Grow my family",
+    "sub": "age 30",
+    "tone": "good",
+    "side": "above",
+    "badge": "30"
+   },
+   {
+    "age": 50,
+    "label": "You retire",
+    "sub": "age 50",
+    "tone": "gold",
+    "side": "below",
+    "badge": "50"
+   },
+   {
+    "age": 52,
+    "label": "Savings run out",
+    "sub": "age 52",
+    "tone": "coral",
+    "side": "above",
+    "badge": "52"
+   },
+   {
+    "age": 66,
+    "label": "State Pension",
+    "sub": "age 66",
+    "tone": "blue",
+    "side": "below",
+    "badge": "66"
+   }
+  ],
+  "startLabel": "You, today · age 27",
+  "endLabel": "Plan to age 80"
+ },
+ "cover": {
+  "eyebrow": "PREPARED FOR POOJA · 8 OCT 2026",
+  "title": "Pooja’s road ahead",
+  "lead": "A clear, indicative guide to where you are, where you’re heading, and who can help you get there.",
+  "badge": "YOUR PERSONAL PLAN",
+  "tiles": [
+   {
+    "icon": "partly",
+    "tone": "gold",
+    "big": "1 of 2",
+    "small": "goals on track today"
+   },
+   {
+    "icon": "storm",
+    "tone": "coral",
+    "big": "Age 52",
+    "small": "when savings run out"
+   },
+   {
+    "icon": "storm",
+    "tone": "blue",
+    "big": "Next step",
+    "small": "share your plan with an expert"
+   }
+  ]
+ },
+ "plan": {
+  "big": "1 of 2",
+  "bigLabel": "goals on track",
+  "bigTone": "coral",
+  "eyebrow": "YOUR PLAN ON A PAGE",
+  "title": "Family goal on track. Retirement needs a bigger plan",
+  "lead": "Grow my family is 100% covered. Retire comfortably is 5% covered. Counting a State Pension, a pension of your own or a later date could change this.",
+  "goals": [
+   {
+    "name": "Grow my family",
+    "icon": "family",
+    "kind": "family",
+    "pct": 100,
+    "band": "good",
+    "bandText": "On track",
+    "meta": "Age 30 · 2029 · €15,000",
+    "sentence": "Fully funded. Your income and savings cover it."
+   },
+   {
+    "name": "Retire comfortably",
+    "icon": "retire",
+    "kind": "retire",
+    "pct": 5,
+    "band": "alert",
+    "bandText": "Needs attention",
+    "meta": "From 50 · 2049 · €40,000 a year",
+    "sentence": "5% covered without a State Pension, about 29% with the full one. Your savings pay for 2 of 31 retirement years."
+   }
+  ],
+  "band": {
+   "kind": "gap",
+   "cells": [
+    {
+     "big": "Age 52",
+     "small": "savings run out"
+    },
+    {
+     "big": "29 years",
+     "small": "with a gap, to age 80"
+    },
+    {
+     "big": "≈ €1.1m",
+     "small": "short in today’s money (€5.3m in future euros)"
+    }
+   ]
+  },
+  "close": {
+   "title": "What could close the gap",
+   "items": [
+    {
+     "points": "+24 points",
+     "tone": "good",
+     "title": "Check your State Pension",
+     "text": "Not confirmed, so the plan counts €0. A full one could lift cover from 5% to about 29%."
+    },
+    {
+     "points": "+19 points",
+     "tone": "gold",
+     "title": "Start a pension",
+     "text": "€987 a month (about €592 after tax relief) could lift cover to 24%."
+    },
+    {
+     "points": "+11 points",
+     "tone": "blue",
+     "title": "Choose your retirement age",
+     "text": "Retire at 60 and cover reaches 11%. At 65, 16%."
+    }
+   ]
+  },
+  "next": {
+   "title": "Next: share this plan with an expert",
+   "text": "They check the numbers and choose the best way forward.",
+   "button": "Meet an expert"
+  }
+ },
+ "money": {
+  "big": "€812",
+  "bigLabel": "left each month",
+  "bigTone": "good",
+  "eyebrow": "YOUR MONEY TODAY",
+  "title": "A comfortable monthly margin",
+  "tiles": [
+   {
+    "label": "Living costs",
+    "value": "€3,000",
+    "amount": 3000,
+    "tone": "navy"
+   },
+   {
+    "label": "Goals",
+    "value": "€813",
+    "amount": 813,
+    "tone": "teal"
+   },
+   {
+    "label": "Left over",
+    "value": "€812",
+    "amount": 812,
+    "tone": "white"
+   }
+  ],
+  "sentence": "For every €100 you take home, about €18 is left at the end of the month. That gives you room to save more.",
+  "takeHome": "Take-home pay is after tax, USC and PRSI (gross pay €79,000).",
+  "exampleChip": "example",
+  "own": {
+   "title": "YOU OWN",
+   "rows": [
+    {
+     "label": "Cash savings",
+     "status": "missing"
+    },
+    {
+     "label": "Investments",
+     "status": "missing"
+    },
+    {
+     "label": "Pension",
+     "status": "missing"
+    },
+    {
+     "label": "Home",
+     "value": "Rent"
+    }
+   ]
+  },
+  "owe": {
+   "title": "YOU OWE",
+   "rows": [
+    {
+     "label": "Mortgage",
+     "value": "None"
+    },
+    {
+     "label": "Credit cards",
+     "status": "missing"
+    },
+    {
+     "label": "Other loans",
+     "status": "missing"
+    }
+   ]
+  },
+  "netWorth": {
+   "label": "Net worth",
+   "status": "not yet known"
+  },
+  "complete": {
+   "eyebrow": "HOW COMPLETE IS YOUR PICTURE?",
+   "have": 15,
+   "total": 27,
+   "sub": "Add these next to sharpen your plan.",
+   "photo": "money-plant",
+   "items": [
+    {
+     "title": "Pension value",
+     "sub": "The biggest tool for retiring early",
+     "priority": "High"
+    },
+    {
+     "title": "Cash savings",
+     "sub": "A head start for your pot",
+     "priority": "High"
+    },
+    {
+     "title": "State Pension record",
+     "sub": "Up to €15,564 a year from 66",
+     "priority": "High"
+    },
+    {
+     "title": "Loans and cards",
+     "sub": "Debt can cancel out saving",
+     "priority": "Medium"
+    }
+   ]
+  }
+ },
+ "roadmap": {
+  "big": "Age 52",
+  "bigLabel": "savings run out",
+  "bigTone": "coral",
+  "eyebrow": "YOUR ROADMAP",
+  "title": "Smooth until 50, then savings run out at 52",
+  "lead": "Green: income covers life. Gold: savings pay. Coral: a gap to plan for.",
+  "decades": [
+   {
+    "label": "20s",
+    "range": "age 27–29",
+    "icon": "sun",
+    "tone": "good",
+    "title": "You are here",
+    "chip": "Comfortable",
+    "text": "Income comfortably covers life. Savings reach about €30,000 by 29.",
+    "goalChips": [],
+    "spark": {
+     "label": "Savings",
+     "values": [
+      9877,
+      20032,
+      30462
+     ],
+     "gapYears": [
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "label": "30s",
+    "range": "age 30–39",
+    "icon": "sun",
+    "tone": "good",
+    "title": "Building your savings",
+    "chip": "Comfortable",
+    "text": "Income comfortably covers life. Savings reach about €131,000 by 39.",
+    "goalChips": [
+     {
+      "age": 30,
+      "text": "Grow my family · 100%",
+      "tone": "good"
+     }
+    ],
+    "spark": {
+     "label": "Savings",
+     "values": [
+      23651,
+      34023,
+      44762,
+      55876,
+      67374,
+      79262,
+      91549,
+      104243,
+      117353,
+      130885
+     ],
+     "gapYears": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "label": "40s",
+    "range": "age 40–49",
+    "icon": "sun",
+    "tone": "good",
+    "title": "Building your savings",
+    "chip": "Comfortable",
+    "text": "Income comfortably covers life. Savings reach about €290,000 by 49.",
+    "goalChips": [],
+    "spark": {
+     "label": "Savings",
+     "values": [
+      144849,
+      159246,
+      174063,
+      189304,
+      204976,
+      221082,
+      237627,
+      254616,
+      272054,
+      289942
+     ],
+     "gapYears": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+     ]
+    }
+   },
+   {
+    "label": "50s",
+    "range": "age 50–59",
+    "icon": "storm",
+    "tone": "coral",
+    "title": "You retire at 50",
+    "chip": "A gap to plan for",
+    "text": "Short by about €107,214 a year in 8 of these 10 years.",
+    "goalChips": [],
+    "spark": {
+     "label": "Savings",
+     "values": [
+      196685,
+      98075,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "gapYears": [
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   {
+    "label": "60s",
+    "range": "age 60–69",
+    "icon": "storm",
+    "tone": "coral",
+    "title": "The gap grows with prices",
+    "chip": "A gap to plan for",
+    "text": "Short by about €168,951 a year, in every year of this decade.",
+    "goalChips": [
+     {
+      "age": 66,
+      "text": "State Pension age",
+      "tone": "blue"
+     }
+    ],
+    "spark": {
+     "label": "Savings",
+     "values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "gapYears": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   {
+    "label": "70s",
+    "range": "age 70–79",
+    "icon": "storm",
+    "tone": "coral",
+    "title": "The gap grows with prices",
+    "chip": "A gap to plan for",
+    "text": "Short by about €247,695 a year, in every year of this decade.",
+    "goalChips": [],
+    "spark": {
+     "label": "Savings",
+     "values": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "gapYears": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+     ]
+    }
+   },
+   {
+    "label": "80s",
+    "range": "age 80–80",
+    "icon": "storm",
+    "tone": "coral",
+    "title": "The plan ends at 80",
+    "chip": "A gap to plan for",
+    "text": "Short by about €303,867 in the last year. In all, 29 years have a gap.",
+    "goalChips": [],
+    "spark": {
+     "label": "Savings",
+     "values": [
+      0
+     ],
+     "gapYears": [
+      true
+     ]
+    }
+   }
+  ]
+ },
+ "goalsDetail": {
+  "big": "5%",
+  "bigLabel": "retirement covered",
+  "bigTone": "coral",
+  "eyebrow": "YOUR GOALS IN DETAIL",
+  "title": "1 of 2 on track, 1 needs attention",
+  "goals": [
+   {
+    "name": "Retire comfortably",
+    "kind": "retire",
+    "icon": "retire",
+    "pct": 5,
+    "band": "alert",
+    "bandText": "Needs attention",
+    "meta": "From 50 · 2049 · €40,000 a year, today’s money",
+    "sentence": "5% covered without a State Pension, about 29% with the full one. Your savings pay for 2 of 31 retirement years.",
+    "photo": "retired-reading",
+    "bars": {
+     "type": "retire",
+     "costLabel": "Retirement costs",
+     "costValue": "about €1.2m",
+     "costPct": 100,
+     "coverLabel": "Your plan covers",
+     "coverValue": "about €118k",
+     "coverPct": 9.8,
+     "note": "In today’s money. In future euros: €5.6m and €295k (5%). The gap is about €1.1m in today’s money."
+    },
+    "years": {
+     "title": "Your retirement years",
+     "summary": "2 funded · 29 with a gap",
+     "cells": [
+      {
+       "age": 50,
+       "state": "savings"
+      },
+      {
+       "age": 51,
+       "state": "savings"
+      },
+      {
+       "age": 52,
+       "state": "gap"
+      },
+      {
+       "age": 53,
+       "state": "gap"
+      },
+      {
+       "age": 54,
+       "state": "gap"
+      },
+      {
+       "age": 55,
+       "state": "gap"
+      },
+      {
+       "age": 56,
+       "state": "gap"
+      },
+      {
+       "age": 57,
+       "state": "gap"
+      },
+      {
+       "age": 58,
+       "state": "gap"
+      },
+      {
+       "age": 59,
+       "state": "gap"
+      },
+      {
+       "age": 60,
+       "state": "gap"
+      },
+      {
+       "age": 61,
+       "state": "gap"
+      },
+      {
+       "age": 62,
+       "state": "gap"
+      },
+      {
+       "age": 63,
+       "state": "gap"
+      },
+      {
+       "age": 64,
+       "state": "gap"
+      },
+      {
+       "age": 65,
+       "state": "gap"
+      },
+      {
+       "age": 66,
+       "state": "gap"
+      },
+      {
+       "age": 67,
+       "state": "gap"
+      },
+      {
+       "age": 68,
+       "state": "gap"
+      },
+      {
+       "age": 69,
+       "state": "gap"
+      },
+      {
+       "age": 70,
+       "state": "gap"
+      },
+      {
+       "age": 71,
+       "state": "gap"
+      },
+      {
+       "age": 72,
+       "state": "gap"
+      },
+      {
+       "age": 73,
+       "state": "gap"
+      },
+      {
+       "age": 74,
+       "state": "gap"
+      },
+      {
+       "age": 75,
+       "state": "gap"
+      },
+      {
+       "age": 76,
+       "state": "gap"
+      },
+      {
+       "age": 77,
+       "state": "gap"
+      },
+      {
+       "age": 78,
+       "state": "gap"
+      },
+      {
+       "age": 79,
+       "state": "gap"
+      },
+      {
+       "age": 80,
+       "state": "gap"
+      }
+     ],
+     "leftLabel": "Ages 50–51: paid from savings",
+     "rightLabel": "Ages 52–80: a gap"
+    }
+   },
+   {
+    "name": "Grow my family",
+    "kind": "family",
+    "icon": "family",
+    "pct": 100,
+    "band": "good",
+    "bandText": "On track",
+    "meta": "Age 30 · 2029 · €15,000",
+    "sentence": "Fully funded. Your income and savings cover it.",
+    "bars": {
+     "type": "saving",
+     "needLabel": "Needs a month",
+     "needValue": "€441",
+     "needPct": 100,
+     "putLabel": "You’re putting in",
+     "putValue": "€441",
+     "putPct": 100
+    }
+   }
+  ],
+  "howToRead": "How to read this page. Today’s money shows what things cost now; future euros add price rises. Covered is how much of a goal’s cost your income and savings meet: 100% is fully covered, 5% leaves about 95% to plan for."
+ },
+ "cashflow": {
+  "big": "€289,942",
+  "bigLabel": "savings at the peak, age 49",
+  "bigTone": "coral",
+  "eyebrow": "CASHFLOW",
+  "title": "Your savings run out at 52",
+  "savingsChart": {
+   "title": "Your savings, age 27 to 80",
+   "subtitle": "Cash and investments",
+   "yMax": 400000,
+   "yTicks": [
+    0,
+    100000,
+    200000,
+    300000,
+    400000
+   ],
+   "series": [
+    {
+     "age": 27,
+     "value": 9877
+    },
+    {
+     "age": 28,
+     "value": 20032
+    },
+    {
+     "age": 29,
+     "value": 30462
+    },
+    {
+     "age": 30,
+     "value": 23651
+    },
+    {
+     "age": 31,
+     "value": 34023
+    },
+    {
+     "age": 32,
+     "value": 44762
+    },
+    {
+     "age": 33,
+     "value": 55876
+    },
+    {
+     "age": 34,
+     "value": 67374
+    },
+    {
+     "age": 35,
+     "value": 79262
+    },
+    {
+     "age": 36,
+     "value": 91549
+    },
+    {
+     "age": 37,
+     "value": 104243
+    },
+    {
+     "age": 38,
+     "value": 117353
+    },
+    {
+     "age": 39,
+     "value": 130885
+    },
+    {
+     "age": 40,
+     "value": 144849
+    },
+    {
+     "age": 41,
+     "value": 159246
+    },
+    {
+     "age": 42,
+     "value": 174063
+    },
+    {
+     "age": 43,
+     "value": 189304
+    },
+    {
+     "age": 44,
+     "value": 204976
+    },
+    {
+     "age": 45,
+     "value": 221082
+    },
+    {
+     "age": 46,
+     "value": 237627
+    },
+    {
+     "age": 47,
+     "value": 254616
+    },
+    {
+     "age": 48,
+     "value": 272054
+    },
+    {
+     "age": 49,
+     "value": 289942
+    },
+    {
+     "age": 50,
+     "value": 196685
+    },
+    {
+     "age": 51,
+     "value": 98075
+    },
+    {
+     "age": 52,
+     "value": 0
+    },
+    {
+     "age": 53,
+     "value": 0
+    },
+    {
+     "age": 54,
+     "value": 0
+    },
+    {
+     "age": 55,
+     "value": 0
+    },
+    {
+     "age": 56,
+     "value": 0
+    },
+    {
+     "age": 57,
+     "value": 0
+    },
+    {
+     "age": 58,
+     "value": 0
+    },
+    {
+     "age": 59,
+     "value": 0
+    },
+    {
+     "age": 60,
+     "value": 0
+    },
+    {
+     "age": 61,
+     "value": 0
+    },
+    {
+     "age": 62,
+     "value": 0
+    },
+    {
+     "age": 63,
+     "value": 0
+    },
+    {
+     "age": 64,
+     "value": 0
+    },
+    {
+     "age": 65,
+     "value": 0
+    },
+    {
+     "age": 66,
+     "value": 0
+    },
+    {
+     "age": 67,
+     "value": 0
+    },
+    {
+     "age": 68,
+     "value": 0
+    },
+    {
+     "age": 69,
+     "value": 0
+    },
+    {
+     "age": 70,
+     "value": 0
+    },
+    {
+     "age": 71,
+     "value": 0
+    },
+    {
+     "age": 72,
+     "value": 0
+    },
+    {
+     "age": 73,
+     "value": 0
+    },
+    {
+     "age": 74,
+     "value": 0
+    },
+    {
+     "age": 75,
+     "value": 0
+    },
+    {
+     "age": 76,
+     "value": 0
+    },
+    {
+     "age": 77,
+     "value": 0
+    },
+    {
+     "age": 78,
+     "value": 0
+    },
+    {
+     "age": 79,
+     "value": 0
+    },
+    {
+     "age": 80,
+     "value": 0
+    }
+   ],
+   "peak": {
+    "age": 49,
+    "value": 289942,
+    "label": "Peak €289,942",
+    "sub": "at age 49"
+   },
+   "runOut": {
+    "age": 52,
+    "label": "Savings run out at 52"
+   },
+   "zones": [
+    {
+     "fromAge": 27,
+     "toAge": 50,
+     "label": "WORKING",
+     "tone": "good"
+    },
+    {
+     "fromAge": 50,
+     "toAge": 52,
+     "label": "",
+     "tone": "gold"
+    },
+    {
+     "fromAge": 52,
+     "toAge": 80,
+     "label": "A GAP",
+     "tone": "coral"
+    }
+   ],
+   "caption": "Savings reach €289,942 at 49. Savings run out at 52."
+  },
+  "paidChart": {
+   "title": "How each year is paid",
+   "legend": [
+    {
+     "tone": "good",
+     "label": "Paid from income"
+    },
+    {
+     "tone": "gold",
+     "label": "Paid from savings"
+    },
+    {
+     "tone": "coral",
+     "label": "Shortfall, not covered"
+    }
+   ],
+   "yMax": 400000,
+   "yTicks": [
+    0,
+    100000,
+    200000,
+    300000,
+    400000
+   ],
+   "bars": [
+    {
+     "age": 27,
+     "fromIncome": 36000,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 28,
+     "fromIncome": 37404,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 29,
+     "fromIncome": 38863,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 30,
+     "fromIncome": 40378,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 31,
+     "fromIncome": 41953,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 32,
+     "fromIncome": 43589,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 33,
+     "fromIncome": 45289,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 34,
+     "fromIncome": 47056,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 35,
+     "fromIncome": 48891,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 36,
+     "fromIncome": 50798,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 37,
+     "fromIncome": 52779,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 38,
+     "fromIncome": 54837,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 39,
+     "fromIncome": 56976,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 40,
+     "fromIncome": 59198,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 41,
+     "fromIncome": 61506,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 42,
+     "fromIncome": 63905,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 43,
+     "fromIncome": 66397,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 44,
+     "fromIncome": 68987,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 45,
+     "fromIncome": 71677,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 46,
+     "fromIncome": 74473,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 47,
+     "fromIncome": 77377,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 48,
+     "fromIncome": 80395,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 49,
+     "fromIncome": 83530,
+     "fromSavings": 0,
+     "shortfall": 0
+    },
+    {
+     "age": 50,
+     "fromIncome": 0,
+     "fromSavings": 96431,
+     "shortfall": 0
+    },
+    {
+     "age": 51,
+     "fromIncome": 0,
+     "fromSavings": 100192,
+     "shortfall": 0
+    },
+    {
+     "age": 52,
+     "fromIncome": 0,
+     "fromSavings": 98076,
+     "shortfall": 6024
+    },
+    {
+     "age": 53,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 108159
+    },
+    {
+     "age": 54,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 112378
+    },
+    {
+     "age": 55,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 116760
+    },
+    {
+     "age": 56,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 121314
+    },
+    {
+     "age": 57,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 126045
+    },
+    {
+     "age": 58,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 130961
+    },
+    {
+     "age": 59,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 136068
+    },
+    {
+     "age": 60,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 141375
+    },
+    {
+     "age": 61,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 146889
+    },
+    {
+     "age": 62,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 152617
+    },
+    {
+     "age": 63,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 158570
+    },
+    {
+     "age": 64,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 164754
+    },
+    {
+     "age": 65,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 171179
+    },
+    {
+     "age": 66,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 177855
+    },
+    {
+     "age": 67,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 184791
+    },
+    {
+     "age": 68,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 191998
+    },
+    {
+     "age": 69,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 199486
+    },
+    {
+     "age": 70,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 207266
+    },
+    {
+     "age": 71,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 215350
+    },
+    {
+     "age": 72,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 223748
+    },
+    {
+     "age": 73,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 232474
+    },
+    {
+     "age": 74,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 241541
+    },
+    {
+     "age": 75,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 250961
+    },
+    {
+     "age": 76,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 260749
+    },
+    {
+     "age": 77,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 270918
+    },
+    {
+     "age": 78,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 281483
+    },
+    {
+     "age": 79,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 292461
+    },
+    {
+     "age": 80,
+     "fromIncome": 0,
+     "fromSavings": 0,
+     "shortfall": 303867
+    }
+   ],
+   "zones": [
+    {
+     "fromAge": 27,
+     "toAge": 50,
+     "label": "WORKING",
+     "tone": "good"
+    },
+    {
+     "fromAge": 50,
+     "toAge": 52,
+     "label": "",
+     "tone": "gold"
+    },
+    {
+     "fromAge": 52,
+     "toAge": 80,
+     "label": "A GAP",
+     "tone": "coral"
+    }
+   ],
+   "stopMarker": {
+    "age": 50,
+    "label": "Pay stops at 50"
+   },
+   "lastLabel": {
+    "age": 80,
+    "label": "€303,867 a year at 80"
+   },
+   "caption": "Pay stops at 50. Costs keep rising."
+  }
+ },
+ "scenarios": {
+  "fromPct": 5,
+  "toPct": 94,
+  "fromTone": "coral",
+  "toTone": "coral",
+  "eyebrow": "WHAT COULD CHANGE THE ANSWER",
+  "title": "Paying more into a pension helps most",
+  "columns": {
+   "what": "WHAT IF YOU…",
+   "covered": "COVERED",
+   "gap": "GAP STARTS AT"
+  },
+  "groups": [
+   {
+    "title": "ONE CHANGE AT A TIME",
+    "rows": [
+     {
+      "id": "today",
+      "title": "Today’s plan",
+      "sub": "Retire at 50, no State Pension counted",
+      "pct": 5,
+      "gapStartsAge": 52,
+      "emphasis": true
+     },
+     {
+      "id": "retire60",
+      "title": "Retire at 60",
+      "sub": "Ten years later",
+      "pct": 11,
+      "gapStartsAge": 63
+     },
+     {
+      "id": "save",
+      "title": "Save €850 more a month",
+      "sub": "In cash and investments. About 18% of take-home pay",
+      "pct": 11,
+      "gapStartsAge": 55
+     },
+     {
+      "id": "retire65",
+      "title": "Retire at 65",
+      "sub": "Fifteen years later",
+      "pct": 16,
+      "gapStartsAge": 68
+     },
+     {
+      "id": "pension",
+      "title": "Start a pension, €987 a month",
+      "sub": "About €592 after tax relief. The most you can claim on at 27",
+      "pct": 24,
+      "gapStartsAge": 51
+     },
+     {
+      "id": "statePension",
+      "title": "Count your State Pension",
+      "sub": "Full rate, €15,564 a year from 66",
+      "pct": 29,
+      "gapStartsAge": 52
+     },
+     {
+      "id": "morePension",
+      "title": "Pay €850 more a month into a pension",
+      "sub": "After tax relief. About 18% of take-home pay",
+      "pct": 33,
+      "gapStartsAge": 52
+     }
+    ]
+   },
+   {
+    "title": "COMBINED",
+    "rows": [
+     {
+      "id": "c60pension",
+      "title": "Retire at 60 + pension at the limit",
+      "sub": "With a full State Pension (confirm yours)",
+      "pct": 70,
+      "gapStartsAge": 65
+     },
+     {
+      "id": "c60more",
+      "title": "…and pay €425 more a month into a pension",
+      "sub": "Total 22% of take-home pay",
+      "pct": 87,
+      "gapStartsAge": 70
+     },
+     {
+      "id": "c65pension",
+      "title": "Or retire at 65 + pension at the limit",
+      "sub": "With a full State Pension. Total 13% of take-home pay",
+      "pct": 94,
+      "gapStartsAge": 79
+     }
+    ]
+   }
+  ],
+  "explore": {
+   "title": "A path to explore",
+   "text": "Retire at 65, start a pension and check your State Pension record: about 94% covered, with a gap only from age 79. Retiring at 60 instead reaches 70%."
+  },
+  "footnote": "Results from the plan engine on your plan; all rows except the State Pension and combined rows assume no State Pension. A full State Pension is not confirmed. Pension money is locked until 60, so retiring before then rests on savings alone. An expert can confirm every figure."
+ },
+ "foundations": {
+  "big": "1 of 5",
+  "bigLabel": "foundations solid",
+  "bigTone": "gold",
+  "eyebrow": "FOUNDATIONS AND YOU",
+  "title": "Build from the bottom up",
+  "lead": "Good planning is built from the bottom up.",
+  "levels": [
+   {
+    "level": 5,
+    "icon": "partly",
+    "title": "Grow wealth & legacy",
+    "status": "Not started · not started yet",
+    "tone": "grey"
+   },
+   {
+    "level": 4,
+    "icon": "partly",
+    "title": "Goals & retirement",
+    "status": "In progress · 1 of 2 goals on track · no pension saving yet",
+    "tone": "gold"
+   },
+   {
+    "level": 3,
+    "icon": "partly",
+    "title": "Clear costly debt & protect your family",
+    "status": "In progress · no income protection if you couldn’t work",
+    "tone": "gold"
+   },
+   {
+    "level": 2,
+    "icon": "partly",
+    "title": "Emergency fund",
+    "status": "In progress · 3 to 6 months of savings (your answer)",
+    "tone": "gold"
+   },
+   {
+    "level": 1,
+    "icon": "sun",
+    "title": "Spend less than you earn",
+    "status": "Solid · about €812 a month spare",
+    "tone": "good"
+   }
+  ],
+  "protection": {
+   "title": "Protection",
+   "photo": "car-and-calculator",
+   "rows": [
+    {
+     "label": "Life cover",
+     "value": "Yes",
+     "good": true
+    },
+    {
+     "label": "Health insurance",
+     "value": "Yes",
+     "good": true
+    },
+    {
+     "label": "Cover through work",
+     "value": "No",
+     "good": false
+    },
+    {
+     "label": "Income protection",
+     "value": "No",
+     "good": false
+    },
+    {
+     "label": "Serious illness cover",
+     "value": "No",
+     "good": false
+    }
+   ],
+   "nextBest": {
+    "label": "NEXT BEST STEP",
+    "text": "Build your emergency fund to 6 months. Add your savings so we can check it."
+   }
+  },
+  "personality": {
+   "eyebrow": "YOUR MONEY PERSONALITY",
+   "name": "The Explorer",
+   "icon": "compass",
+   "strap": "Curious, open to new ideas, comfortable with risk.",
+   "quadrants": [
+    {
+     "label": "HOW YOU FEEL ABOUT MONEY",
+     "value": "The Opportunist · Money avoidance"
+    },
+    {
+     "label": "HOW YOU TEND TO ACT",
+     "value": "Loss aversion · Long-term investor"
+    },
+    {
+     "label": "HOW MUCH RISK YOU WANT",
+     "value": "Not assessed yet"
+    },
+    {
+     "label": "HOW MUCH YOU CAN AFFORD TO LOSE",
+     "value": "Emergency fund · High capacity (your answer)"
+    }
+   ],
+   "riskScale": {
+    "title": "Risk profile",
+    "labels": [
+     "Cautious",
+     "Cautious–balanced",
+     "Balanced",
+     "Balanced–adventurous",
+     "Adventurous"
+    ],
+    "activeIndex": null
+   },
+   "note": "Finish Understand me to add your indicative risk profile. You like risk but dislike losses: a written plan and an automatic monthly payment help you stay steady."
+  }
+ },
+ "next": {
+  "eyebrow": "WHAT HAPPENS NEXT",
+  "title": "Share your plan with an expert",
+  "lead": "This guide is a starting point. An expert can confirm it, answer your questions and help you choose what to do.",
+  "button": "Meet an expert in the app",
+  "photo": "team-with-charts",
+  "steps": [
+   {
+    "n": 1,
+    "title": "Share your plan",
+    "text": "Send this guide to an expert, with your permission."
+   },
+   {
+    "n": 2,
+    "title": "Meet your expert",
+    "text": "They check the numbers and your details."
+   },
+   {
+    "n": 3,
+    "title": "Agree your personal plan",
+    "text": "Choose the steps that fit your life."
+   }
+  ],
+  "topics": {
+   "title": "An expert can help with",
+   "chips": [
+    "Retirement planning",
+    "Pensions and tax relief",
+    "State Pension",
+    "Income protection"
+   ]
+  },
+  "checklist": {
+   "title": "Before you meet",
+   "items": [
+    "Add your cash savings, investments and pension value",
+    "Check your State Pension record on MyWelfare.ie",
+    "Finish “Understand me” for your risk profile"
+   ]
+  },
+  "questions": {
+   "title": "Questions to ask",
+   "items": [
+    "Is retiring at 50 realistic? If not, what age gets me closest to €40,000 a year?",
+    "How much should I pay into a pension each month, and where?",
+    "How do I cover 50 to 60 while pension money is locked?",
+    "What income protection do I need, and what does it cost?"
+   ]
+  },
+  "ready": {
+   "title": "Ready when you are",
+   "text": "Your plan stays private until you choose to share it.",
+   "button": "Meet an expert"
+  }
+ },
+ "assumptions": {
+  "big": "12",
+  "bigLabel": "things we assumed",
+  "eyebrow": "ASSUMPTIONS AND SMALL PRINT",
+  "title": "What your plan assumes",
+  "left": [
+   [
+    "Prices rise",
+    "3.9% a year"
+   ],
+   [
+    "Pay rises",
+    "3% a year"
+   ],
+   [
+    "Cash grows",
+    "1% a year, after DIRT"
+   ],
+   [
+    "Investments grow",
+    "2.6% a year, after charges and exit tax"
+   ],
+   [
+    "Pensions grow",
+    "4.5% working, 3.15% once retired"
+   ],
+   [
+    "State Pension",
+    "€0 in this plan (full rate €299.30 a week)"
+   ]
+  ],
+  "right": [
+   [
+    "Tax",
+    "2026 Irish income tax, USC, PRSI"
+   ],
+   [
+    "Saved towards goals",
+    "About €813 a month"
+   ],
+   [
+    "Emergency fund",
+    "6 months kept aside"
+   ],
+   [
+    "Order of goals",
+    "Must-haves, then soonest first"
+   ],
+   [
+    "Retirement age",
+    "50"
+   ],
+   [
+    "Plan ends",
+    "Age 80"
+   ]
+  ],
+  "knownLimits": {
+   "title": "Known limits",
+   "items": [
+    "Living costs stay the same through the plan, apart from prices.",
+    "Drawdown is from an ARF or vested PRSA. Spare money not saved is assumed spent.",
+    "Irish rules checked 2 Oct 2026. Budget 2027 changes (announced 6 Oct 2026) aren’t included yet. We’ll update your plan once they’re final."
+   ]
+  },
+  "pleaseNote": {
+   "title": "Please note",
+   "text": "This is preliminary guidance, not financial advice. Only an authorised adviser can give advice. Investments can fall as well as rise. All projections are illustrative, not guaranteed. This tool is designed to help you explore your preferences. It does not replace a formal suitability or risk assessment where financial advice is provided."
+  },
+  "sources": "Sources: Revenue; Department of Social Protection; CSO flash inflation September 2026; ECB target; LifeMap plan engine.",
+  "glossary": {
+   "title": "Words used in this report",
+   "items": [
+    [
+     "Today’s money · future euros",
+     "Today’s prices, and amounts after prices rise."
+    ],
+    [
+     "Inflation",
+     "How fast prices rise. This plan uses 3.9% a year."
+    ],
+    [
+     "Shortfall",
+     "The part of a year’s costs your plan cannot pay."
+    ],
+    [
+     "Covered %",
+     "How much of a goal’s cost your income and savings meet."
+    ],
+    [
+     "PRSA · ARF",
+     "A personal pension account · a fund you draw income from."
+    ],
+    [
+     "State Pension",
+     "Government pension from 66. Full rate €299.30 a week."
+    ],
+    [
+     "USC · PRSI",
+     "Irish charges on pay. PRSI builds your State Pension record."
+    ],
+    [
+     "Capacity for loss",
+     "How much you could afford to lose."
+    ],
+    [
+     "My Future Fund",
+     "Ireland’s automatic workplace pension."
+    ]
+   ]
+  }
+ },
+ "appendix": {
+  "big": "54",
+  "bigLabel": "years in numbers",
+  "eyebrow": "APPENDIX",
+  "title": "Every year in numbers",
+  "columns": [
+   "Age (year)",
+   "Income",
+   "Needs",
+   "Shortfall",
+   "Savings left"
+  ],
+  "rows": [
+   {
+    "age": 27,
+    "year": 2026,
+    "income": 55502,
+    "needs": 36000,
+    "shortfall": 0,
+    "savingsLeft": 9877
+   },
+   {
+    "age": 28,
+    "year": 2027,
+    "income": 57205,
+    "needs": 37404,
+    "shortfall": 0,
+    "savingsLeft": 20032
+   },
+   {
+    "age": 29,
+    "year": 2028,
+    "income": 58951,
+    "needs": 38863,
+    "shortfall": 0,
+    "savingsLeft": 30462
+   },
+   {
+    "age": 30,
+    "year": 2029,
+    "income": 59641,
+    "needs": 40378,
+    "shortfall": 0,
+    "savingsLeft": 23651
+   },
+   {
+    "age": 31,
+    "year": 2030,
+    "income": 61599,
+    "needs": 41953,
+    "shortfall": 0,
+    "savingsLeft": 34023
+   },
+   {
+    "age": 32,
+    "year": 2031,
+    "income": 63623,
+    "needs": 43589,
+    "shortfall": 0,
+    "savingsLeft": 44762
+   },
+   {
+    "age": 33,
+    "year": 2032,
+    "income": 65715,
+    "needs": 45289,
+    "shortfall": 0,
+    "savingsLeft": 55876
+   },
+   {
+    "age": 34,
+    "year": 2033,
+    "income": 67876,
+    "needs": 47056,
+    "shortfall": 0,
+    "savingsLeft": 67374
+   },
+   {
+    "age": 35,
+    "year": 2034,
+    "income": 70110,
+    "needs": 48891,
+    "shortfall": 0,
+    "savingsLeft": 79262
+   },
+   {
+    "age": 36,
+    "year": 2035,
+    "income": 72418,
+    "needs": 50798,
+    "shortfall": 0,
+    "savingsLeft": 91549
+   },
+   {
+    "age": 37,
+    "year": 2036,
+    "income": 74803,
+    "needs": 52779,
+    "shortfall": 0,
+    "savingsLeft": 104243
+   },
+   {
+    "age": 38,
+    "year": 2037,
+    "income": 77269,
+    "needs": 54837,
+    "shortfall": 0,
+    "savingsLeft": 117353
+   },
+   {
+    "age": 39,
+    "year": 2038,
+    "income": 79817,
+    "needs": 56976,
+    "shortfall": 0,
+    "savingsLeft": 130885
+   },
+   {
+    "age": 40,
+    "year": 2039,
+    "income": 82450,
+    "needs": 59198,
+    "shortfall": 0,
+    "savingsLeft": 144849
+   },
+   {
+    "age": 41,
+    "year": 2040,
+    "income": 85163,
+    "needs": 61506,
+    "shortfall": 0,
+    "savingsLeft": 159246
+   },
+   {
+    "age": 42,
+    "year": 2041,
+    "income": 87922,
+    "needs": 63905,
+    "shortfall": 0,
+    "savingsLeft": 174063
+   },
+   {
+    "age": 43,
+    "year": 2042,
+    "income": 90771,
+    "needs": 66397,
+    "shortfall": 0,
+    "savingsLeft": 189304
+   },
+   {
+    "age": 44,
+    "year": 2043,
+    "income": 93715,
+    "needs": 68987,
+    "shortfall": 0,
+    "savingsLeft": 204976
+   },
+   {
+    "age": 45,
+    "year": 2044,
+    "income": 96755,
+    "needs": 71677,
+    "shortfall": 0,
+    "savingsLeft": 221082
+   },
+   {
+    "age": 46,
+    "year": 2045,
+    "income": 99895,
+    "needs": 74473,
+    "shortfall": 0,
+    "savingsLeft": 237627
+   },
+   {
+    "age": 47,
+    "year": 2046,
+    "income": 103139,
+    "needs": 77377,
+    "shortfall": 0,
+    "savingsLeft": 254616
+   },
+   {
+    "age": 48,
+    "year": 2047,
+    "income": 106490,
+    "needs": 80395,
+    "shortfall": 0,
+    "savingsLeft": 272054
+   },
+   {
+    "age": 49,
+    "year": 2048,
+    "income": 109951,
+    "needs": 83530,
+    "shortfall": 0,
+    "savingsLeft": 289942
+   },
+   {
+    "age": 50,
+    "year": 2049,
+    "income": 0,
+    "needs": 96431,
+    "shortfall": 0,
+    "savingsLeft": 196685
+   },
+   {
+    "age": 51,
+    "year": 2050,
+    "income": 0,
+    "needs": 100192,
+    "shortfall": 0,
+    "savingsLeft": 98075
+   },
+   {
+    "age": 52,
+    "year": 2051,
+    "income": 0,
+    "needs": 104100,
+    "shortfall": 6024,
+    "savingsLeft": 0
+   },
+   {
+    "age": 53,
+    "year": 2052,
+    "income": 0,
+    "needs": 108159,
+    "shortfall": 108159,
+    "savingsLeft": 0
+   },
+   {
+    "age": 54,
+    "year": 2053,
+    "income": 0,
+    "needs": 112378,
+    "shortfall": 112378,
+    "savingsLeft": 0
+   },
+   {
+    "age": 55,
+    "year": 2054,
+    "income": 0,
+    "needs": 116760,
+    "shortfall": 116760,
+    "savingsLeft": 0
+   },
+   {
+    "age": 56,
+    "year": 2055,
+    "income": 0,
+    "needs": 121314,
+    "shortfall": 121314,
+    "savingsLeft": 0
+   },
+   {
+    "age": 57,
+    "year": 2056,
+    "income": 0,
+    "needs": 126045,
+    "shortfall": 126045,
+    "savingsLeft": 0
+   },
+   {
+    "age": 58,
+    "year": 2057,
+    "income": 0,
+    "needs": 130961,
+    "shortfall": 130961,
+    "savingsLeft": 0
+   },
+   {
+    "age": 59,
+    "year": 2058,
+    "income": 0,
+    "needs": 136068,
+    "shortfall": 136068,
+    "savingsLeft": 0
+   },
+   {
+    "age": 60,
+    "year": 2059,
+    "income": 0,
+    "needs": 141375,
+    "shortfall": 141375,
+    "savingsLeft": 0
+   },
+   {
+    "age": 61,
+    "year": 2060,
+    "income": 0,
+    "needs": 146889,
+    "shortfall": 146889,
+    "savingsLeft": 0
+   },
+   {
+    "age": 62,
+    "year": 2061,
+    "income": 0,
+    "needs": 152617,
+    "shortfall": 152617,
+    "savingsLeft": 0
+   },
+   {
+    "age": 63,
+    "year": 2062,
+    "income": 0,
+    "needs": 158570,
+    "shortfall": 158570,
+    "savingsLeft": 0
+   },
+   {
+    "age": 64,
+    "year": 2063,
+    "income": 0,
+    "needs": 164754,
+    "shortfall": 164754,
+    "savingsLeft": 0
+   },
+   {
+    "age": 65,
+    "year": 2064,
+    "income": 0,
+    "needs": 171179,
+    "shortfall": 171179,
+    "savingsLeft": 0
+   },
+   {
+    "age": 66,
+    "year": 2065,
+    "income": 0,
+    "needs": 177855,
+    "shortfall": 177855,
+    "savingsLeft": 0
+   },
+   {
+    "age": 67,
+    "year": 2066,
+    "income": 0,
+    "needs": 184791,
+    "shortfall": 184791,
+    "savingsLeft": 0
+   },
+   {
+    "age": 68,
+    "year": 2067,
+    "income": 0,
+    "needs": 191998,
+    "shortfall": 191998,
+    "savingsLeft": 0
+   },
+   {
+    "age": 69,
+    "year": 2068,
+    "income": 0,
+    "needs": 199486,
+    "shortfall": 199486,
+    "savingsLeft": 0
+   },
+   {
+    "age": 70,
+    "year": 2069,
+    "income": 0,
+    "needs": 207266,
+    "shortfall": 207266,
+    "savingsLeft": 0
+   },
+   {
+    "age": 71,
+    "year": 2070,
+    "income": 0,
+    "needs": 215350,
+    "shortfall": 215350,
+    "savingsLeft": 0
+   },
+   {
+    "age": 72,
+    "year": 2071,
+    "income": 0,
+    "needs": 223748,
+    "shortfall": 223748,
+    "savingsLeft": 0
+   },
+   {
+    "age": 73,
+    "year": 2072,
+    "income": 0,
+    "needs": 232474,
+    "shortfall": 232474,
+    "savingsLeft": 0
+   },
+   {
+    "age": 74,
+    "year": 2073,
+    "income": 0,
+    "needs": 241541,
+    "shortfall": 241541,
+    "savingsLeft": 0
+   },
+   {
+    "age": 75,
+    "year": 2074,
+    "income": 0,
+    "needs": 250961,
+    "shortfall": 250961,
+    "savingsLeft": 0
+   },
+   {
+    "age": 76,
+    "year": 2075,
+    "income": 0,
+    "needs": 260749,
+    "shortfall": 260749,
+    "savingsLeft": 0
+   },
+   {
+    "age": 77,
+    "year": 2076,
+    "income": 0,
+    "needs": 270918,
+    "shortfall": 270918,
+    "savingsLeft": 0
+   },
+   {
+    "age": 78,
+    "year": 2077,
+    "income": 0,
+    "needs": 281483,
+    "shortfall": 281483,
+    "savingsLeft": 0
+   },
+   {
+    "age": 79,
+    "year": 2078,
+    "income": 0,
+    "needs": 292461,
+    "shortfall": 292461,
+    "savingsLeft": 0
+   },
+   {
+    "age": 80,
+    "year": 2079,
+    "income": 0,
+    "needs": 303867,
+    "shortfall": 303867,
+    "savingsLeft": 0
+   }
+  ],
+  "note": "Future euros. 29 shortfall years sum to €5,328,044 (future euros) or about €1.1m in today’s money."
+ }
+}

@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lifemap-report-data-1.0.0",
+  "title": "LifeMap plan report data (reportData() output)",
+  "description": "Everything the report renderer needs. All text is final display text (already formatted, e.g. '≈ €1.1m'); the renderer never calculates money, percentages or ages. Numbers that drive geometry (ages, pct, series values) are raw numbers. schemaVersion follows semver: patch = wording only, minor = new optional keys, major = renamed/removed keys. Canonical example: tools/report/mock-v5.json.",
+  "type": "object",
+  "required": ["schemaVersion","meta","footer","road","cover","plan","money","roadmap","goalsDetail","cashflow","scenarios","foundations","next","assumptions","appendix"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"},
+    "meta": {
+      "type": "object",
+      "required": ["customerName","possessiveName","dateText","dateUpper","version","currentAge","currentYear","planEndAge","retireAge","statePensionAge","hasPartner","alreadyRetired","hasMortgage","headerRight"],
+      "properties": {
+        "customerName": {"type":"string","minLength":1},
+        "possessiveName": {"type":"string","minLength":1},
+        "dateText": {"type":"string"}, "dateUpper": {"type":"string"},
+        "version": {"type":"integer","minimum":1},
+        "currentAge": {"type":"integer"}, "currentYear": {"type":"integer"},
+        "planEndAge": {"type":"integer","maximum":110},
+        "retireAge": {"type":"integer"}, "statePensionAge": {"type":"integer"},
+        "hasPartner": {"type":"boolean"}, "alreadyRetired": {"type":"boolean"}, "hasMortgage": {"type":"boolean"},
+        "headerRight": {"type":"string"}
+      }
+    },
+    "footer": {"type":"object","required":["line","coverLine"],"properties":{"line":{"type":"string"},"coverLine":{"type":"string"}}},
+    "road": {
+      "type":"object","required":["startAge","endAge","segments","milestones","startLabel","endLabel"],
+      "properties":{
+        "startAge":{"type":"number"},"endAge":{"type":"number"},
+        "segments":{"type":"array","minItems":1,"items":{"type":"object","required":["fromAge","toAge","tone"],"properties":{"fromAge":{"type":"number"},"toAge":{"type":"number"},"tone":{"$ref":"#/$defs/tone3"}}}},
+        "milestones":{"type":"array","maxItems":8,"items":{"type":"object","required":["age","label","sub","tone","side","badge"],"properties":{"age":{"type":"number"},"label":{"type":"string"},"sub":{"type":"string"},"tone":{"$ref":"#/$defs/tone"},"side":{"enum":["above","below"]},"badge":{"type":"string"}}}},
+        "startLabel":{"type":"string"},"endLabel":{"type":"string"}
+      }
+    },
+    "cover": {
+      "type":"object","required":["eyebrow","title","lead","badge","tiles"],
+      "properties":{"eyebrow":{"type":"string"},"title":{"type":"string"},"lead":{"type":"string"},"badge":{"type":"string"},
+        "tiles":{"type":"array","minItems":3,"maxItems":3,"items":{"$ref":"#/$defs/coverTile"}}}
+    },
+    "plan": {
+      "type":"object","required":["big","bigLabel","bigTone","eyebrow","title","lead","goals","band","close","next"],
+      "properties":{
+        "big":{"type":"string"},"bigLabel":{"type":"string"},"bigTone":{"$ref":"#/$defs/tone"},
+        "eyebrow":{"type":"string"},"title":{"type":"string"},"lead":{"type":"string"},
+        "goals":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/goalCard"}},
+        "band":{"type":"object","required":["kind","cells"],"properties":{"kind":{"enum":["gap","none"]},"cells":{"type":"array","minItems":1,"maxItems":3,"items":{"$ref":"#/$defs/bigSmall"}}}},
+        "close":{"type":"object","required":["title","items"],"properties":{"title":{"type":"string"},"items":{"type":"array","maxItems":3,"items":{"type":"object","required":["points","tone","title","text"],"properties":{"points":{"type":"string"},"tone":{"$ref":"#/$defs/tone"},"title":{"type":"string"},"text":{"type":"string"}}}}}},
+        "next":{"type":"object","required":["title","text","button"],"properties":{"title":{"type":"string"},"text":{"type":"string"},"button":{"type":"string"}}}
+      }
+    },
+    "money": {
+      "type":"object","required":["big","bigLabel","bigTone","eyebrow","title","tiles","sentence","takeHome","exampleChip","own","owe","netWorth","complete"],
+      "properties":{
+        "big":{"type":"string"},"bigLabel":{"type":"string"},"bigTone":{"$ref":"#/$defs/tone"},"eyebrow":{"type":"string"},"title":{"type":"string"},
+        "tiles":{"type":"array","minItems":3,"maxItems":3,"items":{"type":"object","required":["label","value","amount","tone"],"properties":{"label":{"type":"string"},"value":{"type":"string"},"amount":{"type":"number"},"tone":{"enum":["navy","teal","white"]}}}},
+        "sentence":{"type":"string"},"takeHome":{"type":"string"},"exampleChip":{"type":"string"},
+        "own":{"$ref":"#/$defs/ledger"},"owe":{"$ref":"#/$defs/ledger"},
+        "netWorth":{"type":"object","required":["label"],"properties":{"label":{"type":"string"},"value":{"type":"string"},"status":{"type":"string","description":"shown instead of value when unknown, e.g. not yet known"}}},
+        "complete":{"type":"object","required":["eyebrow","have","total","sub","photo","items"],"properties":{"eyebrow":{"type":"string"},"have":{"type":"integer"},"total":{"type":"integer"},"sub":{"type":"string"},"photo":{"$ref":"#/$defs/photo"},"items":{"type":"array","maxItems":6,"items":{"type":"object","required":["title","sub","priority"],"properties":{"title":{"type":"string"},"sub":{"type":"string"},"priority":{"enum":["High","Medium","Low"]}}}}}}
+      }
+    },
+    "roadmap": {
+      "type":"object","required":["big","bigLabel","bigTone","eyebrow","title","lead","decades"],
+      "properties":{
+        "big":{"type":"string"},"bigLabel":{"type":"string"},"bigTone":{"$ref":"#/$defs/tone"},"eyebrow":{"type":"string"},"title":{"type":"string"},"lead":{"type":"string"},
+        "decades":{"type":"array","minItems":1,"maxItems":9,"items":{"type":"object","required":["label","range","icon","tone","title","chip","text","goalChips","spark"],
+          "properties":{"label":{"type":"string"},"range":{"type":"string"},"icon":{"$ref":"#/$defs/weather"},"tone":{"$ref":"#/$defs/tone"},"title":{"type":"string"},"chip":{"type":"string"},"text":{"type":"string"},
+            "goalChips":{"type":"array","items":{"type":"object","required":["age","text","tone"],"properties":{"age":{"type":"number"},"text":{"type":"string"},"tone":{"$ref":"#/$defs/tone"}}}},
+            "spark":{"type":"object","required":["label","values","gapYears"],"properties":{"label":{"type":"string"},"values":{"type":"array","items":{"type":"number"}},"gapYears":{"type":"array","items":{"type":"boolean"}}}}}}}
+      }
+    },
+    "goalsDetail": {
+      "type":"object","required":["big","bigLabel","bigTone","eyebrow","title","goals","howToRead"],
+      "properties":{
+        "big":{"type":"string"},"bigLabel":{"type":"string"},"bigTone":{"$ref":"#/$defs/tone"},"eyebrow":{"type":"string"},"title":{"type":"string"},
+        "goals":{"type":"array","minItems":1,"items":{"allOf":[{"$ref":"#/$defs/goalCard"},{"type":"object","required":["bars"],"properties":{"photo":{"anyOf":[{"$ref":"#/$defs/photo"},{"type":"null"}]},
+          "bars":{"type":"object","required":["type"],"properties":{"type":{"enum":["retire","saving"]},"costLabel":{"type":"string"},"costValue":{"type":"string"},"costPct":{"type":"number","minimum":0,"maximum":100},"coverLabel":{"type":"string"},"coverValue":{"type":"string"},"coverPct":{"type":"number","minimum":0,"maximum":100},"needLabel":{"type":"string"},"needValue":{"type":"string"},"needPct":{"type":"number"},"putLabel":{"type":"string"},"putValue":{"type":"string"},"putPct":{"type":"number"},"note":{"type":"string"}},"description":"type retire uses cost*/cover*; type saving uses need*/put*"},
+          "years":{"type":"object","required":["title","summary","cells","leftLabel","rightLabel"],"properties":{"title":{"type":"string"},"summary":{"type":"string"},"cells":{"type":"array","items":{"type":"object","required":["age","state"],"properties":{"age":{"type":"integer"},"state":{"enum":["pension","savings","gap","none"],"description":"how that year of retirement is paid: pension/income, own savings, or not covered"}}}},"leftLabel":{"type":"string"},"rightLabel":{"type":"string"}}}}}]}},
+        "howToRead":{"type":"string"}
+      }
+    },
+    "cashflow": {
+      "type":"object","required":["big","bigLabel","bigTone","eyebrow","title","savingsChart","paidChart"],
+      "properties":{
+        "big":{"type":"string"},"bigLabel":{"type":"string"},"bigTone":{"$ref":"#/$defs/tone"},"eyebrow":{"type":"string"},"title":{"type":"string"},
+        "savingsChart":{"type":"object","required":["title","subtitle","yMax","yTicks","series","zones","caption"],"properties":{
+          "title":{"type":"string"},"subtitle":{"type":"string"},"yMax":{"type":"number"},"yTicks":{"type":"array","items":{"type":"number"}},
+          "series":{"type":"array","minItems":1,"items":{"type":"object","required":["age","value"],"properties":{"age":{"type":"number"},"value":{"type":"number","minimum":0}}}},
+          "peak":{"anyOf":[{"type":"object","required":["age","value","label"],"properties":{"age":{"type":"number"},"value":{"type":"number"},"label":{"type":"string"},"sub":{"type":"string"}}},{"type":"null"}]},
+          "runOut":{"anyOf":[{"type":"object","required":["age","label"],"properties":{"age":{"type":"number"},"label":{"type":"string"}}},{"type":"null"}]},
+          "zones":{"$ref":"#/$defs/zones"},"caption":{"type":"string"}}},
+        "paidChart":{"type":"object","required":["title","legend","yMax","yTicks","bars","zones","caption"],"properties":{
+          "title":{"type":"string"},"legend":{"type":"array","items":{"type":"object","required":["tone","label"],"properties":{"tone":{"$ref":"#/$defs/tone3"},"label":{"type":"string"}}}},"yMax":{"type":"number"},"yTicks":{"type":"array","items":{"type":"number"}},
+          "bars":{"type":"array","minItems":1,"items":{"type":"object","required":["age","fromIncome","fromSavings","shortfall"],"properties":{"age":{"type":"number"},"fromIncome":{"type":"number","minimum":0},"fromSavings":{"type":"number","minimum":0},"shortfall":{"type":"number","minimum":0}}}},
+          "zones":{"$ref":"#/$defs/zones"},
+          "stopMarker":{"anyOf":[{"type":"object","required":["age","label"],"properties":{"age":{"type":"number"},"label":{"type":"string"}}},{"type":"null"}]},
+          "lastLabel":{"anyOf":[{"type":"object","required":["age","label"],"properties":{"age":{"type":"number"},"label":{"type":"string"}}},{"type":"null"}]},
+          "caption":{"type":"string"}}}
+      }
+    },
+    "scenarios": {
+      "type":"object","required":["fromPct","toPct","fromTone","toTone","eyebrow","title","columns","groups","explore","footnote"],
+      "properties":{
+        "fromPct":{"type":"number"},"toPct":{"type":"number"},"fromTone":{"$ref":"#/$defs/tone"},"toTone":{"$ref":"#/$defs/tone"},"eyebrow":{"type":"string"},"title":{"type":"string"},
+        "columns":{"type":"object","required":["what","covered","gap"],"properties":{"what":{"type":"string"},"covered":{"type":"string"},"gap":{"type":"string"}}},
+        "groups":{"type":"array","minItems":1,"items":{"type":"object","required":["title","rows"],"properties":{"title":{"type":"string"},"rows":{"type":"array","minItems":1,"items":{"type":"object","required":["id","title","sub","pct"],"properties":{"id":{"type":"string"},"title":{"type":"string"},"sub":{"type":"string"},"pct":{"type":"number","minimum":0,"maximum":100},"gapStartsAge":{"type":["number","null"]},"emphasis":{"type":"boolean"}}}}}}},
+        "explore":{"type":"object","required":["title","text"],"properties":{"title":{"type":"string"},"text":{"type":"string"}}},
+        "footnote":{"type":"string"}
+      }
+    },
+    "foundations": {
+      "type":"object","required":["big","bigLabel","bigTone","eyebrow","title","lead","levels","protection","personality"],
+      "properties":{
+        "big":{"type":"string"},"bigLabel":{"type":"string"},"bigTone":{"$ref":"#/$defs/tone"},"eyebrow":{"type":"string"},"title":{"type":"string"},"lead":{"type":"string"},
+        "levels":{"type":"array","minItems":5,"maxItems":5,"items":{"type":"object","required":["level","icon","title","status","tone"],"properties":{"level":{"type":"integer"},"icon":{"type":"string"},"title":{"type":"string"},"status":{"type":"string"},"tone":{"$ref":"#/$defs/tone"}}}},
+        "protection":{"type":"object","required":["title","photo","rows","nextBest"],"properties":{"title":{"type":"string"},"photo":{"$ref":"#/$defs/photo"},"rows":{"type":"array","items":{"type":"object","required":["label","value","good"],"properties":{"label":{"type":"string"},"value":{"type":"string"},"good":{"type":["boolean","null"]}}}},"nextBest":{"type":"object","required":["label","text"],"properties":{"label":{"type":"string"},"text":{"type":"string"}}}}},
+        "personality":{"type":"object","required":["eyebrow","name","icon","strap","quadrants","riskScale","note"],"properties":{"eyebrow":{"type":"string"},"name":{"type":"string"},"icon":{"type":"string"},"strap":{"type":"string"},"quadrants":{"type":"array","minItems":4,"maxItems":4,"items":{"type":"object","required":["label","value"],"properties":{"label":{"type":"string"},"value":{"type":"string"}}}},"riskScale":{"type":"object","required":["title","labels","activeIndex"],"properties":{"title":{"type":"string"},"labels":{"type":"array","minItems":5,"maxItems":5,"items":{"type":"string"}},"activeIndex":{"type":["integer","null"],"minimum":0,"maximum":4,"description":"null = risk attitude not yet answered, no marker"}}},"note":{"type":"string"}}}
+      }
+    },
+    "next": {
+      "type":"object","required":["eyebrow","title","lead","button","photo","steps","topics","checklist","questions","ready"],
+      "properties":{
+        "eyebrow":{"type":"string"},"title":{"type":"string"},"lead":{"type":"string"},"button":{"type":"string"},"photo":{"$ref":"#/$defs/photo"},
+        "steps":{"type":"array","minItems":3,"maxItems":3,"items":{"type":"object","required":["n","title","text"],"properties":{"n":{"type":"integer"},"title":{"type":"string"},"text":{"type":"string"}}}},
+        "topics":{"type":"object","required":["title","chips"],"properties":{"title":{"type":"string"},"chips":{"type":"array","maxItems":8,"items":{"type":"string"}}}},
+        "checklist":{"type":"object","required":["title","items"],"properties":{"title":{"type":"string"},"items":{"type":"array","items":{"type":"string"}}}},
+        "questions":{"type":"object","required":["title","items"],"properties":{"title":{"type":"string"},"items":{"type":"array","maxItems":4}}},
+        "ready":{"type":"object","required":["title","text","button"],"properties":{"title":{"type":"string"},"text":{"type":"string"},"button":{"type":"string"}}}
+      }
+    },
+    "assumptions": {
+      "type":"object","required":["big","bigLabel","eyebrow","title","left","right","knownLimits","pleaseNote","sources","glossary"],
+      "properties":{
+        "big":{"type":"string"},"bigLabel":{"type":"string"},"eyebrow":{"type":"string"},"title":{"type":"string"},
+        "left":{"type":"array","items":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"string"}}},
+        "right":{"type":"array","items":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"string"}}},
+        "knownLimits":{"type":"object","required":["title","items"],"properties":{"title":{"type":"string"},"items":{"type":"array","items":{"type":"string"}}}},
+        "pleaseNote":{"type":"object","required":["title","text"],"properties":{"title":{"type":"string"},"text":{"type":"string"}}},
+        "sources":{},
+        "glossary":{"type":"object","required":["title","items"],"properties":{"title":{"type":"string"},"items":{"type":"array","maxItems":9}}}
+      }
+    },
+    "appendix": {
+      "type":"object","required":["big","bigLabel","eyebrow","title","columns","rows","note"],
+      "properties":{
+        "big":{"type":"string"},"bigLabel":{"type":"string"},"eyebrow":{"type":"string"},"title":{"type":"string"},
+        "columns":{"type":"array","minItems":5,"maxItems":5,"items":{"type":"string"}},
+        "rows":{"type":"array","minItems":1,"maxItems":90,"items":{"type":"object","required":["age","year","income","needs","shortfall","savingsLeft"],"properties":{"age":{"type":"integer"},"year":{"type":"integer"},"income":{"type":"number"},"needs":{"type":"number"},"shortfall":{"type":"number"},"savingsLeft":{"type":"number"}}}},
+        "note":{"type":"string"}
+      }
+    }
+  },
+  "$defs": {
+    "tone": {"enum":["good","gold","coral","blue","navy","teal","grey"]},
+    "tone3": {"enum":["good","gold","coral"]},
+    "weather": {"enum":["sun","partly","storm","sunrise","family","compass"]},
+    "bigSmall": {"type":"object","required":["big","small"],"properties":{"big":{"type":"string"},"small":{"type":"string"}}},
+    "coverTile": {"type":"object","required":["icon","tone","big","small"],"properties":{"icon":{"$ref":"#/$defs/weather"},"tone":{"$ref":"#/$defs/tone"},"big":{"type":"string"},"small":{"type":"string"}}},
+    "photo": {"enum":["car-and-calculator","house-for-sale","money-plant","retired-reading","team-with-charts"],"description":"basename of media/<name>.jpg"},
+    "goalCard": {"type":"object","required":["name","icon","kind","pct","band","bandText","meta","sentence"],"properties":{"name":{"type":"string","minLength":1},"icon":{"type":"string"},"kind":{"type":"string"},"pct":{"type":"integer","minimum":0,"maximum":100},"band":{"enum":["good","gold","alert"],"description":"engine band names: good >=95, gold 70-94, alert <70 (rendered coral)"},"bandText":{"type":"string"},"meta":{"type":"string"},"sentence":{"type":"string"}}},
+    "ledger": {"type":"object","required":["title","rows"],"properties":{"title":{"type":"string"},"rows":{"type":"array","items":{"type":"object","required":["label"],"properties":{"label":{"type":"string"},"value":{"type":"string"},"status":{"const":"missing"}}}}}},
+    "zones": {"type":"array","items":{"type":"object","required":["fromAge","toAge","label","tone"],"properties":{"fromAge":{"type":"number"},"toAge":{"type":"number"},"label":{"type":"string","description":"empty string = unlabelled band"},"tone":{"$ref":"#/$defs/tone3"}}}}
+  }
+}
