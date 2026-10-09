@@ -4017,6 +4017,12 @@ function loadScript(src){ return new Promise((res, rej) => { const old = documen
   el.src = src; el.async = true; el.dataset.lib = src; el.onload = () => { clearTimeout(t); res(); }; el.onerror = () => { clearTimeout(t); el.remove(); rej(new Error('load ' + src)); }; document.head.appendChild(el); }); }
 async function pdfLibs(){ if (!(window.jspdf && window.jspdf.jsPDF)) await loadScript(CDN_JSPDF); if (typeof window.html2canvas !== 'function') await loadScript(CDN_H2C);
   if (!(window.jspdf && window.jspdf.jsPDF) || typeof window.html2canvas !== 'function') throw new Error('PDF library missing'); return {jsPDF:window.jspdf.jsPDF, h2c:window.html2canvas}; }
+// Invisible text over the page picture: the PDF looks the same, but words can be searched, copied and read by screen readers.
+function pdfTextLayer(pdf, el){ const box = el.getBoundingClientRect(), k = 210 / box.width, w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), rg = document.createRange(); let n;
+  while ((n = w.nextNode())){ const t = n.nodeValue; if (!t.trim()) continue; const re = /\S+/g; let m;
+    while ((m = re.exec(t))){ rg.setStart(n, m.index); rg.setEnd(n, m.index + m[0].length); const r = rg.getBoundingClientRect(); if (!r.width || !r.height) continue;
+      const txt = m[0].replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').replace(/[\u2013\u2014]/g, '-').replace(/[^\x20-\x7E\u00A3\u20AC]/g, '');
+      if (!txt) continue; pdf.setFontSize(Math.max(r.height * k * 2.83 * 0.7, 3)); pdf.text(txt, (r.left - box.left) * k, (r.bottom - box.top) * k - r.height * k * 0.2, {renderingMode:'invisible'}); } } }
 // A4 (210 x 297 mm). One canvas per report page (794 x 1123 px at 2x), placed full-page, so the PDF pages are exactly the report pages.
 async function buildPlanPdf(){ const {jsPDF, h2c} = await pdfLibs(), rep = repBuild(); if (!rep) throw new Error('no report');
   const host = document.createElement('div'); host.setAttribute('aria-hidden', 'true'); host.style.cssText = 'position:fixed;left:-12000px;top:0;width:794px;background:#fff;z-index:-1';
@@ -4025,7 +4031,7 @@ async function buildPlanPdf(){ const {jsPDF, h2c} = await pdfLibs(), rep = repBu
   try { await (document.fonts && document.fonts.ready); await Promise.all([...host.querySelectorAll('img')].map(im => im.complete ? 1 : new Promise(r => { im.onload = im.onerror = r; })));
     const pdf = new jsPDF({unit:'mm', format:'a4', orientation:'portrait', compress:true}), els = [...wrap.querySelectorAll('.lmr-pg')];
     for (let i = 0; i < els.length; i++){ const cv = await h2c(els[i], {scale:2, width:794, height:1123, backgroundColor:'#ffffff', useCORS:true, logging:false, windowWidth:794});
-      if (i) pdf.addPage(); pdf.addImage(cv.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, 210, 297, undefined, 'FAST'); }
+      if (i) pdf.addPage(); pdf.addImage(cv.toDataURL('image/jpeg', 0.9), 'JPEG', 0, 0, 210, 297, undefined, 'FAST'); try { pdfTextLayer(pdf, els[i]); } catch (e) {} }
     return {blob:pdf.output('blob'), pages:els.length}; }
   finally { host.remove(); } }
 function reportDocHTML(){ const rep = repBuild(); if (!rep) return ''; return LifeMapReport.reportDocument(rep.data, {photoSrc:repPhotoSrc}); }
