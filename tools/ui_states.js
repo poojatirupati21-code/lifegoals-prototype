@@ -79,7 +79,7 @@ const INSTALL = () => {
     if (o.partner === false) S.about.partner = false;
     if (o.age) S.about.age = o.age;
     if (o.asm || (o.noAsm && o.noAsm.length)) { S.asm = Object.assign({}, S.asm, o.asm || {}); (o.noAsm || []).forEach(k => { delete S.asm[k]; }); }
-    (o.unsrc || []).forEach(k => { delete S.src[k]; });
+    (o.unsrc || []).forEach(k => { delete S.src[k]; if (k === 'pAge'){ delete S.fin.pAge; if (S.about.pdob) S.about.pdob = {}; } });   // §29: the partner's date of birth is what sets pAge
     if (o.retire != null) setRetireAge(o.retire);
     if (o.pRet != null) { S.pRet = o.pRet; S.pRetSet = true; }
     (o.missing || []).forEach(k => { if (k === 'retireAge') S.retireSet = false; if (k === 'planEnd') { S.asm = Object.assign({}, S.asm); delete S.asm.planEnd; } if (k === 'infl') { S.infl = null; S.inflOther = false; } if (k === 'pRetireAge') S.pRetSet = false; });
