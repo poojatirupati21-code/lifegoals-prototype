@@ -32,7 +32,7 @@ function leaves(o, path, out) { if (o == null) return; if (typeof o === 'string'
     const labels = await p.$$eval('#report .lmr-pg', ps => ps.map(x => x.getAttribute('aria-label').replace(/^Page \d+ of \d+: /, '').replace(/ \(\d+ of \d+\)/, '')));
     const order = ['Cover', 'Your plan on a page', 'Your money today', 'Your roadmap', 'Your goals in detail', 'Cashflow', 'What could change the answer', 'Foundations and you', 'Share with an expert', 'What your plan assumes', 'Appendix'];
     const dedup = labels.filter((x, k) => x !== labels[k - 1]); const orderOK = JSON.stringify(dedup) === JSON.stringify(order);
-    const bad = [];
+    const bad = []; if (/Infinity|NaN|undefined|null/.test(JSON.stringify(d).replace(/"[^"]*":null/g, ''))) bad.push('data has Infinity/NaN/undefined: ' + (JSON.stringify(d).match(/.{25}(Infinity|NaN|undefined).{10}/) || [''])[0]);
     if (!orderOK) bad.push('page order ' + dedup.join('>')); if (apRows !== d.appendix.rows.length) bad.push('appendix rows ' + apRows + ' vs ' + d.appendix.rows.length);
     if (miss.length) { textMiss += miss.length; bad.push('text not on page: ' + miss.slice(0, 3).map(m => m[0] + '=' + m[1].slice(0, 30)).join(' | ')); }
     issues.forEach(x => bad.push(x.join(' | ')));
