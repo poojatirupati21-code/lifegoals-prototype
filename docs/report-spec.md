@@ -41,7 +41,7 @@ Dark navy full page. Top three-colour bar (teal 3 : gold 1 : coral 1). Magnifier
 |---|---|---|---|
 | Headline number and label | `plan.big`, `plan.bigLabel`, `plan.bigTone` | existing | `1 of 2` / `goals on track`. All covered: `2 of 2`, tone good, wording `goals on track`. |
 | Eyebrow, title, lead | `plan.eyebrow/title/lead` | existing/static | positive wording when no shortfall: title `Your plan is on track`, lead `Your income and savings cover everything you told us about.` |
-| Goal cards (name, icon, meta, big %, band chip, sentence, progress bar) | `plan.goals[]` (name, icon, kind, pct, band, bandText, meta, sentence) | existing `pct` per goal, `band()` | bandText `On track` / `Nearly there` / `Needs attention`. 1 goal: one wide card. 2 to 4 goals: stacked cards. 5 or more: compact rows (one line each, 9 per page, overflow goes to page 5 only and p2 shows "and 3 more, see page 5"). |
+| Goal cards (name, icon, meta, big %, band chip, sentence, progress bar) | `plan.goals[]` (name, icon, kind, pct, band, bandText, meta, sentence) | existing `pct` per goal, `band()` | bandText `On track` / `Nearly there` / `Needs attention`. 1 goal: one wide card. 2 to 4 goals: stacked cards. 5 or more: compact rows; more than 5 goals shows the first 4 and `and N more goals. See the goal pages.`. |
 | Navy band (gap summary) | `plan.band.cells[]` | NEW: run-out age, years with gap, gap today's money and future euros | `kind: "gap"`. **No shortfall**: `kind: "none"`; the renderer shows a teal band with the cells given (planner gives e.g. `Age 80 / savings last`, `0 years / with a gap`, `€0 / short`). **Already retired**: same, years counted from today. |
 | What could close the gap (3 columns, each coloured rule, `+24 points`, title, text) | `plan.close.items[3]` | NEW: top three single-change rows of the scenario table by points (§28) | **No shortfall**: block title becomes `What keeps you on track` (planner sets `close.title`) and items are protections or `[]` (block hidden). |
 | Next banner and button | `plan.next` | static + `nextStep()` | button text `Meet an expert`, links to page 9 |
@@ -65,10 +65,10 @@ Dark navy full page. Top three-colour bar (teal 3 : gold 1 : coral 1). Magnifier
 | Weather icon | `icon` | `sun` all years covered, `partly` income covers but savings falling/goal due, `storm` years with gap | |
 | Rail and chip | `tone`, `chip` | `Comfortable` / `Watch this` / `Gap` | rail is continuous vertical line coloured per row |
 | Goal chips | `goalChips[]` (age, text, tone) | existing goals in the decade | max 3, rest `+n more` |
-| Sparkline | `spark.values[]`, `spark.gapYears[]` | NEW: liquid savings at each age in decade | **normalised against the global maximum of all decades** so rows are comparable; gap years drawn in coral; no values (all zero) = flat grey line |
+| Sparkline | `spark.values[]`, `spark.gapYears[]` | NEW: liquid savings at each age in decade | normalised per decade (v5 behaviour: each row scales to its own maximum, baseline 0); decades with a gap are drawn in coral; all-zero gap decade = flat coral line |
 
 ### Page 5. Your goals in detail (repeats)
-One card per goal, 2 cards per page (v5 shows 2). 1 goal = 1 card on 1 page. 15 goals = 8 pages (pages are numbered in sequence; later pages keep the same header). The last goals page carries the "How to read this page" box (`goalsDetail.howToRead`).
+Cards are packed by weight (retirement card with strip = 2.1, other goal = 1) up to 3.2 per page, so v5 shows 2 cards. 1 goal = 1 card on 1 page. 15 goals = 6 pages in the test set (pages are numbered in sequence; later pages keep the same header). The last goals page carries the "How to read this page" box (`goalsDetail.howToRead`).
 
 | Element | Field | Source | Rules |
 |---|---|---|---|
@@ -109,12 +109,12 @@ Dark top half with photo `team-with-charts`; 3 steps; topic chips (`next.topics.
 Two columns of label/value rows (`assumptions.left/right`: inflation, return, tax year, State Pension counted or not, retire age, plan end age ...), `knownLimits`, `pleaseNote`, `sources`, glossary 3 x 3 (`glossary.items`, 9 entries; fewer entries leave blanks hidden). **Partner**: rows add partner age and retirement. **No mortgage**: no mortgage row.
 
 ### Page 11. Appendix: every year in numbers (repeats)
-Two-column table, 27 rows per column, 54 per page, columns Age, Year, Income, Needs, Shortfall, Savings left. Numbers raw in data, formatted by renderer (`€55,502`; zero shortfall `-`; shortfall > 0 in coral). Plan to 105 from age 27 = 79 rows = 2 pages; page 11 and 12 titled `Appendix (1 of 2)`. Note text on last page only.
+Two-column table, 27 rows per column, 54 per page, columns Age, Year, Income, Needs, Shortfall, Savings left. Numbers raw in data, formatted by renderer as in v5 (`55,502` without euro sign; zero = `—`; shortfall > 0 in coral). Plan to 105 from age 27 = 79 rows = 2 pages; page 11 and 12 titled `Appendix (1 of 2)`. Note text on last page only.
 
 ## 2. Chart specs (inline SVG, no libraries)
 
 ### 2.1 Road with milestones (cover, shown at 690 x 150)
-Smooth curve (cubic through sampled points rising slowly, dips in the coral segment), x = age scaled between `startAge` and `endAge`. The curve is split into `segments[]`, each stroked 10 px with tone colour, round caps. Milestones: circle badge (22 px, white text = `badge`) on the curve at its age, label (bold) and `sub` placed `above` or `below` with 14 px gap; labels never overlap: renderer sorts by age and flips side when two are closer than 12% of width (the data side is a hint). Start and end labels sit at the line ends. Max 8 milestones; extra are dropped from the cover but not from page 4.
+Decorative smooth S-curve (fixed shape as in v5), x = age scaled between `startAge` and `endAge`. The curve is split into `segments[]`, each stroked 10 px with tone colour, round caps. Milestones: circle badge (22 px, white text = `badge`) on the curve at its age, label (bold) and `sub` placed `above` or `below` with 14 px gap; labels never overlap: renderer sorts by age and flips side when two are closer than 12% of width (the data side is a hint). Start and end labels sit at the line ends. Max 8 milestones; extra are dropped from the cover but not from page 4.
 
 ### 2.2 Savings line
 Plot 700 x 190. x = age, y = value / yMax. Line 2.5 px teal; area under line teal at 12%. Horizontal grid at `yTicks` (labels `€0`, `€100k` ...). Zone shading behind: `zones[]` as vertical bands (tint of tone), label top-left of band. Peak marker: dot + label (`label`, `sub`) offset left if beyond 70% width. Run-out: dashed coral vertical line to the axis with label `Savings run out at 52`.
@@ -153,3 +153,10 @@ Schema validity (`docs/report-data.schema.json`), no NaN/undefined strings, `pla
 2. Per-decade `chip` wording thresholds (Comfortable / Watch this / Gap).
 3. Goal photo map (retire -> retired-reading, home -> house-for-sale); other goals have none.
 4. Age vs year of birth (pending decision) changes only `meta`.
+
+## 6. Renderer notes (added with the renderer, 1.0.0)
+- Fonts: the report needs Bricolage Grotesque with the optical-size axis (v5 used 96 pt) and Figtree. Google Fonts link: `Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400..800`. The prototype currently loads the weights-only version; at integration the link changes. Big numbers use tabular figures and opsz 96.
+- The cover magnifier photo is not in the five media photos; it was extracted from v5 and added as `media/magnifier-map.jpg`.
+- Band names from the engine are `good`, `gold`, `alert` (rendered coral).
+- Goal strip `years.cells[]` items are `{age, state}` with state `pension`, `savings`, `gap`, `none`.
+- Tests: `tools/report/test-renderer.js` (v5 plus five synthetic variants), `tools/report/render-pages.js` (page PNGs), `tools/report/page-checks.js` (overflow, contrast, bad text, images).
