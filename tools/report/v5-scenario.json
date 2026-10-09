@@ -1,0 +1,62 @@
+{
+ "name": "v5-customer",
+ "person": "Pooja",
+ "about": {
+  "age": 27,
+  "partner": false,
+  "deps": 0,
+  "dob": {
+   "d": 21,
+   "m": 8,
+   "y": 1999
+  },
+  "married": null
+ },
+ "retireAge": 50,
+ "infl": 0.039,
+ "assume": "standard",
+ "q6": 3,
+ "cred": {
+  "rent": true
+ },
+ "fin": {
+  "work": "Employed",
+  "income": 79000,
+  "costsM": 3000,
+  "home": "Rent",
+  "ae": "No",
+  "life": "Yes",
+  "health": "Yes",
+  "ip": "No",
+  "ci": "No",
+  "workCover": "No"
+ },
+ "asm": {
+  "planEnd": 80,
+  "startYear": 2026,
+  "spWeek": 0
+ },
+ "goals": [
+  {
+   "k": "family",
+   "age": 30,
+   "amount": 15000
+  },
+  {
+   "k": "retire",
+   "amount": 40000
+  }
+ ],
+ "prof": {
+  "ans": {
+   "2": 2,
+   "4": 3,
+   "7": 0,
+   "9": 2,
+   "12": 3
+  },
+  "um": {
+   "u14": 2
+  }
+ }
+}

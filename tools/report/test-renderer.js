@@ -64,6 +64,7 @@ variants.v5 = clone(base);
   d.scenarios.groups = []; d.meta.alreadyRetired = true; d.road.milestones = d.road.milestones.filter(m => m.badge !== '50');
   variants.minimal = d;
 })();
+try { const vj = JSON.parse(fs.readFileSync(path.join(__dirname, 'vectors.json'), 'utf8')).vectors; vj.filter(v => v.reportData && v.reportData.ready !== false).forEach(v => { variants['vec:' + v.name] = v.reportData; }); } catch (e) { console.log('no vectors.json'); }
 (async () => {
   const shots = process.argv.includes('--shots') ? process.argv[process.argv.indexOf('--shots') + 1] : null;
   const fd = process.env.LMR_FONT_DIR, fontCss = fd ? '<style>@font-face{font-family:"Bricolage Grotesque";font-weight:200 800;src:url(file://' + fd + '/bric.woff2)}@font-face{font-family:"Figtree";font-weight:300 900;src:url(file://' + fd + '/fig.woff2)}</style>' : '';
