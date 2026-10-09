@@ -7,6 +7,7 @@ function mk(i) {
   const age = ri(22, 62), partner = rnd() < .5, work = rnd() < .12 ? 'Self-employed' : rnd() < .06 ? 'Not working' : 'Employed';
   const inc = pick([0, 18000, 30000, 45000, 60000, 90000, 140000]) || 40000;
   const sc = {name:'rnd-' + i, about:{age, partner, deps:ri(0, 3), married:partner ? pick([null, true, false, true]) : null}, cred:{}};
+  if (rnd() < .4){ sc.about.dobDay = ri(1, 28); sc.about.dobMonth = ri(1, 12); }   // section 29: a date of birth with a day and month that do not move the plan age
   const retired = rnd() < .08;
   sc.retireAge = retired ? Math.max(50, age - ri(0, 5)) : Math.max(age + 1, pick([55, 60, 63, 65, 66, 68, 70])); if (sc.retireAge > 75) sc.retireAge = 75;
   if (retired && age < 52) sc.retireAge = 50;
@@ -25,7 +26,7 @@ function mk(i) {
   if (rnd() < .35) { fin.cardBal = pick([400, 2500, 9000]); fin.cardPayM = pick([0, 30, 120, 400]); if (rnd() < .5) fin.cardRate = pick([18, 22]); }
   if (rnd() < .35) { fin.loanBal = pick([3500, 12000, 40000]); fin.loanPayM = pick([0, 100, 350, 900]); if (rnd() < .5) fin.loanRate = pick([6.5, 9]); }
   if (rnd() < .1) { fin.debt = pick([5000, 80000]); fin.debtPayM = pick([0, 200]); }
-  if (partner) { fin.pAge = Math.max(18, age + ri(-6, 6)); fin.pIncome = pick([0, 0, 25000, 50000, 90000]); if (fin.pIncome > 0) sc.pRet = pick([40, 50, 55, 60, 62, 65, 66, 68]); fin.pSp = pick([undefined, 'Own full', 'Own partial', 'Qualified adult increase', 'None', 'Not sure']); }
+  if (partner) { fin.pAge = Math.max(19, age + ri(-6, 6)); fin.pIncome = pick([0, 0, 25000, 50000, 90000]); if (fin.pIncome > 0) sc.pRet = pick([40, 50, 55, 60, 62, 65, 66, 68]); fin.pSp = pick([undefined, 'Own full', 'Own partial', 'Qualified adult increase', 'None', 'Not sure']); }
   Object.keys(fin).forEach(k => fin[k] === undefined && delete fin[k]);
   // lists: sometimes use lists for cards, loans, pensions and other-property mortgages
   const L = {}; 
@@ -77,6 +78,9 @@ function mk(i) {
   return sc;
 }
 const EDGE = [
+  {name:'dob-start2026', about:{age:30, partner:false, deps:0, dob:{d:29, m:2, y:1996}}, retireAge:65, infl:0.02, assume:'standard', fin:{work:'Employed', income:52000, costsM:2000, cash:8000, home:'Rent'}, asm:{planEnd:90, startYear:2026}, goals:[{k:'family', age:35, amount:15000}]},
+  {name:'dob-start2027', about:{age:31, partner:false, deps:0, dob:{d:29, m:2, y:1996}}, retireAge:65, infl:0.02, assume:'standard', fin:{work:'Employed', income:52000, costsM:2000, cash:8000, home:'Rent'}, asm:{planEnd:90, startYear:2027}, goals:[{k:'family', age:35, amount:15000}]},
+  {name:'dob-partner-31dec', about:{age:41, partner:true, deps:1, married:true, dobDay:31, dobMonth:12}, retireAge:63, pRet:62, infl:0.025, assume:'standard', fin:{work:'Employed', income:61000, pIncome:30000, pAge:39, costsM:2600, cash:12000, home:'Rent'}, asm:{planEnd:92}, goals:[{k:'edu', age:50, amount:30000}]},
   {name:'edge-no-income', about:{age:35, partner:false, deps:0}, retireAge:65, infl:0.02, assume:'standard', fin:{work:'Not working', income:0, costsM:1500, cash:2000, home:'Rent'}, asm:{planEnd:90}, goals:[{k:'safety', age:37, amount:9000, auto:true}], lists:{}},
   {name:'edge-high-debt', about:{age:40, partner:false, deps:1}, retireAge:65, infl:0.02, assume:'standard', fin:{work:'Employed', income:50000, costsM:2200, cash:3000, home:'Rent', cardBal:30000, cardPayM:100, loanBal:90000, loanPayM:300, debt:20000}, asm:{planEnd:90}, goals:[{k:'safety', age:42, amount:12000, auto:true}, {k:'retire', amount:30000}], lists:{}},
   {name:'edge-retired', about:{age:70, partner:false, deps:0}, retireAge:65, infl:0.02, assume:'standard', fin:{work:'Employed', income:0, costsM:1800, cash:80000, invest:30000, pension:400000, home:'Own outright', sp:'Expect full'}, asm:{planEnd:95, lumpSum:0.25}, goals:[{k:'retire', amount:30000}, {k:'legacy', age:95, amount:50000}], lists:{}},

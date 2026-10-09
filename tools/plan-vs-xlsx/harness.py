@@ -9,13 +9,13 @@ ROWFIELDS = {  # prototype row field -> (alias, workbook column key)
  'liquid': ('C', 'liquid'), 'pen': ('C', 'pen'), 'tax': ('P', 'tax'), 'gross': ('P', 'gross'), 'isShort': ('C', 'isShort')}
 MORT2_FIRST = 86
 
-def apply_sc(x, sc):
+def apply_sc(x, sc, out=None):
     x.clear()
     x.setname('Fill_Example', 'Yes' if sc.get('fill') else 'No')
     if sc.get('fill'): return
     S = lambda n, v: v is not None and x.setname(n, v, col='C')
     ab = sc.get('about', {})
-    S('In_age', ab.get('age')); x.setname('In_partner', 'Yes' if ab.get('partner') else 'No', col='C')
+    x.setname('In_partner', 'Yes' if ab.get('partner') else 'No', col='C')
     if ab.get('married') is not None: x.setname('In_married', 'Yes' if ab['married'] else 'No', col='C')
     S('In_deps', ab.get('deps'))
     S('In_retireAge', sc.get('retireAge')); S('In_pRet', sc.get('pRet')); S('In_infl', sc.get('infl'))
@@ -25,7 +25,13 @@ def apply_sc(x, sc):
     S('In_penExtra', sc.get('penExtra'))
     for k, n in [('rent', 'In_credRent'), ('lone', 'In_credLone'), ('carer', 'In_credCarer')]:
         if sc.get('cred', {}).get(k): x.setname(n, 'Yes', col='C')
-    for k, v in sc.get('fin', {}).items(): S('In_' + k, v / 100 if k in ('mortRate', 'cardRate', 'loanRate', 'penChg') else v)
+    for k, v in sc.get('fin', {}).items():
+        if k != 'pAge': S('In_' + k, v / 100 if k in ('mortRate', 'cardRate', 'loanRate', 'penChg') else v)
+    import datetime as _dt
+    ser = lambda d: (_dt.date(int(d['y']), int(d['m']), int(d['d'])) - _dt.date(1899, 12, 30)).days   # section 29: the dates of birth the prototype used
+    dob = (out or {}).get('dob') or {}
+    if dob.get('you'): x.setname('In_age', ser(dob['you']), col='C')
+    if dob.get('partner') and ab.get('partner'): x.setname('In_pAge', ser(dob['partner']), col='C')
     for k, v in sc.get('asm', {}).items(): S('In_a_' + k, v)
     pr = sc.get('prof', {})
     for k, v in pr.get('ans', {}).items(): x.setname('PA_' + k + '_Typed', v + 1)
@@ -176,6 +182,12 @@ def compare(x, sc, out, tol=1.0, verbose=True):
                     for nm, k in [('Fnd_NextT', 'fndNextT'), ('Fnd_NextD', 'fndNextD')]:
                         if x.val(nm) != M[k]: bad.append(('misc', nm, M[k], x.val(nm)))
         if not sc.get('fill'):
+            v = x.val('DOB_Msg'); v = '' if v is None else v
+            if v != M['dobMsg']: bad.append(('misc', 'DOB_Msg', M['dobMsg'], v))
+            if x.val('DOB_AgeToday') != M['ageToday']: bad.append(('misc', 'DOB_AgeToday', M['ageToday'], x.val('DOB_AgeToday')))
+            if sc.get('about', {}).get('partner'):
+                v = x.val('PDOB_Msg'); v = '' if v is None else v
+                if v != M['pdobMsg']: bad.append(('misc', 'PDOB_Msg', M['pdobMsg'], v))
             for nm, k in [('Retire_Note', 'retNote'), ('PRet_Note', 'pNote'), ('Req_Heading', 'heading')]:
                 v = x.val(nm); v = '' if v is None else v
                 if v != M[k]: bad.append(('misc', nm, M[k], v))
@@ -261,7 +273,7 @@ def run(path, scen_json, only=None, limit=10):
     for k, d in enumerate(data):
         if only is not None and k not in only: continue
         sc, out = d['sc'], d['out']
-        apply_sc(x, sc)
+        apply_sc(x, sc, out)
         if not sc.get('fill'): feed_typed(x, sc, out); feed_before(x, sc, out)
         x.calc()
         bad = compare(x, sc, out)

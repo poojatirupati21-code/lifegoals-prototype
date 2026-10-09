@@ -724,9 +724,9 @@ function setMortYN(v){ const h = S.fin.home; let ok = true;
   return ok; }
 const FF = {
   name:{l:'First name', type:'text', pre:1},
-  age:{l:'Your age', type:'num', min:18, max:80, pre:1},
+  age:{l:'Your age', type:'num', min:18, max:80, pre:1, show:() => !(S && S.about && S.about.dob)},   // with a date of birth the age comes from it (§29)
   retireAge:{l:'Retirement age', type:'num', pre:1, hint:'From your timeline flag'},
-  pAge:{l:"Partner's age", type:'num', min:18, max:85, show:() => S.about.partner && (S.partner.mode !== 'invite' || finN('pIncome') > 0)},
+  pAge:{l:"Partner's date of birth", type:'num', min:18, max:85, show:() => S.about.partner && finN('pIncome') > 0},   // §29: the partner's date of birth is optional when they have no income
   work:{l:'Your work', type:'choice', o:['Employed','Self-employed','Not working']},
   income:{l:'Your gross yearly income', type:'eur', hint:'Before tax'},
   pIncome:{l:"Partner's gross yearly income", type:'eur', show:() => S.about.partner && S.partner.mode !== 'invite'},
@@ -775,7 +775,7 @@ const YNN_O = [['Yes', 'you have it'], ['No', 'you don\'t'], ['Not sure', 'check
 const EXAMPLES = {
   age:{t:() => 'Aoife is ' + sf('age') + '. She enters ' + sf('age') + '.', w:'your date of birth, on your passport or driving licence.'},
   retireAge:{t:() => 'Aoife wants to retire at ' + sf('retireAge') + ', before her State Pension starts at ' + RI.sp.age + '. She enters ' + sf('retireAge') + '.', w:'the normal retirement age on your annual pension benefit statement.'},
-  pAge:{t:() => 'Aoife\'s partner Cian is ' + sf('pAge') + '. She enters ' + sf('pAge') + '.', w:'your partner\'s date of birth.'},
+  pAge:{t:() => 'Aoife\'s partner Cian was born on 3 March ' + (YEAR0 - sf('pAge')) + '. She enters 3, 3 and ' + (YEAR0 - sf('pAge')) + '.', w:'your partner\'s passport, driving licence or birth certificate.'},
   work:{o:[['Employed', 'you get a payslip'], ['Self-employed', 'you file a Form 11'], ['Not working', 'no earnings right now']], t:() => 'Aoife has a payslip, so she picks ' + sf('work') + '.', w:'your payslip, or your Form 11 if self-employed.'},
   income:{t:() => 'Aoife earns ' + se('income') + ' a year before tax. She enters ' + se('income') + '.', w:'gross pay on your payslip, or your Employment Detail Summary in Revenue myAccount.'},
   pIncome:{t:() => 'Cian earns ' + se('pIncome') + ' a year before tax. Aoife enters ' + se('pIncome') + '.', w:'your partner\'s payslip or Employment Detail Summary (Revenue myAccount).'},
@@ -1218,7 +1218,32 @@ function useAllStd(keepInfl){ S.asm = Object.assign({}, S.asm); let n = 0; ASM_K
 const pInc = () => !!(S && S.about && S.about.partner && finN('pIncome') > 0);   // a partner whose income is counted
 const reqKeys = () => ['retireAge', 'planEnd', 'infl'].concat(pInc() ? ['pRetireAge'] : []);   // §22 (+M2): the only choices that block results; the partner's retirement age only when their income is counted
 const req3Missing = () => planMissing().filter(m => reqKeys().includes(m.k));
-function applyAssume(){ Object.assign(AS, curSet()); AS.infl = S && S.infl != null ? S.infl : SV('infl');   // inflation is the client's own choice (S.infl); SV('infl') is only an internal fallback before they choose
+/* ================= DATE OF BIRTH (journey-spec §29) =================
+   S.about.dob / S.about.pdob = {d, m, y}. Years are calendar years: the engine age (S.about.age) is the age the customer reaches in the first plan year
+   (YEAR0 - birth year); "age today" is exact from the date. A customer without a date of birth (older saved states, tests) keeps the age that was typed. */
+const MONTHS_L = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const dobToday = () => { const t = window.__TODAY ? new Date(window.__TODAY + 'T12:00:00') : new Date(); return new Date(t.getFullYear(), t.getMonth(), t.getDate()); };   // tests may set window.__TODAY = 'YYYY-MM-DD'
+const isLeapY = y => (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+const bdayIn = (d, y) => (+d.m === 2 && +d.d === 29 && !isLeapY(y)) ? new Date(y, 2, 1) : new Date(y, +d.m - 1, +d.d);   // born 29 Feb: the birthday is 1 March in other years
+const dobValid = d => { if (!d) return false; const y = +d.y, m = +d.m, dd = +d.d; if (![y, m, dd].every(Number.isInteger) || String(d.y).length !== 4 || y < 1900 || m < 1 || m > 12 || dd < 1 || dd > 31) return false; const t = new Date(y, m - 1, dd); return t.getFullYear() === y && t.getMonth() === m - 1 && t.getDate() === dd && t <= dobToday(); };
+const ageOnDate = (d, date) => date.getFullYear() - +d.y - (date < bdayIn(d, date.getFullYear()) ? 1 : 0);
+const ageTodayOf = d => ageOnDate(d, dobToday());
+const nextBirthday = d => { const t = dobToday(); let b = bdayIn(d, t.getFullYear()); if (b <= t) b = bdayIn(d, t.getFullYear() + 1); return b; };
+const dateLong = dt => dt.getDate() + ' ' + MONTHS_L[dt.getMonth()] + ' ' + dt.getFullYear();
+const dobFilled = d => !!d && String(d.d || '') !== '' && String(d.m || '') !== '' && String(d.y || '') !== '';
+// who: 'you' (18 to 80 today) or 'partner' (18 to 85 today). Returns {ok, text, ageToday}
+function dobCheck(d, who){ const lim = who === 'you' ? 80 : 85, nm = who === 'you' ? S.acct.name : S.partner && S.partner.name;
+  if (!dobFilled(d)) return {ok:false, text:'', ageToday:null};
+  if (!dobValid(d)) return {ok:false, text:'That doesn\'t look like a real date. Check the day, month and year.', ageToday:null};
+  const a = ageTodayOf(d); if (a < 18) return {ok:false, text:'LifeMap is for people aged 18 or over.', ageToday:a}; if (a > lim) return {ok:false, text:'LifeMap plans for people up to age ' + lim + ' today. An expert can help beyond that.', ageToday:a};
+  const nb = nextBirthday(d), you = who === 'you';
+  return {ok:true, ageToday:a, text:'Thanks' + (you && nm ? ', ' + nm : '') + '. ' + (you ? 'You\'re ' : (nm ? nm + ' is ' : 'They\'re ')) + a + ' today and ' + (you ? 'turn ' : nm ? 'turns ' : 'turn ') + (a + 1) + ' on ' + dateLong(nb) + '.'}; }
+function syncAges(){ if (!S || !S.about) return; const b = S.about, y0 = +asmV('startYear');
+  if (b.dob){ if (b._dobAge != null && b.age !== b._dobAge && b.age != null){ delete b.dob; delete b._dobAge; }   // someone set the age directly (a test, an old flow): that wins, as before
+    else { const c = dobCheck(b.dob, 'you'); b.age = c.ok ? y0 - +b.dob.y : null; b._dobAge = b.age; b.ageToday = c.ok ? c.ageToday : null; S.fin.age = b.age == null ? undefined : b.age; if (b.age != null) S.src.age = S.src.age || 'pre'; } }
+  if (!b.dob) b.ageToday = b.age;
+  if (b.pdob){ const c = dobCheck(b.pdob, 'partner'); if (c.ok){ S.fin.pAge = y0 - +b.pdob.y; S.src.pAge = 'typed'; } else { delete S.fin.pAge; delete S.src.pAge; } } }
+function applyAssume(){ syncAges(); Object.assign(AS, curSet()); AS.infl = S && S.infl != null ? S.infl : SV('infl');   // inflation is the client's own choice (S.infl); SV('infl') is only an internal fallback before they choose
   ['wage', 'cash', 'inv', 'pen', 'penRet', 'mortRate', 'cardRate', 'loanRate'].forEach(k => { AS[k] = +asmV(k); });
   AS.end = +asmV('planEnd'); AS.sp = RI.sp.week * RI.sp.weeks; AS.spAge = RI.sp.age; YEAR0 = +asmV('startYear');
   SAVE.buffer = +asmV('safetyMonths'); SAVE.longYrs = +asmV('cashYears'); SAVE.share = +asmV('saveShare'); SAVE.noAnswer = +asmV('noAnswer'); }
@@ -1677,7 +1702,7 @@ function partnerBlock(noMoney){ const pt = S.partner, m = pt.mode;
   if (m === 'invite') h += pt.sent ? '<div class="card" style="background:var(--ok-l);box-shadow:none;margin-top:12px"><b>💌 Invite sent to ' + esc(pt.email) + '</b><p class="small" style="color:var(--ink);margin:4px 0 0">They get a secure link to add their own details. You only see what they choose to share.</p><div class="row" style="gap:16px"><button class="link" data-a="presend">Resend</button><button class="link" data-a="pcancel">Cancel invite</button></div></div>'
     : '<div class="field" style="margin:12px 0 0"><label for="p-email">Their email</label><input class="in" id="p-email" type="email" autocomplete="off" data-partner="email" value="' + esc(pt.email) + '"><p id="perr" class="small" style="color:var(--gap-t);margin:0;min-height:4px" role="alert"></p><button class="btn sm" style="width:100%;margin-top:6px" data-a="pinvite">Send invite</button></div>';
   if (m === 'manual') h += '<div style="margin-top:12px"><div class="field"><label for="p-name">Their first name</label><input class="in" id="p-name" data-partner="name" autocomplete="off" value="' + esc(pt.name) + '"></div>' +
-    '<div class="field"><label for="f-pAge">Their age <span id="tag-pAge">' + tagFor('pAge') + '</span></label><input class="in" id="f-pAge" inputmode="numeric" data-fin="pAge" value="' + (S.fin.pAge == null ? '' : S.fin.pAge) + '"><div class="fhelp"><button class="link" data-a="fex" data-p="pAge" aria-haspopup="dialog">Not sure? See an example</button></div></div>' +
+    dobField('partner') +
     (noMoney ? '<p class="small" style="margin:0">You can add their income later, in Your finances.</p></div>' : '<div class="field" style="margin:0"><label for="f-pIncome">Their gross yearly income <span class="small" style="font-weight:600">Optional</span></label><div class="inw"><span class="cur" aria-hidden="true">€</span><input class="in eur" id="f-pIncome" inputmode="numeric" data-fin="pIncome" value="' + (S.fin.pIncome == null ? '' : Math.round(S.fin.pIncome)) + '"></div><span class="small">Before tax. Leave it blank and we\'ll ask in Income.</span></div></div>');
   if (!m) h += '<p class="small" style="margin:10px 0 0">Pick one. You can change it later in <b>Me</b>.</p>';
   return h; }
@@ -1850,6 +1875,131 @@ function chaptersHTML(P){ const a0 = P.rows[0].a;
     const open = S.chapOpen === ci;
     return '<button class="chap ' + cls + (open ? ' open' : '') + '" data-a="chap" data-p="' + ci + '" aria-expanded="' + open + '"><div class="w" aria-hidden="true">' + wx + '</div><div class="cb"><div class="tt">Your ' + c.dec + 's</div><div class="ag">age ' + c.from + '–' + c.to + (allRet ? (retireGoal() ? ' · retired' : ' · after work') : '') + '</div><div class="st">' + story + '</div>' + (ev.length ? '<div class="ev">' + ev.map(e => '<div>' + e + '</div>').join('') + '</div>' : '') +
       '<div class="mo">' + (open ? '▲ Hide the years' : '▼ See it year by year') + '</div>' + (open ? '<div class="ev">' + c.rows.map(r => { const m = isShort(r), d = r.used > 1 && !m; return '<div class="cy"><b style="width:26px">' + r.a + '</b><span class="d" style="background:' + (m ? 'var(--alert)' : d ? 'var(--nudge)' : 'var(--good)') + '"></span>' + (m ? '<b>Gap to plan for</b>: short ' + eur(r.short) : d ? 'Using savings' : 'Comfortable') + '</div>'; }).join('') + '</div>' : '') + '</div></button>'; }).join('') + '</div>'; }
+/* REPORT DATA */
+/* Journey-spec §28: ONE function, reportData(), returns every number, text and chart series for the plan report. Pure: no DOM, no lasting change to S.
+   It reads only the engine (project(), finNums(), foundations(), findings(), chapters(), rowParts(), goal lines). Phase 1 = pages 1-7 (cover basics, plan on a page,
+   money today, roadmap, goals in detail, cashflow, what could change the answer). Names are documented in docs/report-data-notes.md. */
+const REPDATA = {saveShare:0.18, saveStep:50, limitFloor:true, closeN:3, maxMissing:4};
+const repShort = v => { v = Math.abs(v); return v >= 1e6 ? '€' + (+(v / 1e6).toFixed(1)) + 'm' : v >= 1e4 ? '€' + Math.round(v / 1e3) + 'k' : '€' + Math.round(v).toLocaleString('en-IE'); };
+const repR = (v, s) => Math.round(v / (s || 1)) * (s || 1);
+const repShortName = g => ({family:'Family', retire:'Retirement', home:'Home', edu:'Education', travel:'Travel', business:'Business', mfree:'Mortgage-free', safety:'Safety net', wealth:'Wealth', helpfam:'Helping family', legacy:'Legacy'}[g.k] || g.name);
+// run the plan with ONE change (or several, for the combined rows) on a private copy of the customer, then put everything back
+function repRun(over, fn){ const keep = S; try { S = JSON.parse(JSON.stringify(keep)); over = over || {};
+    if (over.ra != null) setRetireAge(over.ra);
+    if (over.saveM != null){ S.saveM = over.saveM; S.saveUp = true; }
+    if (over.penAddM){ S.fin.pensionM = (+S.fin.pensionM || 0) + over.penAddM; S.fin.pensionOwnM = (+S.fin.pensionOwnM || 0) + over.penAddM; S.src.pensionM = 'typed'; S.src.pensionOwnM = 'typed'; }
+    if (over.fullSP){ S.fin.sp = 'Expect full'; S.src.sp = 'typed'; delete S.fin.spYears; if (S.asm){ delete S.asm.spYears; delete S.asm.spWeek; } }
+    applyAssume(); return fn(project()); } finally { S = keep; applyAssume(); } }
+const repGapAge = P => { const r = P.rows.find(x => x.shortLiving > Math.max(500, x.needs * 0.02)); return r ? r.a : null; };   // the year everyday costs are no longer covered (a goal falling short is a separate note)
+const repIsWorking = f => f.income > 0 && f.work !== 'Not working' && f.R > f.age;
+// pay and tax figures the pension rows need (same rule as the Contribution tool: relief on a share of pay by age band, pay up to the earnings cap)
+function repPension(f){ const lim = relLim(f.age) * Math.min(f.income, RI.pen.earnCap), existing = f.pensionOwnM * 12, room = Math.max(0, lim - existing), limitM = Math.floor(room / 12);
+  const band = f.married ? RI.it.bandMarried + Math.min(f.pIncome, RI.it.bandUplift) : f.spccc ? RI.it.bandSPCCC : RI.it.band, tr = f.income > band ? 0.4 : 0.2;
+  return {limitYear:lim, existingYear:existing, roomYear:room, limitM, taxRate:tr, afterReliefM:Math.round(limitM * (1 - tr)), agePct:relLim(f.age)}; }
+function repScenarios(P, f){
+  const rg = S.goals.find(g => g.kind === 'retire'), goals = S.goals.slice(), tgt = goals.slice().sort((a, b) => P.pct[a.id] - P.pct[b.id] || a.age - b.age)[0], today = {pct:tgt ? P.pct[tgt.id] : 100, gap:repGapAge(P)};
+  const tH = P.rows[0].inflow / 12, N = Math.max(REPDATA.saveStep, repR(REPDATA.saveShare * tH, REPDATA.saveStep)), pen = repPension(f), R = f.R, working = repIsWorking(f), spFull = f.sp >= 0.999;
+  const out = {target:tgt ? {id:tgt.id, name:tgt.name, kind:tgt.kind} : null, today:{covered:today.pct, gapStartsAt:today.gap, label:'Today\'s plan', note:(R >= 0 ? 'Retire at ' + R : '') + (spFull ? '' : f.sp > 0 ? ', State Pension partly counted' : ', no State Pension counted')}, takeHomeM:Math.round(tH), moreM:N, pension:pen, rows:[], combined:[], topThree:[], helpsMost:null, pathToExplore:null, allOnTrack:today.pct >= 95};
+  if (!tgt || today.pct >= 95) return out;
+  const run = over => repRun(over, P2 => ({covered:P2.pct[tgt.id], gapStartsAt:repGapAge(P2), saved:P2.save.saveM, worse:goals.filter(g => g.id !== tgt.id && P2.pct[g.id] <= P.pct[g.id] - 1).map(g => ({name:g.name, before:P.pct[g.id], after:P2.pct[g.id]}))}));
+  const mk = (id, lever, title, sub, over, extra) => { const r = run(over); return Object.assign({id, lever, title, sub, covered:r.covered, gapStartsAt:r.gapStartsAt, points:r.covered - today.pct, over, saved:r.saved, otherGoalsWorse:r.worse, note:r.worse.length ? 'Moves money away from ' + r.worse.map(w => w.name + ' (' + w.before + '% to ' + w.after + '%)').join(', ') : ''}, extra || {}); };
+  const keep = r => r && r.covered >= today.pct && (r.covered > today.pct || (r.gapStartsAt == null ? today.gap != null : today.gap != null && r.gapStartsAt > today.gap));   // skip rows that do nothing or are worse than today
+  const single = [], penOk = working && pen.limitM > 0 && R - f.age >= 1;
+  if (R < 60 && R > f.age) single.push(mk('retire60', 'retirementAge', 'Retire at 60', (60 - R) + ' years later', {ra:60}, {age:60}));
+  if (working || f.age < R){ const eff = Math.max(0, Math.min(P.save.surplusM, P.save.saveM + N) - P.save.saveM);
+    if (eff >= N / 2) single.push(mk('save', 'saveMore', 'Save ' + eur(N) + ' more a month', 'In cash and investments. About ' + Math.round(100 * N / tH) + '% of take-home pay', {saveM:Math.round(P.save.saveM + N)}, {amountM:N, effectiveExtraM:Math.round(eff), capped:eff < N - 0.5})); }
+  if (R < 65 && R > f.age) single.push(mk('retire65', 'retirementAge', 'Retire at 65', (65 - R) + ' years later', {ra:65}, {age:65}));
+  if (penOk) single.push(mk('pension', 'startPension', f.pensionOwnM > 0 ? 'Raise your pension to the limit, ' + eur(pen.limitM) + ' more a month' : 'Start a pension, ' + eur(pen.limitM) + ' a month', 'About ' + eur(pen.afterReliefM) + ' after tax relief. The most you can claim on at ' + f.age, {penAddM:pen.limitM}, {monthlyM:pen.limitM, afterReliefM:pen.afterReliefM}));
+  if (!spFull) single.push(mk('statePension', 'statePension', 'Count your State Pension', 'Full rate, ' + eur(Math.round(RI.sp.week * RI.sp.weeks)) + ' a year from ' + RI.sp.age, {fullSP:true}, {fullRateYear:Math.round(RI.sp.week * RI.sp.weeks)}));
+  if (penOk){ const g = Math.round(N / (1 - pen.taxRate));
+    single.push(mk('payMore', 'payMorePension', 'Pay ' + eur(N) + ' more a month into a pension', 'After tax relief. About ' + Math.round(100 * N / tH) + '% of take-home pay', {penAddM:g}, {amountM:N, grossM:g})); }
+  const kept = single.filter(keep); kept.sort((a, b) => a.covered - b.covered || single.indexOf(a) - single.indexOf(b)); out.rows = kept;
+  // combined paths (each counts a full State Pension, as v5 says: "confirm yours")
+  const comb = [], N2 = Math.round(N / 2), g2 = Math.round(N2 / (1 - pen.taxRate)), cost = x => Math.round(100 * x / tH);
+  const sp = !spFull;
+  if (penOk && R < 60 && R > f.age) comb.push(mk('c60', 'combined', 'Retire at 60 + pension at the limit', sp ? 'With a full State Pension (confirm yours)' : 'Retire at 60 and a pension at the limit', {ra:60, penAddM:pen.limitM, fullSP:true}, {costPct:cost(pen.afterReliefM)}));
+  if (penOk && R < 60 && R > f.age) comb.push(mk('c60more', 'combined', '…and pay ' + eur(N2) + ' more a month into a pension', 'Total ' + cost(pen.afterReliefM + N2) + '% of take-home pay', {ra:60, penAddM:pen.limitM + g2, fullSP:true}, {amountM:N2, costPct:cost(pen.afterReliefM + N2)}));
+  if (penOk && R < 65 && R > f.age) comb.push(mk('c65', 'combined', (comb.length ? 'Or retire' : 'Retire') + ' at 65 + pension at the limit', 'With a full State Pension. Total ' + cost(pen.afterReliefM) + '% of take-home pay', {ra:65, penAddM:pen.limitM, fullSP:true}, {costPct:cost(pen.afterReliefM)}));
+  const sRow = id => single.find(x => x.id === id); out.combined = comb.filter(keep).filter(x => { const c = x.id === 'c65' ? sRow('retire65') : sRow('retire60'); return !c || x.id === 'c60more' || x.covered >= c.covered; });   /* adding the pension must not make the retire-only path worse */ out.combined.sort((a, b) => a.covered - b.covered);
+  // page 2: the best change in each lever, then the top three by points
+  const lever = {}; kept.forEach(r => { const k = r.lever === 'payMorePension' ? null : r.lever; if (k && (!lever[k] || r.points > lever[k].points)) lever[k] = r; });
+  out.topThree = Object.values(lever).filter(r => r.points > 0).sort((a, b) => b.points - a.points).slice(0, REPDATA.closeN).map(r => {
+    const r60 = kept.find(x => x.id === 'retire60'), r65 = kept.find(x => x.id === 'retire65');
+    const title = {statePension:'Check your State Pension', startPension:f.pensionOwnM > 0 ? 'Raise your pension' : 'Start a pension', retirementAge:'Choose your retirement age', saveMore:'Save more each month'}[r.lever];
+    const body = r.lever === 'statePension' ? 'Not confirmed, so the plan counts ' + (f.sp > 0 ? 'only part of it' : '€0') + '. A full one could lift cover from ' + today.pct + '% to about ' + r.covered + '%.'
+      : r.lever === 'startPension' ? eur(r.monthlyM) + ' a month (about ' + eur(r.afterReliefM) + ' after tax relief) could lift cover to ' + r.covered + '%.'
+      : r.lever === 'retirementAge' ? (r60 && r65 ? 'Retire at 60 and cover reaches ' + r60.covered + '%. At 65, ' + r65.covered + '%.' : r.title + ' and cover reaches ' + r.covered + '%.')
+      : 'About ' + eur(r.amountM) + ' more a month could lift cover to ' + r.covered + '%.';
+    return {lever:r.lever, id:r.id, title, body, points:r.points, coveredAfter:r.covered}; });
+  const best = kept.slice().sort((a, b) => b.points - a.points)[0]; out.helpsMost = best ? {id:best.id, lever:best.lever, text:{payMorePension:'Paying more into a pension', startPension:'Starting a pension', retirementAge:'Retiring later', statePension:'Counting your State Pension', saveMore:'Saving more'}[best.lever] + ' helps most', points:best.points} : null;
+  const bc = out.combined.slice().sort((a, b) => b.covered - a.covered)[0];
+  out.bestCovered = bc ? bc.covered : (best ? best.covered : today.pct);
+  if (bc){ const alt = out.combined.find(x => x.id !== bc.id && (x.id === 'c60') !== (bc.id === 'c60') && x.id !== 'c60more'); const age = bc.id === 'c65' ? 65 : 60;
+    out.pathToExplore = {id:bc.id, retireAge:age, covered:bc.covered, gapStartsAt:bc.gapStartsAt, otherRetireAge:alt ? (alt.id === 'c65' ? 65 : 60) : null, otherCovered:alt ? alt.covered : null,
+      text:'Retire at ' + age + ', start a pension' + (sp ? ' and check your State Pension record' : '') + ': about ' + bc.covered + '% covered, ' + (bc.gapStartsAt != null ? 'with a gap only from age ' + bc.gapStartsAt : 'with no gap') + '.' + (alt ? ' Retiring at ' + (alt.id === 'c65' ? 65 : 60) + ' instead reaches ' + alt.covered + '%.' : '')}; }
+  out.assumesNote = 'Results from the plan engine on your plan; all rows except the State Pension and combined rows assume ' + (f.sp > 0 ? 'your current State Pension figure' : 'no State Pension') + '. A full State Pension is not confirmed. Pension money is locked until ' + (+asmV('accessAge')) + ', so retiring before then rests on savings alone. An expert can confirm every figure.';
+  return out; }
+function reportData(){
+  applyAssume(); if (!S || !planReady()) return {ready:false, missing:typeof planMissing === 'function' ? planMissing().map(m => ({key:m.k, name:m.n})) : []};
+  const f = finNums(), P = project(), rows = P.rows, a0 = f.age, infl = AS.infl, rg = S.goals.find(g => g.kind === 'retire'), order = resultOrder(), y0 = rows[0].yr, yrOf = a => y0 + a - a0, defl = r => Math.pow(1 + infl, r.t);
+  const D = {ready:true, meta:{name:S.acct.name || S.fin.name || '', dateISO:new Date().toISOString().slice(0, 10), age:a0, ageToday:S.about.ageToday == null ? a0 : S.about.ageToday, dateOfBirth:S.about.dob && dobValid(S.about.dob) ? S.about.dob.y + '-' + String(S.about.dob.m).padStart(2, '0') + '-' + String(S.about.dob.d).padStart(2, '0') : null, yearStart:y0, planEndAge:AS.end, retireAge:rg ? f.R : null, retireSet:!!S.retireSet, inflation:infl, partner:!!f.partner, stateAge:RI.sp.age, stateFullYear:Math.round(RI.sp.week * RI.sp.weeks), accessAge:+asmV('accessAge'), rows:rows.length, retired:!!rg && f.R <= a0}};
+  const partsAll = rows.map(r => Object.assign({a:r.a, yr:r.yr}, rowParts(r))), gapRows = rows.filter(chartShort), peakRow = rows.reduce((m, r) => r.liquid > m.liquid ? r : m, rows[0]), runOut = gapRows.length ? gapRows[0] : null;
+  const retRows = rows.filter(r => r.retired), gapToday = rows.reduce((s, r) => s + rowParts(r).short / defl(r), 0), gapFuture = rows.reduce((s, r) => s + rowParts(r).short, 0);
+  const sc = repScenarios(P, f); D.scenarios = sc;
+  const spPct = (sc.rows.concat(sc.combined)).find(x => x.id === 'statePension');
+  // ---- retirement strip (page 5) ----
+  const kindOf = r => chartShort(r) ? 'gap' : rowParts(r).fromSavings > 0.5 ? 'savings' : 'income', strip = [];
+  retRows.forEach(r => { const k = kindOf(r), l = strip[strip.length - 1]; if (l && l.kind === k) l.to = r.a; else strip.push({kind:k, from:r.a, to:r.a}); });
+  const retYears = retRows.length, retGap = retRows.filter(chartShort).length, retFunded = retYears - retGap;
+  const retCostF = retRows.reduce((s, r) => s + r.needs, 0), retGapF = retRows.reduce((s, r) => s + rowParts(r).short, 0), retCostT = retRows.reduce((s, r) => s + r.needs / defl(r), 0), retGapT = retRows.reduce((s, r) => s + rowParts(r).short / defl(r), 0);
+  const withSP = f.sp >= 0.999 ? null : spPct ? spPct.covered : null;
+  // ---- goals ----
+  const goalOf = g => { const p = P.pct[g.id], b = band(p), x = P.goal && P.goal[g.id], yrs = g.kind === 'legacy' ? null : g.age, o = {id:g.id, key:g.k, kind:g.kind, name:g.name, emoji:g.e, age:g.kind === 'legacy' ? AS.end : g.age, year:yrOf(g.kind === 'legacy' ? AS.end : g.age), amount:g.amount, amountIsPerYear:g.kind === 'retire', pct:p, band:b, bandLabel:BANDW[b], onTrack:p >= 95, passed:!!passedG(g)};
+    if (g.kind === 'retire'){ o.sentence = p + '% covered ' + (f.sp > 0 ? 'with your State Pension' : 'without a State Pension') + (withSP != null && withSP > p ? ', about ' + withSP + '% with the full one' : '') + '. ' + (retYears ? (retGap === 0 ? 'Your plan pays for all ' + retYears + ' retirement years.' : 'Your savings pay for ' + retFunded + ' of ' + retYears + ' retirement years.') : '');
+      o.retirement = {from:g.age, years:retYears, fundedYears:retFunded, gapYears:retGap, strip, costToday:Math.round(retCostT), coveredToday:Math.round(retCostT - retGapT), gapToday:Math.round(retGapT), costFuture:Math.round(retCostF), coveredFuture:Math.round(retCostF - retGapF), gapFuture:Math.round(retGapF), pctFullStatePension:withSP, costTodayShort:repShort(retCostT), coveredTodayShort:repShort(retCostT - retGapT), costFutureShort:repShort(retCostF), coveredFutureShort:repShort(retCostF - retGapF), gapTodayShort:repShort(retGapT)}; }
+    else { const avg = x ? x.avgM : 0, ex = p >= 100 ? null : extraTo100(g), need = p >= 100 ? avg : ex != null ? avg + ex : Math.max(x ? x.needM || 0 : 0, avg + 5);
+      o.sentence = p >= 100 ? 'Fully funded. Your income and savings cover it.' : p + '% covered. Needs about ' + eur(need) + ' a month; you are putting in about ' + eur(avg) + '.';
+      o.monthly = {needsM:Math.round(need), puttingInM:Math.round(avg)}; o.costToday = g.amount; o.coveredToday = Math.round(g.amount * Math.min(100, p) / 100); o.costFuture = x ? Math.round(x.cost) : null; o.coveredFuture = x ? Math.round(x.have) : null; }
+    return o; };
+  const goals = order.map(goalOf), onTrack = goals.filter(g => g.onTrack).length;
+  const worst = goals.slice().sort((a, b) => a.pct - b.pct)[0], bestOn = goals.filter(g => g.onTrack).map(g => repShortName(S.goals.find(s => s.id === g.id)));
+  D.onePage = {goalsTotal:goals.length, goalsOnTrack:onTrack, goals, gap:{hasGap:gapRows.length > 0, runOutAge:runOut ? runOut.a : null, runOutYear:runOut ? runOut.yr : null, gapYears:gapRows.length, toAge:AS.end, todayMoney:Math.round(gapToday), futureEuros:Math.round(gapFuture), todayShort:repShort(gapToday), futureShort:repShort(gapFuture)},
+    headline:!goals.length ? '' : onTrack === goals.length ? 'All ' + goals.length + (goals.length === 1 ? ' goal is' : ' goals are') + ' on track' : (bestOn.length ? bestOn.join(' and ') + ' goal' + (bestOn.length > 1 ? 's' : '') + ' on track. ' : '') + repShortName(S.goals.find(s => s.id === worst.id)) + ' needs a bigger plan',
+    subline:goals.map(g => g.name + ' is ' + g.pct + '% covered.').join(' ') + (sc.rows.length ? ' Counting a State Pension, a pension of your own or a later date could change this.' : ''),
+    closeTheGap:sc.topThree, nextStep:{key:'shareWithExpert', text:'Share this plan with an expert', body:'They check the numbers and choose the best way forward.'}};
+  // ---- cover (page 1) ----
+  const marks = [{kind:'today', age:a0, text:'You, today'}].concat(S.goals.filter(g => g.kind !== 'retire' && g.kind !== 'legacy' && !passedG(g)).map(g => ({kind:'goal', age:g.age, text:g.name})), rg ? [{kind:'retire', age:f.R, text:'You retire'}] : [], runOut ? [{kind:'runOut', age:runOut.a, text:'Savings run out'}] : [], [{kind:'statePension', age:RI.sp.age, text:'State Pension age'}, {kind:'planEnd', age:AS.end, text:'Plan to age ' + AS.end}]).filter(m => m.age >= a0 && m.age <= AS.end).sort((a, b) => a.age - b.age);
+  D.cover = {name:D.meta.name, marks, tiles:{goalsOnTrack:onTrack, goalsTotal:goals.length, runOutAge:runOut ? runOut.a : null, savingsLastToEnd:!runOut, nextStep:'share your plan with an expert'}};
+  // ---- page 3: money today ----
+  const takeH = rows[0].inflow / 12, livingM = rows[0].living / 12, fixedM = rows[0].fixed / 12, goalsM = P.save.saveM, leftM = takeH - livingM - fixedM - goalsM, has = k => !!S.src[k] && S.fin[k] != null && S.fin[k] !== '';
+  const own = [{key:'cash', label:'Cash savings', status:has('cash') ? 'given' : 'missing', value:has('cash') ? +S.fin.cash : null}, {key:'invest', label:'Investments', status:has('invest') ? 'given' : 'missing', value:has('invest') ? +S.fin.invest : null},
+    {key:'pension', label:'Pension', status:has('pension') ? 'given' : 'missing', value:has('pension') ? +S.fin.pension : null}, {key:'home', label:'Home', status:has('home') ? 'given' : 'missing', value:S.fin.home === 'Rent' || !has('home') ? null : +S.fin.homeValue || null, text:has('home') ? (S.fin.home === 'Rent' ? 'Rent' : S.fin.home) : 'Missing'}];
+  const owe = [{key:'mortgage', label:'Mortgage', status:S.fin.home === 'Own with mortgage' ? (has('mortBal') ? 'given' : 'missing') : 'none', value:S.fin.home === 'Own with mortgage' && has('mortBal') ? +S.fin.mortBal : (has('home') ? 0 : null), text:S.fin.home === 'Own with mortgage' ? undefined : 'None'}, {key:'cards', label:'Credit cards', status:has('cardBal') ? 'given' : 'missing', value:has('cardBal') ? +S.fin.cardBal : null}, {key:'loans', label:'Other loans', status:has('loanBal') ? 'given' : 'missing', value:has('loanBal') ? +S.fin.loanBal : null}];
+  const anyMissing = [own[0], own[1], own[2], owe[1], owe[2]].some(x => x.status === 'missing') || (S.fin.home === 'Own with mortgage' && !has('homeValue')), assets = (own[0].value || 0) + (own[1].value || 0) + (own[2].value || 0) + (S.fin.home && S.fin.home !== 'Rent' ? +S.fin.homeValue || 0 : 0) + (+S.fin.propValue || 0), debts = (owe[0].value || 0) + (owe[1].value || 0) + (owe[2].value || 0);
+  const items = checkItems(), given = items.filter(x => !['miss', 'look'].includes(x.st)).length, total = items.length;
+  const PRI = {pension:['High', 'Pension value', 'The biggest tool for retiring early'], cash:['High', 'Cash savings', 'A head start for your pot'], sp:['High', 'State Pension record', 'Up to ' + eur(Math.round(RI.sp.week * RI.sp.weeks)) + ' a year from ' + RI.sp.age], income:['High', 'Your income', 'Everything in the plan starts here'], costsM:['High', 'Monthly living costs', 'Shows how much you can save'], invest:['Medium', 'Investments', 'Part of your net worth'], cardBal:['Medium', 'Loans and cards', 'Debt can cancel out saving'], loanBal:['Medium', 'Loans and cards', 'Debt can cancel out saving'], mortBal:['High', 'Mortgage', 'Your biggest monthly cost'], pensionM:['Medium', 'Monthly pension payments', 'What you add each month'], life:['Medium', 'Protection', 'Cover that protects your plan'], ip:['Medium', 'Protection', 'Cover that protects your plan']};
+  const RANK = {pension:1, cash:2, sp:3, income:0, costsM:0, mortBal:3.5, cardBal:4, loanBal:4, invest:5, pensionM:6, life:7, ip:7}, seen = {}, missingList = []; items.filter(x => ['miss', 'look'].includes(x.st)).forEach(x => { const p = PRI[x.k]; if (!p || seen[p[1]]) return; seen[p[1]] = 1; missingList.push({key:x.k, priority:p[0], label:p[1], why:p[2], rank:RANK[x.k] == null ? 9 : RANK[x.k]}); });
+  missingList.sort((a, b) => a.rank - b.rank);
+  const pctLeft = takeH > 0 ? Math.round(100 * leftM / takeH) : 0;
+  D.money = {takeHomeM:Math.round(takeH), livingM:Math.round(livingM), debtPaymentsM:Math.round(fixedM), goalsM:Math.round(goalsM), leftM:Math.round(leftM), leftPer100:pctLeft, margin:leftM < 0 ? 'short' : pctLeft >= 10 ? 'comfortable' : 'tight',
+    marginText:leftM < 0 ? 'You spend more than you take home' : pctLeft >= 10 ? 'A comfortable monthly margin' : 'A tight monthly margin', marginNote:leftM < 0 ? 'Costs are higher than pay, so savings are being used.' : pctLeft >= 10 ? 'That gives you room to save more.' : 'There is little room to save more.', grossYear:f.income + f.pIncome, takeHomeNote:'Take-home pay is after tax, USC and PRSI (gross pay ' + eur(f.income + f.pIncome) + ').',
+    own, owe, netWorth:anyMissing ? {known:false, text:'not yet known'} : {known:true, value:Math.round(assets - debts), assets:Math.round(assets), debts:Math.round(debts)}, complete:{given, total, text:given + ' of ' + total, missing:missingList.slice(0, REPDATA.maxMissing), missingAll:missingList}};
+  // ---- page 4: roadmap ----
+  const chap = chapters(P), tagFor = (c, i) => { const t = []; if (i === 0) t.push('You are here'); if (rg && c.rows.some(r => r.rmark)) t.push('You retire at ' + f.R); if (c.to === AS.end && i > 0) t.push('The plan ends at ' + AS.end); if (!t.length){ const sh = c.rows.some(isShort), prevSh = i > 0 && chap[i - 1].rows.some(isShort); t.push(sh && prevSh ? 'The gap grows with prices' : c.rows.every(r => r.retired) ? 'Living on your pensions' : 'Building your savings'); } return t; };
+  D.roadmap = {headline:runOut ? (rg && runOut.a > f.R ? 'Smooth until ' + f.R + ', then savings run out at ' + runOut.a : 'Savings run out at ' + runOut.a) : 'Smooth all the way to ' + AS.end, runOutAge:runOut ? runOut.a : null, legend:'Green: income covers life. Gold: savings pay. Coral: a gap to plan for.',
+    marks:D.cover.marks, decades:chap.map((c, i) => { const sh = c.rows.filter(isShort), dip = c.rows.filter(r => r.used > 1 && !isShort(r)), last = c.rows[c.rows.length - 1], allRet = c.rows.every(r => r.retired);
+      const sentence = sh.length ? (c.rows.length === 1 || (c.to === AS.end && sh.length === 1) ? 'Short by about ' + eur(sh[0].short) + ' in the last year. In all, ' + gapRows.length + ' years have a gap.' : 'Short by about ' + eur(sh.reduce((s, r) => s + r.short, 0) / sh.length) + ' a year' + (sh.length === c.rows.length ? ', in every year of this decade.' : ' in ' + sh.length + ' of these ' + c.rows.length + ' years.'))
+        : allRet ? 'Living on your pensions and savings, and they hold up.' : dip.length ? 'Some years dip into savings. That\'s what they\'re for.' : 'Income comfortably covers life. Savings reach about ' + eur(repR(last.liquid, 1000)) + ' by ' + last.a + '.';
+      const chips = S.goals.filter(g => g.kind !== 'retire' && g.kind !== 'legacy' && g.age >= c.from && g.age <= c.to).map(g => ({age:g.age, name:g.name, pct:P.pct[g.id], band:band(P.pct[g.id])})); if (RI.sp.age >= c.from && RI.sp.age <= c.to) chips.push({age:RI.sp.age, name:'State Pension age', pct:null, band:null});
+      return {decade:c.dec, label:c.dec + 's', fromAge:c.from, toAge:c.to, years:c.rows.length, status:sh.length ? 'gap' : dip.length > c.rows.length / 3 ? 'savings' : dip.length ? 'some' : 'comfortable', weather:sh.length ? 'storm' : dip.length > c.rows.length / 3 ? 'showers' : dip.length ? 'partly' : 'sun', weatherLabel:sh.length ? 'A gap to plan for' : dip.length ? 'Using savings' : 'Comfortable', tags:tagFor(c, i), sentence, gapYears:sh.length, avgShortfall:sh.length ? Math.round(sh.reduce((s, r) => s + r.short, 0) / sh.length) : 0, savingsEnd:Math.round(last.liquid), chips, spark:c.rows.map(r => ({age:r.a, savings:Math.round(r.liquid)})), retired:allRet}; })};
+  // ---- page 6: cashflow series ----
+  const axMax = niceMax(Math.max(1, peakRow.liquid * 1.1)), gMax = niceMax(Math.max(1, ...partsAll.map(p => p.spend)) * 1.1);   // 10% headroom so the peak label fits
+  const worstShort = partsAll.reduce((m, p) => p.short > m.short ? p : m, partsAll[0]);
+  D.cashflow = {savings:{series:rows.map(r => ({age:r.a, year:r.yr, savings:Math.round(r.liquid)})), peak:{age:peakRow.a, year:peakRow.yr, amount:Math.round(peakRow.liquid)}, runOutAge:runOut ? runOut.a : null, axisMax:axMax, working:rg ? {from:a0, to:Math.min(f.R, AS.end)} : null, gapFrom:runOut ? runOut.a : null,
+      text:'Savings reach ' + eur(peakRow.liquid) + ' at ' + peakRow.a + '.' + (runOut ? ' Savings run out at ' + runOut.a + '.' : ' Savings last to ' + AS.end + '.')},
+    paid:{series:partsAll.map(p => ({age:p.a, year:p.yr, fromIncome:Math.round(p.fromIncome), fromSavings:Math.round(p.fromSavings), shortfall:Math.round(p.short), spend:Math.round(p.spend)})), axisMax:gMax, payStopsAge:rg ? f.R : null, worstShortfall:worstShort.short > 0.5 ? {age:worstShort.a, amount:Math.round(worstShort.short)} : null, text:(rg ? 'Pay stops at ' + f.R + '. ' : '') + 'Costs keep rising.'}};
+  return D; }
+/* END REPORT DATA */
 /* ================= DETAIL CASHFLOW CHART (Pooja, 1 Oct): stacked, honest, tappable ================= */
 // Split one year's spending (living + loans & mortgage + goal costs) into: from income / from savings / shortfall. Parts sum exactly to spend.
 function rowParts(r){ const lf = r.living + r.fixed, fromIncome = Math.min(r.inflow, lf), fromSavings = (r.used || 0) + Math.max(0, r.goalCost - r.goalGap), short = (r.shortLiving || 0) + r.goalGap;
@@ -2079,7 +2229,7 @@ V.ME = () => { const m = S.me;
         '<div class="card"><div class="eyebrow">Your money terms</div>' + termsHTML() + '</div>' +
         '<div class="card"><div class="eyebrow">Your indicative risk profile</div><div style="font-family:var(--fh);font-size:26px;font-weight:800;margin:4px 0">' + riskLabelText(r) + '</div>' + (r.label ? bar(sectLbl('appetite'), r.want) + bar(sectLbl('capacity'), r.can) + bar(sectLbl('horizon'), r.time) + (r.limit === 'experience' ? bar(sectLbl('experience'), r.level) : '') + '<p class="small" style="margin:8px 0 0">Set by: <b>' + RISK_SETBY[r.limit] + '</b></p>' + (r.keNote ? '<p class="small" style="margin:6px 0 0;color:var(--ink)">' + KE_NOTE + '</p>' : '') : '') + (r.mis ? '<p class="note" style="margin-top:12px">' + esc(r.mis) + '</p>' : '') + '<p class="small" style="margin:10px 0 0">This now shows on <b>My Plan</b> and in your plan report.</p></div>' +
         retBtn() + '<p class="disc">This is an indicative profile to guide your conversation. It is not advice. Your adviser confirms your risk profile with you. ' + DISC_FORMAL + '</p>'}; }
-  if (m === 'details') return {id:'ME-DET', note:'My details (name, contact, household).', head:appHead('My details', '', 'meback'), html:'<div class="card">' + [['Name', S.acct.name || S.fin.name],['Email', S.acct.email],['Mobile', S.acct.mobile],['Age', S.about.age || 'Not given yet'],['Partner', partnerLine()],['People who rely on you', ['0','1','2','3+'][S.about.deps || 0]],['Retirement age', S.retireSet ? S.retireAge : 'Not chosen yet']].map(x => '<div class="mini"><span>' + x[0] + '</span><b>' + esc(x[1]) + '</b></div>').join('') + '</div><button class="btn ghost" style="margin-top:12px" data-a="fsec" data-p="0">Edit About you</button>'};
+  if (m === 'details') return {id:'ME-DET', note:'My details (name, contact, household).', head:appHead('My details', '', 'meback'), html:'<div class="card">' + [['Name', S.acct.name || S.fin.name],['Email', S.acct.email],['Mobile', S.acct.mobile],['Date of birth', S.about.dob && dobValid(S.about.dob) ? dateLong(new Date(+S.about.dob.y, +S.about.dob.m - 1, +S.about.dob.d)) : 'Not given yet'],['Age', S.about.ageToday ? S.about.ageToday + ' today' : S.about.age || 'Not given yet'],['Partner', partnerLine()],['People who rely on you', ['0','1','2','3+'][S.about.deps || 0]],['Retirement age', S.retireSet ? S.retireAge : 'Not chosen yet']].map(x => '<div class="mini"><span>' + x[0] + '</span><b>' + esc(x[1]) + '</b></div>').join('') + '</div><button class="btn ghost" style="margin-top:12px" data-a="fsec" data-p="0">Edit About you</button>'};
   if (m === 'privacy') return {id:'ME-PRIV', note:'Privacy & preferences: consents, sustainability preference (§13, optional, goes to the adviser), what each adviser can see, delete my data.', head:appHead('Privacy & preferences', '', 'meback'),
     html:'<div class="card"><label class="check"><input type="checkbox" checked disabled><span>Use my details to build my plan (needed for the service)</span></label><label class="check"><input type="checkbox" data-acct="c2"' + (S.acct.c2 ? ' checked' : '') + '><span>Send me reminders and updates</span></label></div>' +
       '<div class="card"><b>Your preferences</b><p class="small" style="margin:4px 0 8px">Optional. Your adviser will ask about this before recommending anything.</p><div class="chips"><button class="chip sm' + (S.advQs.includes(ESG_Q) ? ' sel' : '') + '" aria-pressed="' + S.advQs.includes(ESG_Q) + '" data-a="advq" data-p="' + esc(ESG_Q) + '">🌿 ' + esc(ESG_Q) + '</button></div></div>' +
@@ -2156,10 +2306,15 @@ V.HOME0 = () => { const P = personality(), tg = myTerms().flatMap(x => x.tags).s
       '<p class="disc">Guidance, not advice.</p>'}; };
 V.PLAN0 = () => ({id:'PLAN-0', note:'My Plan before a plan exists (§12): empty state + "Make my plan", which starts the 8-step plan builder.', head:appHead('My Plan', 'Your plan will live here.'),
   html:makePlanCard(true) + '<div class="card"><b>What you\'ll do</b><ol class="pbsteps">' + PB.map((x, i) => '<li class="' + (S.pb && i + 1 < pbStep() ? 'done' : '') + '"><span>' + (i + 1) + '</span>' + x[1] + (i === 4 ? ' <span class="small">(only if not done yet)</span>' : '') + '</li>').join('') + '</ol></div><p class="disc">Guidance, not advice. Nothing is shared with an adviser unless you choose.</p>'});
+function dobField(who){ const you = who === 'you', key = you ? 'dob' : 'pdob', d = S.about[key] || {}, c = dobCheck(d, who), id = you ? 'dob' : 'pdob', nm = you ? 'your' : 'their';
+  const inp = (part, ph, w, ac, lab) => '<input class="in dob" id="' + id + '-' + part + '" inputmode="numeric" autocomplete="' + ac + '" maxlength="' + (part === 'y' ? 4 : 2) + '" placeholder="' + ph + '" aria-label="' + lab + '" data-dob="' + who + '|' + part + '" style="width:' + w + 'px;text-align:center" value="' + esc(d[part] == null ? '' : d[part]) + '">';
+  return '<div class="field"><span class="flabel" id="lab-' + id + '">' + (you ? 'Your date of birth' : 'Their date of birth') + ' <span id="tag-' + id + '">' + (you ? '' : tagFor('pAge')) + '</span></span><div class="dobrow" role="group" aria-labelledby="lab-' + id + '" style="display:flex;gap:8px;align-items:center">' + inp('d', 'DD', 64, you ? 'bday-day' : 'off', 'Day of birth') + inp('m', 'MM', 64, you ? 'bday-month' : 'off', 'Month of birth') + inp('y', 'YYYY', 92, you ? 'bday-year' : 'off', 'Year of birth') + '</div>' +
+    '<p class="small" id="' + id + '-msg" role="status" aria-live="polite" style="margin:6px 0 0;min-height:18px;' + (c.text && !c.ok ? 'color:var(--gap-t)' : 'color:var(--acc-d)') + '">' + esc(c.text) + '</p><p class="small" style="margin:2px 0 0">We use it to get your ages and years exactly right. It stays on your device in this prototype.</p>' +
+    (you ? '' : '<div class="fhelp"><button class="link" data-a="fex" data-p="pAge" aria-haspopup="dialog">Not sure? See an example</button></div>') + '</div>'; }
 V.B1 = () => { const b = S.about, ok = b.age >= 18 && b.partner != null && b.deps != null;
   return {id:'B1', note:'Plan builder step 1: about you & your family (name, age, partner invite or add myself, dependants). Moved out of onboarding (§12). No money figures yet.', head:flowHead(1, 'Step 1', 'About you & your family', 'So we can suggest goals that fit your life stage.', 'pbexit'),
   html:'<div class="card"><div class="field"><label for="b-name">Your first name</label><input class="in" id="b-name" data-acct="name" autocomplete="given-name" value="' + esc(S.acct.name) + '"></div>' +
-    '<div class="field"><span class="flabel" id="lab-age">Your age</span><div class="stepper" role="group" aria-labelledby="lab-age"><button data-a="age" data-p="x|-1" aria-label="Less">−</button><span class="stepv">' + (b.age == null ? nbox('age', 'a', '', '', 'lab-age', {id:'age-v'}).replace('<input class="nb"', '<input class="nb" placeholder="Add your age"').replace(/style="width:[^"]*"/, 'style="width:11ch"') : nbox('age', 'a', b.age, '', 'lab-age', {id:'age-v'})) + '</span><button data-a="age" data-p="x|1" aria-label="More">+</button></div><input type="range" min="18" max="80" value="' + (b.age == null ? 40 : b.age) + '" data-in="age" aria-labelledby="lab-age" aria-valuetext="' + (b.age == null ? 'Not given yet' : 'Age ' + b.age) + '">' + nbHint('age', 'a') + '</div>' +
+    dobField('you') +
     '<div class="field"><span class="flabel">Planning with a partner?</span><div class="seg" role="group" aria-label="Planning with a partner">' + ['Yes','No'].map(x => { const on = (b.partner === true && x === 'Yes') || (b.partner === false && x === 'No'); return '<button class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" data-a="partner" data-p="' + x + '">' + x + '</button>'; }).join('') + '</div>' + (b.partner ? marriedField() + partnerBlock(!verified()) : '') + '</div>' +
     '<div class="field" style="margin:0"><span class="flabel">Children or others who rely on you</span><div class="seg" role="group" aria-label="Dependants">' + ['0','1','2','3+'].map((x, k) => '<button class="' + (b.deps === k ? 'on' : '') + '" aria-pressed="' + (b.deps === k) + '" data-a="deps" data-p="' + k + '">' + x + '</button>').join('') + '</div></div></div>',
   foot:'<button class="btn" data-a="go" data-p="F1"' + (ok ? '' : ' disabled') + '>Next: your goals</button>'}; };
@@ -2991,7 +3146,7 @@ const emoObs = new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n
 let lastId = null, focusKey = null, sheetFrom = null;
 // The control that opened a sheet, as a selector, so focus can go back to it when the sheet closes (Esc, Close or any button)
 function selFor(el){ if (!el || el === document.body || !el.closest || !el.closest('#screen')) return ''; if (el.id) return '#' + CSS.escape(el.id); if (el.dataset && el.dataset.a){ let q = '[data-a="' + el.dataset.a + '"]'; if (el.dataset.p != null) q += '[data-p="' + el.dataset.p.replace(/"/g, '\\"') + '"]'; return q; } return ''; }
-function render(){ syncLists(); syncSafety();
+function render(){ syncAges(); syncLists(); syncSafety();
   if (S.sheet && sheetFrom === null) sheetFrom = selFor(document.activeElement);
   const scr = document.getElementById('screen'), sc0 = scr.querySelector('.scroll,.qbody'), top0 = sc0 ? sc0.scrollTop : 0;
   const s = current(), same = s.id === lastId;
@@ -3234,6 +3389,9 @@ function bind(){
   ph.querySelectorAll('input[type=file][data-pfile]').forEach(i => i.addEventListener('change', () => { const fs = [...i.files].map(f => f.name); if (fs.length) pstStart(i.dataset.pfile, fs); }));
   ph.querySelectorAll('[data-pv]').forEach(i => i.addEventListener('input', () => { if (!S.pst) return; S.pst.edit[i.dataset.pv] = i.value; if (i.dataset.pv === 'prsi'){ const e = document.getElementById('pst-sp'); if (e) e.textContent = spFromYears(+i.value || 0); } }));
   ph.querySelectorAll('[data-whynote]').forEach(i => i.addEventListener('input', () => { S.whyNote = i.value.slice(0, 60); }));
+  ph.querySelectorAll('input[data-dob]').forEach(i => i.addEventListener('input', () => { const [who, part] = i.dataset.dob.split('|'), key = who === 'you' ? 'dob' : 'pdob', clean = i.value.replace(/\D/g, '').slice(0, part === 'y' ? 4 : 2); if (clean !== i.value) i.value = clean;
+    S.about[key] = Object.assign({}, S.about[key]); S.about[key][part] = clean; syncAges(); const c = dobCheck(S.about[key], who), id = who === 'you' ? 'dob' : 'pdob', m = document.getElementById(id + '-msg'); if (m){ m.textContent = c.text; m.style.color = c.text && !c.ok ? 'var(--gap-t)' : 'var(--acc-d)'; } ageNext();
+    if (part !== 'y' && clean.length === 2){ const nx = document.getElementById(id + '-' + (part === 'd' ? 'm' : 'y')); if (nx) nx.focus(); } }));
   ph.querySelectorAll('[data-partner]').forEach(i => i.addEventListener('input', () => { S.partner[i.dataset.partner] = i.value.slice(0, 60); }));
   const ai = ph.querySelector('#ask-in'); if (ai) ai.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ACT.askgo(); } });
   if (ph.querySelector('#tl')) { layoutTL(); bindTL(); }
@@ -3307,7 +3465,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape'){ if (documen
 function loadSample(){
   S = fresh();
   Object.assign(S.ans, {'2':0, '4':1, '6':2, '7':1, '8':2, '9':2, '12':1}); S.why = ['track', 'change'];
-  S.about = {age:38, partner:true, deps:2}; S.retireAge = 63;
+  S.about = {age:38, partner:true, deps:2}; S.retireAge = 63; { const y0 = +asmV('startYear'); S.about.dob = {d:'21', m:'8', y:String(y0 - 38)}; S.about._dobAge = 38; S.about.pdob = {d:'3', m:'3', y:String(y0 - SAMPLE_FIN.pAge[0])}; }
   ['edu','travel','mfree','safety','retire'].forEach(k => S.goals.push(mkGoal(k)));
   const G = k => S.goals.find(g => g.k === k); G('edu').age = 48; G('edu').amount = 50000; G('travel').age = 41; G('travel').amount = 12000; G('mfree').age = 55; G('safety').age = 40; G('safety').amount = 15000; G('safety').auto = false; G('safety').saved = 5000; retireGoal().amount = 46000;
   S.acct = {name:'Aoife', email:'aoife@example.ie', mobile:'087 123 4567', c1:true, c2:false, ev:true, sv:true, pk:true};

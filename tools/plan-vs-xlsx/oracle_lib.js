@@ -14,6 +14,9 @@ window.applyScenario = function(sc){
   S.partner = {mode:'manual', email:'', sent:false, name:'P'}; S.fin.name = 'X'; S.src.name = 'pre'; S.fin.age = ab.age; S.src.age = 'pre';
   Object.entries(sc.fin || {}).forEach(([k, v]) => { S.fin[k] = v; S.src[k] = 'typed'; });
   S.asm = Object.assign({}, sc.asm || {});
+  { const y0 = +asmV('startYear'), mkd = (age, m, d) => ({d:String(d), m:String(m), y:String(y0 - age)});   // section 29: a date of birth whose year gives the same age as the scenario's age in the first plan year
+    S.about.dob = ab.dob ? {d:String(ab.dob.d), m:String(ab.dob.m), y:String(ab.dob.y)} : mkd(ab.age, ab.dobMonth || 8, ab.dobDay || 21);
+    if (sc.fin && sc.fin.pAge != null){ S.about.pdob = mkd(sc.fin.pAge, 3, 3); delete S.fin.pAge; delete S.src.pAge; } }
   S.lists = {cards:[], loans:[], pens:[], mort2:[]};
   const L = sc.lists || {};
   const add = (lk, o) => { const it = newItem(lk); Object.entries(o).forEach(([f, v]) => { it.f[f] = v; it.src[f] = 'typed'; }); LI(lk).push(it); };
@@ -30,7 +33,7 @@ window.applyScenario = function(sc){
   syncLists(); applyAssume(); syncSafety(); return true;
 };
 window.readOutputs = function(){
-  applyAssume(); const out = {}; const P0 = project(), P = project(S.wi);
+  applyAssume(); const out = {}; out.dob = {you:S.about.dob, partner:S.about.pdob || null}; const P0 = project(), P = project(S.wi);
   const rows = P.rows.map(r => ({t:r.t, a:r.a, inflow:r.inflow, needs:r.needs, goalPaid:r.goalPaid, living:r.living, fixed:r.fixed, goalCost:r.goalCost, short:r.short, shortLiving:r.shortLiving, goalGap:r.goalGap, used:r.used, saved:r.saved, spent:r.spent, liquid:r.liquid, pen:r.pen, tax:r.tax, gross:r.gross, isShort:isShort(r) ? 1 : 0}));
   out.rows = rows; out.N = AS.end - S.about.age;
   out.pct = S.goals.map(g => P.pct[g.id]); out.bands = S.goals.map(g => band(P.pct[g.id]));
@@ -46,7 +49,7 @@ window.readOutputs = function(){
       parts:rows.map(r => { const p = rowParts(r); return [p.fromIncome, p.fromSavings, p.short]; })};
     { const L = foundations(), fx = fndNext(L), pm = planMissing(), e = essM(finNums());
       out.misc = {fndNextN:fx ? fx.x.n : 0, fndNextT:fx ? fx.t : '', fndNextD:fx ? fx.d.replace(/&#39;/g, "'") : '', slip:Pb ? S.goals.filter(g => Pb.pct[g.id] < 95).map(g => g.name).join('|') + (S.goals.some(g => Pb.pct[g.id] < 95) ? '|' : '') : '', slipN:S.goals.filter(g => Pb.pct[g.id] < 95).length,
-        reqN:reqKeys().length, reqGot:reqKeys().length - req3Missing().length, retMin:retMin(), retMax:retMax(), retRange:RETIRE_HELP + ' Choose the age you want to plan for, any age from ' + retMin() + ' to ' + retMax() + '.', retNote:S.retireSet ? retNote(S.retireAge) : '', pNote:(pInc() && S.pRetSet) ? pRetNote(S.pRet) : '', planEndSet:asmMine('planEnd'),
+        dobMsg:dobCheck(S.about.dob, 'you').text, ageToday:S.about.ageToday, pdobMsg:(() => { const pn = S.partner.name; S.partner.name = ''; const t = S.about.partner && S.about.pdob ? dobCheck(S.about.pdob, 'partner').text : ''; S.partner.name = pn; return t; })(), reqN:reqKeys().length, reqGot:reqKeys().length - req3Missing().length, retMin:retMin(), retMax:retMax(), retRange:RETIRE_HELP + ' Choose the age you want to plan for, any age from ' + retMin() + ' to ' + retMax() + '.', retNote:S.retireSet ? retNote(S.retireAge) : '', pNote:(pInc() && S.pRetSet) ? pRetNote(S.pRet) : '', planEndSet:asmMine('planEnd'),
           heading:reqKeys().length - req3Missing().length === reqKeys().length ? 'All ' + reqKeys().length + ' chosen' : 'Choose ' + reqKeys().length + ' things',
           use:(() => { const N = {mortRate:'Assumed: add yours · we use the Central Bank average rate', cardRate:'Assumed: add yours · we use a planning rate of ' + pcs(AS.cardRate), loanRate:'Assumed: add yours · we use the Central Bank average rate', mort2:'Assumed: add yours · we use 25 years', mortYears:'Assumed: add yours · we use 25 years', pAge:'Assumed: add yours · we use your age', work:'Assumed: add yours · we use Employed'}; const o = {}; Object.keys(N).forEach(k => { const it = checkItems().find(x => x.k === k); o[k] = it && it.st === 'miss' ? N[k] : ''; }); return o; })(), months:S.goals.map(g => g.k === 'safety' && e > 0 && g.amount > 0 ? Math.round(g.amount / e * 10) / 10 : '')}; }
     out.chapters = chapters(P).map(c => { const s2 = c.rows.filter(isShort), dip = c.rows.filter(r => r.used > 1 && !isShort(r)); return {dec:c.dec, from:c.from, to:c.to, n:c.rows.length, short:s2.length, dip:dip.length, avg:s2.length ? s2.reduce((s, r) => s + r.short, 0) / s2.length : 0, wx:s2.length ? 'storm' : dip.length > c.rows.length / 3 ? 'showers' : dip.length ? 'partly' : 'sun'}; }); }

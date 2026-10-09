@@ -179,3 +179,11 @@ These 23 standards are the planning choices LifeMap uses automatically and label
 | Other missing personal figures | Years left on a mortgage, partner's age and similar figures use a stated default (25 years, the customer's own age) until added, and are counted as missing. | Confirm the defaults are acceptable for a rough picture. | Financial planner |
 | Automatic standards | All LifeMap standards are used without being chosen; only retirement age, plan-until age, inflation and a working partner's retirement age block results. | Confirm each standard is something an adviser would accept as a starting point (section B2 lists the reviewers). | Financial planner |
 
+## G. Date of birth (journey-spec section 29, 9 Oct 2026)
+
+| Item | What it is | What to check | Suggested checker |
+|---|---|---|---|
+| Date of birth is personal data | About you (and the partner) asks day, month and year. In this prototype it stays on the device; nothing is sent anywhere. | Before launch: lawful basis and purpose wording under GDPR, storage and retention, who can see it, and that the production system never sends it to a third party. Review the line "We use it to get your ages and years exactly right." | Compliance / DPO, Proposition & Product Manager |
+| Calendar-year ages | Age for a plan year = year - birth year; an age event applies for the whole calendar year in which the age is reached; no month pro-rating. | Confirm this simplification is acceptable for retirement, pension access and State Pension timing, and say so in the report notes. | Financial planner |
+| Age gate | Age today must be 18 to 80 (partner 18 to 85). | Confirm the limits. | Financial planner, Compliance |
+
