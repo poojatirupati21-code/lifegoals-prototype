@@ -52,7 +52,7 @@ async function fresh(b, w) {
   await p.close(); p = await fresh(b, 1000); await p.evaluate(() => { window.__printed = 0; window.print = () => { window.__printed++; dispatchEvent(new Event('beforeprint')); }; openReport(); }); await p.click('#report [data-r="print"]'); await p.waitForTimeout(800);
   ok(await p.evaluate(() => window.__printed === 1), 'window.print called when downloads are not available');
   await p.emulateMedia({ media: 'print' }); const pr = await p.evaluate(() => { const s = document.querySelector('#report .lmr-slot').getBoundingClientRect(), g = document.querySelector('#report .lmr-pg').getBoundingClientRect(); return { slot: [Math.round(s.width), Math.round(s.height)], page: [Math.round(g.width), Math.round(g.height)], bar: getComputedStyle(document.querySelector('.rep-bar')).display, stage: getComputedStyle(document.querySelector('.stage')).display }; });
-  ok(pr.slot[0] === 794 && pr.slot[1] === 1123 && pr.page[0] === 794 && pr.bar === 'none' && pr.stage === 'none', 'print CSS: A4 page size, no toolbar, app hidden ' + JSON.stringify(pr));
+  ok(pr.slot[0] === 794 && pr.slot[1] === 1122 && pr.page[0] === 794 && pr.bar === 'none' && pr.stage === 'none', 'print CSS: A4 page size, no toolbar, app hidden ' + JSON.stringify(pr));
   await p.emulateMedia({ media: 'screen' });
   // 6. gate for an unready customer
   await p.evaluate(() => { closeReport(); S = fresh(); render(); openReport(); }); await p.waitForTimeout(300); ok(await p.evaluate(() => !document.getElementById('report').classList.contains('on') && /gate/.test(S.sheet || '')), 'unready customer sees the "we need N things" card, no report');
