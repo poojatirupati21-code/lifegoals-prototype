@@ -1189,7 +1189,7 @@ const ASM = {
   budgetNeeds:{g:'safety', b:'B27', ty:3, n:'budget split', l:'Budget split: needs', t:'pct', min:0, max:100, step:5, sug:() => ST.budget[0], get by(){ return STB.budget.by; }, need:() => false, get help(){ return SG('budgetNeeds'); }},
   budgetWants:{g:'safety', b:'B27', ty:3, n:'budget split', l:'Budget split: wants', t:'pct', min:0, max:100, step:5, sug:() => ST.budget[1], get by(){ return STB.budget.by; }, need:() => false, get help(){ return SG('budgetWants'); }},
   budgetSave:{g:'safety', b:'B27', ty:3, n:'budget split', l:'Budget split: savings and debt', t:'pct', min:0, max:100, step:5, sug:() => ST.budget[2], get by(){ return STB.budget.by; }, need:() => false, get help(){ return SG('budgetSave'); }},
-  planEnd:{g:'length', b:'B12', ty:3, own:true, n:'plan-until age', l:'Plan until age (life expectancy)', t:'age', min:80, max:105, step:1, fb:() => S && S.about.partner ? 95 : 90, need:() => true,   // internal fallback only, never shown (planMissing gates results)
+  planEnd:{g:'length', b:'B12', ty:3, own:true, n:'plan-until age', l:'Plan until age (life expectancy)', t:'age', min:50, max:100, step:1, fb:() => S && S.about.partner ? 95 : 90, need:() => true,   // internal fallback only, never shown (planMissing gates results)
     help:'At 65, average life expectancy in Ireland is about ' + GD.lifeMen65 + ' for men and ' + GD.lifeWomen65 + ' for women (' + GDB.lifeMen65.by + '). Choose the age you want to plan to.'},
   startYear:{g:'length', b:'B23', ty:3, n:'plan start year', l:'Start the plan in', t:'choice', o:[[2026, '2026'], [2027, '2027']], sug:() => (new Date() > new Date('2026-09-30T23:59:59') ? 2027 : 2026), by:'from October most of this year has passed', need:() => true, help:''}
 };
@@ -3630,7 +3630,7 @@ const NB = {
     apply(k, v){ S.saveM = v; S.saveNote = ''; liveUpdate(true); } },
   infl:{ lim(){ return {min:0, max:10, smax:10, widen:false, u:'%'}; },
     apply(k, v){ S.infl = +(v / 100).toFixed(4); S.inflOther = true; const out = document.getElementById('cout'), t = xTop(); if (out && t && t.v === 'CALC') out.innerHTML = calcOut(C(t.p)); else if (document.getElementById('wi-out')) liveUpdate(true); } },
-  asm:{ lim(k){ const d = ASM[k]; return d ? {min:d.min, max:d.max, smax:d.max, widen:false, u:nbUnit(d), int:d.t !== 'pct' && d.step % 1 === 0} : null; },
+  asm:{ lim(k){ const d = ASM[k]; return d ? {min:k === 'planEnd' ? Math.max(d.min, (S.about.age || 0) + 1) : d.min, max:d.max, smax:d.max, widen:false, u:nbUnit(d), int:d.t !== 'pct' && d.step % 1 === 0} : null; },
     apply(k, v){ const d = ASM[k]; S.asm = S.asm || {}; if (S.advRate) delete S.advRate[k]; S.asm[k] = d.t === 'pct' ? +(v / 100).toFixed(6) : d.step % 1 === 0 ? Math.round(v) : v; applyAssume();
       if (k === 'planEnd' && S.retireSet && S.retireAge > retMax()){ const r = retMax(); setRetireAge(r); toast('We moved your retirement age to ' + r + ' so it stays before your plan-until age'); } } },
   ret:{ lim(){ return {min:retMin(), max:retMax(), smax:retMax(), widen:false, u:'age', int:true}; },
