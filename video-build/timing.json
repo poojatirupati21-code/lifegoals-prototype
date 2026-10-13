@@ -1,0 +1,275 @@
+{
+ "total": 192.01836734693885,
+ "scenes": [
+  {
+   "id": "hook",
+   "start": 0.0,
+   "end": 13.364580498866212,
+   "sent": [
+    [
+     0.0,
+     3.7490249433106575,
+     "Meet Aoife and Conor. They've rented in Dublin for four years."
+    ],
+    [
+     4.049024943310657,
+     7.544172335600907,
+     "Rent is \u20ac1,800 a month, and a baby is on the way."
+    ],
+    [
+     7.8441723356009065,
+     12.864580498866212,
+     "Tonight they're scrolling listings, and the same questions keep going round their heads."
+    ]
+   ]
+  },
+  {
+   "id": "worries",
+   "start": 13.364580498866212,
+   "end": 23.985986394557827,
+   "sent": [
+    [
+     13.364580498866212,
+     15.314603174603175,
+     "How much can we actually borrow?"
+    ],
+    [
+     15.614603174603175,
+     17.25265306122449,
+     "Is our deposit big enough?"
+    ],
+    [
+     17.55265306122449,
+     19.219319727891158,
+     "Are there schemes to help us?"
+    ],
+    [
+     19.51931972789116,
+     21.020362811791387,
+     "What are the hidden costs?"
+    ],
+    [
+     21.320362811791387,
+     23.485986394557827,
+     "And what happens if rates go up?"
+    ]
+   ]
+  },
+  {
+   "id": "borrow",
+   "start": 23.985986394557827,
+   "end": 42.62598639455783,
+   "sent": [
+    [
+     23.985986394557827,
+     25.887120181405898,
+     "Step one: know your number."
+    ],
+    [
+     26.1871201814059,
+     31.79727891156463,
+     "Central Bank rules: first-time buyers can usually borrow up to 4\u00d7 gross income."
+    ],
+    [
+     32.09727891156463,
+     38.35551020408164,
+     "Together they earn \u20ac110,000, so about \u20ac440,000."
+    ],
+    [
+     38.65551020408164,
+     42.12598639455783,
+     "Lenders also expect a 10% deposit."
+    ]
+   ]
+  },
+  {
+   "id": "deposit",
+   "start": 42.62598639455783,
+   "end": 61.382403628117906,
+   "sent": [
+    [
+     42.62598639455783,
+     44.397052154195016,
+     "Step two: the deposit."
+    ],
+    [
+     44.69705215419501,
+     48.82757369614512,
+     "On a \u20ac400,000 home, 10% is \u20ac40,000."
+    ],
+    [
+     49.12757369614512,
+     52.8819954648526,
+     "They have \u20ac22,000 saved and add \u20ac800 a month."
+    ],
+    [
+     53.1819954648526,
+     60.882403628117906,
+     "Our deposit calculator shows the date: about 1 year 11 months. Save a little more and it gets closer."
+    ]
+   ]
+  },
+  {
+   "id": "schemes",
+   "start": 61.382403628117906,
+   "end": 89.18335600907028,
+   "sent": [
+    [
+     61.382403628117906,
+     64.08594104308389,
+     "Step three: use the help that exists."
+    ],
+    [
+     64.38594104308389,
+     71.80621315192742,
+     "Help to Buy: refund of income tax and DIRT paid, up to \u20ac30,000, on a new build."
+    ],
+    [
+     72.10621315192742,
+     82.19387755102039,
+     "First Home Scheme: shared equity, up to 30% of a new home or 20% second-hand, within price limits."
+    ],
+    [
+     82.49387755102039,
+     88.68335600907028,
+     "Local Authority Home Loan: a backstop if a bank says no. Each has conditions, so check early."
+    ]
+   ]
+  },
+  {
+   "id": "costs",
+   "start": 89.18335600907028,
+   "end": 107.26476190476188,
+   "sent": [
+    [
+     89.18335600907028,
+     92.30385487528343,
+     "Step four: the costs nobody puts in the advert."
+    ],
+    [
+     92.60385487528343,
+     98.92367346938774,
+     "Stamp duty is 1% up to \u20ac1m. Then legal fees, valuation and a survey."
+    ],
+    [
+     99.22367346938773,
+     102.89011337868479,
+     "Lenders also require mortgage protection and home insurance."
+    ],
+    [
+     103.19011337868479,
+     106.76476190476188,
+     "Budget roughly \u20ac9,000\u2013\u20ac12,000 on top of the deposit."
+    ]
+   ]
+  },
+  {
+   "id": "approval",
+   "start": 107.26476190476188,
+   "end": 133.75287981859407,
+   "sent": [
+    [
+     107.26476190476188,
+     110.57759637188207,
+     "Step five: get approval in principle before you view."
+    ],
+    [
+     110.87759637188206,
+     115.72226757369612,
+     "It sets your budget, shows sellers you're serious, and usually lasts 6 months."
+    ],
+    [
+     116.02226757369611,
+     125.66698412698409,
+     "\u20ac360,000 over 30 years at 4% is about \u20ac1,719 a month."
+    ],
+    [
+     125.96698412698409,
+     133.25287981859407,
+     "If rates rise 1%: \u20ac1,933, which is \u20ac214 more. Better to know now."
+    ]
+   ]
+  },
+  {
+   "id": "protect",
+   "start": 133.75287981859407,
+   "end": 146.12907029478455,
+   "sent": [
+    [
+     133.75287981859407,
+     136.00911564625846,
+     "Step six: protect the plan."
+    ],
+    [
+     136.30911564625848,
+     139.7091609977324,
+     "Mortgage protection clears the loan if the worst happens."
+    ],
+    [
+     140.0091609977324,
+     145.62907029478455,
+     "An emergency fund of 3\u20136 months of essentials stops one bad month becoming a crisis."
+    ]
+   ]
+  },
+  {
+   "id": "solution",
+   "start": 146.12907029478455,
+   "end": 178.90888888888892,
+   "sent": [
+    [
+     146.12907029478455,
+     150.7658049886621,
+     "This is where LifeGoals comes in: one place for every worry."
+    ],
+    [
+     151.0658049886621,
+     154.633514739229,
+     "Discover: learns what matters to you and how you handle money."
+    ],
+    [
+     154.93351473922903,
+     159.206485260771,
+     "LifeMap: puts \u201cBuy a home\u201d on a timeline and shows if you're on track."
+    ],
+    [
+     159.506485260771,
+     164.62997732426305,
+     "Snap a payslip or statement. We read it, you check it."
+    ],
+    [
+     164.92997732426306,
+     170.2954195011338,
+     "Calculators for borrowing, deposit, repayments and rate changes."
+    ],
+    [
+     170.59541950113382,
+     178.40888888888892,
+     "Matched with a verified mortgage expert, like Niamh. Or join our live first-time buyers session, Thu 7pm."
+    ]
+   ]
+  },
+  {
+   "id": "end",
+   "start": 178.90888888888892,
+   "end": 192.01836734693885,
+   "sent": [
+    [
+     178.90888888888892,
+     182.66126984126987,
+     "Eight months later, Aoife and Conor open the door to their first home."
+    ],
+    [
+     182.96126984126988,
+     186.33959183673474,
+     "Not by luck. By a plan, built one step at a time."
+    ],
+    [
+     186.63959183673475,
+     191.51836734693885,
+     "Your first home: deposit to keys. Start your LifeMap on LifeGoals today."
+    ]
+   ]
+  }
+ ]
+}
