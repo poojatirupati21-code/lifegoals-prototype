@@ -1,0 +1,244 @@
+{
+ "total": 145.60287499999995,
+ "scenes": [
+  {
+   "id": "hook",
+   "start": 0.0,
+   "end": 19.37858333333333,
+   "sent": [
+    [
+     0.0,
+     7.02075,
+     "Buying your first home in Ireland? Stop. I almost made a costly mistake, so watch this before you sign anything."
+    ],
+    [
+     7.30075,
+     10.345666666666666,
+     "I fell in love with a house. Then the questions hit."
+    ],
+    [
+     10.625666666666666,
+     13.839958333333332,
+     "Can I afford it? What's the catch? What am I missing?"
+    ],
+    [
+     14.119958333333331,
+     18.928583333333332,
+     "So I did my homework. Here are seven things every first time buyer must know."
+    ]
+   ]
+  },
+  {
+   "id": "t1",
+   "start": 19.37858333333333,
+   "end": 33.550541666666675,
+   "sent": [
+    [
+     19.37858333333333,
+     21.176458333333333,
+     "One. Know your real budget."
+    ],
+    [
+     21.456458333333334,
+     28.4785,
+     "Central Bank rules let first time buyers borrow up to four times their income, with a ten percent deposit."
+    ],
+    [
+     28.7585,
+     33.10054166666667,
+     "But the maximum isn't the goal. Choose the repayment you can sleep on."
+    ]
+   ]
+  },
+  {
+   "id": "t2",
+   "start": 33.550541666666675,
+   "end": 43.37262500000001,
+   "sent": [
+    [
+     33.550541666666675,
+     36.25766666666667,
+     "Two. The deposit is not the only cheque."
+    ],
+    [
+     36.537666666666674,
+     42.92262500000001,
+     "Add stamp duty, legal fees, a survey and insurance. Plan for several thousand euro extra."
+    ]
+   ]
+  },
+  {
+   "id": "t3",
+   "start": 43.37262500000001,
+   "end": 65.58145833333334,
+   "sent": [
+    [
+     43.37262500000001,
+     46.09412500000001,
+     "Three. Claim every benefit you qualify for."
+    ],
+    [
+     46.374125000000014,
+     52.18533333333335,
+     "Help to Buy refunds income tax and D.I.R.T., up to thirty thousand euro, on a new build."
+    ],
+    [
+     52.46533333333335,
+     57.50704166666668,
+     "The First Home Scheme is shared equity, up to thirty percent of a new home."
+    ],
+    [
+     57.78704166666668,
+     61.538458333333345,
+     "The Local Authority Home Loan is there if a bank says no."
+    ],
+    [
+     61.818458333333346,
+     65.13145833333334,
+     "And grants exist to bring vacant homes back to life."
+    ]
+   ]
+  },
+  {
+   "id": "t4",
+   "start": 65.58145833333334,
+   "end": 80.23779166666667,
+   "sent": [
+    [
+     65.58145833333334,
+     67.25958333333334,
+     "Four. Pick the right mortgage."
+    ],
+    [
+     67.53958333333334,
+     70.90333333333334,
+     "Fixed rates give certainty. Variable rates can move."
+    ],
+    [
+     71.18333333333334,
+     74.793375,
+     "Green mortgages are cheaper for energy efficient homes."
+    ],
+    [
+     75.073375,
+     79.78779166666666,
+     "A longer term lowers the monthly payment, but you pay more interest overall."
+    ]
+   ]
+  },
+  {
+   "id": "t5",
+   "start": 80.23779166666667,
+   "end": 93.38191666666667,
+   "sent": [
+    [
+     80.23779166666667,
+     82.67941666666667,
+     "Five. Get approval in principle first."
+    ],
+    [
+     82.95941666666667,
+     88.440625,
+     "Lenders study your savings habits, your Central Credit Register record, and your debts."
+    ],
+    [
+     88.720625,
+     92.93191666666667,
+     "So for months before applying, pay on time and avoid new loans."
+    ]
+   ]
+  },
+  {
+   "id": "t6",
+   "start": 93.38191666666667,
+   "end": 103.57520833333334,
+   "sent": [
+    [
+     93.38191666666667,
+     95.33941666666666,
+     "Six. Do your homework on the house."
+    ],
+    [
+     95.61941666666667,
+     103.12520833333333,
+     "Hire a solicitor you trust, get a survey, and check the B E R rating, because energy bills are part of your real cost."
+    ]
+   ]
+  },
+  {
+   "id": "t7",
+   "start": 103.57520833333334,
+   "end": 115.29637500000001,
+   "sent": [
+    [
+     103.57520833333334,
+     105.36583333333334,
+     "Seven. Protect your family."
+    ],
+    [
+     105.64583333333334,
+     110.85975,
+     "Mortgage protection is required, and an emergency fund covers the tough month."
+    ],
+    [
+     111.13975,
+     114.84637500000001,
+     "Ask yourself: what if rates rise, or one income stops?"
+    ]
+   ]
+  },
+  {
+   "id": "road",
+   "start": 115.29637500000001,
+   "end": 126.49554166666668,
+   "sent": [
+    [
+     115.29637500000001,
+     117.23516666666667,
+     "So how do you actually get the keys?"
+    ],
+    [
+     117.51516666666667,
+     126.04554166666668,
+     "Save. Get approval. Find your home. Agree the sale. Receive the loan offer. Sign with your solicitor. Draw down. Collect your keys."
+    ]
+   ]
+  },
+  {
+   "id": "end",
+   "start": 126.49554166666668,
+   "end": 131.23154166666666,
+   "sent": [
+    [
+     126.49554166666668,
+     130.78154166666667,
+     "I followed these steps. Eight months later, the keys were in my hands."
+    ]
+   ]
+  },
+  {
+   "id": "solution",
+   "start": 131.23154166666666,
+   "end": 139.27691666666664,
+   "sent": [
+    [
+     131.23154166666666,
+     138.82691666666665,
+     "LifeGoals brings it all together. Your goals on a timeline, simple learning, and a verified mortgage expert beside you."
+    ]
+   ]
+  },
+  {
+   "id": "cta",
+   "start": 139.27691666666664,
+   "end": 145.60287499999995,
+   "sent": [
+    [
+     139.27691666666664,
+     145.15287499999997,
+     "Save this video, share it with someone buying their first home, and start your plan on LifeGoals."
+    ]
+   ]
+  }
+ ]
+}
