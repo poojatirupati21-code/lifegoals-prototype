@@ -25,3 +25,4 @@ Website extras: `captions.vtt`, `poster.jpg`, and 9 embedded chapter markers.
 ## Revision log
 - Removed the closing word "Sorted" everywhere: the spoken word and the presenter's mouth movement (video now ends at 61.85s on a short fade), the on-screen caption, the gold "Sorted" badge and its chime.
 - Rate chart rebuilt: both bars now start at 0% on one shared 0-13% axis, the bank 7-9% range is highlighted inside its bar, and the 12.68% credit union cap is marked.
+- Removed the "LifeGoals / Borrowing, explained" corner logo from the whole video (it was on every frame).
