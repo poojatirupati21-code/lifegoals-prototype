@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Important mortgage warnings (compact)</title>
+<style>
+  :root{--bg:#fdfaf5;--card:#fff;--ink:#2b1a14;--mute:#6b5a52;--brand:#7f2b16;--alert:#a3281a;--alert-soft:#fbeeea;--line:#eadfd3}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:32px 20px;line-height:1.4}
+  .wrap{max-width:1080px;margin:0 auto}
+  h3.label{font-size:13px;color:var(--mute);font-weight:600;letter-spacing:.4px;margin:28px 0 8px}
+  svg{flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* ============ A: compact, everything visible ============ */
+  .mw{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--alert);border-radius:12px;box-shadow:0 4px 14px rgba(127,43,22,.07);overflow:hidden}
+  .mw__head{display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--alert-soft);border-bottom:1px solid var(--line)}
+  .mw__head svg{width:20px;height:20px;color:var(--alert)}
+  .mw__title{font-size:14px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--alert)}
+  .mw__note{margin-left:auto;font-size:13px;color:var(--mute)}
+  .mw__lead{display:flex;gap:10px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--line);font-size:15.5px;font-weight:700}
+  .mw__lead svg{width:20px;height:20px;color:var(--alert)}
+  .mw__lead em{font-style:normal;color:var(--alert)}
+  .mw__grid{list-style:none;display:grid;grid-template-columns:1fr 1fr}
+  .mw__grid li{display:flex;gap:10px;padding:9px 16px;font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
+  .mw__grid li:nth-child(odd){border-right:1px solid var(--line)}
+  .mw__grid li:nth-last-child(-n+2){border-bottom:0}
+  .mw__grid svg{width:18px;height:18px;margin-top:1px;color:var(--alert)}
+  .mw__foot{padding:8px 16px;background:#fbf7f1;border-top:1px solid var(--line);font-size:13.5px;color:var(--mute)}
+  .mw__foot a{color:var(--brand);font-weight:700;text-decoration:underline;text-underline-offset:2px}
+  .tag{font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--alert);margin-right:4px}
+
+  /* ============ B: collapsible (only if compliance allows) ============ */
+  details.mwb{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--alert);border-radius:12px;box-shadow:0 4px 14px rgba(127,43,22,.07);overflow:hidden}
+  details.mwb summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--alert-soft)}
+  details.mwb summary::-webkit-details-marker{display:none}
+  details.mwb summary svg.s{width:20px;height:20px;color:var(--alert)}
+  .mwb__lead{font-size:15px;font-weight:700}.mwb__lead em{font-style:normal;color:var(--alert)}
+  .mwb__btn{margin-left:auto;white-space:nowrap;font-size:13px;font-weight:700;color:var(--brand);border:1px solid var(--brand);border-radius:999px;padding:4px 12px}
+  details.mwb[open] .mwb__btn::after{content:" ▴"}details.mwb:not([open]) .mwb__btn::after{content:" ▾"}
+  details.mwb ul{list-style:none;padding:4px 16px 8px}
+  details.mwb li{display:flex;gap:10px;padding:8px 0;font-size:14px;font-weight:600;border-top:1px solid var(--line)}
+  details.mwb li svg{width:18px;height:18px;margin-top:1px;color:var(--alert)}
+
+  @media (max-width:760px){
+    body{padding:16px 10px}
+    .mw__note{display:none}
+    .mw__grid{grid-template-columns:1fr}
+    .mw__grid li,.mw__grid li:nth-child(odd){border-right:0}
+    .mw__grid li:nth-last-child(2){border-bottom:1px solid var(--line)}
+    details.mwb summary{flex-wrap:wrap;row-gap:8px}
+    .mwb__lead{font-size:14px;flex:1 1 calc(100% - 34px)}
+    .mwb__btn{padding:3px 10px;margin-left:32px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h3 class="label">OPTION A: compact, all five warnings visible</h3>
+<section class="mw" aria-label="Important mortgage warnings">
+  <div class="mw__head">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.2 7.8 8 9 4.8-1.2 8-4.5 8-9V6l-8-3z"/><path d="M12 8v5"/><path d="M12 16.5h.01"/></svg>
+    <span class="mw__title">Important mortgage warnings</span>
+    <span class="mw__note">Please read before you decide</span>
+  </div>
+  <div class="mw__lead">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M12 10.5v4"/><path d="M12 17h.01"/></svg>
+    <span><span class="tag">Warning:</span>If you do not keep up your repayments <em>you may lose your home.</em></span>
+  </div>
+  <ul class="mw__grid">
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17 9 11l4 4 8-8"/><path d="M15 7h6v6"/></svg><span><span class="tag">Warning:</span>Your interest rate may increase, and the amount of your mortgage repayments may increase as a result.</span></li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg><span><span class="tag">Warning:</span>You may have to pay charges if you pay off a fixed rate loan early.</span></li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg><span><span class="tag">Warning:</span>If you do not meet the repayments on your loan, your account will go into arrears. This may affect your credit rating, which may limit your ability to access credit in the future.</span></li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16"/><path d="M5 8h14"/><path d="M5 8l-2.5 6a3.2 3.2 0 0 0 5 0L5 8z"/><path d="M19 8l-2.5 6a3.2 3.2 0 0 0 5 0L19 8z"/></svg><span><span class="tag">Warning:</span>You should consider the total cost of the mortgage and any applicable incentive included in a mortgage offer.</span></li>
+  </ul>
+  <div class="mw__foot">Compare mortgages and calculate repayments using the <a href="https://www.ccpc.ie">CCPC mortgage comparison tools</a>.</div>
+</section>
+
+<h3 class="label">OPTION B: collapsed by default (needs compliance approval)</h3>
+<details class="mwb">
+  <summary>
+    <svg class="s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.2 7.8 8 9 4.8-1.2 8-4.5 8-9V6l-8-3z"/><path d="M12 8v5"/><path d="M12 16.5h.01"/></svg>
+    <span class="mwb__lead"><span class="tag">Warning:</span>If you do not keep up your repayments <em>you may lose your home.</em></span>
+    <span class="mwb__btn">All 5 warnings</span>
+  </summary>
+  <ul>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17 9 11l4 4 8-8"/><path d="M15 7h6v6"/></svg><span><span class="tag">Warning:</span>Your interest rate may increase, and the amount of your mortgage repayments may increase as a result.</span></li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg><span><span class="tag">Warning:</span>You may have to pay charges if you pay off a fixed rate loan early.</span></li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7 15h4"/></svg><span><span class="tag">Warning:</span>If you do not meet the repayments on your loan, your account will go into arrears. This may affect your credit rating, which may limit your ability to access credit in the future.</span></li>
+    <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16"/><path d="M5 8h14"/><path d="M5 8l-2.5 6a3.2 3.2 0 0 0 5 0L5 8z"/><path d="M19 8l-2.5 6a3.2 3.2 0 0 0 5 0L19 8z"/></svg><span><span class="tag">Warning:</span>You should consider the total cost of the mortgage and any applicable incentive included in a mortgage offer.</span></li>
+  </ul>
+</details>
+
+</div>
+</body>
+</html>
